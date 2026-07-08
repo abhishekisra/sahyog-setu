@@ -73,6 +73,9 @@
                             You passed with a score of <strong>{{ percentage|floatformat:1 }}%</strong>
                             (pass mark: {{ pass_threshold }}%).
                         </p>
+                        {% if attempt.quiz.certificate_enabled %}
+                        <a href="{% url 'quiz_certificate' attempt.id %}" class="btn-outline-ss">🏆 View Certificate</a>
+                        {% endif %}
                     </div>
                     {% else %}
                     <div class="ss-notice-card gold-card-flat">
@@ -83,6 +86,22 @@
                         <a href="{% url 'quiz_take' attempt.quiz.id %}" class="btn-outline-ss">Try Again</a>
                     </div>
                     {% endif %}
+
+                    <div class="ss-share-section">
+                        <span class="ss-share-title">क्विज़ शेयर करें</span>
+                        <div class="ss-share-grid">
+                            <a href="https://api.whatsapp.com/send?text={{ whatsapp_text|urlencode }}" target="_blank" class="ss-share-link wa">
+                                <span>WhatsApp</span>
+                            </a>
+                            <button type="button" class="ss-share-link copy" onclick="ssCopyShareLink(this)" data-url="{{ share_url }}?src=direct">
+                                <span>Copy Link</span>
+                            </button>
+                            <button type="button" class="ss-share-link native" style="display:none;" onclick="ssNativeShare(this)"
+                                data-url="{{ share_url }}?src=direct" data-title="{{ attempt.quiz.title }}" data-text="{{ whatsapp_text }}">
+                                <span>Share</span>
+                            </button>
+                        </div>
+                    </div>
 
                     <div class="ss-review-section">
                         <h2 class="ss-review-title">Question Review</h2>

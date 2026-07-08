@@ -1,0 +1,27 @@
+{% extends 'custom_admin/public_base.html' %}
+
+{% block title %}Certificate Verify - Sahyog Setu{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width:520px; padding-top:80px; padding-bottom:80px;">
+    <div class="gold-card">
+        <h1 style="margin-top:0;">Certificate Verification</h1>
+
+        {% if attempt %}
+        <div class="alert alert-success mb-3">✅ Valid Certificate</div>
+        <table class="table" style="color:inherit;">
+            <tr><td><strong>Name</strong></td><td>{{ attempt.name }}</td></tr>
+            <tr><td><strong>Quiz</strong></td><td>{{ attempt.quiz_title }}</td></tr>
+            <tr><td><strong>Score</strong></td><td>{{ attempt.percentage|floatformat:0 }}%</td></tr>
+            <tr><td><strong>Issued</strong></td><td>{{ attempt.issued_at|date:"d M Y" }}</td></tr>
+            <tr><td><strong>Certificate ID</strong></td><td>{{ cert_id }}</td></tr>
+        </table>
+        {% else %}
+        <div class="alert alert-warning mb-3">❌ Not Found</div>
+        <p>Certificate ID <strong>{{ cert_id }}</strong> se koi valid certificate nahi mila. ID check karke dobara try karo.</p>
+        {% endif %}
+
+        <p class="mt-3"><a href="/">Back to Home</a></p>
+    </div>
+</div>
+{% endblock %}

@@ -83,6 +83,22 @@
                                     <textarea name="certificate_text" id="certificate_text" class="form-control" required></textarea>
                                 </div>
 
+                                <div class="col-6 mt-2">
+                                    <label>Certificate Background (optional)</label>
+                                    <input type="file" name="certificate_background" class="form-control">
+                                    <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB. Khaali chhod do to built-in frame use hoga.</small>
+                                </div>
+
+                                <div class="col-3 mt-2">
+                                    <label>Name Position (top %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="name_top_pct" class="form-control" value="42.0">
+                                </div>
+
+                                <div class="col-3 mt-2">
+                                    <label>Score Position (top %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="score_top_pct" class="form-control" value="64.0">
+                                </div>
+
                                 <hr class="col-12">
 
                                 <div class="col-12">

@@ -25,7 +25,7 @@ SECRET_KEY = '97ny&l)^z^6mxpt@%)qubngaexjiulj@628m*(5ng@cq9-#(j8'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS=['127.0.0.1', '212.38.94.162', 'sahyogsetu.in']
+ALLOWED_HOSTS=['127.0.0.1', '212.38.94.162', 'sahyogsetu.in', 'www.sahyogsetu.in']
 
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_ALL_ORIGINS = True

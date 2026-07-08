@@ -12,7 +12,7 @@
                         <span class="ss-brand-name">Sahyog Setu</span>
                     </div>
                 </div>
-                <a href="{% url 'quiz_result' submission.id %}" class="btn-outline-ss">Back to Result</a>
+                <a href="{% url 'quiz_result' attempt.id %}" class="btn-outline-ss no-print">Back to Result</a>
             </div>
         </div>
     </header>
@@ -20,93 +20,112 @@
     <main class="container">
         <div class="ss-cert-container">
             <div class="ss-cert-preview-card">
-                <div class="ss-cert-outer">
-                    <div class="ss-cert-inner">
-                        <div class="ss-cert-content">
-                            <div class="ss-cert-header">
-                                {% if submission.quiz.logo_1 %}
-                                <img src="{{ media_url }}{{ submission.quiz.logo_1 }}" class="ss-cert-logo">
-                                {% endif %}
-                                <div class="ss-cert-titles">
-                                    <h1 class="ss-cert-main-title">CERTIFICATE</h1>
-                                    <h2 class="ss-cert-sub-title">OF ACHIEVEMENT</h2>
-                                </div>
-                                {% if submission.quiz.logo_2 %}
-                                <img src="{{ media_url }}{{ submission.quiz.logo_2 }}" class="ss-cert-logo">
-                                {% endif %}
-                            </div>
+                <div class="sheet">
+                    {% if quiz.certificate_background %}
+                    <img src="{{ quiz.certificate_background.url }}" class="sheet-bg" alt="">
+                    {% else %}
+                    <!-- No custom background -> built-in vector guilloche frame. Pure SVG,
+                         no image dependency, scales with the container via viewBox. -->
+                    <svg class="sheet-bg" viewBox="0 0 297 210" preserveAspectRatio="none"
+                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                        <defs>
+                            <pattern id="guilloche" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                <rect width="5" height="5" fill="#faf8ef"/>
+                                <circle cx="2.5" cy="2.5" r="0.9" fill="#c8a951" fill-opacity="0.30"/>
+                            </pattern>
+                        </defs>
+                        <rect x="0" y="0" width="297" height="210" fill="#faf8ef"/>
+                        <rect x="6" y="6" width="285" height="198" fill="url(#guilloche)" stroke="#c8a951" stroke-width="2.5"/>
+                        <rect x="14" y="14" width="269" height="182" fill="none" stroke="#222" stroke-width="0.6"/>
+                    </svg>
+                    {% endif %}
 
-                            <div class="ss-cert-body">
-                                <p class="ss-cert-presented">This Certificate is Proudly Presented To</p>
-                                <h3 class="ss-cert-user-name">{{ submission.user_name }}</h3>
-                                <div class="ss-cert-divider"></div>
-                                <p class="ss-cert-desc">
-                                    {{ submission.quiz.certificate_text|default:"For successfully completing the assessment with outstanding performance." }}
-                                </p>
-                                <div class="ss-cert-quiz-info">
-                                    <span class="ss-cert-quiz-name"><strong>Quiz:</strong> {{ submission.quiz.title }}</span>
-                                    <span class="ss-cert-date"><strong>Date:</strong> {{ submission.created_at|date:"d M Y" }}</span>
-                                </div>
+                    <div class="sheet-content">
+                        <div class="zone zone-logos" style="top: 6%;">
+                            <div class="logobox">{% if quiz.logo_1 %}<img src="{{ quiz.logo_1.url }}" alt="">{% endif %}</div>
+                            <div class="zone-titles">
+                                <div class="zone-title">CERTIFICATE</div>
+                                <div class="zone-subtitle">OF ACHIEVEMENT</div>
                             </div>
+                            <div class="logobox">{% if quiz.logo_2 %}<img src="{{ quiz.logo_2.url }}" alt="">{% endif %}</div>
+                        </div>
 
-                            <div class="ss-cert-footer">
-                                <div class="ss-cert-auth">
-                                    {% if submission.quiz.authority1_sign_image %}
-                                    <img src="{{ media_url }}{{ submission.quiz.authority1_sign_image }}" class="ss-cert-sign">
-                                    {% endif %}
-                                    <div class="ss-auth-line"></div>
-                                    <span class="ss-auth-name">{{ submission.quiz.authority1_name|default:"Authorized Signatory" }}</span>
-                                    <span class="ss-auth-desig">{{ submission.quiz.authority1_designation|default:"Director" }}</span>
-                                </div>
-                                <div class="ss-cert-seal">
-                                    <div class="ss-seal-outer">
-                                        <div class="ss-seal-inner">SS</div>
-                                    </div>
-                                </div>
-                                <div class="ss-cert-auth">
-                                    {% if submission.quiz.authority2_sign_image %}
-                                    <img src="{{ media_url }}{{ submission.quiz.authority2_sign_image }}" class="ss-cert-sign">
-                                    {% endif %}
-                                    <div class="ss-auth-line"></div>
-                                    <span class="ss-auth-name">{{ submission.quiz.authority2_name|default:"Verified By" }}</span>
-                                    <span class="ss-auth-desig">{{ submission.quiz.authority2_designation|default:"Admin" }}</span>
-                                </div>
+                        <div class="zone zone-presented" style="top: 28%;">This Certificate is Proudly Presented To</div>
+
+                        <div class="zone zone-name" style="top: {{ quiz.name_top_pct }}%;">
+                            {{ attempt.user.get_full_name|default:attempt.user.username }}
+                        </div>
+
+                        <div class="zone zone-desc" style="top: 52%;">
+                            {{ quiz.certificate_text|default:"For successfully completing the assessment with outstanding performance." }}
+                        </div>
+
+                        <div class="zone zone-score" style="top: {{ quiz.score_top_pct }}%;">
+                            {{ quiz.title }} &middot; Score {{ attempt.percentage|floatformat:0 }}%
+                        </div>
+
+                        <div class="zone zone-signatures" style="top: 84%;">
+                            <div class="zone-auth">
+                                <div class="sigbox">{% if quiz.authority1_sign_image %}<img src="{{ quiz.authority1_sign_image.url }}" alt="">{% endif %}</div>
+                                <div class="zone-auth-line"></div>
+                                <div class="zone-auth-name">{{ quiz.authority1_name|default:"Authorized Signatory" }}</div>
+                                <div class="zone-auth-desig">{{ quiz.authority1_designation|default:"Director" }}</div>
                             </div>
+                            <div class="zone-auth">
+                                <div class="sigbox">{% if quiz.authority2_sign_image %}<img src="{{ quiz.authority2_sign_image.url }}" alt="">{% endif %}</div>
+                                <div class="zone-auth-line"></div>
+                                <div class="zone-auth-name">{{ quiz.authority2_name|default:"Verified By" }}</div>
+                                <div class="zone-auth-desig">{{ quiz.authority2_designation|default:"Admin" }}</div>
+                            </div>
+                        </div>
+
+                        <div class="zone zone-meta" style="top: 96%;">
+                            Certificate ID: {{ attempt.certificate_id }} &middot;
+                            Verify at sahyogsetu.in{% url 'verify_certificate' attempt.certificate_id %}
                         </div>
                     </div>
                 </div>
             </div>
 
-            <div class="ss-cert-actions-card gold-card">
+            <div class="ss-cert-actions-card gold-card no-print">
                 <div class="ss-actions-header">
                     <h3>Certificate Actions</h3>
-                    <p>Download or share your achievement with the world.</p>
+                    <p>Print or save as PDF, and share your achievement.</p>
                 </div>
                 <div class="ss-actions-btns">
-                    <a href="{{ file_url }}" class="btn-primary-ss" download>
+                    <button type="button" class="btn-primary-ss" onclick="window.print()">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
-                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                            <polyline points="7 10 12 15 17 10"></polyline>
-                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                            <polyline points="6 9 6 2 18 2 18 9"></polyline>
+                            <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+                            <rect x="6" y="14" width="12" height="8"></rect>
                         </svg>
-                        Download PDF
-                    </a>
+                        Print / Save as PDF
+                    </button>
                     <div class="ss-share-section">
-                        <span class="ss-share-title">Share Certificate</span>
+                        <span class="ss-share-title">क्विज़ शेयर करें (Share the quiz, not this certificate)</span>
                         <div class="ss-share-grid">
                             <a href="https://api.whatsapp.com/send?text={{ share_text|urlencode }}" target="_blank"
                                 class="ss-share-link wa">
                                 <span>WhatsApp</span>
                             </a>
-                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ page_url|urlencode }}"
+                            <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}?src=facebook"
                                 target="_blank" class="ss-share-link fb">
                                 <span>Facebook</span>
                             </a>
-                            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ page_url|urlencode }}"
+                            <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url|urlencode }}?src=direct"
                                 target="_blank" class="ss-share-link li">
                                 <span>LinkedIn</span>
                             </a>
+                            <button type="button" class="ss-share-link copy" onclick="ssCopyShareLink(this)"
+                                data-url="{{ share_url }}?src=direct">
+                                <span>Copy Link</span>
+                            </button>
+                            <button type="button" class="ss-share-link native" style="display:none;"
+                                onclick="ssNativeShare(this)" data-url="{{ share_url }}?src=direct"
+                                data-title="{{ quiz.title }}" data-text="{{ share_text }}">
+                                <span>Share</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -116,6 +135,52 @@
 </div>
 
 <style>
+    @page { size: A4 landscape; margin: 0; }
+
+    /* Part H, Layer 2 -- fixed box, the image never dictates layout,
+       regardless of what size/aspect-ratio the admin uploaded. */
+    .logobox {
+        display: grid;
+        place-items: center;
+        height: 64px;
+        width: 168px;
+    }
+    .logobox img {
+        max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+    }
+    .sigbox {
+        display: grid;
+        place-items: end center;
+        height: 52px;
+        width: 100%;
+    }
+    .sigbox img {
+        max-height: 100%;
+        max-width: 100%;
+        width: auto;
+        height: auto;
+        object-fit: contain;
+        object-position: bottom;
+    }
+
+    .ss-cert-meta {
+        margin-top: 16px;
+        font-size: 0.8rem;
+        color: #888;
+    }
+
+    @media print {
+        .sheet { box-shadow: none; width: 100%; }
+        .no-print { display: none !important; }
+        body, .ss-certificate-page { background: #fff !important; }
+        .ss-cert-container { display: block !important; max-width: none !important; }
+        .ss-cert-preview-card { box-shadow: none !important; padding: 0 !important; }
+    }
+
     .ss-certificate-page {
         min-height: 100vh;
         padding-bottom: 80px;
@@ -189,160 +254,131 @@
         background: white;
         padding: 40px;
         border-radius: var(--ss-radius-lg);
+    }
+
+    /* Part J -- the certificate "sheet". container-type:inline-size turns
+       on cqw units for every descendant, so all text/spacing below scales
+       with the sheet's actual rendered width instead of the viewport --
+       the same certificate looks right whether it's 300px in a phone
+       preview or full A4 width on print. Content never uses px positions;
+       every zone is placed by percentage (top/left), so it stays correctly
+       aligned no matter what width the sheet ends up at. */
+    .sheet {
+        container-type: inline-size;
+        position: relative;
+        width: 100%;
+        max-width: 1000px;
+        aspect-ratio: 297 / 210;
+        margin: 0 auto;
+        overflow: hidden;
+        background: #faf8ef;
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
 
-    .ss-cert-outer {
-        border: 15px solid #C8A951;
-        padding: 10px;
-        background: #faf8ef;
-    }
-
-    .ss-cert-inner {
-        border: 2px solid #222;
-        padding: 40px;
-        min-height: 600px;
-        display: flex;
-        flex-direction: column;
-    }
-
-    .ss-cert-header {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        margin-bottom: 40px;
-    }
-
-    .ss-cert-logo {
-        height: 80px;
-        width: 80px;
-        object-fit: contain;
-    }
-
-    .ss-cert-titles {
-        text-align: center;
-    }
-
-    .ss-cert-main-title {
-        font-family: 'Cinzel', serif;
-        font-size: 3.5rem;
-        font-weight: 900;
-        margin: 0;
-        color: #000;
-        letter-spacing: 4px;
-    }
-
-    .ss-cert-sub-title {
-        font-family: 'Cinzel', serif;
-        font-size: 1.25rem;
-        font-weight: 700;
-        margin: 8px 0 0 0;
-        color: #333;
-        letter-spacing: 2px;
-    }
-
-    .ss-cert-body {
-        text-align: center;
-        flex: 1;
-        padding-top: 20px;
-    }
-
-    .ss-cert-presented {
-        font-size: 1.25rem;
-        color: #555;
-        margin-bottom: 24px;
-    }
-
-    .ss-cert-user-name {
-        font-family: 'Great Vibes', cursive;
-        font-size: 4rem;
-        color: #1B4332;
-        margin: 0 0 10px 0;
-    }
-
-    .ss-cert-divider {
-        height: 2px;
-        width: 300px;
-        background: #C8A951;
-        margin: 0 auto 32px auto;
-    }
-
-    .ss-cert-desc {
-        font-size: 1.2rem;
-        line-height: 1.6;
-        color: #333;
-        max-width: 500px;
-        margin: 0 auto 40px auto;
-    }
-
-    .ss-cert-quiz-info {
-        display: flex;
-        justify-content: center;
-        gap: 40px;
-        font-size: 1rem;
-        color: #666;
-    }
-
-    .ss-cert-footer {
-        display: flex;
-        justify-content: space-between;
-        align-items: flex-end;
-        margin-top: 60px;
-    }
-
-    .ss-cert-auth {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        width: 180px;
-    }
-
-    .ss-cert-sign {
-        height: 60px;
-        margin-bottom: -10px;
-    }
-
-    .ss-auth-line {
-        height: 1.5px;
+    .sheet-bg {
+        position: absolute;
+        inset: 0;
         width: 100%;
-        background: #C8A951;
-        margin-bottom: 8px;
+        height: 100%;
+        object-fit: cover;
+        z-index: 0;
     }
 
-    .ss-auth-name {
+    .sheet-content {
+        position: absolute;
+        inset: 0;
+        z-index: 2;
+    }
+
+    .zone {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 84%;
+        text-align: center;
+    }
+
+    .zone-logos {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 90%;
+    }
+
+    .zone-titles { flex: 1; }
+
+    .zone-title {
+        font-family: 'Cinzel', serif;
+        font-weight: 900;
+        font-size: 7cqw;
+        letter-spacing: 0.12em;
+        color: #000;
+    }
+
+    .zone-subtitle {
+        font-family: 'Cinzel', serif;
+        font-weight: 700;
+        font-size: 2.2cqw;
+        letter-spacing: 0.1em;
+        color: #333;
+    }
+
+    .zone-presented {
+        font-size: 2.4cqw;
+        color: #555;
+    }
+
+    .zone-name {
+        font-family: 'Great Vibes', cursive;
+        font-size: 7cqw;
+        color: #1B4332;
+    }
+
+    .zone-desc {
+        font-size: 2.2cqw;
+        line-height: 1.5;
+        color: #333;
+        width: 58%;
+        left: 50%;
+    }
+
+    .zone-score {
+        font-size: 1.8cqw;
+        color: #6e5a20;
+        font-weight: 700;
+    }
+
+    .zone-signatures {
+        display: flex;
+        justify-content: space-between;
+        width: 78%;
+    }
+
+    .zone-auth {
+        width: 32%;
+        text-align: center;
+    }
+
+    .zone-auth-line {
+        border-top: 1px solid #333;
+        margin: 4px auto 6px;
+        width: 80%;
+    }
+
+    .zone-auth-name {
         font-weight: 800;
-        font-size: 0.95rem;
+        font-size: 1.6cqw;
         color: #222;
     }
 
-    .ss-auth-desig {
-        font-size: 0.75rem;
-        font-weight: 600;
+    .zone-auth-desig {
+        font-size: 1.3cqw;
         color: #777;
     }
 
-    .ss-cert-seal {
-        width: 100px;
-        height: 100px;
-        position: relative;
-    }
-
-    .ss-seal-outer {
-        width: 80px;
-        height: 80px;
-        border: 4px double #C8A951;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: white;
-        margin: 0 auto;
-    }
-
-    .ss-seal-inner {
-        font-weight: 900;
-        font-size: 1.5rem;
-        color: #C8A951;
+    .zone-meta {
+        font-size: 1.1cqw;
+        color: #888;
     }
 
     /* Actions Card */
@@ -392,53 +428,28 @@
         filter: brightness(1.2);
     }
 
-    .ss-share-section {
+    /* Base .ss-share-* look (colors, padding, font-weight) comes from the
+       shared block in public_base.html -- this narrow sidebar just needs a
+       vertical stack instead of the default horizontal wrap, plus the
+       divider this card already had. */
+    .ss-cert-actions-card .ss-share-section {
         border-top: 1px solid rgba(0, 0, 0, 0.1);
         padding-top: 24px;
+        margin-top: 0;
+        text-align: left;
     }
 
-    .ss-share-title {
-        display: block;
-        font-weight: 800;
-        font-size: 1rem;
-        color: var(--ss-bg-accent);
+    .ss-cert-actions-card .ss-share-title {
         margin-bottom: 16px;
     }
 
-    .ss-share-grid {
-        display: flex;
+    .ss-cert-actions-card .ss-share-grid {
         flex-direction: column;
-        gap: 12px;
+        justify-content: stretch;
     }
 
-    .ss-share-link {
-        padding: 14px 16px;
-        border-radius: 12px;
-        text-decoration: none;
-        font-weight: 800;
-        font-size: 0.95rem;
-        color: white;
-        display: flex;
-        align-items: center;
+    .ss-cert-actions-card .ss-share-link {
         justify-content: center;
-        transition: all 0.2s ease;
-    }
-
-    .ss-share-link:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.1);
-    }
-
-    .ss-share-link.wa {
-        background: #25D366;
-    }
-
-    .ss-share-link.fb {
-        background: #1877F2;
-    }
-
-    .ss-share-link.li {
-        background: #0077B5;
     }
 
     @media (max-width: 992px) {
@@ -454,22 +465,6 @@
     @media (max-width: 600px) {
         .ss-cert-preview-card {
             padding: 20px;
-        }
-
-        .ss-cert-main-title {
-            font-size: 2rem;
-        }
-
-        .ss-cert-user-name {
-            font-size: 2.5rem;
-        }
-
-        .ss-cert-auth {
-            width: 120px;
-        }
-
-        .ss-cert-sign {
-            height: 40px;
         }
     }
 </style>

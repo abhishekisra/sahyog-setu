@@ -1,13 +1,26 @@
+import csv
 import random
+from datetime import timedelta
+from io import BytesIO
 
+from django.db import transaction
+from django.http import HttpResponse, StreamingHttpResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
-from django.db.models import Avg
+from django.db.models import Avg, Count, F, Q
+from django.db.models.functions import TruncDate
+from django.core.exceptions import ValidationError
+from accounts.models import User
+from .certificates import generate_certificate_id
+from .imaging import validate_image_upload, validate_certificate_background, validate_banner_image
 from .models import Questions, Quizzes, QuizAttempt, QuestionResponse
+from .question_import import SAMPLE_ROWS, parse_upload, validate_rows
 
 
 
@@ -33,26 +46,65 @@ class QuizView(View):
             messages.error(request, "You have to login first.")
             return redirect("adminLogin")
 
-    def post(self, request): 
-        if not request.user.is_authenticated: 
-            messages.error(request, "You have to login first.") 
-            return redirect("adminLogin") 
-        try: 
-            # ====================== # CREATE QUIZ # ====================== 
-            quiz = Quizzes.objects.create( title = request.POST.get("title"), 
-                                    description = request.POST.get("description"), 
-                                    certificate_text = request.POST.get("certificate_text"), 
-                                    image = request.FILES.get("image"), 
-                                    logo_1 = request.FILES.get("logo_1"), 
-                                    logo_2 = request.FILES.get("logo_2"), 
-                                    authority1_name = request.POST.get("authority1_name"), 
-                                    authority1_designation = request.POST.get("authority1_designation"), 
-                                    authority1_sign_image = request.FILES.get("authority1_sign_image"), 
-                                    authority2_name = request.POST.get("authority2_name"), 
-                                    authority2_designation = request.POST.get("authority2_designation"), 
-                                    authority2_sign_image = request.FILES.get("authority2_sign_image"), 
-                                    quiz_time = request.POST.get("quiz_time"), 
-                                    status = request.POST.get("status") == "1" ) 
+    def post(self, request):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+
+        # Upload validation (Part H) -- max 2MB, png/jpg/jpeg/webp only,
+        # min 200px long edge. Runs BEFORE the quiz is created, so a bad
+        # image never reaches Quizzes.save()'s normalize() step at all.
+        for field_name in ("image", "logo_1", "logo_2", "authority1_sign_image", "authority2_sign_image"):
+            f = request.FILES.get(field_name)
+            if f:
+                try:
+                    validate_image_upload(f)
+                except ValidationError as e:
+                    messages.error(request, e.message)
+                    return render(request, "custom_admin/quizzes/add-quiz.html")
+
+        # Certificate background validation (Part J) -- different rules
+        # (aspect ratio, bigger size cap) since it's a full-page backdrop,
+        # not a logo. Low resolution is a warning, not a hard reject.
+        bg_file = request.FILES.get("certificate_background")
+        if bg_file:
+            try:
+                warning = validate_certificate_background(bg_file)
+                if warning:
+                    messages.warning(request, warning)
+            except ValidationError as e:
+                messages.error(request, e.message)
+                return render(request, "custom_admin/quizzes/add-quiz.html")
+
+        # Banner aspect-ratio validation -- 16:10, hard reject (wrong ratio
+        # means the listing card will crop it wrong, not just "look blurry").
+        banner_file = request.FILES.get("image")
+        if banner_file:
+            try:
+                validate_banner_image(banner_file)
+            except ValidationError as e:
+                messages.error(request, e.message)
+                return render(request, "custom_admin/quizzes/add-quiz.html")
+
+        try:
+            # ====================== # CREATE QUIZ # ======================
+            quiz = Quizzes.objects.create( title = request.POST.get("title"),
+                                    description = request.POST.get("description"),
+                                    certificate_text = request.POST.get("certificate_text"),
+                                    image = request.FILES.get("image"),
+                                    logo_1 = request.FILES.get("logo_1"),
+                                    logo_2 = request.FILES.get("logo_2"),
+                                    authority1_name = request.POST.get("authority1_name"),
+                                    authority1_designation = request.POST.get("authority1_designation"),
+                                    authority1_sign_image = request.FILES.get("authority1_sign_image"),
+                                    authority2_name = request.POST.get("authority2_name"),
+                                    authority2_designation = request.POST.get("authority2_designation"),
+                                    authority2_sign_image = request.FILES.get("authority2_sign_image"),
+                                    quiz_time = request.POST.get("quiz_time"),
+                                    certificate_background = request.FILES.get("certificate_background"),
+                                    name_top_pct = request.POST.get("name_top_pct") or 42.0,
+                                    score_top_pct = request.POST.get("score_top_pct") or 64.0,
+                                    status = request.POST.get("status") == "1" )
                                     
             # ====================== # GET QUESTIONS DATA # ====================== 
             questions = request.POST.getlist("question[]") 
@@ -92,6 +144,40 @@ class EditQuizView(View):
 
     def post(self, request, id):
 
+        # Upload validation (Part H) -- same rule as QuizView.post: reject
+        # before anything is touched, so a bad image can't half-save.
+        for field_name in ("image", "logo_1", "logo_2", "authority1_sign_image", "authority2_sign_image"):
+            f = request.FILES.get(field_name)
+            if f:
+                try:
+                    validate_image_upload(f)
+                except ValidationError as e:
+                    messages.error(request, e.message)
+                    quiz = get_object_or_404(Quizzes, id=id)
+                    return render(request, "custom_admin/quizzes/edit-quiz.html", {"quiz": quiz})
+
+        # Certificate background validation (Part J)
+        bg_file = request.FILES.get("certificate_background")
+        if bg_file:
+            try:
+                warning = validate_certificate_background(bg_file)
+                if warning:
+                    messages.warning(request, warning)
+            except ValidationError as e:
+                messages.error(request, e.message)
+                quiz = get_object_or_404(Quizzes, id=id)
+                return render(request, "custom_admin/quizzes/edit-quiz.html", {"quiz": quiz})
+
+        # Banner aspect-ratio validation (same rule as QuizView.post)
+        banner_file = request.FILES.get("image")
+        if banner_file:
+            try:
+                validate_banner_image(banner_file)
+            except ValidationError as e:
+                messages.error(request, e.message)
+                quiz = get_object_or_404(Quizzes, id=id)
+                return render(request, "custom_admin/quizzes/edit-quiz.html", {"quiz": quiz})
+
         try:
             quiz = Quizzes.objects.get(id=id)
 
@@ -101,6 +187,8 @@ class EditQuizView(View):
             quiz.certificate_text = request.POST.get("certificate_text")
             quiz.status = request.POST.get("status")
             quiz.quiz_time = request.POST.get("quiz_time")
+            quiz.name_top_pct = request.POST.get("name_top_pct") or quiz.name_top_pct
+            quiz.score_top_pct = request.POST.get("score_top_pct") or quiz.score_top_pct
             if request.FILES.get("image"):
                 quiz.image = request.FILES.get("image")
             if request.FILES.get("logo_1"):
@@ -111,6 +199,8 @@ class EditQuizView(View):
                 quiz.authority1_sign_image = request.FILES.get("authority1_sign_image")
             if request.FILES.get("authority2_sign_image"):
                 quiz.authority2_sign_image = request.FILES.get("authority2_sign_image")
+            if request.FILES.get("certificate_background"):
+                quiz.certificate_background = request.FILES.get("certificate_background")
             quiz.save()
 
 
@@ -170,11 +260,171 @@ def deleteQuiz(request):
 
 
 # ======================================================================
+# BULK QUESTION IMPORT (Part G)
+# ======================================================================
+
+class ImportQuestionsView(View):
+    """Admin-only bulk question upload for one quiz. Uses the same manual
+    is_authenticated + redirect('adminLogin') pattern as QuizView/
+    EditQuizView above -- NOT @login_required, because that decorator
+    redirects to settings.LOGIN_URL (/accounts/login/), which is the
+    PARTICIPANT login page, not this admin panel's own login."""
+
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+        quiz = get_object_or_404(Quizzes, id=id)
+        return render(request, "custom_admin/quizzes/import-questions.html", {"quiz": quiz})
+
+    def post(self, request, id):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+
+        quiz = get_object_or_404(Quizzes, id=id)
+        uploaded = request.FILES.get("file")
+
+        if not uploaded:
+            messages.error(request, "Koi file select nahi ki.")
+            return redirect("adminImportQuestions", id=quiz.id)
+
+        try:
+            raw_rows = parse_upload(uploaded)
+        except Exception as e:
+            messages.error(request, f"File parse nahi ho paayi: {e}")
+            return redirect("adminImportQuestions", id=quiz.id)
+
+        existing_titles_lower = {
+            t.strip().lower() for t in quiz.questions.values_list("question", flat=True)
+        }
+
+        clean_rows, errors, warnings = validate_rows(raw_rows, existing_titles_lower)
+
+        if errors:
+            # Reject the whole file -- show every problem row at once so
+            # the admin can fix the sheet in one pass instead of trial-and-error.
+            return render(request, "custom_admin/quizzes/import-questions.html", {
+                "quiz": quiz,
+                "errors": errors,
+                "warnings": warnings,
+                "row_count": len(raw_rows),
+            })
+
+        # All rows import, or none -- bulk_create runs exactly once, after
+        # the loop that built clean_rows in question_import.validate_rows,
+        # same fix as QuizView.post's bulk_create bug.
+        with transaction.atomic():
+            Questions.objects.bulk_create([
+                Questions(quiz=quiz, **row) for row in clean_rows
+            ])
+
+        messages.success(request, f"{len(clean_rows)} questions import ho gaye.")
+        if warnings:
+            messages.warning(request, f"{len(warnings)} duplicate warning tha (phir bhi import hue).")
+        return redirect("adminEditQuiz", id=quiz.id)
+
+
+def download_question_template(request):
+    if not request.user.is_authenticated:
+        messages.error(request, "You have to login first.")
+        return redirect("adminLogin")
+
+    response = HttpResponse(content_type="text/csv")
+    response["Content-Disposition"] = 'attachment; filename="question_import_template.csv"'
+    writer = csv.writer(response)
+    for row in SAMPLE_ROWS:
+        writer.writerow(row)
+    return response
+
+
+# ======================================================================
 # PARTICIPANT QUIZ FLOW
 # ======================================================================
 
+ALLOWED_SOURCES = {"whatsapp", "sms", "facebook", "email", "qr", "direct"}
+
+
+def clean_source(raw):
+    """Whitelist ?src= against ALLOWED_SOURCES -- never store raw user
+    input here. This value gets rendered back in the admin analytics
+    dashboard's source breakdown, so an unvalidated value is an XSS vector,
+    and would otherwise pollute the analytics with arbitrary junk."""
+    return raw if raw in ALLOWED_SOURCES else "direct"
+
+
 def _session_keys(quiz_id):
     return f"quiz_{quiz_id}_attempt_id", f"quiz_{quiz_id}_question_ids"
+
+
+def _source_session_key(quiz_id):
+    return f"quiz_{quiz_id}_src"
+
+
+class QuizLandingView(View):
+    """Public, no login required -- this is the ONLY URL ever put into a
+    WhatsApp/QR/social share. Reads ?src=, stashes it in session so
+    QuizTakeView can attribute the eventual attempt, and carries Open Graph
+    tags so WhatsApp's link-preview crawler (not logged in, so it can only
+    ever see this page) shows a real title/image instead of a bare URL."""
+
+    def get(self, request, slug):
+        quiz = get_object_or_404(Quizzes, slug=slug, status=True)
+
+        src = clean_source(request.GET.get("src", "direct"))
+        request.session[_source_session_key(quiz.id)] = src
+
+        share_url = request.build_absolute_uri(reverse("quiz_landing", kwargs={"slug": quiz.slug}))
+        og_image = request.build_absolute_uri(quiz.image.url) if quiz.image else None
+        whatsapp_text = f"सहयोग सेतु का \"{quiz.title}\" क्विज़ आज़माइए: {share_url}?src=whatsapp"
+
+        return render(request, "custom_admin/quizzes/quiz_landing.html", {
+            "quiz": quiz,
+            "share_url": share_url,
+            "whatsapp_text": whatsapp_text,
+            "og_image": og_image,
+            "question_count": quiz.questions.count(),
+        })
+
+
+@staff_member_required(login_url="adminLogin")
+def quiz_qr_code(request, slug):
+    """PNG QR code of the public landing page URL, tagged ?src=qr, for
+    field staff to print for village meetings / SHG training sessions.
+    Uses reportlab's QR encoder to build the module matrix (already a
+    dependency for certificate generation), then rasterizes it with Pillow
+    directly -- reportlab's own PNG renderer (renderPM) needs a rlPyCairo
+    or compiled _rl_renderPM backend that isn't installed in this
+    environment, and Pillow is already a hard dependency (see imaging.py),
+    so this needs no new package either way."""
+    from reportlab.graphics.barcode.qr import QrCodeWidget
+    from PIL import Image, ImageDraw
+
+    quiz = get_object_or_404(Quizzes, slug=slug)
+    landing_path = reverse("quiz_landing", kwargs={"slug": quiz.slug})
+    target_url = request.build_absolute_uri(landing_path) + "?src=qr"
+
+    widget = QrCodeWidget(target_url)
+    widget.qr.make()
+    matrix = widget.qr.modules
+    module_count = widget.qr.moduleCount
+
+    scale = 10
+    border = 4  # quiet zone, per QR spec minimum
+    size = (module_count + border * 2) * scale
+    img = Image.new("RGB", (size, size), "white")
+    draw = ImageDraw.Draw(img)
+    for row in range(module_count):
+        for col in range(module_count):
+            if matrix[row][col]:
+                x0, y0 = (col + border) * scale, (row + border) * scale
+                draw.rectangle([x0, y0, x0 + scale - 1, y0 + scale - 1], fill="black")
+
+    buf = BytesIO()
+    img.save(buf, format="PNG")
+    response = HttpResponse(buf.getvalue(), content_type="image/png")
+    response["Content-Disposition"] = f'inline; filename="quiz-{quiz.slug}-qr.png"'
+    return response
 
 
 @method_decorator(login_required, name='dispatch')
@@ -187,7 +437,9 @@ class QuizTakeView(View):
             messages.error(request, "यह क्विज़ अभी उपलब्ध नहीं है।")
             return redirect("/")
 
-        completed_attempts = QuizAttempt.objects.filter(quiz=quiz, completed_at__isnull=False)
+        # is_demo=False here too -- a seeded demo row must never count toward
+        # a real participant's one-attempt limit or their displayed average.
+        completed_attempts = QuizAttempt.objects.filter(quiz=quiz, completed_at__isnull=False, is_demo=False)
 
         if quiz.one_attempt_only:
             existing = completed_attempts.filter(user=request.user).order_by('-completed_at').first()
@@ -214,7 +466,10 @@ class QuizTakeView(View):
             sample_size = min(quiz.questions_per_attempt, len(bank_ids))
             question_ids = random.sample(bank_ids, sample_size) if bank_ids else []
 
-            attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz)
+            # Source is validated again here (not just at landing-page time) --
+            # defence in depth against a tampered session value, cheap to redo.
+            source = clean_source(request.session.get(_source_session_key(quiz.id), "direct"))
+            attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz, source=source)
 
             request.session[attempt_key] = attempt.id
             request.session[question_ids_key] = question_ids
@@ -315,6 +570,16 @@ class QuizResultView(View):
         correct = responses.filter(is_correct=True).count()
         incorrect = attempt.total_questions - correct
 
+        # Share the QUIZ landing page, never this result page -- /quiz/result/<id>/
+        # is private and guessable by id; sharing it would leak this user's
+        # score to whoever clicks the link.
+        share_url = request.build_absolute_uri(reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug}))
+        whatsapp_text = (
+            f"मैंने सहयोग सेतु का \"{attempt.quiz.title}\" क्विज़ "
+            f"{round(attempt.percentage)}% अंकों से पूरा किया 🎓\n"
+            f"आप भी आज़माइए: {share_url}?src=whatsapp"
+        )
+
         return render(request, "custom_admin/quizzes/quiz_result.html", {
             "attempt": attempt,
             "responses": responses,
@@ -322,6 +587,8 @@ class QuizResultView(View):
             "incorrect": incorrect,
             "percentage": attempt.percentage,
             "pass_threshold": attempt.quiz.pass_threshold,
+            "share_url": share_url,
+            "whatsapp_text": whatsapp_text,
         })
 
 
@@ -343,3 +610,237 @@ class QuizLeaderboardView(View):
             "quiz": quiz,
             "attempts": attempts,
         })
+
+
+# ======================================================================
+# CERTIFICATE (Part I) -- HTML + browser print-to-PDF, no WeasyPrint/
+# wkhtmltopdf, so no new system deps on the VPS.
+# ======================================================================
+
+@method_decorator(login_required, name='dispatch')
+class CertificateView(View):
+
+    def get(self, request, pk):
+        # passed=True in the lookup itself -- a failed attempt 404s here
+        # rather than needing a separate "sorry, you didn't pass" branch.
+        # is_demo=False -- a demo/seed row can never issue a real certificate.
+        attempt = get_object_or_404(QuizAttempt, pk=pk, user=request.user, passed=True, is_demo=False)
+
+        if not attempt.quiz.certificate_enabled:
+            messages.error(request, "Is quiz ke liye certificate available nahi hai.")
+            return redirect("quiz_result", pk=attempt.id)
+
+        if not attempt.certificate_id:
+            attempt.certificate_id = generate_certificate_id(QuizAttempt)
+            attempt.certificate_issued_at = timezone.now()
+            attempt.save(update_fields=["certificate_id", "certificate_issued_at"])
+
+        # Share URL is ALWAYS the public quiz landing page, never this
+        # certificate page -- the certificate URL is private and user-scoped
+        # by id; sharing it would leak this attempt to whoever clicks the link.
+        landing_path = reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug})
+        share_url = request.build_absolute_uri(landing_path)
+        share_text = (
+            f"मैंने सहयोग सेतु का \"{attempt.quiz.title}\" क्विज़ "
+            f"{round(attempt.percentage)}% अंकों से पूरा किया 🎓\n"
+            f"आप भी आज़माइए: {share_url}?src=whatsapp"
+        )
+
+        return render(request, "custom_admin/quizzes/certificate.html", {
+            "attempt": attempt,
+            "quiz": attempt.quiz,
+            "share_url": share_url,
+            "share_text": share_text,
+        })
+
+
+def verify_certificate(request, cert_id):
+    # Public, no login -- deliberately does not select_related("user") into
+    # the template with mobile/email fields; the template only ever
+    # receives get_full_name(), never the User object itself, so there's
+    # no field to accidentally leak later.
+    attempt = QuizAttempt.objects.filter(certificate_id=cert_id).select_related("quiz", "user").first()
+
+    context = {"cert_id": cert_id, "attempt": None}
+    if attempt:
+        context["attempt"] = {
+            "name": attempt.user.get_full_name().strip() or "Participant",
+            "quiz_title": attempt.quiz.title,
+            "percentage": attempt.percentage,
+            "issued_at": attempt.certificate_issued_at,
+        }
+
+    return render(request, "custom_admin/quizzes/verify_certificate.html", context)
+
+
+# ======================================================================
+# ANALYTICS -- staff-only, read-only. login_url points at THIS app's own
+# admin login (adminLogin), not settings.LOGIN_URL -- that's the
+# participant login page (/accounts/login/), same mismatch already
+# avoided everywhere else in this file (see the ImportQuestionsView note
+# above). is_staff is already the established "staff" marker in this app
+# (QuizLeaderboardView checks it too).
+# ======================================================================
+
+ALLOWED_ANALYTICS_DAYS = {7, 30, 90}
+
+
+def _analytics_base_qs(include_demo):
+    qs = QuizAttempt.objects.filter(completed_at__isnull=False)
+    if not include_demo:
+        qs = qs.filter(is_demo=False)
+    return qs
+
+
+@method_decorator(staff_member_required(login_url="adminLogin"), name="dispatch")
+class QuizAnalyticsView(View):
+
+    def get(self, request):
+        include_demo = request.GET.get("demo") == "1"
+
+        try:
+            days = int(request.GET.get("days", 30))
+        except ValueError:
+            days = 30
+        if days not in ALLOWED_ANALYTICS_DAYS:
+            days = 30
+
+        base = _analytics_base_qs(include_demo)
+
+        # KPIs -- one aggregate call.
+        kpi = base.aggregate(
+            total=Count("id"),
+            participants=Count("user", distinct=True),
+            avg_pct=Avg("percentage"),
+            passed=Count("id", filter=Q(passed=True)),
+        )
+        total = kpi["total"] or 0
+        pass_rate = round((kpi["passed"] / total * 100), 1) if total else 0
+
+        # Score distribution -- one aggregate.
+        distribution = base.aggregate(
+            low=Count("id", filter=Q(percentage__lt=40)),
+            mid=Count("id", filter=Q(percentage__gte=40, percentage__lt=70)),
+            high=Count("id", filter=Q(percentage__gte=70)),
+        )
+
+        # Most-failed questions -- grouped by snapshot text, NOT question_id,
+        # because EditQuizView deletes+recreates Questions on every edit,
+        # which would null out question_id on every past response.
+        response_qs = QuestionResponse.objects.filter(attempt__completed_at__isnull=False)
+        if not include_demo:
+            response_qs = response_qs.filter(attempt__is_demo=False)
+
+        most_failed = list(
+            response_qs.values("question_text_snapshot")
+            .annotate(seen=Count("id"), wrong=Count("id", filter=Q(is_correct=False)))
+            .filter(seen__gte=5)
+            .annotate(pct_wrong=100.0 * F("wrong") / F("seen"))
+            .order_by("-pct_wrong")[:10]
+        )
+
+        # Per-quiz breakdown -- aggregated from QuizAttempt (never chain
+        # Avg()+Count() through Quizzes' reverse FKs -- that JOIN multiplies
+        # rows and silently corrupts the average).
+        quiz_breakdown = list(
+            base.values("quiz_id", "quiz__title")
+            .annotate(
+                attempts=Count("id"),
+                participants=Count("user", distinct=True),
+                avg_pct=Avg("percentage"),
+                avg_time=Avg("time_taken_seconds"),
+                passed=Count("id", filter=Q(passed=True)),
+            )
+            .order_by("-attempts")
+        )
+
+        # Daily attempts -- fill missing days with 0 so the line doesn't
+        # jump across gaps and lie about the trend.
+        since = timezone.localdate() - timedelta(days=days - 1)
+        daily_rows = (
+            base.filter(completed_at__date__gte=since)
+            .annotate(day=TruncDate("completed_at"))
+            .values("day")
+            .annotate(n=Count("id"))
+        )
+        daily_by_date = {row["day"]: row["n"] for row in daily_rows}
+        daily_series = [
+            {"date": (since + timedelta(days=i)).isoformat(), "count": daily_by_date.get(since + timedelta(days=i), 0)}
+            for i in range(days)
+        ]
+
+        # Source breakdown -- "कहाँ से आए" panel.
+        source_breakdown = list(
+            base.values("source").annotate(n=Count("id")).order_by("-n")
+        )
+
+        chart_data = {
+            "distribution": distribution,
+            "daily": daily_series,
+            "quiz_breakdown": [
+                {**row, "avg_pct": round(row["avg_pct"] or 0, 1)} for row in quiz_breakdown
+            ],
+            "source_breakdown": source_breakdown,
+        }
+
+        return render(request, "custom_admin/quizzes/quiz_analytics.html", {
+            "total": total,
+            "participants": kpi["participants"] or 0,
+            "avg_pct": round(kpi["avg_pct"] or 0, 1),
+            "pass_rate": pass_rate,
+            "distribution": distribution,
+            "most_failed": most_failed,
+            "quiz_breakdown": chart_data["quiz_breakdown"],
+            "source_breakdown": source_breakdown,
+            "registered_users": User.objects.filter(user_type=2).count(),
+            "include_demo": include_demo,
+            "days": days,
+            "chart_data": chart_data,
+        })
+
+
+class _Echo:
+    """A file-like object that just hands back what it's given -- lets
+    csv.writer stream rows through StreamingHttpResponse instead of
+    building the whole CSV in memory first."""
+
+    def write(self, value):
+        return value
+
+
+@staff_member_required(login_url="adminLogin")
+def quiz_analytics_export(request):
+    include_demo = request.GET.get("demo") == "1"
+    qs = _analytics_base_qs(include_demo).select_related("user", "quiz").order_by("id").iterator()
+
+    def rows():
+        writer = csv.writer(_Echo())
+        yield writer.writerow([
+            "attempt_id", "username", "quiz", "score", "total_questions",
+            "percentage", "passed", "started_at", "completed_at", "time_taken_seconds",
+        ])
+        for a in qs:
+            yield writer.writerow([
+                a.id, a.user.username, a.quiz.title, a.score, a.total_questions,
+                round(a.percentage, 1), a.passed, a.started_at, a.completed_at, a.time_taken_seconds,
+            ])
+
+    filename = f"sahyog-quiz-attempts-{timezone.localdate().isoformat()}.csv"
+    response = StreamingHttpResponse(rows(), content_type="text/csv")
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
+
+@method_decorator(login_required, name="dispatch")
+class MyResultsView(View):
+    """Participant's own attempt history. Only ever queries
+    user=request.user -- no other participant's name, score, or rank is
+    ever rendered here."""
+
+    def get(self, request):
+        attempts = (
+            QuizAttempt.objects.filter(user=request.user, completed_at__isnull=False)
+            .select_related("quiz")
+            .order_by("-completed_at")
+        )
+        return render(request, "custom_admin/quizzes/my_results.html", {"attempts": attempts})

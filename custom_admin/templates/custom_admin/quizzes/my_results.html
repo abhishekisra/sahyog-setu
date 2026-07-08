@@ -1,0 +1,49 @@
+{% extends 'custom_admin/public_base.html' %}
+
+{% block title %}My Results{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width:800px; padding-top:60px; padding-bottom:60px;">
+    <div class="gold-card">
+        <h1 style="margin-top:0;">मेरे परिणाम</h1>
+        <p class="mb-4" style="color: rgba(0,0,0,0.6);">आपके सभी पूरे हुए क्विज़ अटेम्प्ट.</p>
+
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="text-align:left; border-bottom:2px solid rgba(0,0,0,0.15);">
+                        <th style="padding:10px 8px;">क्विज़</th>
+                        <th style="padding:10px 8px;">स्कोर</th>
+                        <th style="padding:10px 8px;">परिणाम</th>
+                        <th style="padding:10px 8px;">तारीख</th>
+                        <th style="padding:10px 8px;"></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                    <tr style="border-bottom:1px solid rgba(0,0,0,0.08);">
+                        <td style="padding:10px 8px;">{{ attempt.quiz.title }}</td>
+                        <td style="padding:10px 8px;">{{ attempt.score }}/{{ attempt.total_questions }} ({{ attempt.percentage|floatformat:0 }}%)</td>
+                        <td style="padding:10px 8px;">
+                            {% if attempt.passed %}
+                            <span style="color:#2ca87f; font-weight:600;">पास</span>
+                            {% else %}
+                            <span style="color:#e4566e; font-weight:600;">फेल</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding:10px 8px;">{{ attempt.completed_at|date:"d M Y" }}</td>
+                        <td style="padding:10px 8px;"><a href="{% url 'quiz_result' pk=attempt.id %}" class="ss-link">देखें</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" style="padding:16px 8px;">अभी तक कोई क्विज़ पूरा नहीं किया.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="mt-3"><a href="/" class="ss-link" style="color: var(--ss-bg-accent, var(--ss-primary));">Back to Home</a></p>
+    </div>
+</div>
+{% endblock %}

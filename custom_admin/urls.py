@@ -117,6 +117,8 @@ urlpatterns = [
     path('quiz', Quizzes.QuizView.as_view(),name="adminNewQuiz"),
     path('quiz/<int:id>', Quizzes.EditQuizView.as_view(),name="adminEditQuiz"),
     path('quiz/delete', Quizzes.deleteQuiz, name="adminDeleteQuiz"),
+    path('quiz/<int:id>/import-questions', Quizzes.ImportQuestionsView.as_view(), name="adminImportQuestions"),
+    path('quiz/import-questions/template', Quizzes.download_question_template, name="adminImportQuestionsTemplate"),
     
 
 

@@ -1,0 +1,88 @@
+{% extends 'custom_admin/public_base.html' %}
+{% load static %}
+
+{% block title %}{{ quiz.title }} — सहयोग सेतु{% endblock %}
+
+{% block head %}
+<meta property="og:title" content="{{ quiz.title }} — सहयोग सेतु">
+<meta property="og:description" content="{{ quiz.description|default:"सहयोग सेतु का यह क्विज़ खेलें और अपना ज्ञान परखें।"|truncatechars:110 }}">
+{% if og_image %}
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="750">
+{% endif %}
+<meta property="og:url" content="{{ share_url }}">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+{% endblock %}
+
+{% block body %}
+<div class="ss-result-page">
+    <header class="ss-quiz-header">
+        <div class="container">
+            <div class="ss-header-content">
+                <div class="ss-logo-area">
+                    <img src="{% static 'custom_admin/images/logo-dark.png' %}" alt="Sahyog Setu" class="ss-logo">
+                    <div class="ss-brand-info">
+                        <span class="ss-brand-name">Sahyog Setu</span>
+                    </div>
+                </div>
+                <a href="/" class="btn-outline-ss">Back to Home</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container" style="max-width:800px; padding-top:40px; padding-bottom:60px;">
+        <div class="gold-card">
+            {% if quiz.image %}
+            <div style="aspect-ratio:16/10; border-radius:16px; overflow:hidden; margin-bottom:24px;">
+                <img src="{{ quiz.image.url }}" alt="{{ quiz.title }}" style="width:100%; height:100%; object-fit:cover;">
+            </div>
+            {% endif %}
+
+            <h1 style="margin-top:0;">{{ quiz.title }}</h1>
+            {% if quiz.description %}
+            <p style="color: rgba(0,0,0,0.65); font-size:1.05rem; line-height:1.6;">{{ quiz.description }}</p>
+            {% endif %}
+
+            <div style="display:flex; gap:20px; flex-wrap:wrap; margin:24px 0; padding:18px 20px; background:rgba(0,0,0,0.06); border-radius:14px;">
+                <div><strong>{{ question_count }}</strong> प्रश्न</div>
+                {% if quiz.quiz_time %}<div><strong>{{ quiz.quiz_time }}</strong> मिनट</div>{% endif %}
+                <div>पास होने के लिए <strong>{{ quiz.pass_threshold }}%</strong> चाहिए</div>
+            </div>
+
+            {% if not quiz.is_live %}
+            <div class="alert alert-warning mb-3" style="color:#7a5b00;">यह क्विज़ अभी उपलब्ध नहीं है।</div>
+            {% else %}
+            <div style="text-align:center; margin:28px 0;">
+                {% if request.user.is_authenticated %}
+                <a href="{% url 'quiz_take' quiz.id %}" class="btn btn-primary">क्विज़ शुरू करें</a>
+                {% else %}
+                <a href="{% url 'login' %}?next={% url 'quiz_take' quiz.id %}" class="btn btn-primary">लॉगिन करके क्विज़ शुरू करें</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% if quiz.leaderboard_public %}
+            <p style="text-align:center;"><a href="{% url 'quiz_leaderboard' quiz.id %}" class="ss-link" style="color: var(--ss-bg-accent);">लीडरबोर्ड देखें</a></p>
+            {% endif %}
+
+            <div class="ss-share-section">
+                <span class="ss-share-title">क्विज़ शेयर करें</span>
+                <div class="ss-share-grid">
+                    <a href="https://api.whatsapp.com/send?text={{ whatsapp_text|urlencode }}" target="_blank" class="ss-share-link wa">
+                        <span>WhatsApp</span>
+                    </a>
+                    <button type="button" class="ss-share-link copy" onclick="ssCopyShareLink(this)" data-url="{{ share_url }}?src=direct">
+                        <span>Copy Link</span>
+                    </button>
+                    <button type="button" class="ss-share-link native" style="display:none;" onclick="ssNativeShare(this)"
+                        data-url="{{ share_url }}?src=direct" data-title="{{ quiz.title }}" data-text="{{ quiz.title }} — सहयोग सेतु">
+                        <span>Share</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+{% endblock %}

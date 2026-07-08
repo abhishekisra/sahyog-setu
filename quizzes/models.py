@@ -1,11 +1,17 @@
 from django.db import models
 from django.conf import settings
 from django.utils import timezone
+from django.utils.text import slugify
 
 
 class Quizzes(models.Model):
 
     title = models.CharField(max_length=255)
+    # null=True (not just blank=True) for the same reason as QuizAttempt.certificate_id
+    # below: a unique field can't have more than one row storing '' -- auto-generated
+    # in save() the first time a quiz is saved, so this is only ever null in between
+    # migration and the next save.
+    slug = models.SlugField(max_length=255, unique=True, null=True, blank=True)
     description = models.TextField(blank=True, null=True)
     certificate_text = models.TextField(blank=True, null=True)
     image = models.ImageField(upload_to="quiz/images", blank=True, null=True)
@@ -30,6 +36,16 @@ class Quizzes(models.Model):
     one_attempt_only = models.BooleanField(default=True)
     leaderboard_public = models.BooleanField(default=False)
 
+    # Certificate (Part I)
+    certificate_enabled = models.BooleanField(default=True)
+    certificate_background = models.ImageField(upload_to="quiz/certificate_bg", blank=True, null=True)
+
+    # Certificate layout nudging (Part J) -- lets an admin reposition the
+    # name/score text vertically to fit a specific background image,
+    # without needing a code change or template edit.
+    name_top_pct = models.FloatField(default=42.0)
+    score_top_pct = models.FloatField(default=64.0)
+
     @property
     def is_live(self):
         if not self.status:
@@ -40,6 +56,52 @@ class Quizzes(models.Model):
         if self.end_date and now > self.end_date:
             return False
         return True
+
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            base = slugify(self.title) or "quiz"
+            candidate = base
+            suffix = 1
+            while Quizzes.objects.filter(slug=candidate).exclude(pk=self.pk).exists():
+                suffix += 1
+                candidate = f"{base}-{suffix}"
+            self.slug = candidate
+
+        # Normalise logos/signatures on upload (Part H, Layer 1) -- only
+        # touches a field when a NEW file was just assigned to it
+        # (FieldFile._committed is False for an unsaved upload, True once
+        # persisted), so re-saving the quiz for unrelated reasons never
+        # re-normalises an already-normalised image.
+        from .imaging import LOGO_BOX, SIGN_BOX, normalized_file, normalized_certificate_background, normalized_banner
+
+        for field_name, box, strip_white in (
+            ("logo_1", LOGO_BOX, False),
+            ("logo_2", LOGO_BOX, False),
+            ("authority1_sign_image", SIGN_BOX, True),
+            ("authority2_sign_image", SIGN_BOX, True),
+        ):
+            f = getattr(self, field_name)
+            if f and not f._committed:
+                normalized = normalized_file(f.file, box, strip_white=strip_white, name_hint=field_name)
+                f.save(normalized.name, normalized, save=False)
+
+        # certificate_background gets its own normalize path (Part J) --
+        # no thumbnailing, just orientation/format cleanup, since it's a
+        # full-bleed print backdrop, not a small logo.
+        bg = self.certificate_background
+        if bg and not bg._committed:
+            normalized_bg = normalized_certificate_background(bg.file)
+            bg.save(normalized_bg.name, normalized_bg, save=False)
+
+        # Banner (Part K) -- exif_transpose + re-encode as WEBP only, no
+        # resize/crop here; the 16:10 ratio is already enforced at upload
+        # time in the view, so the file arriving here is already correct.
+        img = self.image
+        if img and not img._committed:
+            normalized_img = normalized_banner(img.file)
+            img.save(normalized_img.name, normalized_img, save=False)
+
+        super().save(*args, **kwargs)
 
 
 class Questions(models.Model):
@@ -66,6 +128,26 @@ class QuizAttempt(models.Model):
     time_taken_seconds = models.IntegerField(null=True, blank=True)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+
+    # Certificate (Part I). null=True (not just blank=True) is required here:
+    # a CharField that's `unique=True` can't have more than one row storing
+    # '' -- most attempts never get a certificate, so unset must be NULL,
+    # since MySQL allows many NULLs but not many empty-string duplicates
+    # under a unique constraint.
+    certificate_id = models.CharField(max_length=32, unique=True, null=True, blank=True)
+    certificate_issued_at = models.DateTimeField(null=True, blank=True)
+
+    # Demo/seed data marker -- lets the analytics dashboard demo without
+    # polluting real numbers. Every analytics query excludes these by
+    # default; a demo row can never issue a certificate or count against
+    # one_attempt_only (see CertificateView, QuizTakeView).
+    is_demo = models.BooleanField(default=False, db_index=True)
+
+    # Where the participant came from (whatsapp/sms/facebook/email/qr/direct).
+    # Always whitelist-validated before it ever reaches this field (see
+    # quizzes.views.clean_source) -- it gets rendered back in the admin
+    # analytics dashboard, so an unvalidated value would be an XSS vector.
+    source = models.CharField(max_length=20, default="direct", db_index=True)
 
     def __str__(self):
         return f"{self.user} - {self.quiz} ({self.score}/{self.total_questions})"

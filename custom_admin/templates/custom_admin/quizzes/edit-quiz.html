@@ -56,8 +56,14 @@
                                     <label>Quiz Image</label>
                                     <input type="file" name="image" class="form-control">
 
-                                    {% if quiz.image %} <br> <img src="{{ quiz.image.url }}" width="80">
+                                    {% if quiz.image %}
+                                    <div style="width:200px;aspect-ratio:16/10;border-radius:8px;overflow:hidden;margin-top:8px;background:#f2f2f2;">
+                                        <img src="{{ quiz.image.url }}" style="width:100%;height:100%;object-fit:cover;">
+                                    </div>
                                     {% endif %}
+                                    <small class="text-muted d-block mt-1">
+                                        16:10 ratio (जैसे 1200×750px), max 2MB. केवल art अपलोड करें — शीर्षक, समय, प्रश्न संख्या database से आते हैं.
+                                    </small>
 
                                 </div>
  
@@ -86,6 +92,25 @@
                                         class="form-control">{{ quiz.certificate_text }}</textarea>
                                 </div>
 
+                                <div class="col-6 mt-2">
+                                    <label>Certificate Background (optional)</label>
+                                    {% if quiz.certificate_background %}
+                                    <div class="mb-1"><img src="{{ quiz.certificate_background.url }}" style="max-height:60px;"></div>
+                                    {% endif %}
+                                    <input type="file" name="certificate_background" class="form-control">
+                                    <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB.</small>
+                                </div>
+
+                                <div class="col-3 mt-2">
+                                    <label>Name Position (top %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="name_top_pct" class="form-control" value="{{ quiz.name_top_pct }}">
+                                </div>
+
+                                <div class="col-3 mt-2">
+                                    <label>Score Position (top %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="score_top_pct" class="form-control" value="{{ quiz.score_top_pct }}">
+                                </div>
+
                                 <hr class="col-12">
 
                                 <h5 class="col-12">Authority 1</h5>
@@ -105,8 +130,9 @@
                                 <div class="col-4">
                                     <label>Signature</label>
                                     <input type="file" name="authority1_sign_image" class="form-control">
-                                    <br>
-                                    <img src="{{ quiz.authority1_sign_image.url }}" width="80">
+                                    <div style="height:64px;width:168px;display:grid;place-items:end center;margin-top:8px;">
+                                        <img src="{{ quiz.authority1_sign_image.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:bottom;">
+                                    </div>
                                 </div>
 
                                 <hr class="col-12">
@@ -128,8 +154,9 @@
                                 <div class="col-4">
                                     <label>Signature</label>
                                     <input type="file" name="authority2_sign_image" class="form-control">
-                                    <br>
-                                    <img src="{{ quiz.authority2_sign_image.url }}" width="80">
+                                    <div style="height:64px;width:168px;display:grid;place-items:end center;margin-top:8px;">
+                                        <img src="{{ quiz.authority2_sign_image.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:bottom;">
+                                    </div>
                                 </div>
 
                                 <hr class="col-12">
@@ -137,15 +164,17 @@
                                 <div class="col-6">
                                     <label>Logo 1</label>
                                     <input type="file" name="logo_1" class="form-control">
-                                    <br>
-                                    <img src="{{ quiz.logo_1.url }}" width="80">
+                                    <div style="height:64px;width:168px;display:grid;place-items:center;margin-top:8px;">
+                                        <img src="{{ quiz.logo_1.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;">
+                                    </div>
                                 </div>
 
                                 <div class="col-6">
                                     <label>Logo 2</label>
                                     <input type="file" name="logo_2" class="form-control">
-                                    <br>
-                                    <img src="{{ quiz.logo_2.url }}" width="80">
+                                    <div style="height:64px;width:168px;display:grid;place-items:center;margin-top:8px;">
+                                        <img src="{{ quiz.logo_2.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;">
+                                    </div>
                                 </div>
 
                             </div>

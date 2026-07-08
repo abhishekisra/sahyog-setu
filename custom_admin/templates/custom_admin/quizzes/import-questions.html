@@ -1,0 +1,107 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5>Import Questions — {{ quiz.title }}</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="/admin/quizzes">Quizzes</a></li>
+                            <li class="breadcrumb-item"><a href="#!">Import Questions</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <a href="/admin/quiz/import-questions/template" class="btn btn-outline-secondary btn-sm">
+                            <i class="feather icon-download"></i>&nbsp;Download Sample CSV
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <p>
+                            Columns required: <code>question, option_1, option_2, option_3, option_4, correct_option, explanation</code><br>
+                            <code>correct_option</code> mein 1/2/3/4, A/B/C/D, ya क/ख/ग/घ — koi bhi ek use kar sakte ho. <code>explanation</code> optional hai.<br>
+                            .csv ya .xlsx dono chalega. Ek row mein error hone par <strong>puri file reject</strong> hogi — pehle sab errors fix karo phir dobara upload karo.
+                        </p>
+
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Question File (.csv ya .xlsx) *</label>
+                                <input type="file" name="file" class="form-control" accept=".csv,.xlsx" required>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Upload &amp; Import</button>
+                            <a href="/admin/quiz/{{ quiz.id }}" class="btn btn-outline-secondary">Cancel</a>
+                        </form>
+
+                        {% if row_count %}
+                        <hr>
+                        <p>{{ row_count }} data row(s) file mein mile.</p>
+                        {% endif %}
+
+                        {% if errors %}
+                        <div class="alert alert-danger">
+                            <strong>{{ errors|length }} error(s) — koi bhi row import nahi hua:</strong>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr><th style="width:80px">Row</th><th>Problem</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for row_num, msg in errors %}
+                                    <tr><td>{{ row_num }}</td><td>{{ msg }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                        {% if warnings %}
+                        <div class="alert alert-warning">
+                            <strong>{{ warnings|length }} duplicate warning(s):</strong>
+                        </div>
+                        <div class="table-responsive">
+                            <table class="table table-bordered table-sm">
+                                <thead>
+                                    <tr><th style="width:80px">Row</th><th>Note</th></tr>
+                                </thead>
+                                <tbody>
+                                    {% for row_num, msg in warnings %}
+                                    <tr><td>{{ row_num }}</td><td>{{ msg }}</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                        {% endif %}
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% for message in messages %}
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+{% endfor %}
+
+{% endblock %}
