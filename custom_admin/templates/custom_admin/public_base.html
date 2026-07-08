@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>{% block title %}Sahyog Setu Portal{% endblock %}</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Poppins:wght@400;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --ss-primary: #facc15;
+            --ss-primary-dark: #eab308;
+            --ss-bg: #1f2f1f;
+            --ss-bg-accent: #313f2f;
+            --ss-bg-gradient: linear-gradient(135deg, #1f2f1f 0%, #152015 100%);
+            --ss-gold-gradient: linear-gradient(135deg, #facc15 0%, #eab308 100%);
+            --ss-ink: #1a1c18;
+            --ss-white: #ffffff;
+            --ss-muted: rgba(255, 255, 255, 0.6);
+            --ss-radius: 16px;
+            --ss-radius-lg: 24px;
+            --ss-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            --ss-shadow-gold: 0 10px 25px rgba(250, 204, 21, 0.2);
+            --ss-danger: #dc3545;
+            --ss-success: #313f2f;
+        }
+
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html,
+        body {
+            height: 100%;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--ss-bg);
+            background-image: var(--ss-bg-gradient);
+            background-attachment: fixed;
+            font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif;
+            color: var(--ss-white);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 16px
+        }
+
+        .ss-page {
+            min-height: 100vh
+        }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            border-radius: 12px;
+            padding: 12px 32px;
+            font-weight: 700;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            user-select: none;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--ss-primary);
+            color: var(--ss-ink);
+            box-shadow: 0 4px 14px rgba(250, 204, 21, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.1);
+            box-shadow: 0 6px 20px rgba(250, 204, 21, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--ss-white);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-outline:hover {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: var(--ss-white);
+            transform: translateY(-2px);
+        }
+
+        .gold-card {
+            background: var(--ss-primary);
+            border-radius: var(--ss-radius);
+            padding: 32px;
+            color: var(--ss-ink);
+            box-shadow: var(--ss-shadow);
+        }
+
+        .alert {
+            border-radius: 14px;
+            padding: 16px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            background: var(--ss-bg-soft);
+            color: var(--ss-white);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert-success {
+            border-color: rgba(22, 163, 74, 0.3);
+            background: rgba(22, 163, 74, 0.1);
+        }
+
+        .alert-warning {
+            border-color: rgba(234, 179, 8, 0.3);
+            background: rgba(234, 179, 8, 0.1);
+        }
+
+        .alert-info {
+            border-color: rgba(59, 130, 246, 0.3);
+            background: rgba(59, 130, 246, 0.1);
+        }
+
+        .d-none {
+            display: none !important
+        }
+
+        .mt-3 {
+            margin-top: 12px
+        }
+
+        .mb-0 {
+            margin-bottom: 0
+        }
+
+        .mb-2 {
+            margin-bottom: 8px
+        }
+
+        .mb-3 {
+            margin-bottom: 12px
+        }
+
+        .mb-4 {
+            margin-bottom: 16px
+        }
+
+        .ss-input {
+            width: 100%;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 16px;
+            font-size: 1rem;
+            outline: none;
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--ss-white);
+            transition: all 0.2s ease;
+        }
+
+        .ss-input:focus {
+            border-color: var(--ss-primary);
+            background: rgba(255, 255, 255, 0.08);
+            box-shadow: 0 0 0 4px rgba(250, 204, 21, 0.1);
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+                scroll-behavior: auto !important
+            }
+        }
+    </style>
+    {% block head %}{% endblock %}
+</head>
+
+<body>
+    <div class="ss-page">
+        {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} mb-2" role="alert">{{ message }}</div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% block body %}{% endblock %}
+    </div>
+</body>
+
+</html>

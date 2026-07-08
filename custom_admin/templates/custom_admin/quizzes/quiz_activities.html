@@ -1,0 +1,352 @@
+{% extends 'custom_admin/public_base.html' %}
+
+{% block body %}
+<div class="ss-activities-page">
+    <header class="ss-quiz-header">
+        <div class="container">
+            <div class="ss-header-content">
+                <div class="ss-logo-area">
+                    {% load static %}
+                    <img src="{% static 'custom_admin/images/logo-dark.png' %}" alt="Sahyog Setu" class="ss-logo">
+                    <div class="ss-brand-info">
+                        <span class="ss-brand-name">Sahyog Setu</span>
+                    </div>
+                </div>
+                <a href="/" class="btn-outline-ss">Back to Home</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="ss-activities-container">
+            <div class="ss-activities-card gold-card">
+                <div class="ss-activities-header">
+                    <span class="ss-badge-accent">History</span>
+                    <h1 class="ss-activities-title">My Quiz Activities</h1>
+                    <p class="ss-activities-subtitle">View and download certificates from your recent quiz attempts.</p>
+                </div>
+
+                <div class="ss-table-wrapper gold-card-flat">
+                    {% if submissions %}
+                    <table class="ss-custom-table">
+                        <thead>
+                            <tr>
+                                <th>Quiz Name</th>
+                                <th>Date & Time</th>
+                                <th>Score</th>
+                                <th class="text-center">Certificate</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for s in submissions %}
+                            <tr>
+                                <td class="ss-td-quiz">
+                                    <div class="ss-quiz-info">
+                                        <span class="ss-quiz-title-text">{{ s.quiz.title }}</span>
+                                        {% if s.is_passed %}
+                                        <span class="ss-status-pill success">Passed</span>
+                                        {% else %}
+                                        <span class="ss-status-pill danger">Failed</span>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                                <td class="ss-td-date">{{ s.created_at|date:"d M Y, h:i A" }}</td>
+                                <td class="ss-td-score">
+                                    <div class="ss-score-pill">{{ s.score }}/{{ s.total_questions }}</div>
+                                </td>
+                                <td class="ss-td-action text-center">
+                                    {% if s.certificate_path %}
+                                    <a href="{{ s.file_url }}" class="ss-download-btn" download
+                                        title="Download Certificate">
+                                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none"
+                                            stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                                            stroke-linejoin="round">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                            <polyline points="7 10 12 15 17 10"></polyline>
+                                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                                        </svg>
+                                        Download
+                                    </a>
+                                    {% else %}
+                                    <span class="ss-no-cert">N/A</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    {% else %}
+                    <div class="ss-empty-state">
+                        <div class="ss-empty-icon">📝</div>
+                        <h3>No Activities Found</h3>
+                        <p>You haven't attempted any quizzes yet. Start your first assessment today!</p>
+                        <a href="/" class="btn-primary-ss">Explore Quizzes</a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<style>
+    .ss-activities-page {
+        min-height: 100vh;
+        padding-bottom: 80px;
+        background: var(--ss-bg);
+    }
+
+    .ss-quiz-header {
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 16px 0;
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ss-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ss-logo-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ss-logo {
+        height: 48px;
+        filter: brightness(0) invert(1);
+    }
+
+    .ss-brand-name {
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--ss-primary);
+        line-height: 1;
+    }
+
+    .ss-brand-tagline {
+        font-size: 0.75rem;
+        color: var(--ss-muted);
+        font-weight: 600;
+    }
+
+    .btn-outline-ss {
+        padding: 10px 20px;
+        border: 2px solid var(--ss-primary);
+        color: var(--ss-primary);
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-ss:hover {
+        background: var(--ss-primary);
+        color: var(--ss-bg-accent);
+    }
+
+    .gold-card {
+        background: var(--ss-gold-gradient);
+        border-radius: var(--ss-radius-lg);
+        padding: 48px;
+        color: var(--ss-ink);
+        box-shadow: var(--ss-shadow-gold);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .gold-card-flat {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--ss-radius);
+        padding: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ss-activities-container {
+        max-width: 1000px;
+        margin: 0 auto;
+    }
+
+    .ss-activities-header {
+        margin-bottom: 40px;
+        text-align: center;
+    }
+
+    .ss-badge-accent {
+        background: rgba(0, 0, 0, 0.1);
+        color: var(--ss-bg-accent);
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-size: 0.85rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 16px;
+    }
+
+    .ss-activities-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin: 0 0 12px 0;
+    }
+
+    .ss-activities-subtitle {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 1.1rem;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+
+    .ss-table-wrapper {
+        overflow-x: auto;
+    }
+
+    .ss-custom-table {
+        width: 100%;
+        border-collapse: collapse;
+        min-width: 700px;
+    }
+
+    .ss-custom-table th {
+        text-align: left;
+        padding: 16px 24px;
+        font-weight: 800;
+        color: rgba(0, 0, 0, 0.4);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .ss-custom-table td {
+        padding: 20px 24px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+    }
+
+    .ss-custom-table tr:last-child td {
+        border-bottom: none;
+    }
+
+    .ss-quiz-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+    }
+
+    .ss-quiz-title-text {
+        font-weight: 800;
+        color: var(--ss-ink);
+        font-size: 1.1rem;
+    }
+
+    .ss-status-pill {
+        display: inline-block;
+        font-size: 0.7rem;
+        font-weight: 800;
+        padding: 4px 10px;
+        border-radius: 99px;
+        width: fit-content;
+        text-transform: uppercase;
+    }
+
+    .ss-status-pill.success {
+        background: var(--ss-bg-accent);
+        color: white;
+    }
+
+    .ss-status-pill.danger {
+        background: var(--ss-danger);
+        color: white;
+    }
+
+    .ss-td-date {
+        color: rgba(0, 0, 0, 0.6);
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
+
+    .ss-score-pill {
+        background: rgba(0, 0, 0, 0.05);
+        color: var(--ss-bg-accent);
+        font-weight: 800;
+        padding: 6px 12px;
+        border-radius: 8px;
+        display: inline-block;
+        font-size: 1rem;
+    }
+
+    .ss-download-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--ss-bg-accent);
+        color: white;
+        padding: 8px 16px;
+        border-radius: 10px;
+        text-decoration: none;
+        font-weight: 700;
+        font-size: 0.85rem;
+        transition: all 0.2s ease;
+    }
+
+    .ss-download-btn:hover {
+        transform: translateY(-2px);
+        filter: brightness(1.2);
+    }
+
+    .ss-no-cert {
+        color: rgba(0, 0, 0, 0.3);
+        font-weight: 700;
+    }
+
+    .ss-empty-state {
+        padding: 64px 32px;
+        text-align: center;
+    }
+
+    .ss-empty-icon {
+        font-size: 4rem;
+        margin-bottom: 24px;
+    }
+
+    .ss-empty-state h3 {
+        font-size: 1.75rem;
+        font-weight: 800;
+        color: var(--ss-ink);
+        margin: 0 0 12px 0;
+    }
+
+    .ss-empty-state p {
+        color: rgba(0, 0, 0, 0.6);
+        margin-bottom: 32px;
+    }
+
+    .btn-primary-ss {
+        background: var(--ss-bg-accent);
+        color: white;
+        border: none;
+        padding: 16px 40px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    @media (max-width: 768px) {
+        .ss-activities-card {
+            padding: 32px 24px;
+        }
+
+        .ss-activities-title {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}

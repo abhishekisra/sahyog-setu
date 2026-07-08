@@ -1,0 +1,35 @@
+{% extends 'custom_admin/public_base.html' %}
+
+{% block title %}लॉगिन - Sahyog Setu{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width:420px; padding-top:80px; padding-bottom:80px;">
+    <div class="gold-card">
+        <h1 style="margin-top:0;">लॉगिन करें</h1>
+
+        {% if error %}
+        <div class="alert alert-warning mb-3">{{ error }}</div>
+        {% endif %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ next }}">
+
+            <div class="mb-3">
+                <label for="id_mobile">मोबाइल नंबर</label>
+                <input type="tel" name="mobile" id="id_mobile" class="ss-input" maxlength="10" pattern="\d{10}"
+                    required>
+            </div>
+
+            <div class="mb-4">
+                <label for="id_password">पासवर्ड</label>
+                <input type="password" name="password" id="id_password" class="ss-input" required>
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;">लॉगिन करें</button>
+        </form>
+
+        <p class="mt-3">नया खाता बनाएं? <a href="{% url 'signup' %}">पंजीकरण करें</a></p>
+    </div>
+</div>
+{% endblock %}

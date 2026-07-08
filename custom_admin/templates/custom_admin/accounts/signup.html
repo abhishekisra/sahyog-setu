@@ -1,0 +1,58 @@
+{% extends 'custom_admin/public_base.html' %}
+
+{% block title %}पंजीकरण - Sahyog Setu{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width:480px; padding-top:60px; padding-bottom:60px;">
+    <div class="gold-card">
+        <h1 style="margin-top:0;">पंजीकरण करें</h1>
+
+        {% for error in form.non_field_errors %}
+        <div class="alert alert-warning mb-3">{{ error }}</div>
+        {% endfor %}
+
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <div class="mb-3">
+                <label for="id_full_name">पूरा नाम</label>
+                <input type="text" name="full_name" id="id_full_name" class="ss-input"
+                    value="{{ form.full_name.value|default:'' }}" required>
+                {% for error in form.full_name.errors %}
+                <div class="alert alert-warning mb-2 mt-3">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_mobile">मोबाइल नंबर</label>
+                <input type="tel" name="mobile" id="id_mobile" class="ss-input" maxlength="10" pattern="\d{10}"
+                    value="{{ form.mobile.value|default:'' }}" required>
+                {% for error in form.mobile.errors %}
+                <div class="alert alert-warning mb-2 mt-3">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-3">
+                <label for="id_password">पासवर्ड</label>
+                <input type="password" name="password" id="id_password" class="ss-input" minlength="6" required>
+                {% for error in form.password.errors %}
+                <div class="alert alert-warning mb-2 mt-3">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <div class="mb-4">
+                <label for="id_email">ईमेल (वैकल्पिक)</label>
+                <input type="email" name="email" id="id_email" class="ss-input"
+                    value="{{ form.email.value|default:'' }}">
+                {% for error in form.email.errors %}
+                <div class="alert alert-warning mb-2 mt-3">{{ error }}</div>
+                {% endfor %}
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width:100%;">पंजीकरण करें</button>
+        </form>
+
+        <p class="mt-3">पहले से खाता है? <a href="{% url 'login' %}">लॉगिन करें</a></p>
+    </div>
+</div>
+{% endblock %}

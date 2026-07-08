@@ -1,0 +1,172 @@
+{% load static %}
+<!DOCTYPE html>
+    <html lang="en">
+        <head>
+            <title>SAHYOG SETU PORTAL | Admin</title>
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimal-ui">
+            <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <meta name="description" content="" />
+            <meta name="keywords" content="">
+            <meta name="author" content="Phoenixcoded" />
+            <!-- Favicon icon -->
+            <link rel="icon" href="{% static 'custom_admin/images/favicon.ico' %}" type="image/x-icon">
+
+            <!-- vendor css -->
+            
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/dataTables.bootstrap4.min.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/footable.bootstrap.css' %}">
+            <!-- <link rel="stylesheet" href="{% static 'fixcar/css/style.css' %}"> -->
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/select2.min.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/bootstrap-tagsinput.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/dropzone.min.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/lightbox.min.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/toast.min.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/style.css' %}">
+
+            <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/daterangepicker.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/rte_theme_default.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/rSlider.min.css' %}">
+            <link rel="stylesheet" href="{% static 'custom_admin/css/richtexteditor/rte_theme_default.css' %}" />
+
+            <script src="{% static 'custom_admin/js/vendor-all.min.js' %}"></script>
+            <!-- <script src="{% static 'fixcar/js/plugins/bootstrap.min.js' %}"></script> -->
+            <script src="{% static 'custom_admin/js/ripple.js' %}"></script>
+            <script src="{% static 'custom_admin/js/pcoded.min.js' %}"></script>
+            
+            <script src="{% static 'custom_admin/js/plugins/apexcharts.min.js' %}"></script>
+            <script src="{% static 'custom_admin/js/pages/dashboard-analytics.js' %}"></script>
+            <script src="{% static 'custom_admin/js/pages/dashboard-main.js' %}"></script>
+            <script src="{% static 'custom_admin/js/vendor-all.min.js' %}"></script>
+            <script src="{% static 'custom_admin/js/plugins/jquery.dataTables.min.js' %}"></script>
+            <script src="{% static 'custom_admin/js/plugins/dataTables.bootstrap4.min.js' %}"></script>
+            <script src="{% static 'custom_admin/js/pages/form-advance-custom.js' %}"></script>
+            <script src="{% static 'custom_admin/js/plugins/select2.full.min.js' %}"></script>
+            <script src="{% static 'custom_admin/js/plugins/bootstrap-tagsinput.min.js' %}"></script>
+            <script src="{% static 'custom_admin/js/plugins/ckeditor.js' %}"></script>
+            <script src="{% static 'custom_admin/js/plugins/dropzone-amd-module.min.js' %}"></script>
+            <script src="{% static 'custom_admin/js/plugins/toast.min.js' %}"></script>
+            <script src="https://maps.google.com/maps/api/js?key=AIzaSyCrc2cJDNc_jKlPWUs9X15BUFmyfkUo5oY"></script>
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+            <script src="{% static 'custom_admin/js/plugins/footable.min.js' %}"></script>
+
+            <script src="{% static 'custom_admin/js/plugins/daterangepicker.js' %}"></script>
+            <script src="{% static 'custom_admin/js/pages/ac-datepicker.js' %}"></script>
+            <script src="{% static 'custom_admin/js/rte.js' %}"></script>
+            <script src="{% static 'custom_admin/js/rSlider.min.js' %}"></script>
+            <script type="text/javascript" src="{% static 'custom_admin/js/richtexteditor/rte.js' %}"></script>
+            <script type="text/javascript" src="{% static 'custom_admin/js/richtexteditor/all_plugins.js' %}"></script>
+             
+
+            <style>
+                img.logo {
+                    width: 130px;
+                    height: auto;
+                }
+
+                .select2-container{
+                    width:100%!important;
+                }
+                
+                .bootstrap-tagsinput .tag [data-role="remove"]:after {
+                    content: "x";
+                }
+
+                .selectedRow{
+                    background: #4680ff !important;
+                    color:#FFFFFF !important;
+                }
+
+                .ck-editor__editable{
+                    min-height : 300px;
+                }
+
+                
+                .table td {
+                    vertical-align: middle;
+                }
+
+            </style>
+        </head>
+        <body class="">
+            {% block body %}{% endblock %}
+        </body>
+
+
+        
+
+        <script>
+
+
+            showNotification =async(message, status)=>{
+                var title = "Success"
+                if(status == 'error'){
+                    title = "Error";
+                }
+                $.toast({
+                    title: title,
+                    content: message,
+                    type: status,
+                    delay: 3000,
+                    dismissible:true
+                });
+            }
+
+           
+
+            $(document).ready(function() {
+                checkCookie();
+            });
+
+            function setCookie(cname, cvalue, exdays) {
+                var d = new Date();
+                d.setTime(d.getTime() + (exdays * 24 * 60 * 60 * 1000));
+                var expires = "expires=" + d.toGMTString();
+                document.cookie = cname + "=" + cvalue + ";" + expires + ";path=/";
+            }
+
+            function getCookie(cname) {
+                var name = cname + "=";
+                var decodedCookie = decodeURIComponent(document.cookie);
+                var ca = decodedCookie.split(';');
+                for (var i = 0; i < ca.length; i++) {
+                    var c = ca[i];
+                    while (c.charAt(0) == ' ') {
+                        c = c.substring(1);
+                    }
+                    if (c.indexOf(name) == 0) {
+                        return c.substring(name.length, c.length);
+                    }
+                }
+                return "";
+            }
+
+            function checkCookie() {
+                var ticks = getCookie("modelopen");
+                if (ticks != "") {
+                    ticks++ ;
+                    setCookie("modelopen", ticks, 1);
+                    if (ticks == "2" || ticks == "1" || ticks == "0") {
+                        $('#exampleModalCenter').modal();
+                    }
+                } else {
+                    // user = prompt("Please enter your name:", "");
+                    $('#exampleModalCenter').modal();
+                    ticks = 1;
+                    setCookie("modelopen", ticks, 1);
+                }
+            }
+
+
+            function getUrl(param) {
+                if(window.location.hostname == "127.0.0.1" || window.location.hostname == "localhost" || window.location.hostname == "212.38.94.162" || window.location.hostname == "sahyogsetu.in"){
+                    return window.location.origin + '/admin' + param;
+                }
+                else {
+                    return window.location.origin + param;
+                }
+            }
+
+        </script>
+
+    </html>

@@ -1,0 +1,43 @@
+{% extends 'custom_admin/public_base.html' %}
+
+{% block title %}Leaderboard - {{ quiz.title }}{% endblock %}
+
+{% block body %}
+<div class="container" style="max-width:800px; padding-top:60px; padding-bottom:60px;">
+    <div class="gold-card">
+        <h1 style="margin-top:0;">{{ quiz.title }}</h1>
+        <p class="mb-4" style="color: rgba(0,0,0,0.6);">Leaderboard — ranked by score, then by fastest time.</p>
+
+        <div style="overflow-x:auto;">
+            <table style="width:100%; border-collapse:collapse;">
+                <thead>
+                    <tr style="text-align:left; border-bottom:2px solid rgba(0,0,0,0.15);">
+                        <th style="padding:10px 8px;">Rank</th>
+                        <th style="padding:10px 8px;">Participant</th>
+                        <th style="padding:10px 8px;">Score</th>
+                        <th style="padding:10px 8px;">Time Taken</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                    <tr style="border-bottom:1px solid rgba(0,0,0,0.08);">
+                        <td style="padding:10px 8px;">{{ forloop.counter }}</td>
+                        <td style="padding:10px 8px;">{{ attempt.user.get_full_name|default:"Participant" }}</td>
+                        <td style="padding:10px 8px;">{{ attempt.score }}/{{ attempt.total_questions }}</td>
+                        <td style="padding:10px 8px;">
+                            {% if attempt.time_taken_seconds %}{{ attempt.time_taken_seconds }}s{% else %}—{% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="padding:16px 8px;">No attempts yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <p class="mt-3"><a href="/" class="ss-link" style="color: var(--ss-bg-accent, var(--ss-primary));">Back to Home</a></p>
+    </div>
+</div>
+{% endblock %}

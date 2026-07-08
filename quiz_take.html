@@ -1,0 +1,576 @@
+{% extends 'custom_admin/public_base.html' %}
+
+{% block body %}
+<div class="ss-quiz-page">
+    <header class="ss-quiz-header">
+        <div class="container">
+            <div class="ss-header-content">
+                <div class="ss-logo-area">
+                    {% load static %}
+                    <img src="{% static 'custom_admin/images/logo-dark.png' %}" alt="Sahyog Setu" class="ss-logo">
+                    <div class="ss-brand-info">
+                        <span class="ss-brand-name">Sahyog Setu</span>
+                    </div>
+                </div>
+                <a href="/" class="btn-outline-ss">Back to Home</a>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <div class="ss-quiz-hero-card gold-card">
+            <div class="ss-hero-left">
+                <span class="ss-badge-dark">Online Assessment</span>
+                <h1 class="ss-main-title">{{ quiz.title }}</h1>
+                <p class="ss-main-desc">Test your knowledge with our general awareness quiz. Answer all questions to
+                    receive your official certificate.</p>
+            </div>
+            <div class="ss-hero-stats">
+                <div class="ss-stat-item gold-card-flat">
+                    <span class="ss-stat-icon">👥</span>
+                    <div class="ss-stat-details">
+                        <span class="ss-stat-value">{{ completed_count }}</span>
+                        <span class="ss-stat-label">Users Completed</span>
+                    </div>
+                </div>
+                <div class="ss-stat-item gold-card-flat">
+                    <span class="ss-stat-icon">📊</span>
+                    <div class="ss-stat-details">
+                        <span class="ss-stat-value">{{ avg_percentage }}%</span>
+                        <span class="ss-stat-label">Average Score</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <form action="{% url 'quiz_submit' quiz.id %}" method="post" id="quizForm" class="ss-quiz-form">
+            {% csrf_token %}
+
+            <div class="ss-form-card gold-card">
+                <div class="ss-card-header">
+                    <h2 class="ss-card-title">Participant Information</h2>
+                    <p class="ss-card-subtitle">Fill in your details correctly for the certificate</p>
+                </div>
+                <div class="ss-input-grid">
+                    <div class="ss-input-group">
+                        <label class="ss-input-label">Full Name</label>
+                        <input type="text" name="user_name" class="ss-form-input" placeholder="e.g. Rahul Kumar"
+                            required>
+                    </div>
+                    <div class="ss-input-group">
+                        <label class="ss-input-label">Email Address</label>
+                        <input type="email" name="user_email" class="ss-form-input" placeholder="rahul@example.com"
+                            required>
+                    </div>
+                </div>
+            </div>
+
+            <div class="ss-questions-wrapper">
+                <div class="ss-progress-sticky gold-card">
+                    <div class="ss-progress-info">
+                        <span class="ss-progress-text">Progress: <strong id="ssAnswered">0</strong> of <strong>{{ total_questions }}</strong> Answered</span>
+                        <span class="ss-progress-percent" id="ssPercentText">0%</span>
+                    </div>
+                    <div class="ss-progress-track">
+                        <div class="ss-progress-fill" id="ssProgressBar"></div>
+                    </div>
+                </div>
+
+                <div class="ss-questions-list">
+                    {% for question in questions %}
+                    <div class="ss-question-card gold-card" id="q-{{ question.id }}"
+                        data-correct="{{ question.correct_option }}">
+                        <div class="ss-q-header">
+                            <span class="ss-q-number">Question {{ forloop.counter }}</span>
+                            <h3 class="ss-q-text">{{ question.question }}</h3>
+                        </div>
+                        <div class="ss-options-grid">
+                            <label class="ss-option-box">
+                                <input type="radio" name="question_{{ question.id }}" value="1" required>
+                                <div class="ss-option-content">
+                                    <span class="ss-option-letter">A</span>
+                                    <span class="ss-option-text">{{ question.option_1 }}</span>
+                                    <span class="ss-option-status"></span>
+                                </div>
+                            </label>
+                            <label class="ss-option-box">
+                                <input type="radio" name="question_{{ question.id }}" value="2">
+                                <div class="ss-option-content">
+                                    <span class="ss-option-letter">B</span>
+                                    <span class="ss-option-text">{{ question.option_2 }}</span>
+                                    <span class="ss-option-status"></span>
+                                </div>
+                            </label>
+                            <label class="ss-option-box">
+                                <input type="radio" name="question_{{ question.id }}" value="3">
+                                <div class="ss-option-content">
+                                    <span class="ss-option-letter">C</span>
+                                    <span class="ss-option-text">{{ question.option_3 }}</span>
+                                    <span class="ss-option-status"></span>
+                                </div>
+                            </label>
+                            <label class="ss-option-box">
+                                <input type="radio" name="question_{{ question.id }}" value="4">
+                                <div class="ss-option-content">
+                                    <span class="ss-option-letter">D</span>
+                                    <span class="ss-option-text">{{ question.option_4 }}</span>
+                                    <span class="ss-option-status"></span>
+                                </div>
+                            </label>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <div class="ss-form-footer">
+                <button type="submit" class="btn-primary-ss">Submit Assessment</button>
+            </div>
+        </form>
+    </main>
+</div>
+
+<style>
+    .ss-quiz-page {
+        min-height: 100vh;
+        padding-bottom: 80px;
+        background: var(--ss-bg);
+    }
+
+    .ss-quiz-header {
+        background: rgba(0, 0, 0, 0.2);
+        backdrop-filter: blur(10px);
+        padding: 16px 0;
+        margin-bottom: 40px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ss-header-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+
+    .ss-logo-area {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+
+    .ss-logo {
+        height: 48px;
+        filter: brightness(0) invert(1);
+    }
+
+    .ss-brand-name {
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--ss-primary);
+        line-height: 1;
+    }
+
+    .btn-outline-ss {
+        padding: 10px 20px;
+        border: 2px solid var(--ss-primary);
+        color: var(--ss-primary);
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        transition: all 0.2s ease;
+    }
+
+    .btn-outline-ss:hover {
+        background: var(--ss-primary);
+        color: var(--ss-bg-accent);
+    }
+
+    .gold-card {
+        background: var(--ss-gold-gradient);
+        border-radius: var(--ss-radius-lg);
+        padding: 40px;
+        box-shadow: var(--ss-shadow-gold);
+        color: var(--ss-ink);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .gold-card-flat {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: var(--ss-radius);
+        padding: 16px 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .ss-quiz-hero-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 40px;
+        margin-bottom: 32px;
+    }
+
+    .ss-badge-dark {
+        background: rgba(0, 0, 0, 0.1);
+        color: var(--ss-bg-accent);
+        padding: 6px 14px;
+        border-radius: 99px;
+        font-size: 0.8rem;
+        font-weight: 800;
+        text-transform: uppercase;
+        display: inline-block;
+        margin-bottom: 16px;
+    }
+
+    .ss-main-title {
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin: 0 0 12px 0;
+        line-height: 1.1;
+    }
+
+    .ss-main-desc {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 1.1rem;
+        line-height: 1.6;
+        margin: 0;
+        max-width: 600px;
+    }
+
+    .ss-hero-stats {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        min-width: 240px;
+    }
+
+    .ss-stat-value {
+        font-weight: 800;
+        font-size: 1.25rem;
+        color: var(--ss-bg-accent);
+    }
+
+    .ss-stat-label {
+        font-size: 0.8rem;
+        color: rgba(0, 0, 0, 0.5);
+        font-weight: 600;
+    }
+
+    .ss-form-card {
+        padding: 32px;
+        margin-bottom: 32px;
+    }
+
+    .ss-card-title {
+        font-size: 1.5rem;
+        font-weight: 800;
+        margin: 0 0 4px 0;
+    }
+
+    .ss-card-subtitle {
+        color: rgba(0, 0, 0, 0.5);
+        font-size: 0.95rem;
+        margin: 0;
+    }
+
+    .ss-input-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    .ss-input-label {
+        display: block;
+        font-weight: 700;
+        font-size: 0.9rem;
+        margin-bottom: 8px;
+    }
+
+    .ss-form-input {
+        width: 100%;
+        background: rgba(255, 255, 255, 0.3);
+        border: 2px solid transparent;
+        border-radius: 12px;
+        padding: 14px 20px;
+        font-size: 1rem;
+        color: var(--ss-ink);
+        transition: all 0.2s ease;
+    }
+
+    .ss-form-input:focus {
+        outline: none;
+        border-color: var(--ss-bg-accent);
+        background: rgba(255, 255, 255, 0.5);
+    }
+
+    .ss-progress-sticky {
+        position: sticky;
+        top: 20px;
+        z-index: 100;
+        padding: 20px;
+        margin-bottom: 32px;
+    }
+
+    .ss-progress-info {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+    }
+
+    .ss-progress-text {
+        font-weight: 700;
+        font-size: 0.95rem;
+    }
+
+    .ss-progress-track {
+        height: 10px;
+        background: rgba(0, 0, 0, 0.1);
+        border-radius: 99px;
+        overflow: hidden;
+    }
+
+    .ss-progress-fill {
+        height: 100%;
+        background: var(--ss-bg-accent);
+        width: 0%;
+        transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .ss-question-card {
+        padding: 32px;
+        margin-bottom: 24px;
+        transition: transform 0.3s ease;
+    }
+
+    .ss-q-number {
+        display: inline-block;
+        color: rgba(0, 0, 0, 0.4);
+        font-weight: 800;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 8px;
+    }
+
+    .ss-q-text {
+        font-size: 1.35rem;
+        font-weight: 800;
+        line-height: 1.4;
+        margin: 0;
+    }
+
+    .ss-options-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 16px;
+        margin-top: 24px;
+    }
+
+    .ss-option-box {
+        cursor: pointer;
+    }
+
+    .ss-option-box input {
+        display: none;
+    }
+
+    .ss-option-content {
+        background: rgba(255, 255, 255, 0.3);
+        border: 2px solid transparent;
+        border-radius: 16px;
+        padding: 20px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        transition: all 0.3s ease;
+        height: 100%;
+        position: relative;
+    }
+
+    .ss-option-letter {
+        width: 36px;
+        height: 36px;
+        background: rgba(0, 0, 0, 0.05);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-weight: 800;
+        font-size: 1rem;
+    }
+
+    .ss-option-text {
+        flex: 1;
+        font-weight: 700;
+        font-size: 1.1rem;
+    }
+
+    /* Hover effect */
+    .ss-option-box:not(.disabled):hover .ss-option-content {
+        transform: translateY(-4px) scale(1.02);
+        background: rgba(255, 255, 255, 0.5);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+    }
+
+    /* States */
+    .ss-option-box.is-correct .ss-option-content {
+        background: var(--ss-success) !important;
+        color: white !important;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .ss-option-box.is-correct .ss-option-letter {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .ss-option-box.is-correct .ss-option-status::after {
+        content: '✔️';
+        font-size: 1.2rem;
+    }
+
+    .ss-option-box.is-wrong .ss-option-content {
+        background: var(--ss-danger) !important;
+        color: white !important;
+        border-color: rgba(255, 255, 255, 0.2);
+    }
+
+    .ss-option-box.is-wrong .ss-option-letter {
+        background: rgba(255, 255, 255, 0.2);
+    }
+
+    .ss-option-box.is-wrong .ss-option-status::after {
+        content: '❌';
+        font-size: 1.2rem;
+    }
+
+    .ss-option-box.disabled {
+        cursor: default;
+        pointer-events: none;
+    }
+
+    .ss-option-box.disabled:not(.is-correct):not(.is-wrong) {
+        opacity: 0.6;
+    }
+
+    .btn-primary-ss {
+        background: var(--ss-bg-accent);
+        color: white;
+        border: none;
+        padding: 18px 48px;
+        border-radius: 16px;
+        font-size: 1.15rem;
+        font-weight: 800;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-primary-ss:hover {
+        transform: translateY(-4px);
+        filter: brightness(1.2);
+    }
+
+    @media (max-width: 768px) {
+        .ss-quiz-hero-card {
+            flex-direction: column;
+            padding: 24px;
+            text-align: center;
+        }
+
+        .ss-main-title {
+            font-size: 1.8rem;
+        }
+
+        .ss-input-grid,
+        .ss-options-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .ss-hero-stats {
+            width: 100%;
+        }
+    }
+</style>
+
+<script>
+    (function () {
+        const form = document.getElementById('quizForm');
+        const answeredEl = document.getElementById('ssAnswered');
+        const progressBar = document.getElementById('ssProgressBar');
+        const percentText = document.getElementById('ssPercentText');
+        const totalQuestions = parseInt('{{ total_questions }}');
+
+        function updateProgress() {
+            const questionBlocks = document.querySelectorAll('.ss-question-card');
+            let answered = 0;
+            questionBlocks.forEach(block => {
+                if (block.classList.contains('answered')) answered++;
+            });
+            answeredEl.textContent = answered;
+            const percent = Math.round((answered / totalQuestions) * 100);
+            progressBar.style.width = percent + '%';
+            percentText.textContent = percent + '%';
+        }
+
+        document.querySelectorAll('.ss-option-box input').forEach(input => {
+            input.addEventListener('change', function () {
+                const box = this.closest('.ss-option-box');
+                const card = this.closest('.ss-question-card');
+                if (card.classList.contains('answered')) return;
+
+                const correctOption = card.getAttribute('data-correct');
+                const selectedOption = this.value;
+                const allOptions = card.querySelectorAll('.ss-option-box');
+
+                card.classList.add('answered');
+
+                // Add a hidden input to ensure the answered value is submitted 
+                // even though we disable the radio buttons
+                const hiddenInput = document.createElement('input');
+                hiddenInput.type = 'hidden';
+                hiddenInput.name = this.name;
+                hiddenInput.value = selectedOption;
+                card.appendChild(hiddenInput);
+
+                allOptions.forEach(opt => {
+                    opt.classList.add('disabled');
+                    const inputElement = opt.querySelector('input');
+                    const val = inputElement.value;
+                    
+                    if (val === correctOption) {
+                        opt.classList.add('is-correct');
+                    } else if (val === selectedOption && selectedOption !== correctOption) {
+                        opt.classList.add('is-wrong');
+                    }
+
+                    // Completely disable all radio inputs to lock them
+                    inputElement.disabled = true;
+                });
+
+                updateProgress();
+            });
+        });
+
+        form.addEventListener('submit', function (e) {
+            const questionBlocks = document.querySelectorAll('.ss-question-card');
+            let unanswered = 0;
+            questionBlocks.forEach(block => {
+                if (!block.classList.contains('answered')) unanswered++;
+            });
+
+            if (unanswered > 0) {
+                e.preventDefault();
+                alert(`Please answer all questions. You have ${unanswered} questions remaining.`);
+                for (let block of questionBlocks) {
+                    if (!block.classList.contains('answered')) {
+                        block.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        break;
+                    }
+                }
+            }
+        });
+    })();
+</script>
+{% endblock %}

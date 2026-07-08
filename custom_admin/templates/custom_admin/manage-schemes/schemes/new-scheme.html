@@ -1,0 +1,425 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<style>
+    label{
+        font-weight : bold !important
+    }
+</style>
+    <div class="pcoded-main-container">
+        <div class="pcoded-content">
+            <!-- [ breadcrumb ] start -->
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Manage Schemes</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                                <li class="breadcrumb-item"><a href="#!">Schemes</a></li>
+                                <li class="breadcrumb-item"><a href="#!">New Schemes</a></li>
+                            </ul>
+                        </div>
+                        
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <!-- [ Main Content ] start -->
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="row">
+                        <div class="col-xl-12">
+                            <div class="card">
+                                <div class="card-body">
+                                    <form method="POST" action="/admin/manage-schemes/scheme" enctype="multipart/form-data">
+                                        {% csrf_token %}
+                                        <div class="row">
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <label>Title *</label>
+                                                    <input type="text" name="title" class="form-control border px-3" placeholder="Enter title *" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <label>Banner (1920 * 400 px)*</label>
+                                                    <input type="file" name="banner" class="form-control border px-3" placeholder="Enter title *" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <label>Category *</label>
+                                                    <select class="form-control" id="category" name="category_id" required>
+                                                        <option value=""></option>
+                                                        {% for category in categories %}
+                                                            <option value="{{category.id}}">{{category.title}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div> 
+                                            <div class="col-4">
+                                                <div class="form-group">
+                                                    <label>Scheme Type *</label>
+                                                    <select class="form-control" id="scheme_type" name="scheme_type" required>
+                                                        <option value=""></option>
+                                                        <option value="0">Central</option>
+                                                        <option value="1">State</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            
+                                            
+                                            
+                                            <div class="col-4 mt-2 state-container">
+                                                <div class="form-group">
+                                                    <label>State</label>
+                                                    <select class="form-control" id="state" name="state">
+                                                        <option value=""></option>
+                                                        {% for state in states %}
+                                                            <option value="{{state.id}}">{{state.state}}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>DBT *</label>
+                                                    <select class="form-control" id="dbt" name="dbt" required>
+                                                        <option value=""></option>
+                                                        <option value="0">No</option>
+                                                        <option value="1">Yes</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Business Related *</label>
+                                                    <select class="form-control" id="business_related" name="business_related" required>
+                                                        <option value=""></option>
+                                                        <option value="0">No</option>
+                                                        <option value="1">Yes</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                           
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Status</label>
+                                                    <select class="form-control" name="status" id="status" value="" required>
+                                                        <option value="0">Inactive</option>
+                                                        <option value="1">Active</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>For Divyang Category</label>
+                                                    <select class="form-control" name="divyang" id="divyang" value="" required>
+                                                        <option value="0">Yes</option>
+                                                        <option value="1">No</option>
+                                                        <option value="2">Both</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Benificiary</label>
+                                                    <select class="form-control w-100" name="benificiaries" id="benificiaries" value="" multiple required>
+                                                        <option value="0">BPL</option>
+                                                        <option value="1">APL</option>
+                                                        <option value="2">AAY</option>
+                                                        <option value="3">PHH</option>
+                                                        <option value="4">Applied / In Progress</option>
+                                                        <option value="5">Not Applicable</option>
+                                                        <option value="6">Not Available</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Caste</label>
+                                                    <select class="form-control" name="caste" id="caste" value="" multiple required>
+                                                        <option value="0">General</option>
+                                                        <option value="1">OBC</option>
+                                                        <option value="2">SC</option>
+                                                        <option value="3">ST</option>
+                                                        <option value="4">Particularly Vulnerable Tribal Group (PVTG)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Scheme For</label>
+                                                    <select class="form-control" name="scheme_for" id="scheme_for" value="" multiple required>
+                                                        <option value="0">Male</option>
+                                                        <option value="1">Female</option>
+                                                        <option value="2">Transgender</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Marital Status</label>
+                                                    <select class="form-control" name="marital_status" id="marital_status" value="" multiple required>
+                                                        <option value="0">Married</option>
+                                                        <option value="1">Unmarried</option>
+                                                        <option value="2">Widowed / Widower</option>
+                                                        <option value="3">Divorced</option>
+                                                        <option value="4">Separted</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Religions</label>
+                                                    <select class="form-control" name="religions" id="religions" value="" multiple required>
+                                                        <option value="0">Hindu</option>
+                                                        <option value="1">Muslim</option>
+                                                        <option value="2">Christian</option>
+                                                        <option value="3">Sikh</option>
+                                                        <option value="4">Parsion</option>
+                                                        <option value="5">Buddhism</option>
+                                                        <option value="6">Jain</option>
+                                                        <option value="7">No Religion</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Employment Status</label>
+                                                    <select class="form-control" name="employments" id="employment" value="" multiple required>
+                                                        <option value="0">Employed</option>
+                                                        <option value="1">Self Employed / Entrepreneur</option>
+                                                        <option value="2">Unemployed</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-4 mt-2">
+                                                <div class="form-group">
+                                                    <label>Area of Residence</label>
+                                                    <select class="form-control" name="areas" id="area" value="" multiple required>
+                                                        <option value="0">Urban</option>
+                                                        <option value="1">Rural</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-12 mt-2">
+                                                <div class="form-group">
+                                                    <label>Occupations</label>
+                                                    <select class="form-control" id="occupations" name="occupations" required multiple>
+                                                        <option value=""></option>
+                                                            {% for occupation in occupations %}
+                                                                <option value="{{occupation.id}}">{{occupation.title}}</option>
+                                                            {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-3 mt-2">
+                                                <div class="form-group">
+                                                    <label>Min Age</label>
+                                                    <input type="number" name="age_min" value="0" min="0" max="100" class="form-control border px-3" placeholder="" required>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-3 mt-2">
+                                                <div class="form-group">
+                                                    <label>Max Age</label>
+                                                    <input type="number" name="age_max" value="1" min="1" max="100" class="form-control border px-3" placeholder="" required>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-3 mt-2">
+                                                <div class="form-group">
+                                                    <label>Min Income</label>
+                                                    <input type="number" name="income_min" value="0" min="0" class="form-control border px-3" placeholder="" required>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-3 mt-2">
+                                                <div class="form-group">
+                                                    <label>Max Income</label>
+                                                    <input type="number" name="income_max" value="0" min="0"  class="form-control border px-3" placeholder="" required>
+                                                </div>
+                                            </div>
+
+                                           
+                                            
+
+                                            
+                                            
+                                            <div class="col-12 mt-2">
+                                                <div class="form-group">
+                                                    <label>Description</label>
+                                                    <textarea class="form-control" name="description" id="description" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+
+
+                                            <div class="col-12 mt-2">
+                                                <div class="form-group">
+                                                    <label>Eligibility</label>
+                                                    <textarea class="form-control" name="eligibility" id="eligibility" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mt-2">
+                                                <div class="form-group">
+                                                    <label>Required Documents</label>
+                                                    <textarea class="form-control" name="required_documents" id="required_documents" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mt-2">
+                                                <div class="form-group">
+                                                    <label>Web Links (How To Apply)</label>
+                                                    <textarea class="form-control" name="web_links" id="web_links" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+
+                                            <div class="col-12 mt-2">
+                                                <div class="form-group">
+                                                    <label>Mode Of Application</label>
+                                                    <textarea class="form-control" name="mode_of_application" id="mode_of_application" placeholder=""></textarea>
+                                                </div>
+                                            </div>
+                                            
+                                        </div>
+                                        
+                                        <center><button type="submit" class="btn btn-primary" >Submit</button></center>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- [ Main Content ] end -->
+        </div>
+    </div>
+
+    <script>
+
+        $('#status').select2({});
+
+        $('#category').select2({});
+
+        $('#dbt').select2({});
+
+        $('#business_related').select2({});
+
+        $('#scheme_type').select2({});
+
+        $('#state').select2({});
+
+        $('#divyang').select2({});
+
+        $('#benificiaries').select2({});
+
+        $('#occupations').select2({});
+
+        $('#scheme_for').select2({});
+
+        $('#marital_status').select2({});
+
+        $('#caste').select2({});
+
+        $('#religions').select2({});
+
+        $('#employment').select2({});
+
+        $('#area').select2({});
+
+        
+        
+        
+
+        $(document).ready(function(){
+
+            new RichTextEditor("#description");
+            new RichTextEditor("#eligibility");
+            new RichTextEditor("#required_documents");
+            new RichTextEditor("#web_links");
+            new RichTextEditor("#mode_of_application");
+
+
+
+            // var age_array =  []
+            // for(i=0; i<=100; i++){
+            //     age_array.push(i);
+            // }
+            // var mySlider = new rSlider({
+            //     target: '#age',
+            //     values: {min: 1, max: 100},
+            //     range: true,
+            //     tooltip: true,
+            //     scale: true,
+            //     labels: true,
+            //     step : 2,
+            //     set: [0, 1]
+            // });
+        });  
+
+
+        $(".select2tags").select2({
+            tags: true,
+            tokenSeparators: [',']
+        })
+
+
+        $(document).on('change', '#scheme_type', function(){
+            var value = $(this).val();
+            if(value == 1){
+                $('.state-container').show();
+            }
+            else{
+                $('.state-container').hide();
+            }
+        });
+
+    </script>
+    
+    {% for message in messages %}
+        <script>
+            showNotification('{{message}}', '{{message.tags}}')
+        </script>
+    {% endfor %}
+
+{% endblock %}
+

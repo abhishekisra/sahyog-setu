@@ -1,0 +1,95 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+<link href="//cdn.datatables.net/buttons/2.3.4/css/buttons.bootstrap4.css">
+<div class="pcoded-main-container">
+        <div class="pcoded-content">
+            <!-- [ breadcrumb ] start -->
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Visitors</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                                <li class="breadcrumb-item"><a href="#!">Visitors</a></li>
+                                
+                            </ul>
+                        </div>
+                        <div class="col-md-6 align-items-end justify-content-end d-flex">
+                            <button type="button" id="download" style="width: auto;" class="btn btn-block btn-success">Export</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <!-- [ Main Content ] start -->
+            <div class="row">
+                <!-- customar project  start -->
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">     
+                                             
+                            <div class="table-responsive">
+                                <table id="table" class="table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>S No.</th>
+                                            <th>Profile pic</th>
+                                            <th>Name</th> 
+                                            <th>Email</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for visitor in visitors %}
+                                            <tr>
+                                                <td>{{forloop.counter}}</td>
+                                                <td>
+                                                    <img src="{{visitor.profile_pic.url}}" class="img-fluid wid-100" alt="">
+                                                </td>
+                                                <td>{{visitor.name}}</td>    
+                                                <td>{{visitor.email}}</td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- customar project  end -->
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+    </div>
+
+{% endblock %}
+<script src="https://cdn.jsdelivr.net/gh/linways/table-to-excel@v1.0.4/dist/tableToExcel.js"></script>
+<script>
+
+    $('.table').DataTable({});
+
+    $(document).on('click', '#download', function(){
+        let table = document.getElementsByTagName("table");
+            TableToExcel.convert(table[0], {
+                name: `visitors.xlsx`,
+                sheet: {
+                    name: 'visitors'
+                }
+            })
+    })
+
+    
+</script>
+
+{% for message in messages %}
+    <script>
+        showNotification('{{message}}', '{{message.tags}}')
+    </script>
+{% endfor %}
+
+

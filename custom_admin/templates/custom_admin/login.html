@@ -1,0 +1,45 @@
+{% extends 'custom_admin/base.html' %}
+{% load static %}
+{% block body %}
+<div class="auth-wrapper">
+	<div class="auth-content">
+		<div class="card">
+			<div class="row align-items-center text-center">
+				<div class="col-md-12">
+					<div class="card-body">
+						<img src="{% static 'custom_admin/images/logo-dark.png' %}" alt="" style="width:50%" class="img-fluid mb-4 px-2 py-2">
+						<!-- <h4 class="mb-3 f-w-400">LOG IN</h4> -->
+						<div class="py-2">
+							{% if error %}
+								<small style="color:red;margin-bottom: 100px;">{{error}}</small>
+							{% endif %}
+						</div>
+						<form method="POST" action="/admin/login">
+							<input type="hidden" name="fcmToken" value="" id="fcm_token">
+							{% csrf_token %}
+							<div class="form-group">
+								<label for="exampleInputEmail1" style="width: 100%; text-align: left;">Email address</label>
+								<input type="email" name="emailId" class="form-control px-2" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email" required>
+							</div>
+							<div class="form-group">
+								<label for="exampleInputPassword1" style="width: 100%; text-align: left;">Password</label>
+								<input type="password" name="password" class="form-control px-2" id="exampleInputPassword1" placeholder="Password" required>
+							</div>
+							<button type="submit" class="btn btn-block btn-primary mb-4">LOG IN</button>
+						</form>
+						<p class="mb-2 text-muted">Forgot password? <a href="/admin/reset-password" class="f-w-400">Reset</a></p>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+</div>
+
+
+{% for message in messages %}
+	<script>
+		showNotification('{{message}}', '{{message.tags}}')
+	</script>
+{% endfor %}
+
+{% endblock %}

@@ -1,0 +1,302 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<style>
+    label {
+        font-weight: bold !important;
+    }
+
+    .question-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 8px;
+        background: #fafafa;
+    }
+
+    .remove-btn {
+        float: right;
+    }
+</style>
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <h5>Edit Quiz</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+
+                <div class="card">
+                    <div class="card-body">
+
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="row px-2">
+
+                                <div class="col-12">
+                                    <label>Quiz Title *</label>
+                                    <input type="text" name="title" value="{{ quiz.title }}" class="form-control"
+                                        required>
+                                </div>
+
+                                <div class="col-4 mt-2">
+                                    <label>Quiz Image</label>
+                                    <input type="file" name="image" class="form-control">
+
+                                    {% if quiz.image %} <br> <img src="{{ quiz.image.url }}" width="80">
+                                    {% endif %}
+
+                                </div>
+ 
+                                <div class="col-4 mt-2">
+                                    <label>Quiz Time</label>
+                                    <input type="number" name="quiz_time" value="{{ quiz.quiz_time }}"  class="form-control" required>
+                                </div>
+
+                                <div class="col-4 mt-2">
+                                    <label>Status *</label>
+                                    <select class="form-control" name="status" id="status">
+                                        <option value="1" {% if quiz.status %}selected{% endif %}>Active</option>
+                                        <option value="0" {% if not quiz.status %}selected{% endif %}>Inactive</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <label>Description</label>
+                                    <textarea name="description" id="description"
+                                        class="form-control">{{ quiz.description }}</textarea>
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <label>Certificate Text</label>
+                                    <textarea name="certificate_text" id="certificate_text"
+                                        class="form-control">{{ quiz.certificate_text }}</textarea>
+                                </div>
+
+                                <hr class="col-12">
+
+                                <h5 class="col-12">Authority 1</h5>
+
+                                <div class="col-4">
+                                    <label>Name *</label>
+                                    <input type="text" name="authority1_name" value="{{ quiz.authority1_name }}"
+                                        class="form-control">
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Designation *</label>
+                                    <input type="text" name="authority1_designation"
+                                        value="{{ quiz.authority1_designation }}" class="form-control">
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Signature</label>
+                                    <input type="file" name="authority1_sign_image" class="form-control">
+                                    <br>
+                                    <img src="{{ quiz.authority1_sign_image.url }}" width="80">
+                                </div>
+
+                                <hr class="col-12">
+
+                                <h5 class="col-12">Authority 2</h5>
+
+                                <div class="col-4">
+                                    <label>Name *</label>
+                                    <input type="text" name="authority2_name" value="{{ quiz.authority2_name }}"
+                                        class="form-control">
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Designation *</label>
+                                    <input type="text" name="authority2_designation"
+                                        value="{{ quiz.authority2_designation }}" class="form-control">
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Signature</label>
+                                    <input type="file" name="authority2_sign_image" class="form-control">
+                                    <br>
+                                    <img src="{{ quiz.authority2_sign_image.url }}" width="80">
+                                </div>
+
+                                <hr class="col-12">
+
+                                <div class="col-6">
+                                    <label>Logo 1</label>
+                                    <input type="file" name="logo_1" class="form-control">
+                                    <br>
+                                    <img src="{{ quiz.logo_1.url }}" width="80">
+                                </div>
+
+                                <div class="col-6">
+                                    <label>Logo 2</label>
+                                    <input type="file" name="logo_2" class="form-control">
+                                    <br>
+                                    <img src="{{ quiz.logo_2.url }}" width="80">
+                                </div>
+
+                            </div>
+
+                            <hr>
+
+                            <div class="d-flex justify-content-between mt-4">
+                                <h4>Questions</h4>
+
+                                <button type="button" class="btn btn-success btn-sm" onclick="addQuestion()">
+                                    + Add Question
+                                </button>
+                            </div>
+
+                            <div id="questions-container">
+
+                                {% for q in quiz.questions.all %}
+
+                                <div class="question-card question-item">
+
+                                    <button type="button" class="btn btn-danger btn-sm remove-btn"
+                                        onclick="removeQuestion(this)">Remove</button>
+
+                                    <textarea name="question[]" class="form-control question-field"
+                                        required>{{ q.question }}</textarea>
+
+                                    <div class="row mt-2">
+
+                                        <div class="col-3">
+                                            <input type="text" name="option_1[]" value="{{ q.option_1 }}"
+                                                class="form-control option-field" required>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <input type="text" name="option_2[]" value="{{ q.option_2 }}"
+                                                class="form-control option-field" required>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <input type="text" name="option_3[]" value="{{ q.option_3 }}"
+                                                class="form-control option-field" required>
+                                        </div>
+
+                                        <div class="col-3">
+                                            <input type="text" name="option_4[]" value="{{ q.option_4 }}"
+                                                class="form-control option-field" required>
+                                        </div>
+
+                                        <div class="col-12 mt-2">
+
+                                            <select name="correct_option[]" class="form-control correct-field" required>
+                                                <option value="1" {% if q.correct_option == 1 %}selected{% endif %}>Option 1</option>
+                                                <option value="2" {% if q.correct_option == 2 %}selected{% endif %}>Option 2</option>
+                                                <option value="3" {% if q.correct_option == 3 %}selected{% endif %}>Option 3</option>
+                                                <option value="4" {% if q.correct_option == 4 %}selected{% endif %}>Option 4</option>
+                                            </select>
+
+                                        </div>
+
+                                    </div>
+
+                                </div>
+
+                                {% endfor %}
+
+                            </div>
+
+                            <center>
+                                <button type="submit" class="btn btn-primary mt-4">
+                                    Update Quiz
+                                </button>
+                            </center>
+
+                        </form>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<script>
+
+    $('#status').select2();
+
+    new RichTextEditor("#description");
+    // new RichTextEditor("#certificate_text");
+
+    function addQuestion() {
+
+        let html = `
+            <div class="question-card question-item">
+
+            <button type="button" class="btn btn-danger btn-sm remove-btn"
+            onclick="removeQuestion(this)">Remove</button>
+
+            <textarea name="question[]" class="form-control question-field" required></textarea>
+
+            <div class="row mt-2">
+
+            <div class="col-3">
+            <input type="text" name="option_1[]" class="form-control option-field" required>
+            </div>
+
+            <div class="col-3">
+            <input type="text" name="option_2[]" class="form-control option-field" required>
+            </div>
+
+            <div class="col-3">
+            <input type="text" name="option_3[]" class="form-control option-field" required>
+            </div>
+
+            <div class="col-3">
+            <input type="text" name="option_4[]" class="form-control option-field" required>
+            </div>
+
+            <div class="col-12 mt-2">
+            <select name="correct_option[]" class="form-control correct-field" required>
+
+            <option value="">Select</option>
+            <option value="1">Option 1</option>
+            <option value="2">Option 2</option>
+            <option value="3">Option 3</option>
+            <option value="4">Option 4</option>
+
+            </select>
+            </div>
+
+            </div>
+            </div>
+        `;
+
+        document.getElementById("questions-container").insertAdjacentHTML("beforeend", html);
+
+    }
+
+    function removeQuestion(btn) {
+
+        let container = document.getElementById("questions-container");
+
+        if (container.children.length > 1)
+            btn.closest(".question-item").remove();
+
+        else
+            alert("Minimum 1 question required");
+
+    }
+
+</script>
+
+{% endblock %}

@@ -1,0 +1,262 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<style>
+    label {
+        font-weight: bold !important;
+    }
+
+    .question-card {
+        border: 1px solid #ddd;
+        padding: 15px;
+        margin-top: 15px;
+        border-radius: 8px;
+        background: #fafafa;
+    }
+
+    .remove-btn {
+        float: right;
+    }
+</style>
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5>Add Quiz</h5>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+
+                        <form method="POST" enctype="multipart/form-data">
+                            {% csrf_token %}
+
+                            <div class="row px-2">
+
+                                <div class="col-12">
+                                    <label>Quiz Title *</label>
+                                    <input type="text" name="title" class="form-control" required>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Quiz Image</label>
+                                    <input type="file" name="image" class="form-control" required>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Quiz Time</label>
+                                    <input type="number" name="quiz_time" class="form-control" required>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Status *</label>
+                                    <select class="form-control" name="status" id="status" required>
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <label>Description</label>
+                                    <textarea name="description" id="description" class="form-control" required></textarea>
+                                </div>
+
+                                <div class="d-flex justify-content-between mt-4">
+                                    <h4>Certificate</h4>
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <label>Certificate Text</label>
+                                    <textarea name="certificate_text" id="certificate_text" class="form-control" required></textarea>
+                                </div>
+
+                                <hr class="col-12">
+
+                                <div class="col-12">
+                                    <h5>Authority 1</h5>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Name *</label>
+                                    <input type="text" name="authority1_name" class="form-control" required>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Designation *</label>
+                                    <input type="text" name="authority1_designation" class="form-control" required>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Signature *</label>
+                                    <input type="file" name="authority1_sign_image" class="form-control" required>
+                                </div>
+
+                                <hr class="col-12">
+
+                                <div class="col-12">
+                                    <h5>Authority 2</h5>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Name *</label>
+                                    <input type="text" name="authority2_name" class="form-control" required>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Designation *</label>
+                                    <input type="text" name="authority2_designation" class="form-control" required>
+                                </div>
+
+                                <div class="col-4">
+                                    <label>Signature *</label>
+                                    <input type="file" name="authority2_sign_image" class="form-control" required>
+                                </div>
+
+                                <hr class="col-12">
+
+                                <div class="col-6">
+                                    <label>Logo 1 *</label>
+                                    <input type="file" name="logo_1" class="form-control" required>
+                                </div>
+
+                                <div class="col-6">
+                                    <label>Logo 2 *</label>
+                                    <input type="file" name="logo_2" class="form-control" required>
+                                </div>
+
+                            </div>
+
+                            <hr>
+
+                            <div class="d-flex justify-content-between mt-4">
+
+                                <h4>Questions</h4>
+
+                                <button type="button" class="btn btn-success btn-sm" onclick="addQuestion()">
+                                    + Add Question
+                                </button>
+
+                            </div>
+
+                            <div id="question-template" style="display:none;">
+
+                                <div class="question-card question-item">
+
+                                    <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeQuestion(this)">Remove </button>
+
+                                    <div class="form-group">
+                                        <label>Question *</label>
+                                        <textarea name="question[]" class="form-control question-field"></textarea>
+                                    </div>
+
+                                    <div class="row">
+
+                                        <div class="col-3">
+                                            <label>Option 1 *</label>
+                                            <input type="text" name="option_1[]" class="form-control option-field">
+                                        </div>
+
+                                        <div class="col-3">
+                                            <label>Option 2 *</label>
+                                            <input type="text" name="option_2[]" class="form-control option-field">
+                                        </div>
+
+                                        <div class="col-3">
+                                            <label>Option 3 *</label>
+                                            <input type="text" name="option_3[]" class="form-control option-field">
+                                        </div>
+
+                                        <div class="col-3">
+                                            <label>Option 4 *</label>
+                                            <input type="text" name="option_4[]" class="form-control option-field">
+                                        </div>
+
+                                        <div class="col-12 mt-2">
+                                            <label>Correct Option *</label>
+                                            <select name="correct_option[]" class="form-control correct-field">
+                                                <option value="">Select</option>
+                                                <option value="1">Option 1</option>
+                                                <option value="2">Option 2</option>
+                                                <option value="3">Option 3</option>
+                                                <option value="4">Option 4</option>
+                                            </select>
+                                        </div>
+
+                                    </div>
+
+                                </div>
+                            </div>
+
+                            <div id="questions-container"></div>
+
+                            <center>
+                                <button type="submit" class="btn btn-primary mt-4">Create Quiz</button>
+                            </center>
+
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+
+
+
+
+
+<script>
+
+    $(document).ready(function () {
+        $('#status').select2();
+        new RichTextEditor("#description");
+        addQuestion();
+    });
+
+
+    function addQuestion() {
+        let template = document.getElementById("question-template");
+        let container = document.getElementById("questions-container");
+        let clone = template.firstElementChild.cloneNode(true);
+        // add require dynamically
+        clone.querySelectorAll(".question-field").forEach(el => el.required = true);
+        clone.querySelectorAll(".option-field").forEach(el => el.required = true);
+        clone.querySelectorAll(".correct-field").forEach(el => el.required = true);
+        container.appendChild(clone);
+    }
+
+
+    function removeQuestion(btn) {
+        let container = document.getElementById("questions-container");
+        if (container.children.length > 1)
+            btn.closest(".question-item").remove();
+        else
+            alert("Minimum 1 question required");
+    }
+</script>
+
+{% for message in messages %}
+
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+
+{% endfor %}
+
+{% endblock %}

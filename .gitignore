@@ -1,0 +1,25 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+venv/
+env/
+*.egg-info/
+
+# Django generated / collected assets
+staticfiles/
+public/static/
+media/
+
+# Runtime / sockets / logs
+*.sock
+nohup.out
+*.log
+
+# Old backup bundles (not source — keep server backups separately)
+deploy_backups_*/
+db_backup_*/
+*.zip
+
+# OS
+.DS_Store

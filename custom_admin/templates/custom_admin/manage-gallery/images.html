@@ -1,0 +1,221 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+    <div class="pcoded-main-container">
+        <div class="pcoded-content">
+            <!-- [ breadcrumb ] start -->
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Manage Gallery</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                                <li class="breadcrumb-item"><a href="#!">Images</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <button class="btn btn-success btn-sm btn-round has-ripple" data-toggle="modal" data-target="#newModel"><i class="feather icon-plus"></i> Add Image</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <!-- [ Main Content ] start -->
+            <div class="row">
+                <!-- customar project  start -->
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">                            
+                            <div class="table-responsive">
+                                <table id="report-table" class="table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>S No.</th>
+                                            <th>Image</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                    {% for image in images %}
+                                        <tr>
+                                            <td>{{forloop.counter}}</td>
+                                            <td><img src="{{image.image.url}}" class="img-fluid wid-100" alt=""></td>
+                                            <td>
+                                                {% if image.status == 1 %}
+                                                    <span class="badge badge-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge badge-danger">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-right">
+                                                <button class="btn btn-info btn-sm editButton" data-id="{{image.id}}" data-status="{{image.status}}" ><i class="feather icon-edit"></i>&nbsp;Edit </button>
+                                                <a href="javascript:void(0)" data-id="{{image.id}}" class="btn btn-danger btn-sm deleteButton"><i class="feather icon-trash-2"></i>&nbsp;Delete </a>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>                            
+         
+                        </div>
+                    </div>
+                </div>
+                <!-- customar project  end -->
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+    </div>
+
+
+    <div id="deleteModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header justify-content-between d-flex align-items-center flex-row">
+                    <h5 class="modal-title" style="color: #000000;" id="exampleModalCenterTitle">Confirm Delete?</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <p>You are going to delete this banner. All contents related with this banner will be lost. Do you want to delete it?</p>
+                    <form method="POST" id="deleteForm"  action="/admin/manage-gallery/image/delete">
+                        {% csrf_token %}
+                        <input type="hidden" id="deleteBannerId" name="image_id" value="">
+                        <div class="justify-content-center d-flex align-items-center flex-row">
+                            <button type="button" class="btn  btn-danger" data-dismiss="modal">Close</button>
+                            <input type="submit" class="btn  btn-success ml-3" value ="Delete">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <div id="newModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="color: #000000;" id="exampleModalCenterTitle">Create Banner</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/admin/manage-gallery/images" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">                        
+                            <div class="col-sm-12 mt-1">
+                                <div class="form-group">
+                                    <label>Image (2000 * 2000 px)</label>
+                                    <input type="file" class="form-control" id="newImage" name="image" placeholder="Banner Image" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select class="select2" id="newStatus" value="0" name="status" required>
+                                        <option value="0">Inactive</option>
+                                        <option value="1">Active</option>
+                                    </select>
+                                </div>
+                            </div> 
+                                                     
+                        </div>
+                        <div class="justify-content-center d-flex align-items-center flex-row">
+                            <button type="button" class="btn  btn-danger" data-dismiss="modal">Close</button>
+                            <input type="submit" class="btn  btn-success ml-3" value ="Save">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="editModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="color: #000000;" id="exampleModalCenterTitle">Edit Banner</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" id="editForm" action="/admin/manage-gallery/image/" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select class="select2" id="editStatus" name="status" required>
+                                        <option value="0">Inactive</option>
+                                        <option value="1">Active</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="col-sm-12 mt-1">
+                                <div class="form-group">
+                                    <label>Image (2000 * 2000 px)</label>
+                                    <input type="file" class="form-control" id="editImage" name="image" placeholder="Banner Image">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="justify-content-center d-flex align-items-center flex-row">
+                            <button type="button" class="btn  btn-danger" data-dismiss="modal">Close</button>
+                            <input type="submit" class="btn  btn-success ml-3" value ="Save">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+    <script>
+
+        $('.table').DataTable({});
+        
+        $(document).on('click' , '.deleteButton', function(){
+            var id = $(this).attr('data-id');
+            $('#deleteBannerId').val(id);
+            $('#deleteModel').modal('show');
+        });
+
+        $('#newStatus').select2({
+            dropdownParent: $('#newModel'),
+            placeholder: 'Select status'
+        });
+
+
+        $('#editStatus').select2({
+            dropdownParent: $('#editModel'),
+            placeholder: 'Select status'
+        });
+
+
+        $(document).on('click', '.editButton', function(){
+            var id = $(this).attr('data-id');            
+            var status = $(this).attr('data-status');
+            var action = $('#editForm').attr('action');
+            action = action + id
+            $('#editForm').attr('action', action);  
+            $('#editStatus').val(status.toString()).trigger('change');        
+            $('#editModel').modal('show');
+        });
+
+    </script>
+
+    {% for message in messages %}
+        <script>
+            showNotification('{{message}}', '{{message.tags}}')
+        </script>
+    {% endfor %}
+    
+        
+   
+{% endblock %}

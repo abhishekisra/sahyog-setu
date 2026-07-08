@@ -1,0 +1,191 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+
+	<div class="pcoded-main-container">
+		<div class="pcoded-content">
+			<!-- [ breadcrumb ] start -->
+			<div class="page-header">
+				<div class="page-block">
+					<div class="row align-items-center">
+						<div class="col-md-12">
+							<div class="page-header-title">
+								<h5 class="m-b-10">Dashboard</h5>
+							</div>
+							<ul class="breadcrumb">
+								<li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+								<li class="breadcrumb-item"><a href="#!">Dashboard</a></li>
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+			<!-- [ breadcrumb ] end -->
+			<!-- [ Main Content ] start -->
+			<div class="row">
+				<!-- amount start -->
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{occupations}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Occupations</span></p>
+						</div>
+						<div id="amount-processed"></div>
+					</div>
+				</div>
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{categories}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-yellow">Categories</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{state_schemes}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-red">State Schemes</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{central_schemes}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Central Schemes</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{important_documents}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-red">Important Documents</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{important_portals}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Important Portals</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{scheme_announcements}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-yellow">Scheme Announcements</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{testimonials}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Testimonials</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{visitors}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-red">Visitors</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{helplines}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Helplines</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{business_plans}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-yellow">Business Plans</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{artificial_intelligence}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Artificial Intelligence</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{organization_registration}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-red">Organization Registrations</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+				
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{legal_registrations}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Legal Registrations</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card overflow-hidden">
+						<div class="card-body">
+							<h2 class="f-w-400">{{marketing}}</h2>
+							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Marketing</span></p>
+						</div>
+						<div id="amount-spent"></div>
+					</div>
+				</div>
+				
+			</div>
+			<!-- [ Main Content ] end -->
+
+		</div>
+	</div>
+{% endblock %}
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>

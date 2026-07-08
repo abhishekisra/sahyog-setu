@@ -1,0 +1,21 @@
+from tokenize import blank_re
+from django.db import models
+from django.db.models.deletion import CASCADE
+from django_resized import ResizedImageField
+
+class Important_Documents(models.Model):
+    id : models.AutoField(primary_key=True)
+    image = ResizedImageField(upload_to="important_documents", default="", blank=False, null=False, quality=100, force_format='WEBP')     
+    banner = ResizedImageField(upload_to="important_documents", default="", blank=True, null=True, quality=100, force_format='WEBP')
+    title = models.CharField(max_length=255, blank=False, null=False)
+    status_type = ((0, 'In Active'), (1, 'Active'))
+    status = models.IntegerField(default = 0, choices=status_type)
+    description = models.TextField(null=False, blank=False)
+    eligibility = models.TextField(null=False, blank=False)
+    required_documents = models.TextField(null=False, blank=False)
+    web_links = models.TextField(max_length=255, null=False, blank=False)
+    mode_of_application = models.TextField(max_length=255, null=False, blank=False)
+    created_at = models.DateTimeField(auto_now_add= True)
+    updated_at = models.DateTimeField(auto_now_add= True)
+
+
