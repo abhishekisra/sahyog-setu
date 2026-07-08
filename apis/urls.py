@@ -73,5 +73,6 @@ urlpatterns = [
 
     path('quizzes', QuizzesView.quizzes, name="quizzes"),
     path('quiz/<int:id>', QuizzesView.quiz, name="quiz"),
+    path('quiz/<int:id>/submit', QuizzesView.submitQuiz, name="quizSubmit"),
     path('quiz/certificate', QuizzesView.generateCertificate, name="certificate")
 ]

@@ -7,7 +7,8 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework import status
 from .serializers import QuizzesSerializer, QuizSerializer
-from .models import Quizzes
+from .models import Quizzes, QuizAttempt, QuestionResponse
+from accounts.models import User
 from django.db.models import Count
 
 from io import BytesIO
@@ -58,21 +59,118 @@ def quiz(request, id):
 
 
 @csrf_exempt
+def submitQuiz(request, id):
+    """Mobile quiz submission — scoring happens here, server-side, against
+    the real correct_option values. The client only ever sends its picked
+    options, never a score, so there is nothing for it to spoof. Mirrors
+    the web quiz_submit view's logic (see quizzes/views.py)."""
+
+    if request.method != "POST":
+        return JsonResponse({'message': 'Invalid request', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        request_data = json.loads(request.body)
+    except (json.JSONDecodeError, TypeError):
+        return JsonResponse({'message': 'Invalid JSON body', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+
+    client_id = request_data.get("client_id")
+    answers = request_data.get("answers") or {}
+
+    if not client_id:
+        return JsonResponse({'message': 'client_id is required', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+
+    try:
+        quiz = Quizzes.objects.get(id=id, status=True)
+    except Quizzes.DoesNotExist:
+        return JsonResponse({'message': "Quiz doesn't exist.", 'status': status.HTTP_404_NOT_FOUND}, status=status.HTTP_404_NOT_FOUND)
+
+    try:
+        user = User.objects.get(client_id=client_id, user_type=2)
+    except User.DoesNotExist:
+        return JsonResponse({'message': 'Unknown client_id — register via /api/user first.', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+
+    if quiz.one_attempt_only and QuizAttempt.objects.filter(quiz=quiz, user=user, completed_at__isnull=False).exists():
+        return JsonResponse({'message': 'You have already attempted this quiz.', 'status': status.HTTP_400_BAD_REQUEST}, status=status.HTTP_400_BAD_REQUEST)
+
+    questions = list(quiz.questions.all())
+    total_questions = len(questions)
+    score = 0
+    responses = []
+
+    for question in questions:
+        selected_option = str(answers.get(str(question.id), ""))
+        correct_option = str(question.correct_option)
+        is_correct = selected_option == correct_option
+        if is_correct:
+            score += 1
+        responses.append(QuestionResponse(
+            question=question,
+            question_text_snapshot=question.question,
+            selected_option=selected_option,
+            correct_option=correct_option,
+            is_correct=is_correct,
+            explanation_snapshot=question.explanation,
+        ))
+
+    percentage = (score / total_questions * 100) if total_questions else 0
+    passed = percentage >= quiz.pass_threshold
+
+    attempt = QuizAttempt.objects.create(
+        user=user,
+        quiz=quiz,
+        score=score,
+        total_questions=total_questions,
+        percentage=percentage,
+        passed=passed,
+        completed_at=timezone.now(),
+    )
+
+    for response in responses:
+        response.attempt = attempt
+    QuestionResponse.objects.bulk_create(responses)
+
+    return JsonResponse({
+        'attempt_id': attempt.id,
+        'score': score,
+        'total_questions': total_questions,
+        'percentage': round(percentage, 1),
+        'passed': passed,
+        'status': status.HTTP_200_OK,
+    }, status=status.HTTP_200_OK)
+
+
+
+@csrf_exempt
 def generateCertificate(request):
+    """Certificate PDF is only ever built from a verified, completed,
+    passed QuizAttempt row — never from client-submitted name/score.
+    (Previously trusted a raw `score` field straight from the request
+    body, so anyone could generate a certificate claiming any score.)"""
 
     if request.method != "POST":
         return HttpResponse("Invalid request", status=400)
 
     request_data = json.loads(request.body)
 
-    name = request_data.get("name", "Participant")
-    score = request_data.get("score", 0)
+    attempt_id = request_data.get("attempt_id")
     quiz_id = request_data.get("quiz_id")
 
+    if not attempt_id or not quiz_id:
+        return HttpResponse("attempt_id and quiz_id are required", status=400)
+
     try:
-        quiz = Quizzes.objects.get(id=quiz_id)
-    except Quizzes.DoesNotExist:
-        return HttpResponse("Quiz not found", status=404)
+        attempt = QuizAttempt.objects.select_related("user", "quiz").get(
+            id=attempt_id, quiz_id=quiz_id, completed_at__isnull=False
+        )
+    except QuizAttempt.DoesNotExist:
+        return HttpResponse("Attempt not found or not completed", status=404)
+
+    if not attempt.passed:
+        return HttpResponse("Certificate is only available for a passed attempt.", status=403)
+
+    quiz = attempt.quiz
+    name = attempt.user.get_full_name().strip() or attempt.user.username
+    score = round(attempt.percentage)
 
     buffer = BytesIO()
 
