@@ -116,8 +116,8 @@ DATABASES = {
         'NAME'   :'SAHYOG_SETU',
         'HOST'   : '127.0.0.1',
         'PORT'   : '3306',
-        'USER'   : 'root',
-        'PASSWORD' : 'sahyog@setu@234'
+        'USER'   : 'sahyog_setu_app',
+        'PASSWORD' : '4pGFumUEox5H5p4HaIyr8DQaNp2F'
     }
 }
 
