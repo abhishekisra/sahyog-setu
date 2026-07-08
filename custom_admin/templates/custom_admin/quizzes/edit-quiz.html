@@ -20,6 +20,85 @@
     .remove-btn {
         float: right;
     }
+
+    /* Live card preview -- exact copy of .gold-card / .ss-quiz-card from
+       public_home.html (the real homepage card), scoped under
+       .ss-card-preview-scope so these fairly generic class names can't
+       leak into or collide with the surrounding Bootstrap admin theme.
+       Values (colors, radius, shadow) are hardcoded here rather than
+       relying on public_base.html's --ss-* variables, since this page
+       extends the admin base, not the public one, and doesn't load them. */
+    .ss-card-preview-scope {
+        max-width: 260px;
+    }
+
+    .ss-card-preview-scope .gold-card {
+        background: #facc15;
+        border-radius: 16px;
+        color: #1a1c18;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+    }
+
+    .ss-card-preview-scope .ss-quiz-card {
+        padding: 0;
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .ss-card-preview-scope .ss-q-card-body {
+        padding: 20px;
+        flex: 1;
+    }
+
+    .ss-card-preview-scope .ss-q-meta {
+        display: flex;
+        gap: 8px;
+        margin-bottom: 12px;
+        flex-wrap: wrap;
+    }
+
+    .ss-card-preview-scope .ss-q-count,
+    .ss-card-preview-scope .ss-q-time {
+        font-size: 0.7rem;
+        font-weight: 800;
+        color: #313f2f;
+        background: rgba(0, 0, 0, 0.05);
+        padding: 3px 8px;
+        border-radius: 6px;
+        text-transform: uppercase;
+    }
+
+    .ss-card-preview-scope .ss-q-title {
+        font-size: 1.1rem;
+        font-weight: 800;
+        color: #1a1c18;
+        margin: 0 0 8px 0;
+        line-height: 1.3;
+    }
+
+    .ss-card-preview-scope .ss-q-desc {
+        color: rgba(0, 0, 0, 0.6);
+        font-size: 0.85rem;
+        line-height: 1.5;
+        margin: 0;
+    }
+
+    .ss-card-preview-scope .ss-q-footer {
+        padding: 0 20px 20px;
+    }
+
+    .ss-card-preview-scope .ss-q-btn {
+        display: block;
+        width: 100%;
+        background: #313f2f;
+        color: white;
+        text-align: center;
+        padding: 10px;
+        border-radius: 12px;
+        font-weight: 800;
+        font-size: 0.85rem;
+    }
 </style>
 
 <div class="pcoded-main-container">
@@ -62,9 +141,31 @@
                                     </div>
                                     {% endif %}
                                     <small class="text-muted d-block mt-1">
-                                        16:10 ratio (जैसे 1200×750px), max 2MB. केवल art अपलोड करें — शीर्षक, समय, प्रश्न संख्या database से आते हैं.
+                                        16:10 ratio (जैसे 1200×750px), max 2MB. केवल art अपलोड करें — शीर्षक, समय, प्रश्न संख्या database से आते हैं, छवि में मत लिखें.
                                     </small>
 
+                                </div>
+
+                                <div class="col-4 mt-2">
+                                    <label>Live Preview</label>
+                                    <div class="ss-card-preview-scope">
+                                        <div class="gold-card ss-quiz-card">
+                                            <div class="ss-q-card-body">
+                                                <div class="ss-q-meta">
+                                                    <span class="ss-q-count">{{ quiz.questions.count }} Questions</span>
+                                                    <span class="ss-q-time">{{ quiz.quiz_time|default:"10" }} Mins</span>
+                                                </div>
+                                                <h3 class="ss-q-title">{{ quiz.title|default:"Quiz Title" }}</h3>
+                                                <p class="ss-q-desc">{{ quiz.description|default:"Quiz description..."|truncatechars:100 }}</p>
+                                            </div>
+                                            <div class="ss-q-footer">
+                                                <span class="ss-q-btn">Start Quiz</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted d-block mt-1">
+                                        यह वही कार्ड है जो होमपेज पर दिखेगा — नोट: card banner image नहीं दिखाता, सिर्फ title/description/meta.
+                                    </small>
                                 </div>
  
                                 <div class="col-4 mt-2">

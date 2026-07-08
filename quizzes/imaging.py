@@ -17,7 +17,10 @@ from PIL import Image, ImageOps
 LOGO_BOX = (400, 160)
 SIGN_BOX = (600, 200)
 
-MAX_UPLOAD_BYTES = 2 * 1024 * 1024  # 2 MB
+# Logos/signatures only -- banner has its own, separate BANNER_MAX_BYTES
+# below (2MB), since a full 16:10 banner photo legitimately needs more
+# headroom than a small logo or a cropped signature.
+MAX_UPLOAD_BYTES = 1 * 1024 * 1024  # 1 MB
 ALLOWED_CONTENT_TYPES = {"image/png", "image/jpeg", "image/webp"}
 MIN_LONG_EDGE_PX = 200
 
@@ -50,7 +53,8 @@ def validate_image_upload(django_file):
     Call this BEFORE normalize() — normalize() has no opinion on quality,
     it just resizes whatever it's given."""
     if django_file.size > MAX_UPLOAD_BYTES:
-        raise ValidationError(f"{django_file.name}: file 2MB se badi hai — chhoti karke dobara try karo.")
+        max_mb = MAX_UPLOAD_BYTES // (1024 * 1024)
+        raise ValidationError(f"{django_file.name}: file {max_mb}MB se badi hai — chhoti karke dobara try karo.")
 
     content_type = getattr(django_file, "content_type", None)
     if content_type and content_type not in ALLOWED_CONTENT_TYPES:

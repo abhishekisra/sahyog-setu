@@ -51,10 +51,13 @@ class QuizView(View):
             messages.error(request, "You have to login first.")
             return redirect("adminLogin")
 
-        # Upload validation (Part H) -- max 2MB, png/jpg/jpeg/webp only,
+        # Upload validation (Part H) -- max 1MB, png/jpg/jpeg/webp only,
         # min 200px long edge. Runs BEFORE the quiz is created, so a bad
         # image never reaches Quizzes.save()'s normalize() step at all.
-        for field_name in ("image", "logo_1", "logo_2", "authority1_sign_image", "authority2_sign_image"):
+        # "image" (banner) deliberately excluded here -- it has its own,
+        # more permissive validate_banner_image() check below (2MB, 16:10
+        # ratio required), which would conflict with this 1MB logo/signature cap.
+        for field_name in ("logo_1", "logo_2", "authority1_sign_image", "authority2_sign_image"):
             f = request.FILES.get(field_name)
             if f:
                 try:
@@ -146,7 +149,8 @@ class EditQuizView(View):
 
         # Upload validation (Part H) -- same rule as QuizView.post: reject
         # before anything is touched, so a bad image can't half-save.
-        for field_name in ("image", "logo_1", "logo_2", "authority1_sign_image", "authority2_sign_image"):
+        # "image" (banner) excluded -- see QuizView.post for why.
+        for field_name in ("logo_1", "logo_2", "authority1_sign_image", "authority2_sign_image"):
             f = request.FILES.get(field_name)
             if f:
                 try:
