@@ -7,7 +7,7 @@ class EmailBackEnd(ModelBackend):
     def authenticate(self, username=None, password=None, **kwargs):
         UserModel = get_user_model()
         try:
-            user = UserModel.objects.get(Q(Q(mobile=username) | Q(email = username))  & Q(Q(user_type = 3) | Q(user_type = 1)))
+            user = UserModel.objects.get(Q(Q(mobile=username) | Q(email = username))  & Q(Q(user_type = 2) | Q(user_type = 1)))
             if user.check_password(password):
                 print(user)
                 return user
