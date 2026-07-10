@@ -39,7 +39,7 @@ class LoginView(View):
     def post(self, request):
         emailId = request.POST['emailId']
         password = request.POST['password']
-        user = EmailBackEnd.authenticate(request, username = emailId, password =password)
+        user = EmailBackEnd().authenticate(request, username = emailId, password =password)
         if user is not None:
             if user.user_type == 1:
                 login(request, user)

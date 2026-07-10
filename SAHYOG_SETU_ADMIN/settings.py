@@ -152,7 +152,7 @@ USE_TZ = True
 
 
 AUTH_USER_MODEL = 'accounts.User'
-AUTHENTICATION_BACENDS = ['accounts.EmailBackEnd.EmailBackEnd']
+AUTHENTICATION_BACKENDS = ['accounts.EmailBackEnd.EmailBackEnd']
 
 LOGIN_URL = '/accounts/login/'
 LOGIN_REDIRECT_URL = '/'

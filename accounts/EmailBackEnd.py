@@ -4,7 +4,7 @@ from django.db.models import Q
 from .models import User
 
 class EmailBackEnd(ModelBackend):
-    def authenticate(self, username=None, password=None, **kwargs):
+    def authenticate(self, request, username=None, password=None, **kwargs):
         UserModel = get_user_model()
         try:
             user = UserModel.objects.get(Q(Q(mobile=username) | Q(email = username))  & Q(Q(user_type = 2) | Q(user_type = 1)))
