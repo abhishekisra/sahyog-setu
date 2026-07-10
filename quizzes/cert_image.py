@@ -136,15 +136,24 @@ def render_certificate_image(attempt):
     auth_name_font = _font("Cinzel-Bold.ttf", 34)
     auth_desig_font = _font("Cormorant-Regular.ttf", 28)
 
+    # _paste_contain centers the image ON its given y, so with box_h=130 the
+    # old center (sign_y - 60) put the box's own bottom edge just 5px below
+    # sign_y -- the signature line and printed name were drawn almost right
+    # on top of the ink for most real (un-cropped, pre-Part-H) signature
+    # uploads on this site. Centering 95px above sign_y instead leaves a
+    # real ~30px gap to the line, matching the equivalent padding fix in
+    # certificate.html's .sigbox.
+    sign_box_w, sign_box_h = 380, 130
+    sign_center_y = sign_y - 95
     left_cx, right_cx = CANVAS_W * 0.22, CANVAS_W * 0.78
     _paste_contain(bg, quiz.authority1_sign_image.path if quiz.authority1_sign_image else None,
-                    left_cx, sign_y - 60, 380, 130)
+                    left_cx, sign_center_y, sign_box_w, sign_box_h)
     draw.line([(left_cx - 260, sign_y), (left_cx + 260, sign_y)], fill=INK, width=2)
     _draw_centered(draw, left_cx, sign_y + 15, quiz.authority1_name or "Authorized Signatory", auth_name_font, INK)
     _draw_centered(draw, left_cx, sign_y + 60, quiz.authority1_designation or "Director", auth_desig_font, MUTED)
 
     _paste_contain(bg, quiz.authority2_sign_image.path if quiz.authority2_sign_image else None,
-                    right_cx, sign_y - 60, 380, 130)
+                    right_cx, sign_center_y, sign_box_w, sign_box_h)
     draw.line([(right_cx - 260, sign_y), (right_cx + 260, sign_y)], fill=INK, width=2)
     _draw_centered(draw, right_cx, sign_y + 15, quiz.authority2_name or "Verified By", auth_name_font, INK)
     _draw_centered(draw, right_cx, sign_y + 60, quiz.authority2_designation or "Admin", auth_desig_font, MUTED)

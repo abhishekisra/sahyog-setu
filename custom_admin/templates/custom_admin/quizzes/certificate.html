@@ -173,12 +173,36 @@
            proportional at every width, same as everything else here. */
         height: 4cqw;
         width: 100%;
+        /* Belt-and-suspenders: see why below on .sigbox img's height:100%. */
+        overflow: hidden;
+        /* object-position:bottom below anchors the ink flush to this box's
+           bottom edge with zero breathing room of its own -- most real
+           signature uploads on this site predate the strip_white/SIGN_BOX
+           normalization (Part H) and are un-cropped scans whose visible
+           strokes reach close to their own image edges, so without this
+           the ink visually runs straight into .zone-auth-line/the printed
+           name directly below (confirmed on a live cert render). This
+           padding is the actual gap; .zone-auth-line's own top margin
+           below is deliberately small since this already provides the space. */
+        padding-bottom: 1.4cqw;
     }
     .sigbox img {
-        max-height: 100%;
+        /* NOT max-height:100% -- .sigbox is a grid container whose single
+           implicit row sizes to `auto` (content-based), so a percentage
+           height on the img never resolves against a definite length (the
+           row's own size depends on the img, and the img's height depends
+           on the row -- circular, so browsers treat it as `none`/unconstrained).
+           Confirmed live: the img's rendered height was 3x+ its .sigbox
+           parent's, overflowing straight through the printed name below
+           regardless of any padding on .sigbox. height:100% instead resolves
+           against .sigbox's own explicit height (4cqw, a definite length,
+           not `auto`), so this actually constrains it; overflow:hidden
+           above is the fallback in case any browser still gets this wrong.
+           width:auto + object-fit:contain still preserve the image's aspect
+           ratio within that height. */
+        height: 100%;
         max-width: 100%;
         width: auto;
-        height: auto;
         object-fit: contain;
         object-position: bottom;
     }
