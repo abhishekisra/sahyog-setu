@@ -53,7 +53,7 @@
                         <div class="zone zone-presented" style="top: 28%;">This Certificate is Proudly Presented To</div>
 
                         <div class="zone zone-name" style="top: {{ quiz.name_top_pct }}%;">
-                            {{ attempt.user.get_full_name|default:attempt.user.username }}
+                            {{ display_name }}
                         </div>
 
                         <div class="zone zone-desc" style="top: 52%;">
@@ -64,7 +64,7 @@
                             {{ quiz.title }} &middot; Score {{ attempt.percentage|floatformat:0 }}%
                         </div>
 
-                        <div class="zone zone-signatures" style="top: 84%;">
+                        <div class="zone zone-signatures" style="top: 78%;">
                             <div class="zone-auth">
                                 <div class="sigbox">{% if quiz.authority1_sign_image %}<img src="{{ quiz.authority1_sign_image.url }}" alt="">{% endif %}</div>
                                 <div class="zone-auth-line"></div>
@@ -102,6 +102,15 @@
                         </svg>
                         Print / Save as PDF
                     </button>
+                    <a href="{% url 'quiz_certificate_download' attempt.id %}" class="btn-outline-ss no-print">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        Download as Image
+                    </a>
                     <div class="ss-share-section">
                         <span class="ss-share-title">क्विज़ शेयर करें (Share the quiz, not this certificate)</span>
                         <div class="ss-share-grid">
@@ -155,7 +164,14 @@
     .sigbox {
         display: grid;
         place-items: end center;
-        height: 52px;
+        /* was a fixed 52px -- the one non-cqw size in this whole sheet,
+           so on a narrow render (the .sheet can be ~300px wide per the
+           comment above on container-type:inline-size) this fixed box
+           stayed full-size while the percentage-based gap down to
+           .zone-meta shrank with it, causing the signature block to
+           spill into the "Verify at..." line below. cqw keeps it
+           proportional at every width, same as everything else here. */
+        height: 4cqw;
         width: 100%;
     }
     .sigbox img {
@@ -170,13 +186,13 @@
     .ss-cert-meta {
         margin-top: 16px;
         font-size: 0.8rem;
-        color: #888;
+        color: var(--ink-muted);
     }
 
     @media print {
         .sheet { box-shadow: none; width: 100%; }
         .no-print { display: none !important; }
-        body, .ss-certificate-page { background: #fff !important; }
+        body, .ss-certificate-page { background: var(--white) !important; }
         .ss-cert-container { display: block !important; max-width: none !important; }
         .ss-cert-preview-card { box-shadow: none !important; padding: 0 !important; }
     }
@@ -355,13 +371,17 @@
     }
 
     .zone-auth {
-        width: 32%;
+        /* Narrower than before (was 32%, leaving only ~14% gap between the
+           two blocks) so the two signature blocks sit well apart instead
+           of crowding the center -- gap between them is now roughly half
+           of .zone-signatures' own width. */
+        width: 23%;
         text-align: center;
     }
 
     .zone-auth-line {
         border-top: 1px solid #333;
-        margin: 4px auto 6px;
+        margin: 1cqw auto 1.2cqw;
         width: 80%;
     }
 
@@ -404,6 +424,25 @@
         margin-bottom: 32px;
     }
 
+    .ss-actions-btns {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .ss-actions-btns > form {
+        margin: 0;
+    }
+
+    .ss-actions-btns .btn-outline-ss {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1rem;
+        padding: 16px 24px;
+    }
+
     .btn-primary-ss {
         background: var(--ss-bg-accent);
         color: white;
@@ -419,7 +458,6 @@
         align-items: center;
         justify-content: center;
         width: 100%;
-        margin-bottom: 32px;
         box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
     }
 

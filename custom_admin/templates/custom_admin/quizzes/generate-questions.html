@@ -1,0 +1,75 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5>Generate Questions with AI — {{ quiz.title }}</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="/admin/quizzes">Quizzes</a></li>
+                            <li class="breadcrumb-item"><a href="#!">Generate with AI</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-8">
+                <div class="card">
+                    <div class="card-body">
+
+                        <p>
+                            Bas topic likho aur kitne questions chahiye — AI (Claude) explanation ke saath ek batch bana dega.
+                            Save hone se pehle agli screen par har question <strong>review aur edit</strong> kar sakte ho, ya kisi ko uncheck karke skip kar sakte ho.
+                            Kuch bhi seedha database mein save nahi hota jab tak tum review screen se "Save" na daba do.
+                        </p>
+
+                        {% if error %}
+                        <div class="alert alert-danger">{{ error }}</div>
+                        {% endif %}
+
+                        <form method="POST">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label>Topic *</label>
+                                <input type="text" name="topic" class="form-control" required
+                                    placeholder="e.g. Digital payments and UPI safety"
+                                    value="{{ topic|default:'' }}">
+                            </div>
+                            <div class="form-group">
+                                <label>Number of Questions</label>
+                                <input type="number" name="count" class="form-control" min="1" max="{{ max_questions }}"
+                                    value="{{ count|default:10 }}">
+                                <small class="form-text text-muted">Maximum {{ max_questions }} per batch — chalao dobara agar zyada chahiye.</small>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="feather icon-cpu"></i>&nbsp;Generate Questions
+                            </button>
+                            <a href="/admin/quiz/{{ quiz.id }}" class="btn btn-outline-secondary">Cancel</a>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% for message in messages %}
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+{% endfor %}
+
+{% endblock %}

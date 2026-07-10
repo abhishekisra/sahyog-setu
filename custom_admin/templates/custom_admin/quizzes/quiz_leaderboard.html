@@ -23,7 +23,7 @@
                     <tr style="border-bottom:1px solid rgba(0,0,0,0.08);">
                         <td style="padding:10px 8px;">{{ forloop.counter }}</td>
                         <td style="padding:10px 8px;">{{ attempt.user.get_full_name|default:"Participant" }}</td>
-                        <td style="padding:10px 8px;">{{ attempt.score }}/{{ attempt.total_questions }}</td>
+                        <td style="padding:10px 8px;">{{ attempt.marks }}/{{ attempt.total_marks }}</td>
                         <td style="padding:10px 8px;">
                             {% if attempt.time_taken_seconds %}{{ attempt.time_taken_seconds }}s{% else %}—{% endif %}
                         </td>

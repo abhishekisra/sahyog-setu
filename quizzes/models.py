@@ -115,6 +115,10 @@ class Questions(models.Model):
     correct_option = models.IntegerField(choices=OPTION_CHOICES)
     explanation = models.TextField(blank=True, default="")
 
+    @property
+    def options_list(self):
+        return [(1, self.option_1), (2, self.option_2), (3, self.option_3), (4, self.option_4)]
+
 
 class QuizAttempt(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quiz_attempts")
@@ -128,6 +132,12 @@ class QuizAttempt(models.Model):
     time_taken_seconds = models.IntegerField(null=True, blank=True)
     started_at = models.DateTimeField(auto_now_add=True)
     completed_at = models.DateTimeField(null=True, blank=True)
+
+    # The randomly-sampled question set for THIS attempt, fixed at creation.
+    # Never read the question set from request.session -- gunicorn restarts,
+    # session expiry, and a second browser tab all destroy session state
+    # mid-quiz, but this row survives all three.
+    question_ids = models.JSONField(default=list)
 
     # Certificate (Part I). null=True (not just blank=True) is required here:
     # a CharField that's `unique=True` can't have more than one row storing
@@ -149,6 +159,22 @@ class QuizAttempt(models.Model):
     # analytics dashboard, so an unvalidated value would be an XSS vector.
     source = models.CharField(max_length=20, default="direct", db_index=True)
 
+    # Enforces "only one LIVE attempt per (user, quiz)" -- what actually
+    # stops two simultaneous taps on "क्विज़ शुरू करें" (or two open tabs)
+    # from racing into two in-progress attempts. This is deliberately NOT a
+    # Meta.UniqueConstraint(condition=Q(completed_at__isnull=True)): Django
+    # accepts that declaration, but MySQL does not support unique
+    # constraints with a condition (models.W036) -- the migration applies
+    # "successfully" while silently creating no constraint at all, which is
+    # worse than an obvious failure. This column is the portable
+    # workaround: set to "<user_id>_<quiz_id>" while the attempt is live,
+    # set back to NULL the moment it completes (see quiz_submit). A plain
+    # UniqueConstraint on this column is fully supported by MySQL, and
+    # MySQL (like every mainstream RDBMS) allows unlimited rows with NULL
+    # in a unique-constrained column, so completed attempts simply drop out
+    # of the uniqueness check instead of needing a real partial index.
+    live_lock = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
     def __str__(self):
         return f"{self.user} - {self.quiz} ({self.score}/{self.total_questions})"
 
@@ -165,6 +191,19 @@ class QuestionResponse(models.Model):
     # this FK (on_delete=SET_NULL) and silently blank the explanation shown
     # in a past attempt's review.
     explanation_snapshot = models.TextField(blank=True, default="")
+
+    class Meta:
+        constraints = [
+            # Users change their answer -- autosave must update_or_create,
+            # never create, or a changed answer leaves a duplicate row
+            # behind and the "most-failed questions" analytics goes garbage.
+            # question=NULL rows (after an admin deletes the question later)
+            # are exempt from this -- MySQL treats each NULL as distinct.
+            models.UniqueConstraint(
+                fields=["attempt", "question"],
+                name="one_response_per_question",
+            ),
+        ]
 
     def __str__(self):
         return f"attempt {self.attempt_id} - {self.question_text_snapshot[:40]}"

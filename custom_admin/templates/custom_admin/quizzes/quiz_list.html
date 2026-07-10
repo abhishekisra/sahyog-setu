@@ -1,0 +1,173 @@
+{% extends 'custom_admin/public_base.html' %}
+{% load static %}
+{% load quiz_extras %}
+
+{% block title %}Quiz Zone — सहयोग सेतु{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<div class="sqz-wrap" id="sqzWrap">
+
+  <div class="sqz-topbar">
+    <div class="sqz-brand"><div class="sqz-seal">स</div><b>Sahyog <span>Setu</span></b></div>
+    <div class="sqz-navpill"><b>{{ quizzes|length }}</b> Quizzes · Earn Certificates 🎖️</div>
+  </div>
+
+  <div class="sqz-hero">
+    <div class="sqz-eyebrow">Sahyog Setu · Quiz Zone</div>
+    <h1>Participate. Learn. <em>Get Recognized.</em></h1>
+    <div class="sqz-flourish"></div>
+    <p>Test your knowledge on welfare schemes, self-help groups, cyber safety and more — and earn a certificate you can share.</p>
+  </div>
+
+  <div class="sqz-grid">
+    {% for item in quizzes %}
+    <article class="sqz-card" style="--accent:{{ item.accent }}">
+      <div class="sqz-media">
+        <span class="sqz-tag">{{ item.tag }}</span>
+        <span class="sqz-dur">⏱ 20s / Q</span>
+        <span class="sqz-icon-badge">{{ item.icon_svg|safe }}</span>
+        {% if item.quiz.certificate_enabled %}<span class="sqz-cert-badge">🎖️ Certificate</span>{% endif %}
+      </div>
+      <div class="sqz-body">
+        <div class="sqz-title">{{ item.quiz.title }}</div>
+        <div class="sqz-desc">{{ item.short_desc }}</div>
+        <div class="sqz-meta">
+          <span class="sqz-chip">📋 <b>{{ item.question_count }}</b> Questions</span>
+          <span class="sqz-chip">🏅 <b>{{ item.total_marks }} marks</b></span>
+          <span class="sqz-chip">⏱ <b>~{{ item.estimated_minutes }} min</b></span>
+        </div>
+        <a class="sqz-go" href="{% url 'quiz_landing' item.quiz.slug %}">Start Quiz →</a>
+      </div>
+    </article>
+    {% empty %}
+    <p class="sqz-empty">कोई क्विज़ अभी उपलब्ध नहीं है।</p>
+    {% endfor %}
+  </div>
+
+  <footer class="sqz-footer">Powered by <b>Uplift Live Foundation</b> · sahyogsetu.in</footer>
+</div>
+
+<style>
+  #sqzWrap{
+    --bg:#122019; --bg2:#17281f; --card:#213627; --card-hi:#2b4634;
+    --ink:#f4efe1; --ink-soft:#adc2b1; --ink-faint:#7d9583;
+    --gold:#c9a227; --gold-hi:#ffd75e;
+    --green:#35d67f; --red:#ff5c5c; --yellow:#f7c948;
+    --line:rgba(201,162,39,.18);
+    --shadow-sm:0 4px 14px rgba(0,0,0,.28);
+    --shadow-md:0 14px 34px rgba(0,0,0,.4);
+    --shadow-lg:0 30px 70px rgba(0,0,0,.5);
+    font-family:'Mukta',system-ui,sans-serif; color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 82% -8%, #1d3628 0%, transparent 58%),
+      radial-gradient(1000px 650px at -10% 108%, #1a2e22 0%, transparent 55%),
+      var(--bg);
+    min-height:100dvh; padding:clamp(18px,4vw,44px) clamp(14px,4vw,40px) 60px;
+  }
+  #sqzWrap *{box-sizing:border-box}
+
+  .sqz-topbar{ display:flex; align-items:center; justify-content:space-between; margin:0 auto clamp(30px,6vw,56px); max-width:1180px; flex-wrap:wrap; gap:12px; }
+  .sqz-brand{ display:flex; align-items:center; gap:11px; }
+  .sqz-seal{
+    width:44px;height:44px;border-radius:50%;
+    background:conic-gradient(from 210deg,var(--gold-hi),var(--gold),#8a6d16,var(--gold-hi));
+    display:grid;place-items:center; color:#122019; font-family:'Fraunces'; font-weight:700; font-size:22px;
+    box-shadow:0 8px 20px rgba(201,162,39,.35), inset 0 0 0 3px rgba(18,32,25,.25);
+  }
+  .sqz-brand b{ font-family:'Fraunces'; font-weight:600; font-size:20px; letter-spacing:.3px; }
+  .sqz-brand span{ color:var(--gold-hi); }
+  .sqz-navpill{
+    font-family:'Mukta'; font-weight:600; font-size:13.5px; color:var(--ink-soft);
+    padding:9px 16px; border-radius:99px; border:1px solid var(--line);
+    background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.14)); box-shadow:var(--shadow-sm);
+  }
+  .sqz-navpill b{ color:var(--gold-hi); }
+
+  .sqz-hero{ text-align:center; margin:0 auto clamp(34px,6vw,54px); max-width:1180px; }
+  .sqz-eyebrow{ color:var(--gold-hi); font-weight:600; letter-spacing:3px; font-size:12px; text-transform:uppercase; }
+  .sqz-hero h1{ font-family:'Fraunces'; font-weight:600; font-size:clamp(34px,7vw,58px); line-height:1.05; margin:12px 0 6px; }
+  .sqz-hero h1 em{ font-style:italic; color:var(--gold-hi); }
+  .sqz-flourish{ width:120px; height:4px; margin:14px auto 16px; border-radius:99px;
+    background:linear-gradient(90deg,transparent,var(--gold),var(--gold-hi),var(--gold),transparent); }
+  .sqz-hero p{ color:var(--ink-soft); font-size:clamp(15px,2.6vw,17px); max-width:560px; margin:0 auto; }
+
+  .sqz-grid{ display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:22px; max-width:1180px; margin:0 auto; }
+  .sqz-empty{ color:var(--ink-soft); text-align:center; grid-column:1/-1; padding:40px 0; }
+
+  .sqz-card{
+    position:relative; display:flex; flex-direction:column; border-radius:24px; overflow:hidden;
+    background:linear-gradient(165deg,var(--card-hi),var(--card));
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.06);
+    transition:transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s, border-color .22s;
+  }
+  .sqz-card:hover{ transform:translateY(-7px); box-shadow:var(--shadow-lg); border-color:rgba(201,162,39,.42); }
+  .sqz-card:hover .sqz-icon-badge{ transform:scale(1.08) rotate(-4deg); }
+  .sqz-card:hover .sqz-go{ filter:brightness(1.06); }
+
+  .sqz-media{
+    position:relative; height:132px; display:grid; place-items:center;
+    background:
+      radial-gradient(130% 90% at 50% -10%, rgba(201,162,39,.22), transparent 60%),
+      linear-gradient(160deg,#294636,#1d3227);
+    border-bottom:1px solid var(--line);
+  }
+  .sqz-media::after{ content:""; position:absolute; left:0; right:0; bottom:-1px; height:3px;
+    background:linear-gradient(90deg,transparent,var(--accent,var(--gold)),transparent); opacity:.8; }
+  .sqz-icon-badge{
+    width:64px; height:64px; border-radius:50%; display:grid; place-items:center;
+    background:
+      radial-gradient(120% 120% at 30% 20%, rgba(255,255,255,.14), transparent 60%),
+      linear-gradient(160deg, var(--accent, var(--gold)) 0%, rgba(0,0,0,.3) 145%);
+    border:1px solid rgba(255,255,255,.2);
+    box-shadow:0 10px 24px rgba(0,0,0,.4), inset 0 1px 0 rgba(255,255,255,.3);
+    transition:transform .3s cubic-bezier(.2,1.4,.4,1);
+  }
+  .sqz-icon-badge svg{ width:30px; height:30px; color:#f4efe1; filter:drop-shadow(0 2px 3px rgba(0,0,0,.35)); }
+  .sqz-tag{
+    position:absolute; top:12px; left:12px; font-size:11.5px; font-weight:700; letter-spacing:.5px;
+    color:#10231a; padding:5px 11px; border-radius:99px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold)); box-shadow:var(--shadow-sm);
+  }
+  .sqz-dur{
+    position:absolute; top:12px; right:12px; font-size:11.5px; font-weight:600; color:var(--ink);
+    padding:5px 11px; border-radius:99px; border:1px solid var(--line);
+    background:rgba(0,0,0,.32); backdrop-filter:blur(3px);
+  }
+  .sqz-cert-badge{
+    position:absolute; bottom:10px; right:12px; font-size:11px; font-weight:700; color:var(--gold-hi);
+    padding:4px 10px; border-radius:99px; border:1px solid var(--line); background:rgba(0,0,0,.3);
+  }
+
+  .sqz-body{ padding:18px 18px 20px; display:flex; flex-direction:column; flex:1; }
+  .sqz-title{ font-family:'Fraunces'; font-weight:600; font-size:19px; line-height:1.25; margin-bottom:8px; }
+  .sqz-desc{ color:var(--ink-soft); font-size:14px; line-height:1.5; flex:1; }
+  .sqz-meta{ display:flex; gap:8px; margin:16px 0; flex-wrap:wrap; }
+  .sqz-chip{
+    display:flex; align-items:center; gap:6px; font-size:12.5px; color:var(--ink-soft);
+    padding:7px 11px; border-radius:11px; background:rgba(0,0,0,.2); border:1px solid var(--line);
+  }
+  .sqz-chip b{ color:var(--ink); font-weight:600; }
+  .sqz-go{
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    font-family:'Mukta'; font-weight:700; font-size:15.5px; color:#10231a; text-decoration:none;
+    padding:14px; border-radius:14px; cursor:pointer; letter-spacing:.3px;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    border-bottom:4px solid #8a6d16;
+    box-shadow:0 12px 26px rgba(201,162,39,.32), inset 0 1px 0 rgba(255,255,255,.4);
+    transition:transform .12s ease, box-shadow .12s ease, filter .2s;
+  }
+  .sqz-go:active{ transform:translateY(3px); border-bottom-width:1px; box-shadow:0 5px 12px rgba(201,162,39,.4); }
+
+  .sqz-footer{ text-align:center; color:var(--ink-faint); font-size:13px; margin-top:46px; max-width:1180px; margin-left:auto; margin-right:auto; }
+  .sqz-footer b{ color:var(--gold-hi); }
+
+  #sqzWrap :focus-visible{ outline:3px solid var(--gold-hi); outline-offset:2px; }
+</style>
+{% endblock %}

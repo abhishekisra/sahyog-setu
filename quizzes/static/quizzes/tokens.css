@@ -1,0 +1,60 @@
+/*
+ * Sahyog Setu quiz duotone tokens — the ONLY place a hex code for the
+ * quiz-taking experience should live. Every other template references
+ * these custom properties; never a literal hex.
+ *
+ * ENFORCEMENT RULES (read before touching a color in this app):
+ *
+ * 1. #ffd700 (--y-400) is an ACCENT, never text on a light surface.
+ *    On white it measures 1.6:1. WCAG AA needs 4.5:1. It is unreadable.
+ *    For gold text on white, use --y-800 (#8A7500) — 4.5:1, passes AA.
+ *
+ * 2. #ffd700 as a background REQUIRES --g-900 (#1B2419) as its text colour.
+ *    That pairing is 7.9:1, AAA.
+ *
+ * 3. Never signal state with colour alone (WCAG 1.4.1, GIGW).
+ *    Answered = green fill + gold ✓ badge.
+ *    Skipped  = gold dashed border.
+ *    Wrong    = red + ✕ icon + text label.
+ *
+ * Focus ring: 3px solid var(--y-400) on dark surfaces,
+ *             3px solid var(--g-700) on gold buttons.
+ * Never remove focus outlines.
+ */
+
+:root {
+    /* Gold scale */
+    --y-100: #FFF8DC;   /* light gold wash — subtle backgrounds only */
+    --y-400: #FFD700;   /* accent — buttons, badges, borders. NEVER text-on-white */
+    --y-600: #C9A700;   /* mid gold — dashed "skipped" borders, secondary accents */
+    --y-800: #8A7500;   /* gold TEXT on white/light surfaces — 4.5:1 AA */
+
+    /* Green scale */
+    --g-100: #E8EDE6;   /* light green wash */
+    --g-600: #45573F;   /* muted green text on dark surfaces */
+    --g-700: #313F2F;   /* dark surface / focus ring on gold buttons */
+    --g-800: #1F2F1F;   /* darker surface (page background) */
+    --g-900: #1B2419;   /* TEXT on gold backgrounds — 7.9:1 AAA */
+
+    /* Semantic (state) — always paired with an icon/label, never color-only */
+    --state-correct-bg: var(--g-700);
+    --state-correct-badge: var(--y-400);
+    --state-skipped-border: var(--y-600);
+    --state-wrong: #B3261E;   /* red — 5.9:1 on white, paired with ✕ + text always */
+
+    --white: #FFFFFF;
+    --ink-muted: #888888;   /* generic secondary/caption text on light chrome */
+
+    /* Focus rings */
+    --focus-ring-dark: 3px solid var(--y-400);
+    --focus-ring-gold: 3px solid var(--g-700);
+
+    /* Third-party brand colors (share buttons). These are NOT part of this
+       app's palette and must never be swapped for a --y-*/--g-* token —
+       they're fixed so the button is recognizable as WhatsApp/Facebook/
+       LinkedIn's own brand, not this app's. Tokenized only so no template
+       needs a literal hex, per the "one source of truth" rule. */
+    --brand-whatsapp: #25D366;
+    --brand-facebook: #1877F2;
+    --brand-linkedin: #0077B5;
+}

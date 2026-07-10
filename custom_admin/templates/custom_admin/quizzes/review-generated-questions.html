@@ -1,0 +1,111 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-12">
+                        <div class="page-header-title">
+                            <h5>Review AI-Generated Questions — {{ quiz.title }}</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="/admin/quizzes">Quizzes</a></li>
+                            <li class="breadcrumb-item"><a href="#!">Review AI Questions</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-body">
+                        <p>
+                            {{ draft_rows|length }} question(s) AI ne banaye. Jo galat lage usko edit kar do, ya checkbox uncheck karke skip kar do.
+                            <strong>Save</strong> dabane par sirf checked questions is quiz ke question bank mein add honge — koi existing question touch nahi hoga.
+                        </p>
+
+                        <form method="POST" id="reviewForm">
+                            {% csrf_token %}
+
+                            {% for row in draft_rows %}
+                            <div class="card mb-3" style="border:1px solid #dee2e6;">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-start mb-2">
+                                        <div class="custom-control custom-checkbox">
+                                            <input type="checkbox" class="custom-control-input" id="include_{{ forloop.counter0 }}"
+                                                name="include[]" value="{{ forloop.counter0 }}" checked>
+                                            <label class="custom-control-label" for="include_{{ forloop.counter0 }}">
+                                                <strong>Question {{ forloop.counter }}</strong> — include this in the quiz
+                                            </label>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Question</label>
+                                        <textarea name="question[]" class="form-control" rows="2" required>{{ row.question }}</textarea>
+                                    </div>
+
+                                    <div class="row">
+                                        {% for n in "1234" %}
+                                        <div class="col-md-6 form-group">
+                                            <label>
+                                                Option {{ n }}
+                                                {% if row.correct_option|stringformat:"s" == n %}<span class="badge badge-success">Correct</span>{% endif %}
+                                            </label>
+                                            <input type="text" name="option_{{ n }}[]" class="form-control"
+                                                value="{% if n == '1' %}{{ row.option_1 }}{% elif n == '2' %}{{ row.option_2 }}{% elif n == '3' %}{{ row.option_3 }}{% else %}{{ row.option_4 }}{% endif %}" required>
+                                        </div>
+                                        {% endfor %}
+                                    </div>
+
+                                    <div class="form-group">
+                                        <label>Correct Option</label>
+                                        <select name="correct_option[]" class="form-control" style="max-width:160px;">
+                                            {% for n in "1234" %}
+                                            <option value="{{ n }}" {% if row.correct_option|stringformat:"s" == n %}selected{% endif %}>Option {{ n }}</option>
+                                            {% endfor %}
+                                        </select>
+                                    </div>
+
+                                    <div class="form-group mb-0">
+                                        <label>Explanation</label>
+                                        <textarea name="explanation[]" class="form-control" rows="2">{{ row.explanation }}</textarea>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+
+                            <div class="mt-3">
+                                <button type="submit" name="action" value="save" class="btn btn-primary">
+                                    <i class="feather icon-check"></i>&nbsp;Save Checked Questions
+                                </button>
+                                <button type="submit" name="action" value="regenerate" class="btn btn-outline-secondary">
+                                    Discard &amp; Regenerate
+                                </button>
+                                <a href="/admin/quiz/{{ quiz.id }}" class="btn btn-outline-secondary">Cancel</a>
+                            </div>
+                        </form>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+{% for message in messages %}
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+{% endfor %}
+
+{% endblock %}

@@ -114,6 +114,12 @@
             </div>
         </div>
 
+        {% if live_attempt_count > 0 %}
+        <div class="alert alert-warning">
+            ⚠️ {{ live_attempt_count }} लोग अभी यह क्विज़ दे रहे हैं — प्रश्न बदलने से उनके चल रहे attempt पर असर पड़ सकता है।
+        </div>
+        {% endif %}
+
         <div class="row">
             <div class="col-md-12">
 
@@ -231,9 +237,11 @@
                                 <div class="col-4">
                                     <label>Signature</label>
                                     <input type="file" name="authority1_sign_image" class="form-control">
+                                    {% if quiz.authority1_sign_image %}
                                     <div style="height:64px;width:168px;display:grid;place-items:end center;margin-top:8px;">
                                         <img src="{{ quiz.authority1_sign_image.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:bottom;">
                                     </div>
+                                    {% endif %}
                                 </div>
 
                                 <hr class="col-12">
@@ -255,9 +263,11 @@
                                 <div class="col-4">
                                     <label>Signature</label>
                                     <input type="file" name="authority2_sign_image" class="form-control">
+                                    {% if quiz.authority2_sign_image %}
                                     <div style="height:64px;width:168px;display:grid;place-items:end center;margin-top:8px;">
                                         <img src="{{ quiz.authority2_sign_image.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:bottom;">
                                     </div>
+                                    {% endif %}
                                 </div>
 
                                 <hr class="col-12">
@@ -265,17 +275,21 @@
                                 <div class="col-6">
                                     <label>Logo 1</label>
                                     <input type="file" name="logo_1" class="form-control">
+                                    {% if quiz.logo_1 %}
                                     <div style="height:64px;width:168px;display:grid;place-items:center;margin-top:8px;">
                                         <img src="{{ quiz.logo_1.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;">
                                     </div>
+                                    {% endif %}
                                 </div>
 
                                 <div class="col-6">
                                     <label>Logo 2</label>
                                     <input type="file" name="logo_2" class="form-control">
+                                    {% if quiz.logo_2 %}
                                     <div style="height:64px;width:168px;display:grid;place-items:center;margin-top:8px;">
                                         <img src="{{ quiz.logo_2.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;">
                                     </div>
+                                    {% endif %}
                                 </div>
 
                             </div>
@@ -285,9 +299,19 @@
                             <div class="d-flex justify-content-between mt-4">
                                 <h4>Questions</h4>
 
-                                <button type="button" class="btn btn-success btn-sm" onclick="addQuestion()">
-                                    + Add Question
-                                </button>
+                                <div>
+                                    <a href="/admin/quiz/{{ quiz.id }}/generate-questions"
+                                    class="btn btn-warning btn-sm">
+                                        <i class="feather icon-cpu"></i>&nbsp;Generate with AI
+                                    </a>
+                                    <a href="/admin/quiz/{{ quiz.id }}/import-questions"
+                                    class="btn btn-primary btn-sm">
+                                        <i class="feather icon-upload"></i>&nbsp;Bulk Import Questions
+                                    </a>
+                                    <button type="button" class="btn btn-success btn-sm" onclick="addQuestion()">
+                                        + Add Question
+                                    </button>
+                                </div>
                             </div>
 
                             <div id="questions-container">

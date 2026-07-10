@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 
+{% load static %}
 <head>
     <title>{% block title %}Sahyog Setu Portal{% endblock %}</title>
     <meta charset="utf-8">
@@ -11,23 +12,28 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&family=Poppins:wght@400;600;700;800;900&display=swap"
         rel="stylesheet">
+    <link rel="stylesheet" href="{% static 'quizzes/tokens.css' %}">
     <style>
         :root {
-            --ss-primary: #facc15;
-            --ss-primary-dark: #eab308;
-            --ss-bg: #1f2f1f;
-            --ss-bg-accent: #313f2f;
-            --ss-bg-gradient: linear-gradient(135deg, #1f2f1f 0%, #152015 100%);
-            --ss-gold-gradient: linear-gradient(135deg, #facc15 0%, #eab308 100%);
-            --ss-ink: #1a1c18;
-            --ss-white: #ffffff;
+            /* --ss-* names kept so every existing template keeps working
+               unchanged; every value below is now a reference into
+               tokens.css (see that file for the enforcement rules), not a
+               literal hex, per the "one source of truth" requirement. */
+            --ss-primary: var(--y-400);
+            --ss-primary-dark: var(--y-600);
+            --ss-bg: var(--g-800);
+            --ss-bg-accent: var(--g-700);
+            --ss-bg-gradient: linear-gradient(135deg, var(--g-800) 0%, var(--g-900) 100%);
+            --ss-gold-gradient: linear-gradient(135deg, var(--y-400) 0%, var(--y-600) 100%);
+            --ss-ink: var(--g-900);
+            --ss-white: var(--white);
             --ss-muted: rgba(255, 255, 255, 0.6);
             --ss-radius: 16px;
             --ss-radius-lg: 24px;
             --ss-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
             --ss-shadow-gold: 0 10px 25px rgba(250, 204, 21, 0.2);
-            --ss-danger: #dc3545;
-            --ss-success: #313f2f;
+            --ss-danger: var(--state-wrong);
+            --ss-success: var(--g-700);
         }
 
         * {
@@ -221,7 +227,7 @@
             gap: 8px;
             padding: 10px 18px;
             border-radius: 10px;
-            color: #fff;
+            color: var(--white);
             text-decoration: none;
             font-weight: 700;
             font-size: 0.85rem;
@@ -236,15 +242,15 @@
         }
 
         .ss-share-link.wa {
-            background: #25d366;
+            background: var(--brand-whatsapp);
         }
 
         .ss-share-link.fb {
-            background: #1877f2;
+            background: var(--brand-facebook);
         }
 
         .ss-share-link.li {
-            background: #0077b5;
+            background: var(--brand-linkedin);
         }
 
         .ss-share-link.copy {

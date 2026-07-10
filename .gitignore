@@ -24,3 +24,4 @@ db_backup_*/
 
 # OS
 .DS_Store
+.secrets/

@@ -23,12 +23,12 @@
                     {% for attempt in attempts %}
                     <tr style="border-bottom:1px solid rgba(0,0,0,0.08);">
                         <td style="padding:10px 8px;">{{ attempt.quiz.title }}</td>
-                        <td style="padding:10px 8px;">{{ attempt.score }}/{{ attempt.total_questions }} ({{ attempt.percentage|floatformat:0 }}%)</td>
+                        <td style="padding:10px 8px;">{{ attempt.marks }}/{{ attempt.total_marks }} ({{ attempt.percentage|floatformat:0 }}%)</td>
                         <td style="padding:10px 8px;">
                             {% if attempt.passed %}
-                            <span style="color:#2ca87f; font-weight:600;">पास</span>
+                            <span style="color:var(--g-900); font-weight:600;">✓ पास</span>
                             {% else %}
-                            <span style="color:#e4566e; font-weight:600;">फेल</span>
+                            <span style="color:var(--state-wrong); font-weight:600;">✕ फेल</span>
                             {% endif %}
                         </td>
                         <td style="padding:10px 8px;">{{ attempt.completed_at|date:"d M Y" }}</td>

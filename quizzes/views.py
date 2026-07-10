@@ -1,10 +1,11 @@
 import csv
+import html
 import random
 from datetime import timedelta
 from io import BytesIO
 
-from django.db import transaction
-from django.http import HttpResponse, StreamingHttpResponse
+from django.db import transaction, IntegrityError
+from django.http import HttpResponse, StreamingHttpResponse, JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse
 from django.views import View
@@ -13,14 +14,35 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
+from django.utils.html import strip_tags
+from django.utils.text import Truncator
 from django.db.models import Avg, Count, F, Q
 from django.db.models.functions import TruncDate
 from django.core.exceptions import ValidationError
 from accounts.models import User
 from .certificates import generate_certificate_id
+from .cert_image import render_certificate_image
 from .imaging import validate_image_upload, validate_certificate_background, validate_banner_image
 from .models import Questions, Quizzes, QuizAttempt, QuestionResponse
-from .question_import import SAMPLE_ROWS, parse_upload, validate_rows
+from .question_import import SAMPLE_ROWS, normalize_correct_option, parse_upload, validate_rows
+from .ai_generate import AIGenerationError, MAX_QUESTIONS_PER_BATCH, generate_questions
+
+# Every quiz now runs a fixed 20s-per-question timer (forward-only, no
+# going back) instead of quiz.quiz_time as an overall countdown -- that
+# field was a longstanding source of bad data (admins had no unit hint on
+# the entry field, so values like 1500 ended up meaning 1500 *minutes*).
+# +5s/question is network/render slack for the server-side safety check
+# below; the client-side 20s countdown is what actually paces the user.
+PER_QUESTION_SECONDS = 20
+PER_QUESTION_SERVER_BUDGET = 25
+
+# Each question is worth a flat 10 marks -- attempt.score/total_questions
+# stay as raw correct-answer COUNTS everywhere internally (percentage,
+# pass_threshold, leaderboard ordering, analytics, the CSV export column)
+# so none of that math or any existing report changes meaning; this is
+# purely the multiplier used wherever a participant-facing mark total is
+# displayed.
+MARKS_PER_QUESTION = 10
 
 
 
@@ -124,7 +146,14 @@ class QuizView(View):
                 question_list.append(Questions( quiz = quiz, question = questions[i], option_1 = option_1[i], option_2 = option_2[i], option_3 = option_3[i], option_4 = option_4[i], correct_option = int(correct_option[i]) ) )
             Questions.objects.bulk_create(question_list)
             messages.success(request, "Quiz created successfully")
-            return redirect("adminQuizzes") 
+            if not question_list:
+                # No questions typed manually -- straight to bulk import
+                # instead of the list, so an admin who plans to upload a
+                # CSV/XLSX of questions doesn't have to go find the quiz
+                # again first.
+                messages.info(request, "Ab questions bulk import karo, ya neeche se ek-ek add karo.")
+                return redirect("adminImportQuestions", id=quiz.id)
+            return redirect("adminQuizzes")
         except Exception as e: 
             print("Quiz Create Error:", e) 
             messages.error(request, "Something went wrong.") 
@@ -142,7 +171,18 @@ class EditQuizView(View):
 
         quiz = Quizzes.objects.get(id=id)
 
-        return render(request,"custom_admin/quizzes/edit-quiz.html",{"quiz":quiz})
+        # Editing questions deletes+recreates the whole set (see post()
+        # below) -- anyone mid-attempt right now would silently hold dead
+        # question IDs. Not blocked, just surfaced, so the admin can choose
+        # to wait.
+        live_attempt_count = QuizAttempt.objects.filter(
+            quiz=quiz, completed_at__isnull=True, is_demo=False
+        ).count()
+
+        return render(request, "custom_admin/quizzes/edit-quiz.html", {
+            "quiz": quiz,
+            "live_attempt_count": live_attempt_count,
+        })
 
 
     def post(self, request, id):
@@ -264,6 +304,141 @@ def deleteQuiz(request):
 
 
 # ======================================================================
+# AI QUESTION GENERATION
+# ======================================================================
+
+def _ai_draft_session_key(quiz_id):
+    return f"ai_draft_questions_{quiz_id}"
+
+
+class GenerateQuestionsView(View):
+    """Admin-only: give a topic, get an AI-drafted question batch. Never
+    writes to Questions directly -- the draft is stashed in the session
+    and handed to ReviewGeneratedQuestionsView, where the admin edits/
+    excludes rows before anything is saved. Same manual auth pattern as
+    ImportQuestionsView (this is the admin panel's own login, not the
+    participant-facing @login_required one)."""
+
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+        quiz = get_object_or_404(Quizzes, id=id)
+        return render(request, "custom_admin/quizzes/generate-questions.html", {
+            "quiz": quiz,
+            "max_questions": MAX_QUESTIONS_PER_BATCH,
+        })
+
+    def post(self, request, id):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+
+        quiz = get_object_or_404(Quizzes, id=id)
+        topic = request.POST.get("topic", "").strip()
+        count_raw = request.POST.get("count", "10").strip()
+        count = int(count_raw) if count_raw.isdigit() else 10
+
+        try:
+            draft_rows = generate_questions(topic, count)
+        except AIGenerationError as e:
+            return render(request, "custom_admin/quizzes/generate-questions.html", {
+                "quiz": quiz,
+                "max_questions": MAX_QUESTIONS_PER_BATCH,
+                "error": str(e),
+                "topic": topic,
+                "count": count,
+            })
+
+        request.session[_ai_draft_session_key(quiz.id)] = draft_rows
+        return redirect("adminReviewGeneratedQuestions", id=quiz.id)
+
+
+class ReviewGeneratedQuestionsView(View):
+    """Editable review screen for an AI-drafted batch sitting in the
+    session. Each row is independently included/excluded and fully
+    editable before Save -- Save only bulk_creates the rows the admin
+    left checked, and never touches existing questions in the bank
+    (unlike EditQuizView.post's delete-and-replace-everything model,
+    which would be the wrong behaviour here: this is meant to ADD to the
+    bank, same as ImportQuestionsView)."""
+
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+        quiz = get_object_or_404(Quizzes, id=id)
+        draft_rows = request.session.get(_ai_draft_session_key(quiz.id))
+        if not draft_rows:
+            messages.error(request, "Koi AI-generated draft nahi mila -- pehle questions generate karo.")
+            return redirect("adminGenerateQuestions", id=quiz.id)
+        return render(request, "custom_admin/quizzes/review-generated-questions.html", {
+            "quiz": quiz,
+            "draft_rows": draft_rows,
+        })
+
+    def post(self, request, id):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+
+        quiz = get_object_or_404(Quizzes, id=id)
+        action = request.POST.get("action")
+
+        if action == "regenerate":
+            request.session.pop(_ai_draft_session_key(quiz.id), None)
+            return redirect("adminGenerateQuestions", id=quiz.id)
+
+        questions = request.POST.getlist("question[]")
+        option_1 = request.POST.getlist("option_1[]")
+        option_2 = request.POST.getlist("option_2[]")
+        option_3 = request.POST.getlist("option_3[]")
+        option_4 = request.POST.getlist("option_4[]")
+        correct_option = request.POST.getlist("correct_option[]")
+        explanation = request.POST.getlist("explanation[]")
+        included = {int(i) for i in request.POST.getlist("include[]") if i.isdigit()}
+
+        existing_titles_lower = {
+            t.strip().lower() for t in quiz.questions.values_list("question", flat=True)
+        }
+
+        clean_rows = []
+        skipped = 0
+        for i in range(len(questions)):
+            if i not in included:
+                continue
+            q_text = questions[i].strip()
+            opts = [option_1[i].strip(), option_2[i].strip(), option_3[i].strip(), option_4[i].strip()]
+            correct_int = normalize_correct_option(correct_option[i]) if i < len(correct_option) else None
+            if not q_text or any(not o for o in opts) or correct_int is None:
+                skipped += 1
+                continue
+            if q_text.lower() in existing_titles_lower:
+                skipped += 1
+                continue
+            clean_rows.append(Questions(
+                quiz=quiz,
+                question=q_text,
+                option_1=opts[0], option_2=opts[1], option_3=opts[2], option_4=opts[3],
+                correct_option=correct_int,
+                explanation=explanation[i].strip() if i < len(explanation) else "",
+            ))
+
+        if not clean_rows:
+            messages.error(request, "Koi bhi question save karne layak nahi tha (ya sab uncheck/duplicate the).")
+            return redirect("adminReviewGeneratedQuestions", id=quiz.id)
+
+        with transaction.atomic():
+            Questions.objects.bulk_create(clean_rows)
+
+        request.session.pop(_ai_draft_session_key(quiz.id), None)
+        messages.success(request, f"{len(clean_rows)} AI-generated questions add ho gaye.")
+        if skipped:
+            messages.warning(request, f"{skipped} question(s) skip ho gaye (khaali/duplicate/uncheck the).")
+        return redirect("adminEditQuiz", id=quiz.id)
+
+
+# ======================================================================
 # BULK QUESTION IMPORT (Part G)
 # ======================================================================
 
@@ -357,12 +532,107 @@ def clean_source(raw):
     return raw if raw in ALLOWED_SOURCES else "direct"
 
 
-def _session_keys(quiz_id):
-    return f"quiz_{quiz_id}_attempt_id", f"quiz_{quiz_id}_question_ids"
-
-
 def _source_session_key(quiz_id):
     return f"quiz_{quiz_id}_src"
+
+
+# Hand-authored line-icons (24x24, stroke=currentColor) instead of emoji --
+# emoji render inconsistently across OS/browsers (different art style per
+# platform, some literally missing), so this keeps every card's icon
+# looking identical everywhere and matching the site's premium
+# gold/dark-green theme instead of whatever emoji set the visitor's
+# device ships.
+QUIZ_ICON_SVGS = {
+    "rocket": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M12 2c2.5 2 4 5.5 4 9 0 2-.5 4-1.5 6l-2.5 3-2.5-3C8.5 15 8 13 8 11c0-3.5 1.5-7 4-9z"/>'
+        '<circle cx="12" cy="10" r="1.6"/>'
+        '<path d="M8.5 15c-2 .5-3 2-3.5 4.5 2.5-.5 4-1.5 4.5-3.5"/>'
+        '<path d="M15.5 15c2 .5 3 2 3.5 4.5-2.5-.5-4-1.5-4.5-3.5"/>'
+        '</svg>'
+    ),
+    "users": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        '<circle cx="9" cy="8" r="3"/>'
+        '<path d="M3.5 19c0-3 2.5-5.5 5.5-5.5s5.5 2.5 5.5 5.5"/>'
+        '<circle cx="17" cy="8.5" r="2.3"/>'
+        '<path d="M15 13.8c2.5.2 4.5 2.3 5.5 5"/>'
+        '</svg>'
+    ),
+    "shield": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M12 3l7 3v5.5c0 4.5-3 8-7 9.5-4-1.5-7-5-7-9.5V6l7-3z"/>'
+        '<path d="M9 12l2 2 4-4.5"/>'
+        '</svg>'
+    ),
+    "landmark": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M2.5 10.5L12 4l9.5 6.5z"/>'
+        '<path d="M4.5 21V10.5M9 21V10.5M15 21V10.5M19.5 21V10.5"/>'
+        '<path d="M3 21h18"/>'
+        '</svg>'
+    ),
+    "book": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M6 3.5C4.9 3.5 4 4.4 4 5.5v14c0 1.1.9 2 2 2h11.5V5.5c0-1.1-.9-2-2-2H6z"/>'
+        '<path d="M8 8h6M8 11.5h6"/>'
+        '</svg>'
+    ),
+}
+
+QUIZ_LIST_CARD_META = {
+    # No "subtitle" here -- every quiz.title already carries its own
+    # Hindi/English descriptor (e.g. "Cyber Security — साइबर सुरक्षा"),
+    # so appending a second subtitle line just duplicated the same text.
+    "government-welfare-schemes": {"icon": "landmark", "tag": "Yojana", "accent": "#35d67f"},
+    "shg-training-quiz": {"icon": "users", "tag": "SHG", "accent": "#ffd75e"},
+    "cyber-security": {"icon": "shield", "tag": "Cyber", "accent": "#5eb8ff"},
+    "yuvakendra-need-assessment-planning-document-for-startup": {"icon": "rocket", "tag": "Startup", "accent": "#ff9d6e"},
+}
+QUIZ_LIST_CARD_DEFAULT = {"icon": "book", "tag": "Quiz", "accent": "#c9a227"}
+
+
+class QuizListView(View):
+    """Public, no-login quiz listing -- data-driven replacement for the
+    React SPA's own /quizzes card grid (which showed uploaded banner
+    images, a stale '0 min' badge, and full question-bank sizes instead
+    of the actual per-attempt sample size). Reuses the same
+    questions_per_attempt/MARKS_PER_QUESTION logic as QuizLandingView so
+    the numbers shown here always match what the landing page promises."""
+
+    def get(self, request):
+        quizzes = []
+        for quiz in Quizzes.objects.filter(status=True).order_by("id"):
+            if not quiz.is_live:
+                continue
+            meta = QUIZ_LIST_CARD_META.get(quiz.slug, QUIZ_LIST_CARD_DEFAULT)
+            question_count = min(quiz.questions_per_attempt, quiz.questions.count())
+            # strip_tags() alone leaves entities like "&amp;" as literal
+            # text, which autoescaping then re-escapes on render (visible
+            # as "&amp;" on the page) -- unescape() first so what's left
+            # is plain text with real "&" characters for autoescape to
+            # handle correctly, exactly once.
+            short_desc = html.unescape(strip_tags(quiz.description or ""))
+            short_desc = Truncator(short_desc.strip()).chars(140)
+            quizzes.append({
+                "quiz": quiz,
+                "icon_svg": QUIZ_ICON_SVGS[meta["icon"]],
+                "tag": meta["tag"],
+                "accent": meta["accent"],
+                "question_count": question_count,
+                "total_marks": question_count * MARKS_PER_QUESTION,
+                "short_desc": short_desc,
+                # Same PER_QUESTION_SECONDS the actual quiz-take timer uses
+                # (not a separate guess), so this can never drift out of
+                # sync with the real per-question countdown.
+                "estimated_minutes": round(question_count * PER_QUESTION_SECONDS / 60),
+            })
+        return render(request, "custom_admin/quizzes/quiz_list.html", {"quizzes": quizzes})
 
 
 class QuizLandingView(View):
@@ -382,12 +652,20 @@ class QuizLandingView(View):
         og_image = request.build_absolute_uri(quiz.image.url) if quiz.image else None
         whatsapp_text = f"सहयोग सेतु का \"{quiz.title}\" क्विज़ आज़माइए: {share_url}?src=whatsapp"
 
+        # How many questions THIS attempt will actually contain, not the
+        # size of the full bank -- quiz.questions.count() (e.g. 100) was
+        # shown here before, but QuizTakeView only ever samples
+        # questions_per_attempt (e.g. 10), so the old number promised
+        # far more than the quiz actually delivers.
+        question_count = min(quiz.questions_per_attempt, quiz.questions.count())
+
         return render(request, "custom_admin/quizzes/quiz_landing.html", {
             "quiz": quiz,
             "share_url": share_url,
             "whatsapp_text": whatsapp_text,
             "og_image": og_image,
-            "question_count": quiz.questions.count(),
+            "question_count": question_count,
+            "total_marks": question_count * MARKS_PER_QUESTION,
         })
 
 
@@ -450,119 +728,271 @@ class QuizTakeView(View):
             if existing:
                 return redirect("quiz_result", pk=existing.id)
 
-        attempt_key, question_ids_key = _session_keys(quiz.id)
+        attempt = self._get_or_create_attempt(request, quiz)
 
-        attempt = None
-        attempt_id = request.session.get(attempt_key)
-        if attempt_id:
-            attempt = QuizAttempt.objects.filter(
-                id=attempt_id, user=request.user, quiz=quiz, completed_at__isnull=True
-            ).first()
+        # Resolve against attempt.question_ids -- NEVER request.session.
+        # gunicorn restarts, session expiry, and a second browser tab all
+        # destroy session state mid-quiz; this row survives all three.
+        # IDs that no longer resolve (admin deleted the question mid-attempt
+        # via EditQuizView) are simply skipped here -- quiz_submit excludes
+        # them from total_questions too, never counts them wrong.
+        questions_by_id = Questions.objects.in_bulk(attempt.question_ids)
+        questions = [questions_by_id[qid] for qid in attempt.question_ids if qid in questions_by_id]
 
-        question_ids = request.session.get(question_ids_key)
+        # Already-saved answers, so a resumed attempt (crash/reload/new tab)
+        # shows correct palette state on first paint, not just after JS runs.
+        existing_answers = dict(
+            attempt.responses.exclude(question_id__isnull=True).values_list("question_id", "selected_option")
+        )
 
-        if not attempt or not question_ids:
-            # Fresh attempt: lock in a random question set and start the
-            # server-side timer now. Reusing an in-progress attempt (above)
-            # instead of always creating a new one prevents a participant
-            # from resetting their time limit by simply reloading the page.
-            bank_ids = list(quiz.questions.values_list("id", flat=True))
-            sample_size = min(quiz.questions_per_attempt, len(bank_ids))
-            question_ids = random.sample(bank_ids, sample_size) if bank_ids else []
-
-            # Source is validated again here (not just at landing-page time) --
-            # defence in depth against a tampered session value, cheap to redo.
-            source = clean_source(request.session.get(_source_session_key(quiz.id), "direct"))
-            attempt = QuizAttempt.objects.create(user=request.user, quiz=quiz, source=source)
-
-            request.session[attempt_key] = attempt.id
-            request.session[question_ids_key] = question_ids
-
-        questions_by_id = Questions.objects.in_bulk(question_ids)
-        questions = [questions_by_id[qid] for qid in question_ids if qid in questions_by_id]
+        # Server is the only clock. remaining_seconds here is the whole-
+        # attempt safety budget backing quiz_answer's server-side rejection
+        # below, NOT what drives the client's visible countdown any more --
+        # the client now runs its own fixed 30s-per-question timer (see
+        # quiz_take.html), reset locally on every question change.
+        elapsed = (timezone.now() - attempt.started_at).total_seconds()
+        remaining_seconds = max(0, len(questions) * PER_QUESTION_SERVER_BUDGET - int(elapsed))
 
         avg_percentage = completed_attempts.aggregate(avg=Avg('percentage'))['avg'] or 0
 
+        # Forward-only + one-shot answers (see quiz_answer) mean an already-
+        # answered question is never shown again -- resume at the first
+        # question that has no saved response yet, not always index 0,
+        # otherwise reloading mid-quiz would strand the participant back on
+        # a locked, already-answered Q1.
+        resume_index = next(
+            (i for i, q in enumerate(questions) if q.id not in existing_answers),
+            len(questions),
+        )
+
+        # Question text/options travel to the client (needed to render the
+        # gamified single-card UI without a full-page reload per question),
+        # but correct_option/explanation never do -- those only ever come
+        # back from quiz_answer(), after an answer for that specific
+        # question is already locked in, same secure boundary as before.
+        quiz_data = {
+            "attemptId": attempt.id,
+            "answerUrl": reverse("quiz_answer", kwargs={"quiz_id": quiz.id}),
+            "perQuestionSeconds": PER_QUESTION_SECONDS,
+            "resumeIndex": resume_index,
+            "questions": [
+                {
+                    "id": q.id,
+                    "text": q.question,
+                    "options": [text for _, text in q.options_list],
+                }
+                for q in questions
+            ],
+        }
+
         return render(request, "custom_admin/quizzes/quiz_take.html", {
             "quiz": quiz,
+            "attempt": attempt,
             "questions": questions,
+            "existing_answers": existing_answers,
             "total_questions": len(questions),
+            "remaining_seconds": remaining_seconds,
             "completed_count": completed_attempts.count(),
             "avg_percentage": round(avg_percentage, 1),
+            "quiz_data": quiz_data,
         })
+
+    def _get_or_create_attempt(self, request, quiz):
+        # Reusing an in-progress attempt (rather than always creating a new
+        # one) is what makes the timer un-resettable by just reloading the
+        # page, AND is what makes a resubmit idempotent later in
+        # quiz_submit -- there's only ever one live row per (user, quiz).
+        #
+        # That guarantee is enforced by QuizAttempt.live_lock's real unique
+        # constraint (see the field's docstring for why it's this and not a
+        # Meta.UniqueConstraint(condition=...) -- MySQL doesn't support
+        # conditional unique constraints, so that declaration would silently
+        # create nothing). The .filter().first() below is just a fast-path
+        # read for the common case; live_lock's uniqueness is what actually
+        # stops two simultaneous taps on "क्विज़ शुरू करें" from both
+        # succeeding.
+        attempt = QuizAttempt.objects.filter(user=request.user, quiz=quiz, completed_at__isnull=True).first()
+        created = False
+
+        if not attempt:
+            try:
+                with transaction.atomic():
+                    attempt = QuizAttempt.objects.create(
+                        user=request.user, quiz=quiz,
+                        live_lock=f"{request.user.id}_{quiz.id}",
+                        source=clean_source(request.session.get(_source_session_key(quiz.id), "direct")),
+                    )
+                    created = True
+            except IntegrityError:
+                # Someone else's concurrent request won the race and holds
+                # live_lock for this (user, quiz) pair right now -- re-fetch
+                # their row instead of erroring out.
+                attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz, completed_at__isnull=True)
+
+        if created or not attempt.question_ids:
+            bank_ids = list(quiz.questions.values_list("id", flat=True))
+            sample_size = min(quiz.questions_per_attempt, len(bank_ids))
+            attempt.question_ids = random.sample(bank_ids, sample_size) if bank_ids else []
+            attempt.save(update_fields=["question_ids"])
+
+        return attempt
 
 
 @login_required
-def quiz_submit(request, quiz_id):
-    quiz = get_object_or_404(Quizzes, id=quiz_id, status=True)
+def quiz_answer(request, quiz_id):
+    """Per-question answer, called via fetch() the instant the participant
+    picks an option (or a question times out/is skipped) -- NOT at final
+    submit (quiz_submit reads no client answers at all; everything
+    scoreable is already here). Also the ONLY place correct_option/
+    explanation are ever revealed to the client, and only for the one
+    question just answered -- the gamified UI shows an immediate right/
+    wrong reveal, so this response carries isCorrect/correctOption/
+    explanation back down.
 
+    One-shot, not update_or_create: the new UI locks a question's options
+    the instant it's answered (no "change your mind" affordance left on
+    the client), so the server enforces the same rule -- otherwise, since
+    this endpoint now echoes back whether an answer was correct, a client
+    that ignored its own UI lock could brute-force every question by
+    POSTing each option in turn and reading isCorrect. First answer for a
+    question is final; a repeat POST just replays the original result
+    instead of erroring, so a network retry after a dropped response is
+    harmless."""
     if request.method != "POST":
-        return redirect("quiz_take", quiz_id=quiz.id)
+        return JsonResponse({"ok": False, "error": "post_required"}, status=405)
 
-    attempt_key, question_ids_key = _session_keys(quiz.id)
-    attempt_id = request.session.get(attempt_key)
+    quiz = get_object_or_404(Quizzes, id=quiz_id, status=True)
+    attempt = QuizAttempt.objects.filter(user=request.user, quiz=quiz, completed_at__isnull=True).first()
+    if not attempt:
+        return JsonResponse({"ok": False, "error": "no_active_attempt"}, status=409)
 
-    if not attempt_id:
-        messages.error(request, "आपका क्विज़ सत्र समाप्त हो गया है। कृपया फिर से शुरू करें।")
-        return redirect("quiz_take", quiz_id=quiz.id)
+    # Server is the only clock -- reject anything POSTed after time's up.
+    # Budget is per-attempt question count * PER_QUESTION_SERVER_BUDGET,
+    # matching the client's fixed 30s-per-question pacing (not quiz.quiz_time,
+    # which no longer drives timing -- see PER_QUESTION_SECONDS above).
+    # (quiz_submit re-derives elapsed time independently too; this is just
+    # the earliest point an over-time answer can be caught.)
+    elapsed = (timezone.now() - attempt.started_at).total_seconds()
+    if elapsed > len(attempt.question_ids) * PER_QUESTION_SERVER_BUDGET:
+        return JsonResponse({"ok": False, "error": "time_up"}, status=403)
 
-    attempt = get_object_or_404(
-        QuizAttempt, id=attempt_id, user=request.user, quiz=quiz, completed_at__isnull=True
-    )
+    try:
+        question_id = int(request.POST.get("question_id", ""))
+    except (TypeError, ValueError):
+        return JsonResponse({"ok": False, "error": "bad_question_id"}, status=400)
 
-    question_ids = request.session.get(question_ids_key) or list(
-        quiz.questions.values_list("id", flat=True)
-    )
-    questions_by_id = Questions.objects.in_bulk(question_ids)
-    questions = [questions_by_id[qid] for qid in question_ids if qid in questions_by_id]
+    # Must be a question actually sampled for THIS attempt -- closes off
+    # answering something that was never assigned to this participant.
+    if question_id not in attempt.question_ids:
+        return JsonResponse({"ok": False, "error": "not_in_attempt"}, status=400)
 
-    # Server-side timer: elapsed time is always derived from when the attempt
-    # row was created (started_at), never from anything the client sends.
-    elapsed_seconds = (timezone.now() - attempt.started_at).total_seconds()
+    question = Questions.objects.filter(id=question_id, quiz=quiz).first()
+    if not question:
+        # Deleted mid-attempt by EditQuizView -- nothing to score against.
+        # Told to the client so it can grey that palette slot instead of
+        # silently failing or retrying forever.
+        return JsonResponse({"ok": False, "error": "question_deleted"}, status=410)
 
-    total_questions = len(questions)
-    score = 0
-    responses = []
+    existing = QuestionResponse.objects.filter(attempt=attempt, question=question).first()
+    if existing:
+        return JsonResponse({
+            "ok": True,
+            "isCorrect": existing.is_correct,
+            "correctOption": int(existing.correct_option),
+            "explanation": existing.explanation_snapshot,
+        })
 
-    for question in questions:
-        selected_option = request.POST.get(f"question_{question.id}", "")
-        correct_option = str(question.correct_option)
-        # A blank selected_option can never equal correct_option, so an
-        # unanswered question is always scored wrong -- including when time
-        # has run out, which is exactly "mark unanswered questions as wrong"
-        # without needing to special-case the timeout.
-        is_correct = selected_option == correct_option
-        if is_correct:
-            score += 1
+    # selected_option is "" for a skip/timeout -- never equals correct_option
+    # ("1".."4"), so it scores as wrong exactly like any other wrong answer.
+    selected_option = request.POST.get("selected_option", "")
+    correct_option = str(question.correct_option)
+    is_correct = selected_option == correct_option
 
-        responses.append(QuestionResponse(
-            question=question,
+    try:
+        response = QuestionResponse.objects.create(
+            attempt=attempt, question=question,
             question_text_snapshot=question.question,
             selected_option=selected_option,
             correct_option=correct_option,
             is_correct=is_correct,
             explanation_snapshot=question.explanation,
-        ))
+        )
+    except IntegrityError:
+        # Two near-simultaneous POSTs for the same question (e.g. a
+        # double-tap before the client-side lock kicks in) -- the
+        # UniqueConstraint on (attempt, question) means only one could have
+        # won the create(); hand back that winner's real result instead of
+        # 500ing on the loser.
+        response = QuestionResponse.objects.get(attempt=attempt, question=question)
 
-    percentage = (score / total_questions * 100) if total_questions else 0
-    passed = percentage >= quiz.pass_threshold
+    return JsonResponse({
+        "ok": True,
+        "isCorrect": response.is_correct,
+        "correctOption": int(response.correct_option),
+        "explanation": response.explanation_snapshot,
+    })
 
-    attempt.score = score
-    attempt.total_questions = total_questions
-    attempt.percentage = percentage
-    attempt.passed = passed
-    attempt.time_taken_seconds = int(elapsed_seconds)
-    attempt.completed_at = timezone.now()
-    attempt.save()
 
-    for response in responses:
-        response.attempt = attempt
-    QuestionResponse.objects.bulk_create(responses)
+@login_required
+def quiz_submit(request, pk):
+    """Idempotent finalize. The client sends NO answers and NO score --
+    everything is already in QuestionResponse, saved incrementally by
+    quiz_answer() as the participant went. A question with no response row
+    is unanswered = wrong. select_for_update + an already-completed
+    short-circuit closes the same double-scoring hole /api/quiz/certificate
+    had: a double-tap, a network retry, or a queued offline POST replaying
+    after the attempt already finished all just redirect to the existing
+    result instead of re-scoring."""
+    if request.method != "POST":
+        attempt = get_object_or_404(QuizAttempt, pk=pk, user=request.user)
+        return redirect("quiz_take", quiz_id=attempt.quiz_id)
 
-    request.session.pop(attempt_key, None)
-    request.session.pop(question_ids_key, None)
+    with transaction.atomic():
+        attempt = get_object_or_404(
+            QuizAttempt.objects.select_for_update(), pk=pk, user=request.user
+        )
 
-    return redirect("quiz_result", pk=attempt.id)
+        if attempt.completed_at:
+            return redirect("quiz_result", pk=attempt.pk)
+
+        quiz = attempt.quiz
+
+        # Recompute elapsed from started_at server-side -- never trust
+        # anything the client sends about timing.
+        elapsed_seconds = (timezone.now() - attempt.started_at).total_seconds()
+
+        # Resolve against question_ids fixed at attempt creation. Any ID
+        # that no longer exists (admin deleted the question mid-attempt) is
+        # excluded from total_questions entirely, never counted wrong --
+        # the user is never punished for an admin's edit.
+        live_question_ids = set(
+            Questions.objects.filter(id__in=attempt.question_ids).values_list("id", flat=True)
+        )
+        total_questions = len(live_question_ids)
+
+        responses_by_qid = dict(
+            attempt.responses.filter(question_id__in=live_question_ids)
+            .values_list("question_id", "is_correct")
+        )
+        # A live question with no saved response = never answered = wrong.
+        score = sum(1 for qid in live_question_ids if responses_by_qid.get(qid))
+
+        percentage = (score / total_questions * 100) if total_questions else 0
+        passed = percentage >= quiz.pass_threshold
+
+        attempt.score = score
+        attempt.total_questions = total_questions
+        attempt.percentage = percentage
+        attempt.passed = passed
+        attempt.time_taken_seconds = int(elapsed_seconds)
+        attempt.completed_at = timezone.now()
+        # Release live_lock -- this is what lets the same user start a NEW
+        # live attempt later (repeat attempts, if one_attempt_only=False)
+        # without live_lock's unique constraint blocking them.
+        attempt.live_lock = None
+        attempt.save()
+
+    return redirect("quiz_result", pk=attempt.pk)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -572,7 +1002,22 @@ class QuizResultView(View):
         attempt = get_object_or_404(QuizAttempt, pk=pk, user=request.user)
         responses = attempt.responses.all()
         correct = responses.filter(is_correct=True).count()
+        # "Wrong" (picked an option, got it wrong) vs "missed" (skipped, or
+        # timed out with no answer -- quiz_answer records those with
+        # selected_option="") are shown as separate states in the gamified
+        # navigator grid/report, matching the taking flow's own reveal.
+        # missed is total-minus-the-rest rather than its own filter so a
+        # question with NO response row at all (the network gave up after
+        # retries in quiz_take.html, see submitAnswer there) still counts
+        # toward it -- correct+wrong+missed always equals total_questions
+        # even in that edge case, even though that particular question has
+        # no snapshot to show in the review list below.
+        wrong = responses.filter(is_correct=False).exclude(selected_option="").count()
+        missed = attempt.total_questions - correct - wrong
         incorrect = attempt.total_questions - correct
+
+        marks = attempt.score * MARKS_PER_QUESTION
+        total_marks = attempt.total_questions * MARKS_PER_QUESTION
 
         # Share the QUIZ landing page, never this result page -- /quiz/result/<id>/
         # is private and guessable by id; sharing it would leak this user's
@@ -588,9 +1033,14 @@ class QuizResultView(View):
             "attempt": attempt,
             "responses": responses,
             "correct": correct,
+            "wrong": wrong,
+            "missed": missed,
             "incorrect": incorrect,
+            "marks": marks,
+            "total_marks": total_marks,
             "percentage": attempt.percentage,
             "pass_threshold": attempt.quiz.pass_threshold,
+            "certificate_min_percentage": CERTIFICATE_MIN_PERCENTAGE,
             "share_url": share_url,
             "whatsapp_text": whatsapp_text,
         })
@@ -608,7 +1058,10 @@ class QuizLeaderboardView(View):
 
         attempts = QuizAttempt.objects.filter(
             quiz=quiz, completed_at__isnull=False
-        ).select_related("user").order_by("-score", "time_taken_seconds")[:100]
+        ).select_related("user").annotate(
+            marks=F("score") * MARKS_PER_QUESTION,
+            total_marks=F("total_questions") * MARKS_PER_QUESTION,
+        ).order_by("-score", "time_taken_seconds")[:100]
 
         return render(request, "custom_admin/quizzes/quiz_leaderboard.html", {
             "quiz": quiz,
@@ -621,6 +1074,13 @@ class QuizLeaderboardView(View):
 # wkhtmltopdf, so no new system deps on the VPS.
 # ======================================================================
 
+# Hard floor, independent of quiz.pass_threshold -- pass_threshold is
+# admin-configurable per quiz (e.g. for leaderboard/analytics "did they
+# pass" purposes) and could be set below 60 for some future quiz. A
+# certificate must never go out under 60% regardless of that setting.
+CERTIFICATE_MIN_PERCENTAGE = 60
+
+
 @method_decorator(login_required, name='dispatch')
 class CertificateView(View):
 
@@ -628,10 +1088,24 @@ class CertificateView(View):
         # passed=True in the lookup itself -- a failed attempt 404s here
         # rather than needing a separate "sorry, you didn't pass" branch.
         # is_demo=False -- a demo/seed row can never issue a real certificate.
-        attempt = get_object_or_404(QuizAttempt, pk=pk, user=request.user, passed=True, is_demo=False)
+        # percentage__gte -- see CERTIFICATE_MIN_PERCENTAGE above.
+        attempt = get_object_or_404(
+            QuizAttempt, pk=pk, user=request.user, passed=True, is_demo=False,
+            percentage__gte=CERTIFICATE_MIN_PERCENTAGE,
+        )
 
         if not attempt.quiz.certificate_enabled:
             messages.error(request, "Is quiz ke liye certificate available nahi hai.")
+            return redirect("quiz_result", pk=attempt.id)
+
+        # Some users registered with mobile only and have a blank first_name
+        # -- get_full_name() then returns ''. username is required NOT NULL
+        # for auth so this should be unreachable in practice, but a blank
+        # name signed onto a certificate is bad enough to guard explicitly
+        # rather than trust that invariant silently.
+        display_name = (attempt.user.get_full_name() or attempt.user.username or "").strip()
+        if not display_name:
+            messages.error(request, "आपके प्रोफ़ाइल में नाम नहीं है — certificate जारी नहीं किया जा सकता। कृपया सहायता से संपर्क करें।")
             return redirect("quiz_result", pk=attempt.id)
 
         if not attempt.certificate_id:
@@ -653,9 +1127,32 @@ class CertificateView(View):
         return render(request, "custom_admin/quizzes/certificate.html", {
             "attempt": attempt,
             "quiz": attempt.quiz,
+            "display_name": display_name,
             "share_url": share_url,
             "share_text": share_text,
         })
+
+
+@method_decorator(login_required, name='dispatch')
+class CertificateImageDownloadView(View):
+    """PNG download (Part K) -- same eligibility checks as CertificateView
+    (own attempt, passed, not demo) since this bypasses the certificate
+    page entirely; without them a logged-in user could download any
+    attempt's certificate by guessing a pk."""
+
+    def get(self, request, pk):
+        attempt = get_object_or_404(
+            QuizAttempt, pk=pk, user=request.user, passed=True, is_demo=False,
+            percentage__gte=CERTIFICATE_MIN_PERCENTAGE,
+        )
+        if not attempt.certificate_id:
+            messages.error(request, "Certificate abhi issue nahi hua hai.")
+            return redirect("quiz_result", pk=attempt.id)
+
+        image_bytes = render_certificate_image(attempt)
+        response = HttpResponse(image_bytes, content_type="image/png")
+        response["Content-Disposition"] = f'attachment; filename="certificate_{attempt.certificate_id}.png"'
+        return response
 
 
 def verify_certificate(request, cert_id):
@@ -845,6 +1342,10 @@ class MyResultsView(View):
         attempts = (
             QuizAttempt.objects.filter(user=request.user, completed_at__isnull=False)
             .select_related("quiz")
+            .annotate(
+                marks=F("score") * MARKS_PER_QUESTION,
+                total_marks=F("total_questions") * MARKS_PER_QUESTION,
+            )
             .order_by("-completed_at")
         )
         return render(request, "custom_admin/quizzes/my_results.html", {"attempts": attempts})
