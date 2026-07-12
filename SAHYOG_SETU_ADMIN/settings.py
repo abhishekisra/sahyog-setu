@@ -23,22 +23,36 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = '97ny&l)^z^6mxpt@%)qubngaexjiulj@628m*(5ng@cq9-#(j8'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
 ALLOWED_HOSTS=['127.0.0.1', '212.38.94.162', 'sahyogsetu.in', 'www.sahyogsetu.in']
 
 CORS_ALLOW_CREDENTIALS = True
-CORS_ALLOW_ALL_ORIGINS = True
+# ALL_ORIGINS + CREDENTIALS together let any website make authenticated
+# (cookie-bearing) cross-origin requests and read the response -- restricted
+# to the actual known origins instead (same-origin browser traffic doesn't
+# need CORS at all; this only matters for the separate dev frontend / any
+# future cross-origin caller).
+CORS_ALLOW_ALL_ORIGINS = False
+CORS_ALLOWED_ORIGINS = [
+    "https://sahyogsetu.in",
+    "https://www.sahyogsetu.in",
+    "http://127.0.0.1:3000",
+    "http://localhost:3000",
+]
 
 # CORS_ALLOW_ALL_HEADERS = True
 
 CORS_ALLOW_HEADERS = ["authorization", 'credentials', 'content-type']
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost",
-# ]
-
 CSRF_TRUSTED_ORIGINS = ['http://127.0.0.1:3000', 'http://localhost:3000', 'https://sahyogsetu.in']
+
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
+# nginx terminates TLS and always forwards this header (see /etc/nginx/proxy_params)
+# -- without it Django thinks every request is plain HTTP, which defeats the
+# secure-cookie flags above and makes build_absolute_uri() emit http:// links.
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
 
 
@@ -131,7 +145,7 @@ AUTH_PASSWORD_VALIDATORS = [
     },
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
-        'OPTIONS': {'min_length': 6},
+        'OPTIONS': {'min_length': 8},
     },
     {
         'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
@@ -174,11 +188,12 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 if DEBUG:
     STATICFILES_DIRS = [os.path.join(BASE_DIR, 'public/static')]
-else:
-  STATIC_ROOT = os.path.join(BASE_DIR, 'public/static')
 
+# nginx serves /public/static/ directly via alias regardless of DEBUG -- this
+# is only what `collectstatic` would write to, so it has to match that same
+# directory (previously shadowed by a second, unconditional STATIC_ROOT
+# assignment further down that pointed at a different, unused folder).
+STATIC_ROOT = os.path.join(BASE_DIR, 'public/static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-import os
-STATIC_ROOT = BASE_DIR / 'staticfiles'
 

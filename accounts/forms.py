@@ -6,17 +6,17 @@ User = get_user_model()
 
 
 class SignupForm(forms.Form):
-    full_name = forms.CharField(label="पूरा नाम", max_length=150)
-    mobile = forms.CharField(label="मोबाइल नंबर", max_length=10)
-    password = forms.CharField(label="पासवर्ड", widget=forms.PasswordInput)
-    email = forms.EmailField(label="ईमेल", required=False)
+    full_name = forms.CharField(label="Full Name", max_length=150)
+    mobile = forms.CharField(label="Mobile Number", max_length=10)
+    password = forms.CharField(label="Password", widget=forms.PasswordInput)
+    email = forms.EmailField(label="Email", required=False)
 
     def clean_mobile(self):
         mobile = self.cleaned_data['mobile'].strip()
         if not mobile.isdigit() or len(mobile) != 10:
-            raise ValidationError("कृपया 10 अंकों का सही मोबाइल नंबर दर्ज करें।")
+            raise ValidationError("Please enter a valid 10-digit mobile number.")
         if User.objects.filter(username=mobile).exists():
-            raise ValidationError("यह मोबाइल नंबर पहले से पंजीकृत है।")
+            raise ValidationError("This mobile number is already registered.")
         return mobile
 
     def clean_password(self):

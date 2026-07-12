@@ -311,6 +311,373 @@
             }).catch(function () { /* user cancelled -- ignore */ });
         }
     </script>
+
+    <!-- Language selector (Google Website Translator) -- the React SPA
+         already has its own language switcher covering these same Indian
+         languages, but that only applies to SPA-rendered routes. These
+         Django-rendered pages (quiz section, login/signup) had no
+         translator at all, so this adds the same capability here,
+         scoped to the same language list, via Google's official
+         translate.google.com widget (no server-side i18n content exists
+         to translate against, so this is the only practical way to cover
+         quiz text in Indian languages without authoring parallel content
+         for every language). -->
+    <div id="ssq-lang-root">
+        <span id="ssq-lang-icon" aria-hidden="true">🌐</span>
+        <div id="google_translate_element"></div>
+    </div>
+
+    <script type="text/javascript">
+        function ssqGoogleTranslateInit() {
+            new google.translate.TranslateElement({
+                pageLanguage: 'en',
+                includedLanguages: 'as,bn,gu,hi,kn,gom,mai,ml,mr,or,pa,sa,ta,te,ur',
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE,
+                autoDisplay: false
+            }, 'google_translate_element');
+        }
+        // Google's widget injects two different iframe.skiptranslate elements:
+        // the always-hideable top "this page has been translated" banner, AND
+        // the on-demand language-picker dropdown -- both carry only the
+        // generic "skiptranslate" class in the current markup (the older,
+        // more specific .goog-te-banner-frame/.goog-te-menu-frame class names
+        // are gone), so a blanket `iframe.skiptranslate{display:none}` rule
+        // was hiding the dropdown menu along with the banner -- the widget
+        // looked present but clicking it never showed a language list.
+        // Distinguish them by geometry instead: the banner is flush to the
+        // top of the viewport and spans (almost) its full width; the picker
+        // popup is a small box positioned near the trigger button.
+        (function () {
+            // NOTE: an earlier version of this also reached inside the
+            // picker popup's (same-origin, document.write'd) iframe to
+            // recolor Google's own <table>/<a> markup to match the site's
+            // gold/dark-green theme. That was reverted -- Google's internal
+            // markup for this popup renders its two language columns
+            // inconsistently against the same CSS selectors (one column
+            // picked up the injected styles, the other didn't, even after
+            // Google finished rendering), producing a half-styled, worse-
+            // looking result than just leaving Google's own default styling
+            // alone. Only the outer container (trigger button + iframe
+            // border/shadow below) is styled -- that reliably works because
+            // it's applied from the parent document, not injected into
+            // Google's own.
+            function sweep() {
+                document.querySelectorAll('iframe.skiptranslate').forEach(function (ifr) {
+                    var r = ifr.getBoundingClientRect();
+                    var isBanner = r.top <= 5 && r.width >= window.innerWidth * 0.8;
+                    ifr.style.setProperty('display', isBanner ? 'none' : '', 'important');
+                    if (!isBanner && r.width > 0) {
+                        ifr.style.setProperty('border-radius', '10px', 'important');
+                        ifr.style.setProperty('overflow', 'hidden', 'important');
+                        ifr.style.setProperty('border', '1px solid rgba(255,215,0,.25)', 'important');
+                        ifr.style.setProperty('box-shadow', '0 12px 28px rgba(0,0,0,.45)', 'important');
+                    }
+                });
+            }
+            setInterval(sweep, 400);
+        })();
+    </script>
+    <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=ssqGoogleTranslateInit"></script>
+
+    <style>
+        #ssq-lang-root {
+            position: fixed; top: 16px; right: 16px; z-index: 99997;
+            display: flex; align-items: center; gap: 6px;
+            background: linear-gradient(165deg, #2b4634, #213627);
+            border: 1px solid rgba(201,162,39,.35);
+            border-radius: 12px;
+            padding: 4px 10px;
+            box-shadow: 0 8px 20px rgba(0,0,0,.35);
+            transition: filter .15s ease, transform .15s ease;
+        }
+        #ssq-lang-root:hover {
+            filter: brightness(1.15);
+        }
+        #ssq-lang-icon { font-size: 13px; line-height: 1; }
+        /* Force gold text on every descendant rather than a single named
+           class -- Google's own class names on the gadget's inner spans/link
+           are randomly generated per load and change across widget updates,
+           so targeting a specific one (e.g. the old .goog-te-menu-value) is
+           not reliable; a blanket !important on `*` beats whatever inline
+           color Google sets on its own elements regardless of their class. */
+        #ssq-lang-root .goog-te-gadget,
+        #ssq-lang-root .goog-te-gadget * {
+            font-family: 'Mukta', system-ui, sans-serif !important;
+            color: #ffd75e !important;
+            font-size: 13px !important;
+            font-weight: 600 !important;
+        }
+        #ssq-lang-root .goog-te-gadget-simple {
+            background: transparent !important; border: none !important; padding: 0 !important;
+        }
+        #ssq-lang-root img { display: none !important; }
+        /* Google shifts <body> down to make room for its top banner when a
+           translation is active; the banner itself is hidden by the sweep()
+           above (geometry-based), so undo that shift too. */
+        body { top: 0 !important; }
+    </style>
+
+    <!-- Sahyog Setu FAQ chatbot widget -- same self-contained markup as
+         /var/www/html/index.html (the React SPA shell), kept in sync
+         manually since the two live in separate deploy pipelines. -->
+    <div id="ssq-chatbot-root">
+        <button id="ssq-chatbot-toggle" aria-label="Chat sahayak kholein" type="button">
+            <svg id="ssq-chatbot-icon-open" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#14301f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <svg id="ssq-chatbot-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#14301f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
+        <div id="ssq-chatbot-panel" role="dialog" aria-label="Sahyog Setu Sahayak">
+            <div id="ssq-chatbot-header">
+                <span id="ssq-chatbot-avatar">स</span>
+                <div>
+                    <div id="ssq-chatbot-title">Sahyog Setu Sahayak</div>
+                    <div id="ssq-chatbot-subtitle">आमतौर पर तुरंत जवाब देता है</div>
+                </div>
+            </div>
+            <div id="ssq-chatbot-messages"></div>
+            <div id="ssq-chatbot-quick"></div>
+            <form id="ssq-chatbot-form">
+                <input id="ssq-chatbot-input" type="text" autocomplete="off" placeholder="अपना सवाल लिखें...">
+                <button type="submit" aria-label="भेजें">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#14301f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        #ssq-chatbot-root, #ssq-chatbot-root * { box-sizing: border-box; font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif; }
+
+        #ssq-chatbot-toggle {
+            position: fixed; right: 20px; bottom: 20px; z-index: 99998;
+            width: 58px; height: 58px; border-radius: 50%; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #ffe27a 0%, #d9a916 100%);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        #ssq-chatbot-toggle:hover { transform: scale(1.06); }
+
+        #ssq-chatbot-panel {
+            position: fixed; right: 20px; bottom: 90px; z-index: 99999;
+            width: 340px; max-width: calc(100vw - 32px);
+            height: 460px; max-height: calc(100vh - 130px);
+            background: #10241a;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #ssq-chatbot-panel.ssq-open { display: flex; }
+
+        #ssq-chatbot-header {
+            background: linear-gradient(135deg, #1b4332 0%, #10241a 100%);
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+        #ssq-chatbot-avatar {
+            width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #ffe27a 0%, #d9a916 100%);
+            color: #14301f; font-weight: 800; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #ssq-chatbot-title { color: #fff; font-weight: 700; font-size: 14px; }
+        #ssq-chatbot-subtitle { color: rgba(255,255,255,0.55); font-size: 11px; margin-top: 1px; }
+
+        #ssq-chatbot-messages {
+            flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .ssq-msg { max-width: 84%; padding: 9px 13px; border-radius: 12px; font-size: 13px; line-height: 1.45; white-space: pre-line; }
+        .ssq-msg-bot { align-self: flex-start; background: rgba(255,255,255,0.08); color: #f3f3ef; border-bottom-left-radius: 3px; }
+        .ssq-msg-user { align-self: flex-end; background: #d9a916; color: #14301f; font-weight: 600; border-bottom-right-radius: 3px; }
+        .ssq-msg-bot a { color: #ffe27a; font-weight: 700; text-decoration: underline; }
+
+        #ssq-chatbot-quick {
+            display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px 14px; flex-shrink: 0;
+        }
+        .ssq-chip {
+            background: rgba(255,255,255,0.08); color: #ffe27a; border: 1px solid rgba(255,226,122,0.35);
+            border-radius: 99px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .ssq-chip:hover { background: rgba(255,226,122,0.15); }
+
+        #ssq-chatbot-form {
+            display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+        }
+        #ssq-chatbot-input {
+            flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 9px 12px; color: #fff; font-size: 13px; outline: none;
+        }
+        #ssq-chatbot-input::placeholder { color: rgba(255,255,255,0.4); }
+        #ssq-chatbot-input:focus { border-color: #d9a916; }
+        #ssq-chatbot-form button[type=submit] {
+            width: 38px; height: 38px; border-radius: 10px; border: none; cursor: pointer; flex-shrink: 0;
+            background: linear-gradient(135deg, #ffe27a 0%, #d9a916 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        @media (max-width: 420px) {
+            #ssq-chatbot-panel { right: 16px; left: 16px; width: auto; bottom: 78px; }
+            /* Smaller + tucked further into the corner than the desktop
+               58px/20px version -- on mobile this sits directly over
+               whatever page content happens to be scrolled to the bottom
+               of the viewport (e.g. a full-width CTA button on /quizzes),
+               so the smaller footprint here is to minimize how much of
+               that content it visually sits on top of. It doesn't block
+               taps either way (this is a separate element on top, the
+               button underneath is still 100% clickable), but the smaller
+               size reads as "a small floating icon" rather than "a chunk
+               covering the button". */
+            #ssq-chatbot-toggle { right: 12px; bottom: 12px; width: 46px; height: 46px; }
+            #ssq-chatbot-toggle svg { width: 20px; height: 20px; }
+        }
+    </style>
+
+    <script>
+    (function () {
+        if (window.__ssqChatbotInit) return;
+        window.__ssqChatbotInit = true;
+
+        var TOPICS = [
+            {
+                chip: "योजनाएं",
+                keywords: ["scheme", "yojana", "योजना"],
+                reply: "केंद्र और राज्य सरकार की योजनाओं की जानकारी यहाँ देखें:\n" +
+                    "<a href=\"/schemes-and-services/central\">Central Schemes</a>\n" +
+                    "<a href=\"/schemes/map\">State Schemes</a>\n" +
+                    "<a href=\"/eligibility\">Check Eligibility</a>"
+            },
+            {
+                chip: "क्विज़ / प्रमाण पत्र",
+                keywords: ["quiz", "certificate", "प्रमाण", "क्विज़", "score", "pass"],
+                reply: "Quiz Zone में जाकर कोई भी क्विज़ चुनें और शुरू करें:\n" +
+                    "<a href=\"/quizzes\">सभी क्विज़ देखें</a>\n\n" +
+                    "पास होने पर certificate turant मिल जाता है — apna result " +
+                    "<a href=\"/my-results\">My Results</a> mein dekh sakte hain (login zaroori hai)."
+            },
+            {
+                chip: "लॉगिन / साइनअप",
+                keywords: ["login", "signup", "register", "account", "लॉगिन", "पंजीकरण"],
+                reply: "Quiz lene ya result/certificate dekhne ke liye login/signup zaroori hai:\n" +
+                    "<a href=\"/accounts/login/\">Login करें</a>\n" +
+                    "<a href=\"/accounts/signup/\">Signup करें</a>"
+            },
+            {
+                chip: "हेल्पलाइन / संपर्क",
+                keywords: ["helpline", "contact", "help", "support", "संपर्क", "सहायता", "फोन", "number"],
+                reply: "Kisi bhi sawal ya samasya ke liye:\n<a href=\"/helplines\">Helplines देखें</a>"
+            },
+            {
+                chip: "ज़रूरी दस्तावेज़ / पोर्टल",
+                keywords: ["document", "portal", "aadhaar", "pan", "दस्तावेज़", "पोर्टल"],
+                reply: "Zaroori sarkari documents aur portals ki list yahan hai:\n" +
+                    "<a href=\"/important-documents\">Important Documents</a>\n" +
+                    "<a href=\"/important-portals\">Important Portals</a>"
+            },
+            {
+                chip: "उद्यमिता",
+                keywords: ["entrepreneur", "business", "startup", "उद्यम", "व्यवसाय"],
+                reply: "Entrepreneurship Development section mein business plans, " +
+                    "registrations aur marketing support ki jaankari milegi:\n" +
+                    "<a href=\"/entrepreneurship-developement\">यहाँ देखें</a>"
+            }
+        ];
+
+        var GREETING = "नमस्ते! 🙏 Main Sahyog Setu Sahayak hoon. Neeche diye gaye topics mein se koi चुनें, ya apna sawal type karein.";
+        var FALLBACK = "Maaf kijiye, is sawal ka seedha jawab mere paas nahi hai. Kripya humari " +
+            "<a href=\"/helplines\">Helpline</a> se sampark karein ya " +
+            "<a href=\"/page/3\">About Us</a> page dekhein.";
+
+        function ready(fn) {
+            if (document.readyState !== "loading") fn();
+            else document.addEventListener("DOMContentLoaded", fn);
+        }
+
+        ready(function () {
+            var toggle = document.getElementById("ssq-chatbot-toggle");
+            var panel = document.getElementById("ssq-chatbot-panel");
+            var iconOpen = document.getElementById("ssq-chatbot-icon-open");
+            var iconClose = document.getElementById("ssq-chatbot-icon-close");
+            var messages = document.getElementById("ssq-chatbot-messages");
+            var quick = document.getElementById("ssq-chatbot-quick");
+            var form = document.getElementById("ssq-chatbot-form");
+            var input = document.getElementById("ssq-chatbot-input");
+            if (!toggle || !panel) return;
+
+            var greeted = false;
+
+            function addMessage(html, who) {
+                var el = document.createElement("div");
+                el.className = "ssq-msg " + (who === "user" ? "ssq-msg-user" : "ssq-msg-bot");
+                el.innerHTML = html;
+                messages.appendChild(el);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            function renderQuickReplies() {
+                quick.innerHTML = "";
+                TOPICS.forEach(function (t) {
+                    var chip = document.createElement("button");
+                    chip.type = "button";
+                    chip.className = "ssq-chip";
+                    chip.textContent = t.chip;
+                    chip.addEventListener("click", function () {
+                        addMessage(t.chip, "user");
+                        addMessage(t.reply, "bot");
+                    });
+                    quick.appendChild(chip);
+                });
+            }
+
+            function escapeHtml(s) {
+                var div = document.createElement("div");
+                div.textContent = s;
+                return div.innerHTML;
+            }
+
+            function answerFreeText(text) {
+                var lower = text.toLowerCase();
+                for (var i = 0; i < TOPICS.length; i++) {
+                    var kws = TOPICS[i].keywords;
+                    for (var j = 0; j < kws.length; j++) {
+                        if (lower.indexOf(kws[j].toLowerCase()) !== -1) {
+                            return TOPICS[i].reply;
+                        }
+                    }
+                }
+                return FALLBACK;
+            }
+
+            toggle.addEventListener("click", function () {
+                var isOpen = panel.classList.toggle("ssq-open");
+                iconOpen.style.display = isOpen ? "none" : "";
+                iconClose.style.display = isOpen ? "" : "none";
+                toggle.setAttribute("aria-label", isOpen ? "Chat sahayak band karein" : "Chat sahayak kholein");
+                if (isOpen && !greeted) {
+                    greeted = true;
+                    addMessage(GREETING, "bot");
+                    renderQuickReplies();
+                }
+                if (isOpen) input.focus();
+            });
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                var text = input.value.trim();
+                if (!text) return;
+                addMessage(escapeHtml(text), "user");
+                input.value = "";
+                var reply = answerFreeText(text);
+                setTimeout(function () { addMessage(reply, "bot"); }, 250);
+            });
+        });
+    })();
+    </script>
 </body>
 
 </html>

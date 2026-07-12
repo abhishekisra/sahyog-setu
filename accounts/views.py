@@ -53,7 +53,7 @@ class LoginView(View):
 
         if attempts >= LOGIN_ATTEMPT_LIMIT:
             return render(request, 'custom_admin/accounts/login.html', {
-                'error': "बहुत अधिक असफल प्रयास हुए हैं। कृपया 15 मिनट बाद पुनः प्रयास करें।",
+                'error': "Too many failed attempts. Please try again after 15 minutes.",
                 'next': next_url,
             })
 
@@ -65,7 +65,7 @@ class LoginView(View):
 
         cache.set(cache_key, attempts + 1, LOGIN_ATTEMPT_WINDOW)
         return render(request, 'custom_admin/accounts/login.html', {
-            'error': "गलत मोबाइल नंबर या पासवर्ड।",
+            'error': "Incorrect mobile number or password.",
             'next': next_url,
         })
 
