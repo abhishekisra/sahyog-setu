@@ -74,12 +74,12 @@ def validate_rows(raw_rows, existing_titles_lower):
     seen_in_file = set()
 
     if not raw_rows:
-        errors.append((0, "File mein koi data row nahi mili."))
+        errors.append((0, "No data rows found in the file."))
         return [], errors, warnings
 
     missing_cols = [c for c in REQUIRED_COLUMNS if c not in raw_rows[0]]
     if missing_cols:
-        errors.append((0, f"Column missing hai: {', '.join(missing_cols)} — template download karke format check karo."))
+        errors.append((0, f"Missing column(s): {', '.join(missing_cols)} — download the template to check the format."))
         return [], errors, warnings
 
     for idx, row in enumerate(raw_rows, start=2):
@@ -89,20 +89,20 @@ def validate_rows(raw_rows, existing_titles_lower):
         explanation = _clean_str(row.get("explanation"))
 
         if not q_text:
-            errors.append((idx, "Question text khaali hai."))
+            errors.append((idx, "Question text is empty."))
             continue
         if any(not o for o in opts):
-            errors.append((idx, "Ek ya zyada option khaali hai (option_1 se option_4 sab chahiye)."))
+            errors.append((idx, "One or more options are empty (option_1 through option_4 are all required)."))
             continue
 
         correct_int = normalize_correct_option(correct_raw)
         if correct_int is None:
-            errors.append((idx, f"correct_option '{correct_raw}' samajh nahi aaya — 1/2/3/4, A/B/C/D, ya क/ख/ग/घ mein se ek use karo."))
+            errors.append((idx, f"correct_option '{correct_raw}' not recognized — use one of 1/2/3/4, A/B/C/D, or क/ख/ग/घ."))
             continue
 
         key = q_text.lower()
         if key in seen_in_file or key in existing_titles_lower:
-            warnings.append((idx, f"Duplicate question (is quiz mein pehle se hai): \"{q_text[:60]}\""))
+            warnings.append((idx, f"Duplicate question (already in this quiz): \"{q_text[:60]}\""))
         seen_in_file.add(key)
 
         clean_rows.append({
@@ -117,6 +117,6 @@ def validate_rows(raw_rows, existing_titles_lower):
 
 SAMPLE_ROWS = [
     ["question", "option_1", "option_2", "option_3", "option_4", "correct_option", "explanation"],
-    ["भारत की राजधानी क्या है?", "मुंबई", "दिल्ली", "कोलकाता", "चेन्नई", "2", "दिल्ली भारत की राजधानी है।"],
-    ["2 + 2 कितना होता है?", "3", "4", "5", "6", "B", ""],
+    ["What is the capital of India?", "Mumbai", "Delhi", "Kolkata", "Chennai", "2", "Delhi is the capital of India."],
+    ["What is 2 + 2?", "3", "4", "5", "6", "B", ""],
 ]

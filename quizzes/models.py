@@ -160,7 +160,7 @@ class QuizAttempt(models.Model):
     source = models.CharField(max_length=20, default="direct", db_index=True)
 
     # Enforces "only one LIVE attempt per (user, quiz)" -- what actually
-    # stops two simultaneous taps on "क्विज़ शुरू करें" (or two open tabs)
+    # stops two simultaneous taps on "Start Quiz" (or two open tabs)
     # from racing into two in-progress attempts. This is deliberately NOT a
     # Meta.UniqueConstraint(condition=Q(completed_at__isnull=True)): Django
     # accepts that declaration, but MySQL does not support unique

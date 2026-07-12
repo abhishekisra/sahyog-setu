@@ -56,7 +56,7 @@
                             {{ display_name }}
                         </div>
 
-                        <div class="zone zone-desc" style="top: 50%;">
+                        <div class="zone zone-desc" style="top: 52%;">
                             {{ quiz.certificate_text|default:"For successfully completing the assessment with outstanding performance." }}
                         </div>
 
@@ -64,7 +64,7 @@
                             {{ quiz.title }} &middot; Score {{ attempt.percentage|floatformat:0 }}%
                         </div>
 
-                        <div class="zone zone-signatures" style="top: 78%;">
+                        <div class="zone zone-signatures" style="top: 74%;">
                             <div class="zone-auth">
                                 <div class="sigbox">{% if quiz.authority1_sign_image %}<img src="{{ quiz.authority1_sign_image.url }}" alt="">{% endif %}</div>
                                 <div class="zone-auth-line"></div>
@@ -112,7 +112,7 @@
                         Download as Image
                     </a>
                     <div class="ss-share-section">
-                        <span class="ss-share-title">क्विज़ शेयर करें (Share the quiz, not this certificate)</span>
+                        <span class="ss-share-title">Share Quiz (Share the quiz, not this certificate)</span>
                         <div class="ss-share-grid">
                             <a href="https://api.whatsapp.com/send?text={{ share_text|urlencode }}" target="_blank"
                                 class="ss-share-link wa">
@@ -162,8 +162,6 @@
         object-fit: contain;
     }
     .sigbox {
-        display: grid;
-        place-items: end center;
         /* was a fixed 52px -- the one non-cqw size in this whole sheet,
            so on a narrow render (the .sheet can be ~300px wide per the
            comment above on container-type:inline-size) this fixed box
@@ -171,35 +169,46 @@
            .zone-meta shrank with it, causing the signature block to
            spill into the "Verify at..." line below. cqw keeps it
            proportional at every width, same as everything else here. */
-        height: 4cqw;
+        /* This site sets a global `* { box-sizing: border-box }` (see
+           public_base.html), which makes padding eat into an explicit
+           height instead of adding to it -- 4cqw with border-box only
+           left 2.6cqw of actual content space for the image once the
+           1.4cqw padding-bottom below was subtracted, which is what was
+           silently clipping the top of every signature via overflow:hidden.
+           Sizing this to content-height (4cqw) + padding (1.4cqw) restores
+           the full 4cqw the image was actually designed to render at. */
+        position: relative;
+        height: 5.4cqw;
         width: 100%;
         /* Belt-and-suspenders: see why below on .sigbox img's height:100%. */
         overflow: hidden;
-        /* object-position:bottom below anchors the ink flush to this box's
-           bottom edge with zero breathing room of its own -- most real
-           signature uploads on this site predate the strip_white/SIGN_BOX
-           normalization (Part H) and are un-cropped scans whose visible
-           strokes reach close to their own image edges, so without this
-           the ink visually runs straight into .zone-auth-line/the printed
-           name directly below (confirmed on a live cert render). This
-           padding is the actual gap; .zone-auth-line's own top margin
-           below is deliberately small since this already provides the space. */
         padding-bottom: 1.4cqw;
     }
     .sigbox img {
-        /* NOT max-height:100% -- .sigbox is a grid container whose single
-           implicit row sizes to `auto` (content-based), so a percentage
-           height on the img never resolves against a definite length (the
-           row's own size depends on the img, and the img's height depends
-           on the row -- circular, so browsers treat it as `none`/unconstrained).
-           Confirmed live: the img's rendered height was 3x+ its .sigbox
-           parent's, overflowing straight through the printed name below
-           regardless of any padding on .sigbox. height:100% instead resolves
-           against .sigbox's own explicit height (4cqw, a definite length,
-           not `auto`), so this actually constrains it; overflow:hidden
-           above is the fallback in case any browser still gets this wrong.
-           width:auto + object-fit:contain still preserve the image's aspect
-           ratio within that height. */
+        /* This used to be a grid item (place-items:end center) with
+           height:100% -- but a grid container's single implicit row sizes
+           to `auto` (content-based), so the img's percentage height never
+           resolved against a definite length (the row's size depends on the
+           img, the img's height depends on the row -- circular, so browsers
+           fall back to sizing the img by its own natural aspect ratio at
+           whatever width it gets instead). Confirmed live at a narrow
+           (~318px) sheet width: measured img height was 2x+ its .sigbox
+           parent's, clipped through overflow:hidden -- so this was still
+           broken on mobile-sized certificate renders despite looking fine
+           on a full-width desktop preview.
+           Absolute positioning fixes this for real: .sigbox is
+           position:relative with an explicit height, so it's a definite
+           containing block, and height:100% on an absolutely-positioned
+           img resolves against that directly -- no row/track sizing
+           involved, no circularity. bottom:0 + the object-position:bottom
+           below keep the ink anchored flush to the box's bottom edge (see
+           padding-bottom above for the gap down to the printed name), and
+           left:50%/translateX(-50%) keeps it centered the same as the old
+           place-items:center did. */
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        transform: translateX(-50%);
         height: 100%;
         max-width: 100%;
         width: auto;

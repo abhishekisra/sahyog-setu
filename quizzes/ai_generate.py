@@ -73,7 +73,7 @@ def _extract_json_array(text):
     try:
         return json.loads(text)
     except json.JSONDecodeError as e:
-        raise AIGenerationError(f"AI ne jo output diya wo valid JSON nahi tha: {e}")
+        raise AIGenerationError(f"The AI's output was not valid JSON: {e}")
 
 
 def generate_questions(topic, count):
@@ -82,13 +82,13 @@ def generate_questions(topic, count):
     writes to the database."""
     topic = (topic or "").strip()
     if not topic:
-        raise AIGenerationError("Topic khaali hai.")
+        raise AIGenerationError("Topic is empty.")
     count = max(1, min(int(count), MAX_QUESTIONS_PER_BATCH))
 
     api_key = get_api_key()
     if not api_key:
         raise AIGenerationError(
-            "ANTHROPIC_API_KEY set nahi hai server par -- pehle API key configure karo."
+            "ANTHROPIC_API_KEY is not set on the server -- configure the API key first."
         )
 
     try:
@@ -107,7 +107,7 @@ def generate_questions(topic, count):
             timeout=90,
         )
     except requests.RequestException as e:
-        raise AIGenerationError(f"Anthropic API tak pahunch nahi paaye: {e}")
+        raise AIGenerationError(f"Could not reach the Anthropic API: {e}")
 
     if resp.status_code != 200:
         raise AIGenerationError(
@@ -118,11 +118,11 @@ def generate_questions(topic, count):
         data = resp.json()
         text = data["content"][0]["text"]
     except (KeyError, IndexError, ValueError) as e:
-        raise AIGenerationError(f"API response ka format samajh nahi aaya: {e}")
+        raise AIGenerationError(f"Could not understand the API response format: {e}")
 
     parsed = _extract_json_array(text)
     if not isinstance(parsed, list) or not parsed:
-        raise AIGenerationError("AI ne koi question list nahi di.")
+        raise AIGenerationError("The AI did not return a question list.")
 
     clean_rows = []
     for idx, row in enumerate(parsed, start=1):
@@ -144,6 +144,6 @@ def generate_questions(topic, count):
         })
 
     if not clean_rows:
-        raise AIGenerationError("AI ke output se ek bhi valid question nahi ban paya -- dobara try karo.")
+        raise AIGenerationError("Not a single valid question could be built from the AI's output -- try again.")
 
     return clean_rows

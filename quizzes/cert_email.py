@@ -10,7 +10,7 @@ def send_certificate_email(attempt, request=None):
     surfaces as a clean user-facing message instead of a 500."""
     user = attempt.user
     if not user.email:
-        return False, "Aapke account mein email address nahi hai."
+        return False, "Your account does not have an email address."
 
     quiz = attempt.quiz
     verify_url = f"https://sahyogsetu.in/certificate/verify/{attempt.certificate_id}/"
@@ -29,6 +29,6 @@ def send_certificate_email(attempt, request=None):
         email = EmailMessage(subject=subject, body=body, to=[user.email])
         email.attach(f"certificate_{attempt.certificate_id}.png", image_bytes, "image/png")
         email.send(fail_silently=False)
-        return True, f"Certificate {user.email} par bhej diya gaya."
+        return True, f"Certificate sent to {user.email}."
     except Exception as e:
-        return False, f"Email bhejne mein dikkat hui: {e}"
+        return False, f"There was a problem sending the email: {e}"

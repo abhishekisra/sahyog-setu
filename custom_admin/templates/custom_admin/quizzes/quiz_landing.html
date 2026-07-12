@@ -2,11 +2,11 @@
 {% load static %}
 {% load quiz_extras %}
 
-{% block title %}{{ quiz.title }} — सहयोग सेतु{% endblock %}
+{% block title %}{{ quiz.title }} — Sahyog Setu{% endblock %}
 
 {% block head %}
-<meta property="og:title" content="{{ quiz.title }} — सहयोग सेतु">
-<meta property="og:description" content="{{ quiz.description|striptags|default:"सहयोग सेतु का यह क्विज़ खेलें और अपना ज्ञान परखें।"|truncatechars:110 }}">
+<meta property="og:title" content="{{ quiz.title }} — Sahyog Setu">
+<meta property="og:description" content="{{ quiz.description|striptags|default:"Play this quiz on Sahyog Setu and test your knowledge."|truncatechars:110 }}">
 {% if og_image %}
 <meta property="og:image" content="{{ og_image }}">
 <meta property="og:image:width" content="1200">
@@ -25,7 +25,7 @@
   <header class="sq-head">
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-      <a href="/" class="sq-back-link">होम पर वापस</a>
+      <a href="/" class="sq-back-link">Back to Home</a>
     </div>
   </header>
 
@@ -34,37 +34,37 @@
       <div class="sq-gold-line"></div>
       <div class="sq-land-body">
         <div class="sq-brand-inline"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-        <div class="sq-eyebrow">सरकारी योजना · ज्ञान परीक्षा</div>
+        <div class="sq-eyebrow">Government Scheme · Knowledge Test</div>
         <h1 class="sq-land-title">{{ quiz.title }}</h1>
         {% if quiz.description %}
-        <p class="sq-land-desc">{{ quiz.description|sanitize_html }}</p>
+        <div class="sq-land-desc">{{ quiz.description|sanitize_html }}</div>
         {% endif %}
 
         <div class="sq-meta">
-          <div class="sq-chip"><div class="n">{{ question_count }}</div><div class="l">प्रश्न</div></div>
-          <div class="sq-chip"><div class="n">20s</div><div class="l">प्रति प्रश्न</div></div>
-          <div class="sq-chip"><div class="n">{{ total_marks }}</div><div class="l">कुल अंक</div></div>
-          <div class="sq-chip"><div class="n">{{ quiz.pass_threshold }}%</div><div class="l">पास होने के लिए</div></div>
+          <div class="sq-chip"><div class="n">{{ question_count }}</div><div class="l">Questions</div></div>
+          <div class="sq-chip"><div class="n">20s</div><div class="l">per Question</div></div>
+          <div class="sq-chip"><div class="n">{{ total_marks }}</div><div class="l">Total Marks</div></div>
+          <div class="sq-chip"><div class="n">{{ quiz.pass_threshold }}%</div><div class="l">to Pass</div></div>
         </div>
 
         {% if not quiz.is_live %}
-        <div class="sq-land-warning">यह क्विज़ अभी उपलब्ध नहीं है।</div>
+        <div class="sq-land-warning">This quiz is not available right now.</div>
         {% else %}
         <div class="sq-land-cta">
           {% if request.user.is_authenticated %}
-          <a href="{% url 'quiz_take' quiz.id %}" class="sq-btn">क्विज़ शुरू करें →</a>
+          <a href="{% url 'quiz_take' quiz.id %}" class="sq-btn">Start Quiz →</a>
           {% else %}
-          <a href="{% url 'login' %}?next={% url 'quiz_take' quiz.id %}" class="sq-btn">लॉगिन करके क्विज़ शुरू करें →</a>
+          <a href="{% url 'login' %}?next={% url 'quiz_take' quiz.id %}" class="sq-btn">Login to Start Quiz →</a>
           {% endif %}
         </div>
         {% endif %}
 
         {% if quiz.leaderboard_public %}
-        <p class="sq-land-leaderboard"><a href="{% url 'quiz_leaderboard' quiz.id %}">लीडरबोर्ड देखें</a></p>
+        <p class="sq-land-leaderboard"><a href="{% url 'quiz_leaderboard' quiz.id %}">View Leaderboard</a></p>
         {% endif %}
 
         <div class="sq-share-section">
-          <span class="sq-share-title">क्विज़ शेयर करें</span>
+          <span class="sq-share-title">Share Quiz</span>
           <div class="sq-share-grid">
             <a href="https://api.whatsapp.com/send?text={{ whatsapp_text|urlencode }}" target="_blank" class="sq-share-link sq-wa">
               <span>WhatsApp</span>
@@ -73,7 +73,7 @@
               <span>Copy Link</span>
             </button>
             <button type="button" class="sq-share-link sq-native" style="display:none;" onclick="ssNativeShare(this)"
-              data-url="{{ share_url }}?src=direct" data-title="{{ quiz.title }}" data-text="{{ quiz.title }} — सहयोग सेतु">
+              data-url="{{ share_url }}?src=direct" data-title="{{ quiz.title }}" data-text="{{ quiz.title }} — Sahyog Setu">
               <span>Share</span>
             </button>
           </div>
@@ -138,6 +138,15 @@
   .sq-eyebrow{ color:var(--gold-hi); font-weight:600; letter-spacing:2.5px; font-size:11.5px; text-transform:uppercase; margin-bottom:8px; }
   .sq-land-title{ font-family:'Fraunces'; font-weight:600; font-size:clamp(26px,6.5vw,36px); line-height:1.15; margin:0 0 12px; }
   .sq-land-desc{ color:var(--ink-soft); font-size:15px; line-height:1.6; max-width:440px; margin:0 auto 24px; }
+  /* quiz.description is admin-authored rich text and often includes a bullet
+     list (e.g. "Instructions: ..."); centered text but browser-default
+     outside bullet markers look broken together (markers end up in their
+     own column, detached from the centered text), so lists inside the
+     description get their own left-aligned block instead. */
+  .sq-land-desc ul, .sq-land-desc ol{ text-align:left; padding-left:22px; margin:0 0 10px; }
+  .sq-land-desc li{ margin-bottom:4px; }
+  .sq-land-desc p{ margin:0 0 10px; }
+  .sq-land-desc p:last-child, .sq-land-desc ul:last-child, .sq-land-desc ol:last-child{ margin-bottom:0; }
 
   .sq-meta{ display:flex; gap:12px; justify-content:center; margin-bottom:26px; flex-wrap:wrap; }
   .sq-chip{ flex:1; min-width:100px; max-width:130px; padding:14px 8px; border-radius:16px;

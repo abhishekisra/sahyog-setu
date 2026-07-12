@@ -5,17 +5,38 @@
 {% block body %}
 
 <style>
-    .qa-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:16px; }
-    .qa-days a { padding:6px 14px; border-radius:6px; border:1px solid #ddd; color:#555; text-decoration:none; margin-right:6px; font-size:13px; }
-    .qa-days a.active { background:#4680ff; border-color:#4680ff; color:#fff; }
-    .qa-demo-banner { background:#fff3cd; border:1px solid #ffe69c; color:#7a5b00; padding:10px 16px; border-radius:6px; margin-bottom:16px; font-weight:600; }
+    .qa-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:20px; }
+    .qa-days a { padding:7px 16px; border-radius:8px; border:1px solid #e3e6ec; color:#555; text-decoration:none; margin-right:6px; font-size:13px; font-weight:600; transition: all .15s ease; }
+    .qa-days a:hover { border-color:#4680ff; color:#4680ff; }
+    .qa-days a.active { background:#4680ff; border-color:#4680ff; color:#fff; box-shadow:0 4px 12px rgba(70,128,255,.25); }
+    .qa-demo-banner { background:#fff7e6; border:1px solid rgba(255,171,0,.25); color:#92660b; padding:12px 18px; border-radius:10px; margin-bottom:18px; font-weight:600; }
     .qa-empty { text-align:center; padding:60px 20px; color:#888; }
-    .qa-chart-card { background:#fff; border-radius:8px; padding:18px; margin-bottom:20px; box-shadow:0 1px 3px rgba(0,0,0,0.08); }
-    .qa-chart-card h6 { margin-bottom:14px; font-weight:600; }
+    .qa-chart-card { background:#fff; border-radius:14px; padding:20px; margin-bottom:22px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+    .qa-chart-card h6 { margin-bottom:14px; font-weight:800; color:#24272b; font-size:14px; }
     table.qa-table { width:100%; border-collapse:collapse; font-size:13px; }
-    table.qa-table th, table.qa-table td { padding:8px 10px; border-bottom:1px solid #eee; text-align:left; }
-    table.qa-table th { color:#888; font-weight:600; text-transform:uppercase; font-size:11px; letter-spacing:.03em; }
-    .qa-pct-bad { color:#e4566e; font-weight:600; }
+    table.qa-table th, table.qa-table td { padding:10px 10px; border-bottom:1px solid #f1f2f5; text-align:left; }
+    table.qa-table th { color:#8a8f98; font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:.03em; }
+    .qa-pct-bad { color:#c0392b; font-weight:700; }
+
+    /* Stat cards -- overrides the plain default .amount-card look with the
+       same icon-chip style used on the Quizzes list page, for visual
+       consistency across the quiz-admin section. */
+    .qa-stat-card2 {
+        display: flex; align-items: center; gap: 14px;
+        background: #fff; border-radius: 14px; padding: 18px 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,.05); border: 1px solid #eef0f4; height: 100%;
+    }
+    .qa-stat-icon2 {
+        width: 46px; height: 46px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; flex-shrink: 0;
+    }
+    .qa-stat-icon2-blue   { background: rgba(70,128,255,.12); color: #4680ff; }
+    .qa-stat-icon2-green  { background: rgba(45,177,113,.12); color: #2db171; }
+    .qa-stat-icon2-gold   { background: rgba(201,162,39,.15); color: #a5820f; }
+    .qa-stat-icon2-red    { background: rgba(220,53,69,.1); color: #c0392b; }
+    .qa-stat-num2 { font-size: 22px; font-weight: 800; color: #24272b; line-height: 1.1; }
+    .qa-stat-label2 { font-size: 12.5px; color: #8a8f98; font-weight: 600; margin-top: 2px; }
 </style>
 
 <div class="pcoded-main-container">
@@ -30,6 +51,9 @@
                         </div>
                     </div>
                     <div class="col-md-6 text-md-right">
+                        <a href="{% url 'quiz_participants' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="feather icon-users"></i> Participants
+                        </a>
                         <a href="{% url 'quiz_analytics_export' %}?demo={{ include_demo|yesno:'1,0' }}" class="btn btn-outline-primary btn-sm">
                             <i class="feather icon-download"></i> Export CSV
                         </a>
@@ -39,61 +63,65 @@
         </div>
 
         {% if include_demo %}
-        <div class="qa-demo-banner">इसमें डेमो डेटा शामिल है — <a href="?days={{ days }}">असली डेटा देखने के लिए यहाँ क्लिक करें</a></div>
+        <div class="qa-demo-banner">This includes demo data — <a href="?days={{ days }}">click here to see real data</a></div>
         {% endif %}
 
         <div class="qa-toolbar">
             <div class="qa-days">
-                <a href="?days=7{% if include_demo %}&demo=1{% endif %}" class="{% if days == 7 %}active{% endif %}">7 दिन</a>
-                <a href="?days=30{% if include_demo %}&demo=1{% endif %}" class="{% if days == 30 %}active{% endif %}">30 दिन</a>
-                <a href="?days=90{% if include_demo %}&demo=1{% endif %}" class="{% if days == 90 %}active{% endif %}">90 दिन</a>
+                <a href="?days=7{% if include_demo %}&demo=1{% endif %}" class="{% if days == 7 %}active{% endif %}">7 days</a>
+                <a href="?days=30{% if include_demo %}&demo=1{% endif %}" class="{% if days == 30 %}active{% endif %}">30 days</a>
+                <a href="?days=90{% if include_demo %}&demo=1{% endif %}" class="{% if days == 90 %}active{% endif %}">90 days</a>
             </div>
             {% if not include_demo %}
-            <a href="?days={{ days }}&demo=1" class="text-muted" style="font-size:12px;">डेमो डेटा भी दिखाएँ</a>
+            <a href="?days={{ days }}&demo=1" class="text-muted" style="font-size:12px;">Show demo data too</a>
             {% endif %}
         </div>
 
         {% if total == 0 %}
         <div class="qa-empty">
             <i class="feather icon-bar-chart-2" style="font-size:40px; opacity:.3;"></i>
-            <h5 class="mt-3">अभी तक कोई पूरा हुआ क्विज़ अटेम्प्ट नहीं है</h5>
-            <p>{{ registered_users }} registered participants हैं, लेकिन किसी ने अभी क्विज़ पूरा नहीं किया.</p>
+            <h5 class="mt-3">No completed quiz attempts yet</h5>
+            <p>There are {{ registered_users }} registered participants, but no one has completed a quiz yet.</p>
             {% if not include_demo %}
-            <a href="?days={{ days }}&demo=1" class="btn btn-primary btn-sm mt-2">डेमो डेटा से preview देखें</a>
+            <a href="?days={{ days }}&demo=1" class="btn btn-primary btn-sm mt-2">Preview with demo data</a>
             {% endif %}
         </div>
         {% else %}
 
         <div class="row">
-            <div class="col-md-3 col-6">
-                <div class="card amount-card overflow-hidden">
-                    <div class="card-body">
-                        <h2 class="f-w-400">{{ total }}</h2>
-                        <p class="text-muted f-w-600 f-16"><span class="text-c-blue">कुल अटेम्प्ट</span></p>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="qa-stat-card2">
+                    <div class="qa-stat-icon2 qa-stat-icon2-blue"><i class="feather icon-activity"></i></div>
+                    <div>
+                        <div class="qa-stat-num2">{{ total }}</div>
+                        <div class="qa-stat-label2">Total Attempts</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 col-6">
-                <div class="card amount-card overflow-hidden">
-                    <div class="card-body">
-                        <h2 class="f-w-400">{{ participants }}</h2>
-                        <p class="text-muted f-w-600 f-16"><span class="text-c-green">प्रतिभागी</span></p>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="qa-stat-card2">
+                    <div class="qa-stat-icon2 qa-stat-icon2-green"><i class="feather icon-users"></i></div>
+                    <div>
+                        <div class="qa-stat-num2">{{ participants }}</div>
+                        <div class="qa-stat-label2">Participants</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 col-6">
-                <div class="card amount-card overflow-hidden">
-                    <div class="card-body">
-                        <h2 class="f-w-400">{{ avg_pct }}%</h2>
-                        <p class="text-muted f-w-600 f-16"><span class="text-c-yellow">औसत स्कोर</span></p>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="qa-stat-card2">
+                    <div class="qa-stat-icon2 qa-stat-icon2-gold"><i class="feather icon-trending-up"></i></div>
+                    <div>
+                        <div class="qa-stat-num2">{{ avg_pct }}%</div>
+                        <div class="qa-stat-label2">Average Score</div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-3 col-6">
-                <div class="card amount-card overflow-hidden">
-                    <div class="card-body">
-                        <h2 class="f-w-400">{{ pass_rate }}%</h2>
-                        <p class="text-muted f-w-600 f-16"><span class="text-c-red">पास दर</span></p>
+            <div class="col-md-3 col-6 mb-3">
+                <div class="qa-stat-card2">
+                    <div class="qa-stat-icon2 qa-stat-icon2-red"><i class="feather icon-award"></i></div>
+                    <div>
+                        <div class="qa-stat-num2">{{ pass_rate }}%</div>
+                        <div class="qa-stat-label2">Pass Rate</div>
                     </div>
                 </div>
             </div>
@@ -102,13 +130,13 @@
         <div class="row">
             <div class="col-md-5">
                 <div class="qa-chart-card">
-                    <h6>स्कोर वितरण</h6>
+                    <h6>Score Distribution</h6>
                     <canvas id="qaDistChart" height="220"></canvas>
                 </div>
             </div>
             <div class="col-md-7">
                 <div class="qa-chart-card">
-                    <h6>दैनिक अटेम्प्ट ({{ days }} दिन)</h6>
+                    <h6>Daily Attempts ({{ days }} days)</h6>
                     <canvas id="qaDailyChart" height="220"></canvas>
                 </div>
             </div>
@@ -117,11 +145,11 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="qa-chart-card">
-                    <h6>सबसे ज़्यादा गलत हुए प्रश्न</h6>
+                    <h6>Most Failed Questions</h6>
                     {% if most_failed %}
                     <div style="overflow-x:auto;">
                         <table class="qa-table">
-                            <thead><tr><th>प्रश्न</th><th>देखा</th><th>गलत %</th></tr></thead>
+                            <thead><tr><th>Question</th><th>Seen</th><th>Wrong %</th></tr></thead>
                             <tbody>
                                 {% for q in most_failed %}
                                 <tr>
@@ -134,16 +162,16 @@
                         </table>
                     </div>
                     {% else %}
-                    <p class="text-muted" style="font-size:13px;">कम से कम 5 responses वाला कोई प्रश्न अभी नहीं है.</p>
+                    <p class="text-muted" style="font-size:13px;">No question with at least 5 responses yet.</p>
                     {% endif %}
                 </div>
             </div>
             <div class="col-md-6">
                 <div class="qa-chart-card">
-                    <h6>क्विज़ अनुसार प्रदर्शन</h6>
+                    <h6>Performance by Quiz</h6>
                     <div style="overflow-x:auto;">
                         <table class="qa-table">
-                            <thead><tr><th>क्विज़</th><th>अटेम्प्ट</th><th>औसत %</th><th>पास</th></tr></thead>
+                            <thead><tr><th>Quiz</th><th>Attempts</th><th>Avg %</th><th>Passed</th></tr></thead>
                             <tbody>
                                 {% for q in quiz_breakdown %}
                                 <tr>
@@ -163,7 +191,7 @@
         <div class="row">
             <div class="col-md-6">
                 <div class="qa-chart-card">
-                    <h6>कहाँ से आए</h6>
+                    <h6>Traffic Sources</h6>
                     <canvas id="qaSourceChart" height="180"></canvas>
                 </div>
             </div>
@@ -206,7 +234,7 @@
                 data: {
                     labels: data.daily.map(function (d) { return d.date.slice(5); }),
                     datasets: [{
-                        label: "अटेम्प्ट",
+                        label: "Attempts",
                         data: data.daily.map(function (d) { return d.count; }),
                         borderColor: "#4680ff",
                         backgroundColor: "rgba(70,128,255,0.12)",
@@ -224,13 +252,13 @@
 
         var sourceEl = document.getElementById("qaSourceChart");
         if (sourceEl && data.source_breakdown && data.source_breakdown.length) {
-            var sourceLabels = { whatsapp: "WhatsApp", sms: "SMS", facebook: "Facebook", email: "Email", qr: "QR कोड", direct: "Direct" };
+            var sourceLabels = { whatsapp: "WhatsApp", sms: "SMS", facebook: "Facebook", email: "Email", qr: "QR Code", direct: "Direct" };
             new Chart(sourceEl, {
                 type: "bar",
                 data: {
                     labels: data.source_breakdown.map(function (s) { return sourceLabels[s.source] || s.source; }),
                     datasets: [{
-                        label: "अटेम्प्ट",
+                        label: "Attempts",
                         data: data.source_breakdown.map(function (s) { return s.n; }),
                         backgroundColor: "#2ca87f",
                         borderRadius: 4

@@ -17,6 +17,9 @@ urlpatterns = [
     path('certificate/verify/<str:cert_id>/', views.verify_certificate, name='verify_certificate'),
     path('quiz-analytics/', views.QuizAnalyticsView.as_view(), name='quiz_analytics'),
     path('quiz-analytics/export/', views.quiz_analytics_export, name='quiz_analytics_export'),
+    path('quiz-analytics/participants/', views.ParticipantsListView.as_view(), name='quiz_participants'),
+    path('quiz-analytics/participants/<int:user_id>/', views.ParticipantDetailView.as_view(), name='quiz_participant_detail'),
+    path('quiz-analytics/attempt/<int:pk>/', views.AdminAttemptDetailView.as_view(), name='quiz_admin_attempt_detail'),
     path('my-results/', views.MyResultsView.as_view(), name='my_results'),
     # slug routes last -- quiz/<slug>/ is a single path segment, so it can't
     # structurally collide with the multi-segment routes above (quiz/<id>/take/,

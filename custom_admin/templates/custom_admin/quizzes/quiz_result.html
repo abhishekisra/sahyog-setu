@@ -12,7 +12,7 @@
   <header class="sq-head">
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-      <a href="/" class="sq-back-link">होम पर वापस</a>
+      <a href="/" class="sq-back-link">Back to Home</a>
     </div>
   </header>
 
@@ -21,33 +21,33 @@
       <div class="sq-gold-line"></div>
       <div class="sq-result-body">
         <div class="sq-rseal">
-          <div><div class="sq-pct">{{ percentage|floatformat:0 }}%</div><div class="sq-pl">स्कोर</div></div>
+          <div><div class="sq-pct">{{ percentage|floatformat:0 }}%</div><div class="sq-pl">Score</div></div>
         </div>
-        <h1 class="sq-rtitle">{% if attempt.passed %}बधाई हो!{% else %}अभ्यास जारी रखें!{% endif %}</h1>
-        <p class="sq-rmsg">आपने <strong>{{ attempt.quiz.title }}</strong> में <strong>{{ marks }}/{{ total_marks }}</strong> अंक प्राप्त किए।</p>
+        <h1 class="sq-rtitle">{% if attempt.passed %}Congratulations!{% else %}Keep Practicing!{% endif %}</h1>
+        <p class="sq-rmsg">You scored <strong>{{ marks }}/{{ total_marks }}</strong> marks in <strong>{{ attempt.quiz.title }}</strong>.</p>
 
         <div class="sq-breakdown">
-          <div class="sq-bd sq-g"><div class="bn">{{ correct }}</div><div class="bl">सही</div></div>
-          <div class="sq-bd sq-r"><div class="bn">{{ wrong }}</div><div class="bl">गलत</div></div>
-          <div class="sq-bd sq-y"><div class="bn">{{ missed }}</div><div class="bl">छूटे</div></div>
+          <div class="sq-bd sq-g"><div class="bn">{{ correct }}</div><div class="bl">Correct</div></div>
+          <div class="sq-bd sq-r"><div class="bn">{{ wrong }}</div><div class="bl">Wrong</div></div>
+          <div class="sq-bd sq-y"><div class="bn">{{ missed }}</div><div class="bl">Missed</div></div>
         </div>
 
         {% if attempt.passed %}
         <div class="sq-notice sq-notice-pass">
-          <p>आपने <strong>{{ percentage|floatformat:1 }}%</strong> अंकों से यह क्विज़ पास कर लिया (पास होने के लिए {{ pass_threshold }}% चाहिए था)।</p>
+          <p>You passed this quiz with <strong>{{ percentage|floatformat:1 }}%</strong> (pass mark was {{ pass_threshold }}%).</p>
           {% if attempt.quiz.certificate_enabled and percentage >= certificate_min_percentage %}
-          <a href="{% url 'quiz_certificate' attempt.id %}" class="sq-btn-outline">🏆 प्रमाणपत्र देखें</a>
+          <a href="{% url 'quiz_certificate' attempt.id %}" class="sq-btn-outline">🏆 View Certificate</a>
           {% endif %}
         </div>
         {% else %}
         <div class="sq-notice">
-          <p>पास होने के लिए कम से कम <strong>{{ pass_threshold }}%</strong> अंक चाहिए। अभ्यास जारी रखें!</p>
-          <a href="{% url 'quiz_take' attempt.quiz.id %}" class="sq-btn-outline">फिर कोशिश करें</a>
+          <p>You need at least <strong>{{ pass_threshold }}%</strong> to pass. Keep practicing!</p>
+          <a href="{% url 'quiz_take' attempt.quiz.id %}" class="sq-btn-outline">Try Again</a>
         </div>
         {% endif %}
 
         <div class="sq-share-section">
-          <span class="sq-share-title">क्विज़ शेयर करें</span>
+          <span class="sq-share-title">Share Quiz</span>
           <div class="sq-share-grid">
             <a href="https://api.whatsapp.com/send?text={{ whatsapp_text|urlencode }}" target="_blank" class="sq-share-link sq-wa">
               <span>WhatsApp</span>
@@ -64,22 +64,22 @@
 
         {% if responses %}
         <div class="sq-review">
-          <div class="sq-rvh">सभी प्रश्न</div>
+          <div class="sq-rvh">All Questions</div>
           <div class="sq-qnav">
             {% for response in responses %}
             <span class="sq-ncell {% if response.is_correct %}sq-correct{% elif response.selected_option %}sq-wrong{% else %}sq-missed{% endif %}">{{ forloop.counter }}</span>
             {% endfor %}
           </div>
           <div class="sq-navlegend">
-            <span><i class="sq-ndot sq-c"></i>सही</span>
-            <span><i class="sq-ndot sq-w"></i>गलत</span>
-            <span><i class="sq-ndot sq-m"></i>छूटा</span>
+            <span><i class="sq-ndot sq-c"></i>Correct</span>
+            <span><i class="sq-ndot sq-w"></i>Wrong</span>
+            <span><i class="sq-ndot sq-m"></i>Missed</span>
           </div>
         </div>
         {% endif %}
 
         <div class="sq-footer-links">
-          <a href="/" class="sq-link">होम पर वापस</a>
+          <a href="/" class="sq-link">Back to Home</a>
         </div>
       </div>
     </section>

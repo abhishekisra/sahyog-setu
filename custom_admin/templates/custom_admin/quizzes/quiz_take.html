@@ -14,12 +14,12 @@
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
       <div class="sq-head-actions">
-        <div class="sq-font-controls" role="group" aria-label="फ़ॉन्ट साइज़">
-          <button type="button" class="sq-font-btn" data-scale="down" aria-label="फ़ॉन्ट छोटा करें">A−</button>
-          <button type="button" class="sq-font-btn" data-scale="reset" aria-label="फ़ॉन्ट सामान्य करें">A</button>
-          <button type="button" class="sq-font-btn" data-scale="up" aria-label="फ़ॉन्ट बड़ा करें">A+</button>
+        <div class="sq-font-controls" role="group" aria-label="Font Size">
+          <button type="button" class="sq-font-btn" data-scale="down" aria-label="Decrease font size">A−</button>
+          <button type="button" class="sq-font-btn" data-scale="reset" aria-label="Reset font size">A</button>
+          <button type="button" class="sq-font-btn" data-scale="up" aria-label="Increase font size">A+</button>
         </div>
-        <button class="sq-mute-btn" id="sqMuteBtn" title="आवाज़ चालू/बंद">🔊</button>
+        <button class="sq-mute-btn" id="sqMuteBtn" title="Toggle sound">🔊</button>
       </div>
     </div>
   </header>
@@ -31,13 +31,13 @@
       <div class="sq-gold-line"></div>
 
       <div class="sq-topbar">
-        <div class="sq-qcount"><span>प्रश्न</span> <b id="sqQNow">1</b>/<span id="sqQTot">{{ total_questions }}</span></div>
+        <div class="sq-qcount"><span>Question</span> <b id="sqQNow">1</b>/<span id="sqQTot">{{ total_questions }}</span></div>
         <div class="sq-pbar"><div class="sq-pfill" id="sqPfill"></div></div>
       </div>
       <div class="sq-stats">
-        <div class="sq-stat"><div class="v" id="sqSScore">0</div><div class="k">स्कोर</div></div>
-        <div class="sq-stat sq-streak"><div class="v" id="sqSStreak">0🔥</div><div class="k">स्ट्रीक</div></div>
-        <div class="sq-stat"><div class="v" id="sqSRight">0</div><div class="k">सही</div></div>
+        <div class="sq-stat"><div class="v" id="sqSScore">0</div><div class="k">Score</div></div>
+        <div class="sq-stat sq-streak"><div class="v" id="sqSStreak">0🔥</div><div class="k">Streak</div></div>
+        <div class="sq-stat"><div class="v" id="sqSRight">0</div><div class="k">Correct</div></div>
       </div>
 
       <div class="sq-qwrap">
@@ -56,17 +56,17 @@
           <div class="sq-opts" id="sqOpts"></div>
           <div class="sq-explain" id="sqExplain"></div>
           <div class="sq-neterr" id="sqNetErr" hidden>
-            <span>जवाब सेव नहीं हो पाया — नेटवर्क जांचें।</span>
-            <button type="button" id="sqRetryBtn">फिर कोशिश करें</button>
+            <span>Answer could not be saved — check your network.</span>
+            <button type="button" id="sqRetryBtn">Retry</button>
           </div>
         </div>
       </div>
 
       <div class="sq-qfoot">
-        <button type="button" class="sq-btn sq-skip" id="sqSkipBtn">छोड़ें ⏭</button>
-        <button type="button" class="sq-btn" id="sqNextBtn" style="display:none">आगे →</button>
+        <button type="button" class="sq-btn sq-skip" id="sqSkipBtn">Skip ⏭</button>
+        <button type="button" class="sq-btn" id="sqNextBtn" style="display:none">Next →</button>
       </div>
-      <p class="sq-forward-note">हर प्रश्न के लिए 20 सेकंड, हर सही जवाब के 10 अंक — एक बार आगे बढ़ने के बाद पीछे नहीं जा सकते।</p>
+      <p class="sq-forward-note">20 seconds per question, 10 marks for every correct answer — once you move ahead you cannot go back.</p>
     </section>
 
     <form method="post" action="{% url 'quiz_submit' attempt.id %}" id="sqSubmitForm" style="display:none">
@@ -74,7 +74,7 @@
     </form>
 
     <noscript>
-      <div class="alert alert-warning">इस क्विज़ को लेने के लिए JavaScript चालू करना ज़रूरी है।</div>
+      <div class="alert alert-warning">JavaScript must be enabled to take this quiz.</div>
     </noscript>
   </main>
 </div>
@@ -231,6 +231,8 @@
   .sq-explain::before{ content:"💡"; position:absolute; left:15px; top:13px; font-size:17px; }
   .sq-explain b{ color:var(--gold-hi); }
   .sq-explain .sq-verdict{ display:block; font-family:'Fraunces'; font-weight:600; font-size:16px; margin-bottom:3px; }
+  .sq-explain .sq-correct-line{ color:var(--gold-hi); margin-bottom:4px; }
+  .sq-explain .sq-correct-line strong{ color:var(--gold-hi); }
   .sq-v-green{ color:var(--green)!important; } .sq-v-red{color:var(--red)!important;} .sq-v-yellow{color:var(--yellow)!important;}
 
   /* [hidden] must win over the flex display below -- otherwise the
@@ -466,7 +468,7 @@
       if(remaining > 0) playTick(remaining <= 5);
       if(remaining <= 5){ $('sqRingProg').style.stroke = 'var(--red)'; if(ring) ring.classList.add('sq-low'); }
       [10,5].forEach(function(mark){
-        if(remaining === mark && !announced[mark]){ announced[mark]=true; $('sqAnnouncer').textContent = mark+' सेकंड बाकी हैं'; }
+        if(remaining === mark && !announced[mark]){ announced[mark]=true; $('sqAnnouncer').textContent = mark+' seconds left'; }
       });
       if(remaining <= 0){ clearInterval(timer); timeUp(); }
     }, 250);
@@ -526,31 +528,38 @@
     btns[correctIdx].classList.add('sq-correct');
     btns[correctIdx].querySelector('.sq-ic').textContent = '✓';
 
+    // Wrong/skipped: the correct button is already highlighted green above,
+    // but colour alone isn't enough (screen readers, colour-blind users, or
+    // just someone who wants it spelled out) -- state the correct option's
+    // text explicitly in the verdict panel too.
+    var correctText = QUESTIONS[idx].options[correctIdx];
+
     if(chosenIdx === -1){
       streak = 0;
       playBuzz();
       pulse('var(--yellow)'); stamp(manualSkip ? '⏭' : '⏱', 'var(--yellow)');
-      verdict('yellow', manualSkip ? 'छोड़ दिया' : 'समय समाप्त ⏳', explanation);
+      verdict('yellow', manualSkip ? 'Skipped' : 'Time up ⏳', explanation, correctText);
     } else if(isCorrect){
       score += 10; streak++; right++;
       playDing(); burst(); flash('sq-goldflash'); cardCelebrate(); pulse('var(--green)'); stamp('✓','#8affc0');
       floatPoints(btns[chosenIdx], '+10', '#8affc0');
       if(streak >= 3) streakPop(streak);
-      verdict('green', 'सही जवाब! 🎉', explanation);
+      verdict('green', 'Correct answer! 🎉', explanation);
     } else {
       btns[chosenIdx].classList.add('sq-wrong');
       btns[chosenIdx].querySelector('.sq-ic').textContent = '✕';
       streak = 0;
       playBuzz(); flash('sq-redflash'); pulse('var(--red)'); stamp('✕','var(--red)');
-      verdict('red', 'गलत जवाब', explanation);
+      verdict('red', 'Wrong answer', explanation, correctText);
     }
     updateStats();
     showNext();
   }
 
-  function verdict(color, head, exp){
+  function verdict(color, head, exp, correctText){
     var el = $('sqExplain');
-    el.innerHTML = '<span class="sq-verdict sq-v-'+color+'">'+head+'</span>'+(exp ? escapeHtml(exp) : '');
+    var correctLine = correctText ? '<div class="sq-correct-line">Correct answer: <strong>'+escapeHtml(correctText)+'</strong></div>' : '';
+    el.innerHTML = '<span class="sq-verdict sq-v-'+color+'">'+head+'</span>'+correctLine+(exp ? escapeHtml(exp) : '');
     el.classList.add('sq-on');
   }
   function pulse(c){
@@ -561,7 +570,7 @@
   function showNext(){
     $('sqSkipBtn').style.display = 'none';
     var b = $('sqNextBtn'); b.style.display = '';
-    b.textContent = idx === QUESTIONS.length-1 ? 'परिणाम देखें 🏆' : 'आगे →';
+    b.textContent = idx === QUESTIONS.length-1 ? 'View Results 🏆' : 'Next →';
   }
   function updateStats(){
     animateNumber($('sqSScore'), shownScore, score); shownScore = score;
@@ -628,7 +637,7 @@
     setTimeout(function(){ s.remove(); }, 880);
   }
   function flash(cls){ var f = document.createElement('div'); f.className = cls; document.body.appendChild(f); setTimeout(function(){ f.remove(); }, 720); }
-  function streakPop(n){ var p = document.createElement('div'); p.className = 'sq-streakpop'; p.textContent = '🔥 स्ट्रीक ×'+n+'!'; document.body.appendChild(p); setTimeout(function(){ p.remove(); }, 1300); }
+  function streakPop(n){ var p = document.createElement('div'); p.className = 'sq-streakpop'; p.textContent = '🔥 Streak ×'+n+'!'; document.body.appendChild(p); setTimeout(function(){ p.remove(); }, 1300); }
   function cardCelebrate(){ $('sqQcard').animate([{transform:'scale(1)'},{transform:'scale(1.025) translateY(-4px)'},{transform:'scale(1)'}],{duration:520,easing:'ease'}); }
   function animateNumber(el,from,to){
     var t0 = performance.now(), dur = 650;

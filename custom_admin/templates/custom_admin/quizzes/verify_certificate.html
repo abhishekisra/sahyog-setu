@@ -1,27 +1,113 @@
 {% extends 'custom_admin/public_base.html' %}
+{% load static %}
 
-{% block title %}Certificate Verify - Sahyog Setu{% endblock %}
+{% block title %}Certificate Verification — Sahyog Setu{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block body %}
-<div class="container" style="max-width:520px; padding-top:80px; padding-bottom:80px;">
-    <div class="gold-card">
-        <h1 style="margin-top:0;">Certificate Verification</h1>
+<div class="sq-page" id="sqVerifyPage">
+  <header class="sq-head">
+    <div class="sq-head-inner">
+      <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
+      <a href="/" class="sq-back-link">Back to Home</a>
+    </div>
+  </header>
+
+  <main class="sq-stage">
+    <section class="sq-panel">
+      <div class="sq-gold-line"></div>
+      <div class="sq-body">
+        <div class="sq-eyebrow">Certificate</div>
+        <h1 class="sq-title">Certificate Verification</h1>
 
         {% if attempt %}
-        <div class="alert alert-success mb-3">✅ Valid Certificate</div>
-        <table class="table" style="color:inherit;">
-            <tr><td><strong>Name</strong></td><td>{{ attempt.name }}</td></tr>
-            <tr><td><strong>Quiz</strong></td><td>{{ attempt.quiz_title }}</td></tr>
-            <tr><td><strong>Score</strong></td><td>{{ attempt.percentage|floatformat:0 }}%</td></tr>
-            <tr><td><strong>Issued</strong></td><td>{{ attempt.issued_at|date:"d M Y" }}</td></tr>
-            <tr><td><strong>Certificate ID</strong></td><td>{{ cert_id }}</td></tr>
-        </table>
+        <div class="sq-status sq-status-ok">✅ Valid Certificate</div>
+        <div class="sq-details">
+          <div class="sq-row"><span class="sq-k">Name</span><span class="sq-v">{{ attempt.name }}</span></div>
+          <div class="sq-row"><span class="sq-k">Quiz</span><span class="sq-v">{{ attempt.quiz_title }}</span></div>
+          <div class="sq-row"><span class="sq-k">Score</span><span class="sq-v">{{ attempt.percentage|floatformat:0 }}%</span></div>
+          <div class="sq-row"><span class="sq-k">Issued</span><span class="sq-v">{{ attempt.issued_at|date:"d M Y" }}</span></div>
+          <div class="sq-row"><span class="sq-k">Certificate ID</span><span class="sq-v">{{ cert_id }}</span></div>
+        </div>
         {% else %}
-        <div class="alert alert-warning mb-3">❌ Not Found</div>
-        <p>Certificate ID <strong>{{ cert_id }}</strong> se koi valid certificate nahi mila. ID check karke dobara try karo.</p>
+        <div class="sq-status sq-status-bad">❌ Not Found</div>
+        <p class="sq-sub">No valid certificate was found for ID <strong>{{ cert_id }}</strong>. Please check the ID and try again.</p>
         {% endif %}
 
-        <p class="mt-3"><a href="/">Back to Home</a></p>
-    </div>
+        <p class="sq-footer-link"><a href="/" class="sq-link">Back to Home</a></p>
+      </div>
+    </section>
+  </main>
 </div>
+
+<style>
+  .sq-page{
+    --bg:#122019; --bg2:#17281f; --card:#213627; --card-hi:#2b4634;
+    --ink:#f4efe1; --ink-soft:#adc2b1; --ink-faint:#7d9583;
+    --gold:#c9a227; --gold-hi:#ffd75e;
+    --green:#35d67f; --red:#ff5c5c;
+    --line:rgba(201,162,39,.18);
+    --shadow-lg:0 30px 70px rgba(0,0,0,.5);
+    font-family:'Mukta',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 80% -10%, #1d3628 0%, transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, #1a2e22 0%, transparent 55%),
+      var(--bg);
+    min-height:100dvh;
+    padding:clamp(10px,2.5vw,34px);
+  }
+  .sq-page *{box-sizing:border-box}
+
+  .sq-head{ max-width:480px; margin:0 auto 14px; display:flex; }
+  .sq-head-inner{ display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px; }
+  .sq-brand{ display:flex; align-items:center; gap:10px; }
+  .sq-seal{
+    width:38px;height:38px;border-radius:50%;
+    background:conic-gradient(from 210deg,var(--gold-hi),var(--gold),#8a6d16,var(--gold-hi));
+    display:grid;place-items:center; color:#122019; font-weight:700; font-size:17px;
+    box-shadow:0 8px 20px rgba(201,162,39,.35), inset 0 0 0 3px rgba(18,32,25,.25);
+  }
+  .sq-brand b{ font-family:'Fraunces'; font-weight:600; letter-spacing:.3px; font-size:16px; color:var(--ink); }
+  .sq-brand span{ color:var(--gold-hi); }
+  .sq-back-link{ color:var(--ink-soft); font-weight:600; font-size:14px; text-decoration:none; }
+  .sq-back-link:hover{ color:var(--gold-hi); }
+
+  .sq-stage{ width:100%; max-width:480px; margin:30px auto 0; }
+  .sq-panel{
+    position:relative; border-radius:26px;
+    background:linear-gradient(165deg,var(--card-hi),var(--card));
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .sq-gold-line{ height:4px; background:linear-gradient(90deg,transparent,var(--gold),var(--gold-hi),var(--gold),transparent); }
+  .sq-body{ padding:34px 30px; }
+
+  .sq-eyebrow{ color:var(--gold-hi); font-weight:600; letter-spacing:2.5px; font-size:11.5px; text-transform:uppercase; margin-bottom:8px; text-align:center; }
+  .sq-title{ font-family:'Fraunces'; font-weight:600; font-size:clamp(22px,6vw,26px); margin:0 0 22px; text-align:center; }
+
+  .sq-status{ padding:12px 16px; border-radius:12px; font-weight:600; font-size:14.5px; margin-bottom:22px; text-align:center; }
+  .sq-status-ok{ background:rgba(53,214,127,.14); border:1px solid rgba(53,214,127,.35); color:var(--green); }
+  .sq-status-bad{ background:rgba(255,92,92,.14); border:1px solid rgba(255,92,92,.35); color:var(--red); }
+
+  .sq-details{ display:flex; flex-direction:column; gap:12px; }
+  .sq-row{ display:flex; justify-content:space-between; gap:12px; padding-bottom:12px; border-bottom:1px solid var(--line); font-size:14px; }
+  .sq-row:last-child{ border-bottom:none; padding-bottom:0; }
+  .sq-k{ color:var(--ink-faint); font-weight:600; }
+  .sq-v{ color:var(--ink); text-align:right; }
+
+  .sq-sub{ color:var(--ink-soft); font-size:14.5px; line-height:1.6; }
+
+  .sq-footer-link{ margin:26px 0 0; }
+  .sq-link{ color:var(--gold-hi); font-weight:600; text-decoration:none; }
+  .sq-link:hover{ text-decoration:underline; }
+
+  .sq-page :focus-visible{ outline:3px solid var(--gold-hi); outline-offset:2px; }
+</style>
 {% endblock %}

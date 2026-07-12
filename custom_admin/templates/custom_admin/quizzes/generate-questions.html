@@ -25,37 +25,45 @@
 
         <div class="row">
             <div class="col-md-8">
-                <div class="card">
+                <div class="card qa-card qa-section">
                     <div class="card-body">
 
-                        <p>
-                            Bas topic likho aur kitne questions chahiye — AI (Claude) explanation ke saath ek batch bana dega.
-                            Save hone se pehle agli screen par har question <strong>review aur edit</strong> kar sakte ho, ya kisi ko uncheck karke skip kar sakte ho.
-                            Kuch bhi seedha database mein save nahi hota jab tak tum review screen se "Save" na daba do.
-                        </p>
+                        <div class="qa-section-head">
+                            <span class="qa-section-icon qa-section-icon-amber"><i class="feather icon-cpu"></i></span>
+                            <div>
+                                <h5 class="qa-section-title">AI Question Generator</h5>
+                                <p class="qa-section-sub">Claude will draft a batch of questions with explanations — nothing saves until you review and confirm.</p>
+                            </div>
+                        </div>
+
+                        <div class="qa-info-strip">
+                            <i class="feather icon-info"></i>
+                            <span>Just enter a topic and how many questions you need. Before saving, you can <strong>review and edit</strong>
+                            every question on the next screen, or uncheck any to skip it.</span>
+                        </div>
 
                         {% if error %}
-                        <div class="alert alert-danger">{{ error }}</div>
+                        <div class="alert alert-danger mt-3">{{ error }}</div>
                         {% endif %}
 
-                        <form method="POST">
+                        <form method="POST" class="mt-3">
                             {% csrf_token %}
-                            <div class="form-group">
+                            <div class="form-group qa-field-row">
                                 <label>Topic *</label>
                                 <input type="text" name="topic" class="form-control" required
                                     placeholder="e.g. Digital payments and UPI safety"
                                     value="{{ topic|default:'' }}">
                             </div>
-                            <div class="form-group">
+                            <div class="form-group qa-field-row">
                                 <label>Number of Questions</label>
                                 <input type="number" name="count" class="form-control" min="1" max="{{ max_questions }}"
                                     value="{{ count|default:10 }}">
-                                <small class="form-text text-muted">Maximum {{ max_questions }} per batch — chalao dobara agar zyada chahiye.</small>
+                                <small class="form-text text-muted">Maximum {{ max_questions }} per batch — run it again if you need more.</small>
                             </div>
-                            <button type="submit" class="btn btn-primary">
+                            <button type="submit" class="btn btn-primary qa-submit-btn-sm">
                                 <i class="feather icon-cpu"></i>&nbsp;Generate Questions
                             </button>
-                            <a href="/admin/quiz/{{ quiz.id }}" class="btn btn-outline-secondary">Cancel</a>
+                            <a href="/admin/quiz/{{ quiz.id }}" class="btn btn-outline-secondary qa-submit-btn-sm">Cancel</a>
                         </form>
 
                     </div>
@@ -65,6 +73,27 @@
 
     </div>
 </div>
+
+<style>
+    label { font-weight: 700 !important; color: #3a3f47; font-size: 13.5px; }
+    .qa-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .qa-section-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 14px; }
+    .qa-section-icon {
+        width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 19px;
+    }
+    .qa-section-icon-amber { background: rgba(255,171,0,.14); color: #b3720a; }
+    .qa-section-title { margin: 0; font-size: 17px; font-weight: 800; color: #24272b; }
+    .qa-section-sub { margin: 2px 0 0; font-size: 12.5px; color: #8a8f98; }
+    .qa-field-row .form-control { border-radius: 8px; border-color: #e3e6ec; margin-top: 4px; }
+    .qa-field-row .form-control:focus { border-color: #4680ff; box-shadow: 0 0 0 3px rgba(70,128,255,.12); }
+    .qa-info-strip {
+        background: rgba(70,128,255,.07); border: 1px solid rgba(70,128,255,.15);
+        border-radius: 10px; padding: 12px 16px; font-size: 13px; color: #445; display: flex; gap: 10px;
+    }
+    .qa-info-strip i { color: #4680ff; flex-shrink: 0; margin-top: 2px; }
+    .qa-submit-btn-sm { border-radius: 8px; font-weight: 700; padding: 10px 22px; }
+</style>
 
 {% for message in messages %}
 <script>

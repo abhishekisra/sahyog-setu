@@ -16,7 +16,8 @@ from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
-from django.db.models import Avg, Count, F, Q
+from django.core.paginator import Paginator
+from django.db.models import Avg, Count, F, Max, Q
 from django.db.models.functions import TruncDate
 from django.core.exceptions import ValidationError
 from accounts.models import User
@@ -50,8 +51,21 @@ class QuizzesView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
-            quizzes = Quizzes.objects.all().order_by("-id")
-            return render(request,"custom_admin/quizzes/quizzes.html",{"quizzes": quizzes})
+            quizzes = (
+                Quizzes.objects.all()
+                .order_by("-id")
+                .annotate(
+                    question_count=Count("questions", distinct=True),
+                    attempt_count=Count("attempts", distinct=True),
+                )
+            )
+            stats = {
+                "total": len(quizzes),
+                "active": sum(1 for q in quizzes if q.status),
+                "questions": sum(q.question_count for q in quizzes),
+                "attempts": sum(q.attempt_count for q in quizzes),
+            }
+            return render(request, "custom_admin/quizzes/quizzes.html", {"quizzes": quizzes, "stats": stats})
 
         else:
             messages.error(request, "You have to login first.")
@@ -151,7 +165,7 @@ class QuizView(View):
                 # instead of the list, so an admin who plans to upload a
                 # CSV/XLSX of questions doesn't have to go find the quiz
                 # again first.
-                messages.info(request, "Ab questions bulk import karo, ya neeche se ek-ek add karo.")
+                messages.info(request, "Now bulk-import questions, or add them one by one below.")
                 return redirect("adminImportQuestions", id=quiz.id)
             return redirect("adminQuizzes")
         except Exception as e: 
@@ -179,9 +193,17 @@ class EditQuizView(View):
             quiz=quiz, completed_at__isnull=True, is_demo=False
         ).count()
 
+        # Same strip_tags+unescape treatment as the public listing's
+        # short_desc (see quiz_list below) -- the raw description is rich
+        # HTML (<p>/<ul>/<strong>...), and this preview card is plain text,
+        # so rendering it unstripped just dumps literal tags on the admin.
+        preview_desc = html.unescape(strip_tags(quiz.description or ""))
+        preview_desc = Truncator(preview_desc.strip()).chars(100)
+
         return render(request, "custom_admin/quizzes/edit-quiz.html", {
             "quiz": quiz,
             "live_attempt_count": live_attempt_count,
+            "preview_desc": preview_desc,
         })
 
 
@@ -370,7 +392,7 @@ class ReviewGeneratedQuestionsView(View):
         quiz = get_object_or_404(Quizzes, id=id)
         draft_rows = request.session.get(_ai_draft_session_key(quiz.id))
         if not draft_rows:
-            messages.error(request, "Koi AI-generated draft nahi mila -- pehle questions generate karo.")
+            messages.error(request, "No AI-generated draft found -- generate questions first.")
             return redirect("adminGenerateQuestions", id=quiz.id)
         return render(request, "custom_admin/quizzes/review-generated-questions.html", {
             "quiz": quiz,
@@ -425,16 +447,16 @@ class ReviewGeneratedQuestionsView(View):
             ))
 
         if not clean_rows:
-            messages.error(request, "Koi bhi question save karne layak nahi tha (ya sab uncheck/duplicate the).")
+            messages.error(request, "No question was fit to save (either all were unchecked or duplicates).")
             return redirect("adminReviewGeneratedQuestions", id=quiz.id)
 
         with transaction.atomic():
             Questions.objects.bulk_create(clean_rows)
 
         request.session.pop(_ai_draft_session_key(quiz.id), None)
-        messages.success(request, f"{len(clean_rows)} AI-generated questions add ho gaye.")
+        messages.success(request, f"{len(clean_rows)} AI-generated questions added.")
         if skipped:
-            messages.warning(request, f"{skipped} question(s) skip ho gaye (khaali/duplicate/uncheck the).")
+            messages.warning(request, f"{skipped} question(s) were skipped (empty/duplicate/unchecked).")
         return redirect("adminEditQuiz", id=quiz.id)
 
 
@@ -465,13 +487,13 @@ class ImportQuestionsView(View):
         uploaded = request.FILES.get("file")
 
         if not uploaded:
-            messages.error(request, "Koi file select nahi ki.")
+            messages.error(request, "No file selected.")
             return redirect("adminImportQuestions", id=quiz.id)
 
         try:
             raw_rows = parse_upload(uploaded)
         except Exception as e:
-            messages.error(request, f"File parse nahi ho paayi: {e}")
+            messages.error(request, f"Could not parse the file: {e}")
             return redirect("adminImportQuestions", id=quiz.id)
 
         existing_titles_lower = {
@@ -498,9 +520,9 @@ class ImportQuestionsView(View):
                 Questions(quiz=quiz, **row) for row in clean_rows
             ])
 
-        messages.success(request, f"{len(clean_rows)} questions import ho gaye.")
+        messages.success(request, f"{len(clean_rows)} questions imported.")
         if warnings:
-            messages.warning(request, f"{len(warnings)} duplicate warning tha (phir bhi import hue).")
+            messages.warning(request, f"{len(warnings)} duplicate warning(s) (imported anyway).")
         return redirect("adminEditQuiz", id=quiz.id)
 
 
@@ -583,16 +605,32 @@ QUIZ_ICON_SVGS = {
         '<path d="M8 8h6M8 11.5h6"/>'
         '</svg>'
     ),
+    "megaphone": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V5L6 9H5a2 2 0 0 0-2 2z"/>'
+        '<path d="M15 8a3 3 0 0 1 0 8"/>'
+        '<path d="M18 5a7 7 0 0 1 0 14"/>'
+        '</svg>'
+    ),
+    "tag": (
+        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" '
+        'stroke-linecap="round" stroke-linejoin="round">'
+        '<path d="M20.6 13.4 11 3.8A2 2 0 0 0 9.6 3H4.5A1.5 1.5 0 0 0 3 4.5v5.1a2 2 0 0 0 .6 1.4l9.6 9.6a2 2 0 0 0 2.8 0l4.6-4.6a2 2 0 0 0 0-2.6z"/>'
+        '<circle cx="7.5" cy="7.5" r="1.3"/>'
+        '</svg>'
+    ),
 }
 
 QUIZ_LIST_CARD_META = {
-    # No "subtitle" here -- every quiz.title already carries its own
-    # Hindi/English descriptor (e.g. "Cyber Security — साइबर सुरक्षा"),
-    # so appending a second subtitle line just duplicated the same text.
+    # No "subtitle" here -- quiz.title is already descriptive enough on its
+    # own, so appending a second subtitle line just duplicated the same text.
     "government-welfare-schemes": {"icon": "landmark", "tag": "Yojana", "accent": "#35d67f"},
     "shg-training-quiz": {"icon": "users", "tag": "SHG", "accent": "#ffd75e"},
     "cyber-security": {"icon": "shield", "tag": "Cyber", "accent": "#5eb8ff"},
     "yuvakendra-need-assessment-planning-document-for-startup": {"icon": "rocket", "tag": "Startup", "accent": "#ff9d6e"},
+    "branding-and-marketing": {"icon": "megaphone", "tag": "Marketing", "accent": "#a78bfa"},
+    "pricing-strategies-and-standards": {"icon": "tag", "tag": "Pricing", "accent": "#f472b6"},
 }
 QUIZ_LIST_CARD_DEFAULT = {"icon": "book", "tag": "Quiz", "accent": "#c9a227"}
 
@@ -650,7 +688,7 @@ class QuizLandingView(View):
 
         share_url = request.build_absolute_uri(reverse("quiz_landing", kwargs={"slug": quiz.slug}))
         og_image = request.build_absolute_uri(quiz.image.url) if quiz.image else None
-        whatsapp_text = f"सहयोग सेतु का \"{quiz.title}\" क्विज़ आज़माइए: {share_url}?src=whatsapp"
+        whatsapp_text = f"Try the \"{quiz.title}\" quiz on Sahyog Setu: {share_url}?src=whatsapp"
 
         # How many questions THIS attempt will actually contain, not the
         # size of the full bank -- quiz.questions.count() (e.g. 100) was
@@ -716,7 +754,7 @@ class QuizTakeView(View):
         quiz = get_object_or_404(Quizzes, id=quiz_id, status=True)
 
         if not quiz.is_live:
-            messages.error(request, "यह क्विज़ अभी उपलब्ध नहीं है।")
+            messages.error(request, "This quiz is not available right now.")
             return redirect("/")
 
         # is_demo=False here too -- a seeded demo row must never count toward
@@ -809,7 +847,7 @@ class QuizTakeView(View):
         # conditional unique constraints, so that declaration would silently
         # create nothing). The .filter().first() below is just a fast-path
         # read for the common case; live_lock's uniqueness is what actually
-        # stops two simultaneous taps on "क्विज़ शुरू करें" from both
+        # stops two simultaneous taps on "Start Quiz" from both
         # succeeding.
         attempt = QuizAttempt.objects.filter(user=request.user, quiz=quiz, completed_at__isnull=True).first()
         created = False
@@ -1024,9 +1062,9 @@ class QuizResultView(View):
         # score to whoever clicks the link.
         share_url = request.build_absolute_uri(reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug}))
         whatsapp_text = (
-            f"मैंने सहयोग सेतु का \"{attempt.quiz.title}\" क्विज़ "
-            f"{round(attempt.percentage)}% अंकों से पूरा किया 🎓\n"
-            f"आप भी आज़माइए: {share_url}?src=whatsapp"
+            f"I completed the \"{attempt.quiz.title}\" quiz on Sahyog Setu "
+            f"with {round(attempt.percentage)}% 🎓\n"
+            f"You try it too: {share_url}?src=whatsapp"
         )
 
         return render(request, "custom_admin/quizzes/quiz_result.html", {
@@ -1053,7 +1091,7 @@ class QuizLeaderboardView(View):
         is_staff = request.user.is_authenticated and request.user.is_staff
 
         if not is_staff and not quiz.leaderboard_public:
-            messages.error(request, "यह लीडरबोर्ड सार्वजनिक नहीं है।")
+            messages.error(request, "This leaderboard is not public.")
             return redirect("quiz_take", quiz_id=quiz.id)
 
         attempts = QuizAttempt.objects.filter(
@@ -1095,7 +1133,7 @@ class CertificateView(View):
         )
 
         if not attempt.quiz.certificate_enabled:
-            messages.error(request, "Is quiz ke liye certificate available nahi hai.")
+            messages.error(request, "Certificate is not available for this quiz.")
             return redirect("quiz_result", pk=attempt.id)
 
         # Some users registered with mobile only and have a blank first_name
@@ -1105,7 +1143,7 @@ class CertificateView(View):
         # rather than trust that invariant silently.
         display_name = (attempt.user.get_full_name() or attempt.user.username or "").strip()
         if not display_name:
-            messages.error(request, "आपके प्रोफ़ाइल में नाम नहीं है — certificate जारी नहीं किया जा सकता। कृपया सहायता से संपर्क करें।")
+            messages.error(request, "Your profile has no name on file — a certificate cannot be issued. Please contact support.")
             return redirect("quiz_result", pk=attempt.id)
 
         if not attempt.certificate_id:
@@ -1119,9 +1157,9 @@ class CertificateView(View):
         landing_path = reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug})
         share_url = request.build_absolute_uri(landing_path)
         share_text = (
-            f"मैंने सहयोग सेतु का \"{attempt.quiz.title}\" क्विज़ "
-            f"{round(attempt.percentage)}% अंकों से पूरा किया 🎓\n"
-            f"आप भी आज़माइए: {share_url}?src=whatsapp"
+            f"I completed the \"{attempt.quiz.title}\" quiz on Sahyog Setu "
+            f"with {round(attempt.percentage)}% 🎓\n"
+            f"You try it too: {share_url}?src=whatsapp"
         )
 
         return render(request, "custom_admin/quizzes/certificate.html", {
@@ -1146,7 +1184,7 @@ class CertificateImageDownloadView(View):
             percentage__gte=CERTIFICATE_MIN_PERCENTAGE,
         )
         if not attempt.certificate_id:
-            messages.error(request, "Certificate abhi issue nahi hua hai.")
+            messages.error(request, "Certificate has not been issued yet.")
             return redirect("quiz_result", pk=attempt.id)
 
         image_bytes = render_certificate_image(attempt)
@@ -1270,7 +1308,7 @@ class QuizAnalyticsView(View):
             for i in range(days)
         ]
 
-        # Source breakdown -- "कहाँ से आए" panel.
+        # Source breakdown -- "Traffic Sources" panel.
         source_breakdown = list(
             base.values("source").annotate(n=Count("id")).order_by("-n")
         )
@@ -1330,6 +1368,120 @@ def quiz_analytics_export(request):
     response = StreamingHttpResponse(rows(), content_type="text/csv")
     response["Content-Disposition"] = f'attachment; filename="{filename}"'
     return response
+
+
+PARTICIPANTS_PER_PAGE = 25
+
+
+@method_decorator(staff_member_required(login_url="adminLogin"), name="dispatch")
+class ParticipantsListView(View):
+    """Every participant who has completed at least one quiz, with
+    aggregated stats. Grouped straight off QuizAttempt (its own fields
+    only) -- never annotate these aggregates onto User via the reverse FK,
+    that's the same join-multiplication trap noted on quiz_breakdown above,
+    except worse here since it would also multiply the distinct-quiz count."""
+
+    def get(self, request):
+        q = request.GET.get("q", "").strip()
+
+        rows = (
+            QuizAttempt.objects.filter(completed_at__isnull=False, is_demo=False)
+            .values("user_id", "user__name", "user__mobile", "user__email")
+            .annotate(
+                attempts=Count("id"),
+                quizzes_taken=Count("quiz_id", distinct=True),
+                avg_pct=Avg("percentage"),
+                passed=Count("id", filter=Q(passed=True)),
+                last_attempt=Max("completed_at"),
+            )
+            .order_by("-last_attempt")
+        )
+
+        if q:
+            rows = rows.filter(
+                Q(user__name__icontains=q) | Q(user__mobile__icontains=q) | Q(user__email__icontains=q)
+            )
+
+        rows = list(rows)
+        for row in rows:
+            row["avg_pct"] = round(row["avg_pct"] or 0, 1)
+            row["pass_rate"] = round(row["passed"] / row["attempts"] * 100, 1) if row["attempts"] else 0
+
+        paginator = Paginator(rows, PARTICIPANTS_PER_PAGE)
+        page = paginator.get_page(request.GET.get("page"))
+
+        return render(request, "custom_admin/quizzes/quiz_participants.html", {
+            "page_obj": page,
+            "q": q,
+        })
+
+
+@method_decorator(staff_member_required(login_url="adminLogin"), name="dispatch")
+class ParticipantDetailView(View):
+    """One participant's full attempt history -- every quiz they've taken,
+    not just one. user_type=2 keeps this from ever resolving to an admin
+    account by id guess."""
+
+    def get(self, request, user_id):
+        participant = get_object_or_404(User, pk=user_id, user_type=2)
+
+        attempts = (
+            QuizAttempt.objects.filter(user=participant, completed_at__isnull=False)
+            .select_related("quiz")
+            .order_by("-completed_at")
+        )
+        agg = attempts.aggregate(avg_pct=Avg("percentage"), passed=Count("id", filter=Q(passed=True)))
+        total = len(attempts)
+
+        return render(request, "custom_admin/quizzes/quiz_participant_detail.html", {
+            "participant": participant,
+            "attempts": attempts,
+            "total": total,
+            "avg_pct": round(agg["avg_pct"] or 0, 1),
+            "passed": agg["passed"] or 0,
+        })
+
+
+@method_decorator(staff_member_required(login_url="adminLogin"), name="dispatch")
+class AdminAttemptDetailView(View):
+    """Question-by-question review of a single attempt, for any participant --
+    the staff-only counterpart of QuizResultView (which is locked to
+    user=request.user). No such lock here; that's the point of this view."""
+
+    def get(self, request, pk):
+        attempt = get_object_or_404(
+            QuizAttempt.objects.select_related("user", "quiz"), pk=pk, completed_at__isnull=False
+        )
+        responses = attempt.responses.select_related("question").order_by("id")
+
+        def option_label(opt_str, options_by_number):
+            if not opt_str:
+                return "Skipped"
+            try:
+                n = int(opt_str)
+            except ValueError:
+                return opt_str
+            return options_by_number.get(n, f"Option {n}")
+
+        rows = []
+        for r in responses:
+            # question is SET_NULL on delete -- if the admin has since edited
+            # the quiz (EditQuizView deletes+recreates Questions), only the
+            # snapshotted question TEXT survives, never the option-text
+            # snapshot, so a deleted question can only be labeled by number.
+            options_by_number = dict(r.question.options_list) if r.question else {}
+            rows.append({
+                "question_text": r.question_text_snapshot,
+                "selected_label": option_label(r.selected_option, options_by_number),
+                "correct_label": option_label(r.correct_option, options_by_number),
+                "is_correct": r.is_correct,
+                "explanation": r.explanation_snapshot,
+            })
+
+        return render(request, "custom_admin/quizzes/quiz_attempt_detail.html", {
+            "attempt": attempt,
+            "rows": rows,
+        })
 
 
 @method_decorator(login_required, name="dispatch")

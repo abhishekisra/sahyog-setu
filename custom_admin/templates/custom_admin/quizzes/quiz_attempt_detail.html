@@ -1,0 +1,85 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<style>
+    .qa-chart-card { background:#fff; border-radius:14px; padding:20px; margin-bottom:22px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+    .qa-profile { display:flex; gap:28px; flex-wrap:wrap; }
+    .qa-profile-field { min-width:150px; }
+    .qa-profile-field label { display:block; color:#8a8f98; font-size:11px; text-transform:uppercase; letter-spacing:.03em; font-weight:700; margin-bottom:4px; }
+    .qa-profile-field span { font-size:16px; font-weight:800; color:#24272b; }
+    .qa-chart-card h6 { font-weight:800; color:#24272b; font-size:14px; margin-bottom:16px; }
+    .qa-q-card { border:1px solid #eef0f4; background:#fbfbfd; border-radius:10px; padding:16px 20px; margin-bottom:12px; transition: box-shadow .15s ease; }
+    .qa-q-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.05); }
+    .qa-q-card.correct { border-left:4px solid #2db171; }
+    .qa-q-card.wrong { border-left:4px solid #dc3545; }
+    .qa-q-text { font-weight:700; margin-bottom:10px; color:#24272b; }
+    .qa-q-row { display:flex; gap:8px; font-size:13px; margin-bottom:5px; }
+    .qa-q-row label { color:#8a8f98; min-width:110px; font-weight:600; }
+    .qa-q-answer.correct { color:#1f8a58; font-weight:700; }
+    .qa-q-answer.wrong { color:#c0392b; font-weight:700; }
+    .qa-q-explanation { margin-top:8px; font-size:12px; color:#8a8f98; font-style:italic; }
+    .qa-status-pill { display:inline-block; padding:3px 12px; border-radius:99px; font-size:11px; font-weight:700; }
+    .qa-status-pill.pass { background:rgba(45,177,113,.13); color:#1f8a58; }
+    .qa-status-pill.fail { background:rgba(220,53,69,.1); color:#c0392b; }
+</style>
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">{{ attempt.quiz.title }} — {{ attempt.user.name|default:attempt.user.username }}</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-right">
+                        <a href="{% url 'quiz_participant_detail' attempt.user_id %}" class="btn btn-outline-primary btn-sm">
+                            <i class="feather icon-arrow-left"></i> Back to Participant
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="qa-chart-card">
+            <div class="qa-profile">
+                <div class="qa-profile-field"><label>Score</label><span>{{ attempt.score }}/{{ attempt.total_questions }} ({{ attempt.percentage|floatformat:1 }}%)</span></div>
+                <div class="qa-profile-field"><label>Result</label><span><span class="qa-status-pill {% if attempt.passed %}pass{% else %}fail{% endif %}">{% if attempt.passed %}Passed{% else %}Failed{% endif %}</span></span></div>
+                <div class="qa-profile-field"><label>Time Taken</label><span>{% if attempt.time_taken_seconds %}{{ attempt.time_taken_seconds }}s{% else %}—{% endif %}</span></div>
+                <div class="qa-profile-field"><label>Completed At</label><span>{{ attempt.completed_at|date:"d M Y, h:i A" }}</span></div>
+            </div>
+        </div>
+
+        <div class="qa-chart-card">
+            <h6>Question-by-Question Review</h6>
+            {% for row in rows %}
+            <div class="qa-q-card {% if row.is_correct %}correct{% else %}wrong{% endif %}">
+                <div class="qa-q-text">{{ forloop.counter }}. {{ row.question_text }}</div>
+                <div class="qa-q-row">
+                    <label>Answered:</label>
+                    <span class="qa-q-answer {% if row.is_correct %}correct{% else %}wrong{% endif %}">{{ row.selected_label }}</span>
+                </div>
+                {% if not row.is_correct %}
+                <div class="qa-q-row">
+                    <label>Correct Answer:</label>
+                    <span class="qa-q-answer correct">{{ row.correct_label }}</span>
+                </div>
+                {% endif %}
+                {% if row.explanation %}
+                <div class="qa-q-explanation">{{ row.explanation }}</div>
+                {% endif %}
+            </div>
+            {% empty %}
+            <p class="text-muted">No responses recorded for this attempt.</p>
+            {% endfor %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

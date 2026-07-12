@@ -5,22 +5,6 @@
 {% block body %}
 
 <style>
-    label {
-        font-weight: bold !important;
-    }
-
-    .question-card {
-        border: 1px solid #ddd;
-        padding: 15px;
-        margin-top: 15px;
-        border-radius: 8px;
-        background: #fafafa;
-    }
-
-    .remove-btn {
-        float: right;
-    }
-
     /* Live card preview -- exact copy of .gold-card / .ss-quiz-card from
        public_home.html (the real homepage card), scoped under
        .ss-card-preview-scope so these fairly generic class names can't
@@ -28,77 +12,112 @@
        Values (colors, radius, shadow) are hardcoded here rather than
        relying on public_base.html's --ss-* variables, since this page
        extends the admin base, not the public one, and doesn't load them. */
-    .ss-card-preview-scope {
-        max-width: 260px;
-    }
-
+    .ss-card-preview-scope { max-width: 260px; }
     .ss-card-preview-scope .gold-card {
-        background: #facc15;
-        border-radius: 16px;
-        color: #1a1c18;
+        background: #facc15; border-radius: 16px; color: #1a1c18;
         box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
     }
-
-    .ss-card-preview-scope .ss-quiz-card {
-        padding: 0;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
+    .ss-card-preview-scope .ss-quiz-card { padding: 0; overflow: hidden; display: flex; flex-direction: column; }
+    .ss-card-preview-scope .ss-q-card-body { padding: 20px; flex: 1; }
+    .ss-card-preview-scope .ss-q-meta { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+    .ss-card-preview-scope .ss-q-count, .ss-card-preview-scope .ss-q-time {
+        font-size: 0.7rem; font-weight: 800; color: #313f2f; background: rgba(0, 0, 0, 0.05);
+        padding: 3px 8px; border-radius: 6px; text-transform: uppercase;
     }
-
-    .ss-card-preview-scope .ss-q-card-body {
-        padding: 20px;
-        flex: 1;
-    }
-
-    .ss-card-preview-scope .ss-q-meta {
-        display: flex;
-        gap: 8px;
-        margin-bottom: 12px;
-        flex-wrap: wrap;
-    }
-
-    .ss-card-preview-scope .ss-q-count,
-    .ss-card-preview-scope .ss-q-time {
-        font-size: 0.7rem;
-        font-weight: 800;
-        color: #313f2f;
-        background: rgba(0, 0, 0, 0.05);
-        padding: 3px 8px;
-        border-radius: 6px;
-        text-transform: uppercase;
-    }
-
-    .ss-card-preview-scope .ss-q-title {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #1a1c18;
-        margin: 0 0 8px 0;
-        line-height: 1.3;
-    }
-
-    .ss-card-preview-scope .ss-q-desc {
-        color: rgba(0, 0, 0, 0.6);
-        font-size: 0.85rem;
-        line-height: 1.5;
-        margin: 0;
-    }
-
-    .ss-card-preview-scope .ss-q-footer {
-        padding: 0 20px 20px;
-    }
-
+    .ss-card-preview-scope .ss-q-title { font-size: 1.1rem; font-weight: 800; color: #1a1c18; margin: 0 0 8px 0; line-height: 1.3; }
+    .ss-card-preview-scope .ss-q-desc { color: rgba(0, 0, 0, 0.6); font-size: 0.85rem; line-height: 1.5; margin: 0; }
+    .ss-card-preview-scope .ss-q-footer { padding: 0 20px 20px; }
     .ss-card-preview-scope .ss-q-btn {
-        display: block;
-        width: 100%;
-        background: #313f2f;
-        color: white;
-        text-align: center;
-        padding: 10px;
-        border-radius: 12px;
-        font-weight: 800;
-        font-size: 0.85rem;
+        display: block; width: 100%; background: #313f2f; color: white; text-align: center;
+        padding: 10px; border-radius: 12px; font-weight: 800; font-size: 0.85rem;
     }
+
+    /* Quiz-admin "premium" visual layer -- additive on top of the existing
+       Bootstrap4/Able-Pro admin theme, scoped via qa- prefix. */
+    label { font-weight: 700 !important; color: #3a3f47; font-size: 13.5px; }
+
+    .qa-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .qa-section { margin-bottom: 22px; }
+    .qa-section-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+    .qa-section-head-split { justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .qa-section-icon {
+        width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 19px;
+    }
+    .qa-section-icon-blue   { background: rgba(70,128,255,.12); color: #4680ff; }
+    .qa-section-icon-gold   { background: rgba(201,162,39,.15); color: #a5820f; }
+    .qa-section-icon-purple { background: rgba(139,92,246,.12); color: #8b5cf6; }
+    .qa-section-title { margin: 0; font-size: 17px; font-weight: 800; color: #24272b; display: flex; align-items: center; gap: 10px; }
+    .qa-section-sub { margin: 2px 0 0; font-size: 12.5px; color: #8a8f98; }
+    .qa-q-count-badge { background: #8b5cf6; color: #fff; font-size: 12px; font-weight: 700; border-radius: 20px; padding: 2px 10px; display: inline-block; }
+
+    .qa-field-row .col-12, .qa-field-row [class*="col-md"] { margin-bottom: 16px; }
+    .qa-field-row .form-control { border-radius: 8px; border-color: #e3e6ec; }
+    .qa-field-row .form-control:focus { border-color: #4680ff; box-shadow: 0 0 0 3px rgba(70,128,255,.12); }
+
+    .qa-divider { border-top: 1px dashed #e3e6ec; margin: 6px 0 20px; }
+    .qa-subhead {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-weight: 800; font-size: 13.5px; color: #4680ff;
+        text-transform: uppercase; letter-spacing: .03em;
+    }
+    .qa-subhead i { width: 15px; height: 15px; }
+
+    .qa-live-alert {
+        border-radius: 12px; border: none; background: #fff7e6; color: #92660b;
+        font-weight: 600; padding: 14px 18px; display: flex; align-items: center; gap: 10px;
+        margin-bottom: 20px;
+    }
+
+    .qa-preview-thumb { width: 200px; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-top: 8px; background: #f2f2f2; }
+    .qa-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .qa-sig-preview { height: 64px; width: 168px; display: grid; place-items: end center; margin-top: 8px; }
+    .qa-sig-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; object-position: bottom; }
+    .qa-logo-preview { height: 64px; width: 168px; display: grid; place-items: center; margin-top: 8px; }
+    .qa-logo-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; }
+
+    /* Question toolbar (search + expand/collapse all) */
+    .qa-q-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+    .qa-q-search { max-width: 280px; border-radius: 8px; }
+    .qa-add-q-btn, .qa-toolbar-btn { border-radius: 8px; }
+
+    /* Collapsible question cards -- with up to 100 questions on a single
+       quiz, a flat always-expanded list was unusable; each question now
+       collapses to a one-line summary (number + preview text + correct-
+       option chip) and only the question being edited needs to be open. */
+    .qa-question-card {
+        border: 1px solid #eef0f4; margin-top: 12px; border-radius: 12px;
+        background: #fbfbfd; overflow: hidden;
+        transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    .qa-question-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.05); border-color: #e3e6ec; }
+    .qa-question-summary {
+        display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+        cursor: pointer; user-select: none;
+    }
+    .qa-question-num {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
+        background: rgba(139,92,246,.12); color: #7c3aed; font-weight: 800; font-size: 13px;
+    }
+    .qa-question-preview {
+        flex: 1; font-size: 13.5px; font-weight: 600; color: #3a3f47;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .qa-question-preview.qa-empty { color: #b0b4bb; font-weight: 500; font-style: italic; }
+    .qa-correct-chip {
+        font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
+        background: rgba(45,177,113,.13); color: #1f8a58; white-space: nowrap; flex-shrink: 0;
+    }
+    .qa-correct-chip.qa-missing { background: rgba(220,53,69,.1); color: #c0392b; }
+    .qa-question-chevron { transition: transform .15s ease; color: #8a8f98; flex-shrink: 0; }
+    .qa-question-card.qa-open .qa-question-chevron { transform: rotate(180deg); }
+    .qa-question-body { display: none; padding: 4px 18px 18px; border-top: 1px solid #eef0f4; }
+    .qa-question-card.qa-open .qa-question-body { display: block; }
+    .qa-remove-btn { border-radius: 8px; }
+
+    .qa-submit-bar { text-align: center; margin: 8px 0 40px; }
+    .qa-submit-btn { padding: 13px 42px; border-radius: 10px; font-weight: 700; box-shadow: 0 8px 20px rgba(70,128,255,.28); }
 </style>
 
 <div class="pcoded-main-container">
@@ -109,50 +128,58 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <h5>Edit Quiz</h5>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item"><a href="/admin/dashboard"><i class="feather icon-home"></i></a></li>
+                            <li class="breadcrumb-item"><a href="/admin/quizzes">Quizzes</a></li>
+                            <li class="breadcrumb-item"><a href="#!">{{ quiz.title }}</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
         {% if live_attempt_count > 0 %}
-        <div class="alert alert-warning">
-            ⚠️ {{ live_attempt_count }} लोग अभी यह क्विज़ दे रहे हैं — प्रश्न बदलने से उनके चल रहे attempt पर असर पड़ सकता है।
+        <div class="qa-live-alert">
+            <i class="feather icon-alert-triangle"></i>
+            {{ live_attempt_count }} people are taking this quiz right now — changing the questions may affect their in-progress attempt.
         </div>
         {% endif %}
 
-        <div class="row">
-            <div class="col-md-12">
+        <form method="POST" enctype="multipart/form-data">
+            {% csrf_token %}
 
-                <div class="card">
-                    <div class="card-body">
+            <div class="row">
+                <div class="col-md-12">
 
-                        <form method="POST" enctype="multipart/form-data">
-                            {% csrf_token %}
+                    <!-- Section: Basic Info -->
+                    <div class="card qa-card qa-section">
+                        <div class="card-body">
+                            <div class="qa-section-head">
+                                <span class="qa-section-icon qa-section-icon-blue"><i class="feather icon-info"></i></span>
+                                <div>
+                                    <h5 class="qa-section-title">Basic Information</h5>
+                                    <p class="qa-section-sub">The quiz name, description and how it appears in the public listing.</p>
+                                </div>
+                            </div>
 
-                            <div class="row px-2">
-
+                            <div class="row px-2 qa-field-row">
                                 <div class="col-12">
                                     <label>Quiz Title *</label>
-                                    <input type="text" name="title" value="{{ quiz.title }}" class="form-control"
-                                        required>
+                                    <input type="text" name="title" value="{{ quiz.title }}" class="form-control" required>
                                 </div>
 
-                                <div class="col-4 mt-2">
+                                <div class="col-md-4">
                                     <label>Quiz Image</label>
                                     <input type="file" name="image" class="form-control">
-
                                     {% if quiz.image %}
-                                    <div style="width:200px;aspect-ratio:16/10;border-radius:8px;overflow:hidden;margin-top:8px;background:#f2f2f2;">
-                                        <img src="{{ quiz.image.url }}" style="width:100%;height:100%;object-fit:cover;">
-                                    </div>
+                                    <div class="qa-preview-thumb"><img src="{{ quiz.image.url }}"></div>
                                     {% endif %}
                                     <small class="text-muted d-block mt-1">
-                                        16:10 ratio (जैसे 1200×750px), max 2MB. केवल art अपलोड करें — शीर्षक, समय, प्रश्न संख्या database से आते हैं, छवि में मत लिखें.
+                                        16:10 ratio (e.g. 1200×750px), max 2MB. Upload artwork only — title, time, question count come from the database, do not write them into the image.
                                     </small>
-
                                 </div>
 
-                                <div class="col-4 mt-2">
+                                <div class="col-md-4">
                                     <label>Live Preview</label>
                                     <div class="ss-card-preview-scope">
                                         <div class="gold-card ss-quiz-card">
@@ -162,7 +189,7 @@
                                                     <span class="ss-q-time">{{ quiz.quiz_time|default:"10" }} Mins</span>
                                                 </div>
                                                 <h3 class="ss-q-title">{{ quiz.title|default:"Quiz Title" }}</h3>
-                                                <p class="ss-q-desc">{{ quiz.description|default:"Quiz description..."|truncatechars:100 }}</p>
+                                                <p class="ss-q-desc">{{ preview_desc|default:"Quiz description..." }}</p>
                                             </div>
                                             <div class="ss-q-footer">
                                                 <span class="ss-q-btn">Start Quiz</span>
@@ -170,17 +197,15 @@
                                         </div>
                                     </div>
                                     <small class="text-muted d-block mt-1">
-                                        यह वही कार्ड है जो होमपेज पर दिखेगा — नोट: card banner image नहीं दिखाता, सिर्फ title/description/meta.
+                                        This is the same card that will show on the homepage — note: it doesn't show the card banner image, only title/description/meta.
                                     </small>
                                 </div>
- 
-                                <div class="col-4 mt-2">
-                                    <label>Quiz Time</label>
-                                    <input type="number" name="quiz_time" value="{{ quiz.quiz_time }}"  class="form-control" required>
-                                </div>
 
-                                <div class="col-4 mt-2">
-                                    <label>Status *</label>
+                                <div class="col-md-4">
+                                    <label>Quiz Time</label>
+                                    <input type="number" name="quiz_time" value="{{ quiz.quiz_time }}" class="form-control" required>
+
+                                    <label class="mt-3">Status *</label>
                                     <select class="form-control" name="status" id="status">
                                         <option value="1" {% if quiz.status %}selected{% endif %}>Active</option>
                                         <option value="0" {% if not quiz.status %}selected{% endif %}>Inactive</option>
@@ -189,176 +214,215 @@
 
                                 <div class="col-12 mt-2">
                                     <label>Description</label>
-                                    <textarea name="description" id="description"
-                                        class="form-control">{{ quiz.description }}</textarea>
+                                    <textarea name="description" id="description" class="form-control">{{ quiz.description }}</textarea>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                <div class="col-12 mt-2">
+                    <!-- Section: Certificate -->
+                    <div class="card qa-card qa-section">
+                        <div class="card-body">
+                            <div class="qa-section-head">
+                                <span class="qa-section-icon qa-section-icon-gold"><i class="feather icon-award"></i></span>
+                                <div>
+                                    <h5 class="qa-section-title">Certificate</h5>
+                                    <p class="qa-section-sub">What the participant's certificate says and how it's laid out.</p>
+                                </div>
+                            </div>
+
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-12">
                                     <label>Certificate Text</label>
-                                    <textarea name="certificate_text" id="certificate_text"
-                                        class="form-control">{{ quiz.certificate_text }}</textarea>
+                                    <textarea name="certificate_text" id="certificate_text" class="form-control">{{ quiz.certificate_text }}</textarea>
+                                    <small class="text-muted">Shown inside quotes on the certificate. Keep the quiz name here consistent with the Quiz Title above.</small>
                                 </div>
 
-                                <div class="col-6 mt-2">
+                                <div class="col-md-6 mt-2">
                                     <label>Certificate Background (optional)</label>
                                     {% if quiz.certificate_background %}
-                                    <div class="mb-1"><img src="{{ quiz.certificate_background.url }}" style="max-height:60px;"></div>
+                                    <div class="mb-1"><img src="{{ quiz.certificate_background.url }}" style="max-height:60px;border-radius:6px;"></div>
                                     {% endif %}
                                     <input type="file" name="certificate_background" class="form-control">
                                     <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB.</small>
                                 </div>
 
-                                <div class="col-3 mt-2">
+                                <div class="col-md-3 mt-2">
                                     <label>Name Position (top %)</label>
                                     <input type="number" step="0.1" min="0" max="100" name="name_top_pct" class="form-control" value="{{ quiz.name_top_pct }}">
                                 </div>
 
-                                <div class="col-3 mt-2">
+                                <div class="col-md-3 mt-2">
                                     <label>Score Position (top %)</label>
                                     <input type="number" step="0.1" min="0" max="100" name="score_top_pct" class="form-control" value="{{ quiz.score_top_pct }}">
                                 </div>
+                            </div>
 
-                                <hr class="col-12">
+                            <hr class="qa-divider">
 
-                                <h5 class="col-12">Authority 1</h5>
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-12 mb-2">
+                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 1</span>
+                                </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Name *</label>
-                                    <input type="text" name="authority1_name" value="{{ quiz.authority1_name }}"
-                                        class="form-control">
+                                    <input type="text" name="authority1_name" value="{{ quiz.authority1_name }}" class="form-control">
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Designation *</label>
-                                    <input type="text" name="authority1_designation"
-                                        value="{{ quiz.authority1_designation }}" class="form-control">
+                                    <input type="text" name="authority1_designation" value="{{ quiz.authority1_designation }}" class="form-control">
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Signature</label>
                                     <input type="file" name="authority1_sign_image" class="form-control">
                                     {% if quiz.authority1_sign_image %}
-                                    <div style="height:64px;width:168px;display:grid;place-items:end center;margin-top:8px;">
-                                        <img src="{{ quiz.authority1_sign_image.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:bottom;">
-                                    </div>
+                                    <div class="qa-sig-preview"><img src="{{ quiz.authority1_sign_image.url }}"></div>
                                     {% endif %}
                                 </div>
+                            </div>
 
-                                <hr class="col-12">
+                            <hr class="qa-divider">
 
-                                <h5 class="col-12">Authority 2</h5>
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-12 mb-2">
+                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 2</span>
+                                </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Name *</label>
-                                    <input type="text" name="authority2_name" value="{{ quiz.authority2_name }}"
-                                        class="form-control">
+                                    <input type="text" name="authority2_name" value="{{ quiz.authority2_name }}" class="form-control">
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Designation *</label>
-                                    <input type="text" name="authority2_designation"
-                                        value="{{ quiz.authority2_designation }}" class="form-control">
+                                    <input type="text" name="authority2_designation" value="{{ quiz.authority2_designation }}" class="form-control">
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Signature</label>
                                     <input type="file" name="authority2_sign_image" class="form-control">
                                     {% if quiz.authority2_sign_image %}
-                                    <div style="height:64px;width:168px;display:grid;place-items:end center;margin-top:8px;">
-                                        <img src="{{ quiz.authority2_sign_image.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;object-position:bottom;">
-                                    </div>
+                                    <div class="qa-sig-preview"><img src="{{ quiz.authority2_sign_image.url }}"></div>
                                     {% endif %}
                                 </div>
+                            </div>
 
-                                <hr class="col-12">
+                            <hr class="qa-divider">
 
-                                <div class="col-6">
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-md-6">
                                     <label>Logo 1</label>
                                     <input type="file" name="logo_1" class="form-control">
                                     {% if quiz.logo_1 %}
-                                    <div style="height:64px;width:168px;display:grid;place-items:center;margin-top:8px;">
-                                        <img src="{{ quiz.logo_1.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;">
-                                    </div>
+                                    <div class="qa-logo-preview"><img src="{{ quiz.logo_1.url }}"></div>
                                     {% endif %}
                                 </div>
 
-                                <div class="col-6">
+                                <div class="col-md-6">
                                     <label>Logo 2</label>
                                     <input type="file" name="logo_2" class="form-control">
                                     {% if quiz.logo_2 %}
-                                    <div style="height:64px;width:168px;display:grid;place-items:center;margin-top:8px;">
-                                        <img src="{{ quiz.logo_2.url }}" style="max-height:100%;max-width:100%;width:auto;height:auto;object-fit:contain;">
-                                    </div>
+                                    <div class="qa-logo-preview"><img src="{{ quiz.logo_2.url }}"></div>
                                     {% endif %}
                                 </div>
-
                             </div>
+                        </div>
+                    </div>
 
-                            <hr>
-
-                            <div class="d-flex justify-content-between mt-4">
-                                <h4>Questions</h4>
-
+                    <!-- Section: Questions -->
+                    <div class="card qa-card qa-section">
+                        <div class="card-body">
+                            <div class="qa-section-head qa-section-head-split">
+                                <div class="d-flex">
+                                    <span class="qa-section-icon qa-section-icon-purple"><i class="feather icon-help-circle"></i></span>
+                                    <div>
+                                        <h5 class="qa-section-title">Questions <span class="qa-q-count-badge" id="qCountBadge">{{ quiz.questions.count }}</span></h5>
+                                        <p class="qa-section-sub">Click a question to expand and edit it.</p>
+                                    </div>
+                                </div>
                                 <div>
-                                    <a href="/admin/quiz/{{ quiz.id }}/generate-questions"
-                                    class="btn btn-warning btn-sm">
-                                        <i class="feather icon-cpu"></i>&nbsp;Generate with AI
+                                    <a href="/admin/quiz/{{ quiz.id }}/generate-questions" class="btn btn-warning btn-sm qa-toolbar-btn">
+                                        <i class="feather icon-cpu"></i> Generate with AI
                                     </a>
-                                    <a href="/admin/quiz/{{ quiz.id }}/import-questions"
-                                    class="btn btn-primary btn-sm">
-                                        <i class="feather icon-upload"></i>&nbsp;Bulk Import Questions
+                                    <a href="/admin/quiz/{{ quiz.id }}/import-questions" class="btn btn-primary btn-sm qa-toolbar-btn">
+                                        <i class="feather icon-upload"></i> Bulk Import
                                     </a>
-                                    <button type="button" class="btn btn-success btn-sm" onclick="addQuestion()">
-                                        + Add Question
+                                    <button type="button" class="btn btn-success btn-sm qa-add-q-btn" onclick="addQuestion()">
+                                        <i class="feather icon-plus"></i> Add Question
                                     </button>
                                 </div>
+                            </div>
+
+                            <div class="qa-q-toolbar">
+                                <input type="text" class="form-control form-control-sm qa-q-search" id="qSearch"
+                                    placeholder="Search questions...">
+                                <button type="button" class="btn btn-outline-secondary btn-sm qa-toolbar-btn" onclick="setAllOpen(true)">
+                                    <i class="feather icon-maximize-2"></i> Expand All
+                                </button>
+                                <button type="button" class="btn btn-outline-secondary btn-sm qa-toolbar-btn" onclick="setAllOpen(false)">
+                                    <i class="feather icon-minimize-2"></i> Collapse All
+                                </button>
                             </div>
 
                             <div id="questions-container">
 
                                 {% for q in quiz.questions.all %}
 
-                                <div class="question-card question-item">
+                                <div class="qa-question-card question-item">
 
-                                    <button type="button" class="btn btn-danger btn-sm remove-btn"
-                                        onclick="removeQuestion(this)">Remove</button>
+                                    <div class="qa-question-summary" onclick="toggleQuestion(this.parentElement)">
+                                        <span class="qa-question-num">Q{{ forloop.counter }}</span>
+                                        <span class="qa-question-preview">{{ q.question }}</span>
+                                        <span class="qa-correct-chip">Correct: Option {{ q.correct_option }}</span>
+                                        <button type="button" class="btn btn-outline-danger btn-sm qa-remove-btn"
+                                            onclick="event.stopPropagation(); removeQuestion(this)">
+                                            <i class="feather icon-trash-2"></i>
+                                        </button>
+                                        <i class="feather icon-chevron-down qa-question-chevron"></i>
+                                    </div>
 
-                                    <textarea name="question[]" class="form-control question-field"
-                                        required>{{ q.question }}</textarea>
-
-                                    <div class="row mt-2">
-
-                                        <div class="col-3">
-                                            <input type="text" name="option_1[]" value="{{ q.option_1 }}"
-                                                class="form-control option-field" required>
+                                    <div class="qa-question-body">
+                                        <div class="form-group">
+                                            <label>Question *</label>
+                                            <textarea name="question[]" class="form-control question-field" required rows="2">{{ q.question }}</textarea>
                                         </div>
 
-                                        <div class="col-3">
-                                            <input type="text" name="option_2[]" value="{{ q.option_2 }}"
-                                                class="form-control option-field" required>
+                                        <div class="row mt-2">
+
+                                            <div class="col-md-3">
+                                                <label>Option 1 *</label>
+                                                <input type="text" name="option_1[]" value="{{ q.option_1 }}" class="form-control option-field" required>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>Option 2 *</label>
+                                                <input type="text" name="option_2[]" value="{{ q.option_2 }}" class="form-control option-field" required>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>Option 3 *</label>
+                                                <input type="text" name="option_3[]" value="{{ q.option_3 }}" class="form-control option-field" required>
+                                            </div>
+
+                                            <div class="col-md-3">
+                                                <label>Option 4 *</label>
+                                                <input type="text" name="option_4[]" value="{{ q.option_4 }}" class="form-control option-field" required>
+                                            </div>
+
+                                            <div class="col-12 mt-2">
+                                                <label>Correct Option *</label>
+                                                <select name="correct_option[]" class="form-control correct-field" required>
+                                                    <option value="1" {% if q.correct_option == 1 %}selected{% endif %}>Option 1</option>
+                                                    <option value="2" {% if q.correct_option == 2 %}selected{% endif %}>Option 2</option>
+                                                    <option value="3" {% if q.correct_option == 3 %}selected{% endif %}>Option 3</option>
+                                                    <option value="4" {% if q.correct_option == 4 %}selected{% endif %}>Option 4</option>
+                                                </select>
+                                            </div>
+
                                         </div>
-
-                                        <div class="col-3">
-                                            <input type="text" name="option_3[]" value="{{ q.option_3 }}"
-                                                class="form-control option-field" required>
-                                        </div>
-
-                                        <div class="col-3">
-                                            <input type="text" name="option_4[]" value="{{ q.option_4 }}"
-                                                class="form-control option-field" required>
-                                        </div>
-
-                                        <div class="col-12 mt-2">
-
-                                            <select name="correct_option[]" class="form-control correct-field" required>
-                                                <option value="1" {% if q.correct_option == 1 %}selected{% endif %}>Option 1</option>
-                                                <option value="2" {% if q.correct_option == 2 %}selected{% endif %}>Option 2</option>
-                                                <option value="3" {% if q.correct_option == 3 %}selected{% endif %}>Option 3</option>
-                                                <option value="4" {% if q.correct_option == 4 %}selected{% endif %}>Option 4</option>
-                                            </select>
-
-                                        </div>
-
                                     </div>
 
                                 </div>
@@ -366,20 +430,19 @@
                                 {% endfor %}
 
                             </div>
-
-                            <center>
-                                <button type="submit" class="btn btn-primary mt-4">
-                                    Update Quiz
-                                </button>
-                            </center>
-
-                        </form>
-
+                        </div>
                     </div>
-                </div>
 
+                    <div class="qa-submit-bar">
+                        <button type="submit" class="btn btn-primary btn-lg qa-submit-btn">
+                            <i class="feather icon-check-circle"></i> Update Quiz
+                        </button>
+                    </div>
+
+                </div>
             </div>
-        </div>
+
+        </form>
 
     </div>
 </div>
@@ -387,70 +450,137 @@
 <script>
 
     $('#status').select2();
-
     new RichTextEditor("#description");
-    // new RichTextEditor("#certificate_text");
+
+    function toggleQuestion(card, forceOpen) {
+        let shouldOpen = forceOpen !== undefined ? forceOpen : !card.classList.contains('qa-open');
+        card.classList.toggle('qa-open', shouldOpen);
+    }
+
+    function setAllOpen(open) {
+        document.querySelectorAll('#questions-container .question-item').forEach(card => toggleQuestion(card, open));
+    }
+
+    function refreshSummary(card) {
+        let qText = card.querySelector('.question-field').value.trim();
+        let preview = card.querySelector('.qa-question-preview');
+        preview.textContent = qText || '(empty question)';
+        preview.classList.toggle('qa-empty', !qText);
+
+        let correctSel = card.querySelector('.correct-field');
+        let chip = card.querySelector('.qa-correct-chip');
+        if (correctSel.value) {
+            chip.textContent = 'Correct: Option ' + correctSel.value;
+            chip.classList.remove('qa-missing');
+        } else {
+            chip.textContent = 'No correct option set';
+            chip.classList.add('qa-missing');
+        }
+    }
+
+    function renumberQuestions() {
+        let items = document.querySelectorAll('#questions-container .question-item');
+        items.forEach((el, i) => {
+            el.querySelector('.qa-question-num').textContent = 'Q' + (i + 1);
+        });
+        document.getElementById('qCountBadge').textContent = items.length;
+    }
+
+    document.getElementById('questions-container').addEventListener('input', function (e) {
+        let card = e.target.closest('.question-item');
+        if (card) refreshSummary(card);
+    });
 
     function addQuestion() {
 
         let html = `
-            <div class="question-card question-item">
+            <div class="qa-question-card question-item qa-open">
 
-            <button type="button" class="btn btn-danger btn-sm remove-btn"
-            onclick="removeQuestion(this)">Remove</button>
+                <div class="qa-question-summary" onclick="toggleQuestion(this.parentElement)">
+                    <span class="qa-question-num">Q</span>
+                    <span class="qa-question-preview qa-empty">(empty question)</span>
+                    <span class="qa-correct-chip qa-missing">No correct option set</span>
+                    <button type="button" class="btn btn-outline-danger btn-sm qa-remove-btn"
+                        onclick="event.stopPropagation(); removeQuestion(this)">
+                        <i class="feather icon-trash-2"></i>
+                    </button>
+                    <i class="feather icon-chevron-down qa-question-chevron"></i>
+                </div>
 
-            <textarea name="question[]" class="form-control question-field" required></textarea>
+                <div class="qa-question-body">
+                    <div class="form-group">
+                        <label>Question *</label>
+                        <textarea name="question[]" class="form-control question-field" required rows="2"></textarea>
+                    </div>
 
-            <div class="row mt-2">
-
-            <div class="col-3">
-            <input type="text" name="option_1[]" class="form-control option-field" required>
-            </div>
-
-            <div class="col-3">
-            <input type="text" name="option_2[]" class="form-control option-field" required>
-            </div>
-
-            <div class="col-3">
-            <input type="text" name="option_3[]" class="form-control option-field" required>
-            </div>
-
-            <div class="col-3">
-            <input type="text" name="option_4[]" class="form-control option-field" required>
-            </div>
-
-            <div class="col-12 mt-2">
-            <select name="correct_option[]" class="form-control correct-field" required>
-
-            <option value="">Select</option>
-            <option value="1">Option 1</option>
-            <option value="2">Option 2</option>
-            <option value="3">Option 3</option>
-            <option value="4">Option 4</option>
-
-            </select>
-            </div>
-
-            </div>
+                    <div class="row mt-2">
+                        <div class="col-md-3">
+                            <label>Option 1 *</label>
+                            <input type="text" name="option_1[]" class="form-control option-field" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Option 2 *</label>
+                            <input type="text" name="option_2[]" class="form-control option-field" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Option 3 *</label>
+                            <input type="text" name="option_3[]" class="form-control option-field" required>
+                        </div>
+                        <div class="col-md-3">
+                            <label>Option 4 *</label>
+                            <input type="text" name="option_4[]" class="form-control option-field" required>
+                        </div>
+                        <div class="col-12 mt-2">
+                            <label>Correct Option *</label>
+                            <select name="correct_option[]" class="form-control correct-field" required>
+                                <option value="">Select</option>
+                                <option value="1">Option 1</option>
+                                <option value="2">Option 2</option>
+                                <option value="3">Option 3</option>
+                                <option value="4">Option 4</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
 
         document.getElementById("questions-container").insertAdjacentHTML("beforeend", html);
-
+        renumberQuestions();
+        let container = document.getElementById("questions-container");
+        let newCard = container.lastElementChild;
+        newCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
     function removeQuestion(btn) {
 
         let container = document.getElementById("questions-container");
 
-        if (container.children.length > 1)
+        if (container.children.length > 1) {
             btn.closest(".question-item").remove();
-
-        else
+            renumberQuestions();
+        } else {
             alert("Minimum 1 question required");
+        }
 
     }
 
+    document.getElementById('qSearch').addEventListener('input', function () {
+        let term = this.value.trim().toLowerCase();
+        document.querySelectorAll('#questions-container .question-item').forEach(card => {
+            let text = card.querySelector('.question-field').value.toLowerCase();
+            card.style.display = (!term || text.includes(term)) ? '' : 'none';
+        });
+    });
+
 </script>
+
+{% for message in messages %}
+
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+
+{% endfor %}
 
 {% endblock %}

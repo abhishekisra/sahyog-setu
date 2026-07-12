@@ -1,0 +1,119 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<style>
+    .qa-toolbar { display:flex; flex-wrap:wrap; gap:10px; align-items:center; justify-content:space-between; margin-bottom:18px; }
+    .qa-search { display:flex; gap:8px; }
+    .qa-search input { padding:9px 16px; border-radius:8px; border:1px solid #e3e6ec; font-size:13px; min-width:280px; }
+    .qa-search input:focus { border-color:#4680ff; outline:none; box-shadow:0 0 0 3px rgba(70,128,255,.12); }
+    .qa-chart-card { background:#fff; border-radius:14px; padding:20px; margin-bottom:22px; box-shadow:0 2px 12px rgba(0,0,0,.06); }
+    table.qa-table { width:100%; border-collapse:collapse; font-size:13px; }
+    table.qa-table th, table.qa-table td { padding:12px 12px; border-bottom:1px solid #f1f2f5; text-align:left; }
+    table.qa-table th { color:#8a8f98; font-weight:700; text-transform:uppercase; font-size:11px; letter-spacing:.03em; }
+    table.qa-table tr:hover { background:#fbfbfd; }
+    .qa-table a.qa-row-link { color:#24272b; text-decoration:none; font-weight:700; }
+    .qa-table a.qa-row-link:hover { color:#4680ff; }
+    .qa-pill { display:inline-block; padding:3px 12px; border-radius:99px; font-size:11px; font-weight:700; }
+    .qa-pill-good { background:rgba(45,177,113,.13); color:#1f8a58; }
+    .qa-pill-bad { background:rgba(220,53,69,.1); color:#c0392b; }
+    .qa-empty { text-align:center; padding:60px 20px; color:#888; }
+    .qa-pagination { display:flex; gap:6px; justify-content:center; margin-top:16px; }
+    .qa-pagination a, .qa-pagination span { padding:7px 14px; border-radius:8px; border:1px solid #e3e6ec; color:#555; text-decoration:none; font-size:13px; font-weight:600; }
+    .qa-pagination a:hover { border-color:#4680ff; color:#4680ff; }
+    .qa-pagination .active { background:#4680ff; border-color:#4680ff; color:#fff; }
+</style>
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5 class="m-b-10">Participants</h5>
+                        </div>
+                    </div>
+                    <div class="col-md-6 text-md-right">
+                        <a href="{% url 'quiz_analytics' %}" class="btn btn-outline-primary btn-sm">
+                            <i class="feather icon-bar-chart-2"></i> Back to Analytics
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="qa-toolbar">
+            <form method="get" class="qa-search">
+                <input type="text" name="q" value="{{ q }}" placeholder="Search by name, mobile, or email">
+                <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                {% if q %}<a href="{% url 'quiz_participants' %}" class="btn btn-outline-secondary btn-sm">Clear</a>{% endif %}
+            </form>
+        </div>
+
+        <div class="qa-chart-card">
+            {% if page_obj.object_list %}
+            <div style="overflow-x:auto;">
+                <table class="qa-table">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Mobile</th>
+                            <th>Quizzes Taken</th>
+                            <th>Attempts</th>
+                            <th>Avg %</th>
+                            <th>Pass Rate</th>
+                            <th>Last Attempt</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for row in page_obj.object_list %}
+                        <tr>
+                            <td>
+                                <a class="qa-row-link" href="{% url 'quiz_participant_detail' row.user_id %}">
+                                    {{ row.user__name|default:"—" }}
+                                </a>
+                            </td>
+                            <td>{{ row.user__mobile|default:"—" }}</td>
+                            <td>{{ row.quizzes_taken }}</td>
+                            <td>{{ row.attempts }}</td>
+                            <td>{{ row.avg_pct }}%</td>
+                            <td>
+                                <span class="qa-pill {% if row.pass_rate >= 50 %}qa-pill-good{% else %}qa-pill-bad{% endif %}">
+                                    {{ row.passed }}/{{ row.attempts }} ({{ row.pass_rate }}%)
+                                </span>
+                            </td>
+                            <td>{{ row.last_attempt|date:"d M Y, h:i A" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if page_obj.paginator.num_pages > 1 %}
+            <div class="qa-pagination">
+                {% if page_obj.has_previous %}
+                <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Prev</a>
+                {% endif %}
+                <span class="active">{{ page_obj.number }} / {{ page_obj.paginator.num_pages }}</span>
+                {% if page_obj.has_next %}
+                <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Next</a>
+                {% endif %}
+            </div>
+            {% endif %}
+
+            {% else %}
+            <div class="qa-empty">
+                <i class="feather icon-users" style="font-size:40px; opacity:.3;"></i>
+                <h5 class="mt-3">{% if q %}No participant found{% else %}No one has completed a quiz yet{% endif %}</h5>
+            </div>
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

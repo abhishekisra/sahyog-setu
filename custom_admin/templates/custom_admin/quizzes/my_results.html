@@ -1,49 +1,133 @@
 {% extends 'custom_admin/public_base.html' %}
+{% load static %}
 
-{% block title %}My Results{% endblock %}
+{% block title %}My Results — Sahyog Setu{% endblock %}
+
+{% block head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+{% endblock %}
 
 {% block body %}
-<div class="container" style="max-width:800px; padding-top:60px; padding-bottom:60px;">
-    <div class="gold-card">
-        <h1 style="margin-top:0;">मेरे परिणाम</h1>
-        <p class="mb-4" style="color: rgba(0,0,0,0.6);">आपके सभी पूरे हुए क्विज़ अटेम्प्ट.</p>
-
-        <div style="overflow-x:auto;">
-            <table style="width:100%; border-collapse:collapse;">
-                <thead>
-                    <tr style="text-align:left; border-bottom:2px solid rgba(0,0,0,0.15);">
-                        <th style="padding:10px 8px;">क्विज़</th>
-                        <th style="padding:10px 8px;">स्कोर</th>
-                        <th style="padding:10px 8px;">परिणाम</th>
-                        <th style="padding:10px 8px;">तारीख</th>
-                        <th style="padding:10px 8px;"></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for attempt in attempts %}
-                    <tr style="border-bottom:1px solid rgba(0,0,0,0.08);">
-                        <td style="padding:10px 8px;">{{ attempt.quiz.title }}</td>
-                        <td style="padding:10px 8px;">{{ attempt.marks }}/{{ attempt.total_marks }} ({{ attempt.percentage|floatformat:0 }}%)</td>
-                        <td style="padding:10px 8px;">
-                            {% if attempt.passed %}
-                            <span style="color:var(--g-900); font-weight:600;">✓ पास</span>
-                            {% else %}
-                            <span style="color:var(--state-wrong); font-weight:600;">✕ फेल</span>
-                            {% endif %}
-                        </td>
-                        <td style="padding:10px 8px;">{{ attempt.completed_at|date:"d M Y" }}</td>
-                        <td style="padding:10px 8px;"><a href="{% url 'quiz_result' pk=attempt.id %}" class="ss-link">देखें</a></td>
-                    </tr>
-                    {% empty %}
-                    <tr>
-                        <td colspan="5" style="padding:16px 8px;">अभी तक कोई क्विज़ पूरा नहीं किया.</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-        <p class="mt-3"><a href="/" class="ss-link" style="color: var(--ss-bg-accent, var(--ss-primary));">Back to Home</a></p>
+<div class="sq-page" id="sqResultsPage">
+  <header class="sq-head">
+    <div class="sq-head-inner">
+      <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
+      <a href="/" class="sq-back-link">Back to Home</a>
     </div>
+  </header>
+
+  <main class="sq-stage">
+    <section class="sq-panel">
+      <div class="sq-gold-line"></div>
+      <div class="sq-body">
+        <div class="sq-eyebrow">Your Progress</div>
+        <h1 class="sq-title">My Results</h1>
+        <p class="sq-sub">All of your completed quiz attempts.</p>
+
+        <div class="sq-table-wrap">
+          <table class="sq-table">
+            <thead>
+              <tr>
+                <th>Quiz</th>
+                <th>Score</th>
+                <th>Result</th>
+                <th>Date</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for attempt in attempts %}
+              <tr>
+                <td>{{ attempt.quiz.title }}</td>
+                <td>{{ attempt.marks }}/{{ attempt.total_marks }} ({{ attempt.percentage|floatformat:0 }}%)</td>
+                <td>
+                  {% if attempt.passed %}
+                  <span class="sq-pill sq-pill-pass">✓ Pass</span>
+                  {% else %}
+                  <span class="sq-pill sq-pill-fail">✕ Fail</span>
+                  {% endif %}
+                </td>
+                <td>{{ attempt.completed_at|date:"d M Y" }}</td>
+                <td><a href="{% url 'quiz_result' pk=attempt.id %}" class="sq-link">View</a></td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="5" class="sq-empty-cell">No quizzes completed yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  </main>
 </div>
+
+<style>
+  .sq-page{
+    --bg:#122019; --bg2:#17281f; --card:#213627; --card-hi:#2b4634;
+    --ink:#f4efe1; --ink-soft:#adc2b1; --ink-faint:#7d9583;
+    --gold:#c9a227; --gold-hi:#ffd75e;
+    --green:#35d67f; --red:#ff5c5c;
+    --line:rgba(201,162,39,.18);
+    --shadow-sm:0 4px 14px rgba(0,0,0,.28);
+    --shadow-lg:0 30px 70px rgba(0,0,0,.5);
+    font-family:'Mukta',system-ui,sans-serif;
+    color:var(--ink);
+    background:
+      radial-gradient(1200px 700px at 80% -10%, #1d3628 0%, transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, #1a2e22 0%, transparent 55%),
+      var(--bg);
+    min-height:100dvh;
+    padding:clamp(10px,2.5vw,34px);
+  }
+  .sq-page *{box-sizing:border-box}
+
+  .sq-head{ max-width:760px; margin:0 auto 14px; display:flex; }
+  .sq-head-inner{ display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px; }
+  .sq-brand{ display:flex; align-items:center; gap:10px; }
+  .sq-seal{
+    width:38px;height:38px;border-radius:50%;
+    background:conic-gradient(from 210deg,var(--gold-hi),var(--gold),#8a6d16,var(--gold-hi));
+    display:grid;place-items:center; color:#122019; font-weight:700; font-size:17px;
+    box-shadow:0 8px 20px rgba(201,162,39,.35), inset 0 0 0 3px rgba(18,32,25,.25);
+  }
+  .sq-brand b{ font-family:'Fraunces'; font-weight:600; letter-spacing:.3px; font-size:16px; color:var(--ink); }
+  .sq-brand span{ color:var(--gold-hi); }
+  .sq-back-link{ color:var(--ink-soft); font-weight:600; font-size:14px; text-decoration:none; }
+  .sq-back-link:hover{ color:var(--gold-hi); }
+
+  .sq-stage{ width:100%; max-width:760px; margin:20px auto 0; }
+  .sq-panel{
+    position:relative; border-radius:26px;
+    background:linear-gradient(165deg,var(--card-hi),var(--card));
+    border:1px solid var(--line);
+    box-shadow:var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,.06);
+    overflow:hidden;
+  }
+  .sq-gold-line{ height:4px; background:linear-gradient(90deg,transparent,var(--gold),var(--gold-hi),var(--gold),transparent); }
+  .sq-body{ padding:34px 30px; }
+
+  .sq-eyebrow{ color:var(--gold-hi); font-weight:600; letter-spacing:2.5px; font-size:11.5px; text-transform:uppercase; margin-bottom:8px; }
+  .sq-title{ font-family:'Fraunces'; font-weight:600; font-size:clamp(24px,6vw,30px); margin:0 0 8px; }
+  .sq-sub{ color:var(--ink-soft); font-size:14.5px; margin:0 0 26px; }
+
+  .sq-table-wrap{ overflow-x:auto; }
+  .sq-table{ width:100%; border-collapse:collapse; font-size:14px; }
+  .sq-table th{ text-align:left; padding:10px 10px; color:var(--ink-faint); font-weight:600; font-size:11.5px;
+    text-transform:uppercase; letter-spacing:.03em; border-bottom:1px solid var(--line); }
+  .sq-table td{ padding:12px 10px; border-bottom:1px solid var(--line); }
+  .sq-empty-cell{ color:var(--ink-soft); padding:20px 10px; }
+
+  .sq-pill{ display:inline-block; padding:3px 12px; border-radius:99px; font-size:12px; font-weight:700; }
+  .sq-pill-pass{ background:rgba(53,214,127,.14); color:var(--green); }
+  .sq-pill-fail{ background:rgba(255,92,92,.14); color:var(--red); }
+
+  .sq-link{ color:var(--gold-hi); font-weight:600; text-decoration:none; }
+  .sq-link:hover{ text-decoration:underline; }
+
+  .sq-page :focus-visible{ outline:3px solid var(--gold-hi); outline-offset:2px; }
+</style>
 {% endblock %}

@@ -29,7 +29,7 @@
                     </div>
 
                     <div class="col-md-6 text-right">
-                        <a href="/admin/quiz" class="btn btn-success btn-sm btn-round has-ripple">
+                        <a href="/admin/quiz" class="btn btn-success btn-sm btn-round has-ripple qa-add-btn">
                             <i class="feather icon-plus"></i>&nbsp;Add Quiz
                         </a>
                     </div>
@@ -38,23 +38,59 @@
             </div>
         </div>
 
+        <!-- Quick stats -->
+        <div class="row qa-stats-row">
+            <div class="col-6 col-md-3">
+                <div class="qa-stat-card">
+                    <div class="qa-stat-icon qa-stat-icon-blue"><i class="feather icon-book-open"></i></div>
+                    <div>
+                        <div class="qa-stat-num">{{ stats.total }}</div>
+                        <div class="qa-stat-label">Total Quizzes</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="qa-stat-card">
+                    <div class="qa-stat-icon qa-stat-icon-green"><i class="feather icon-check-circle"></i></div>
+                    <div>
+                        <div class="qa-stat-num">{{ stats.active }}</div>
+                        <div class="qa-stat-label">Live / Active</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="qa-stat-card">
+                    <div class="qa-stat-icon qa-stat-icon-gold"><i class="feather icon-help-circle"></i></div>
+                    <div>
+                        <div class="qa-stat-num">{{ stats.questions }}</div>
+                        <div class="qa-stat-label">Total Questions</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6 col-md-3">
+                <div class="qa-stat-card">
+                    <div class="qa-stat-icon qa-stat-icon-purple"><i class="feather icon-users"></i></div>
+                    <div>
+                        <div class="qa-stat-num">{{ stats.attempts }}</div>
+                        <div class="qa-stat-label">Total Attempts</div>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-   
         <div class="row">
             <div class="col-xl-12">
 
-                <div class="card">
+                <div class="card qa-card">
                     <div class="card-body">
 
                         <div class="table-responsive">
 
-                            <table id="report-table" class="table mb-0">
+                            <table id="report-table" class="table mb-0 qa-table">
 
                                 <thead>
                                     <tr>
-                                        <th>S No.</th>
-                                        <th>Title</th>
-                                        <th>Image</th>
+                                        <th>Quiz</th>
                                         <th>Authority 1</th>
                                         <th>Authority 2</th>
                                         <th>Status</th>
@@ -67,68 +103,95 @@
                                     {% for quiz in quizzes %}
                                     <tr>
 
-                                        <td>{{ forloop.counter }}</td>
-
-                                        <td>{{ quiz.title }}</td>
-
                                         <td>
-                                            {% if quiz.image %}
-                                                <img src="{{ quiz.image.url }}" class="img-fluid wid-100" alt="">
-                                            {% else %}
-                                                No Image
-                                            {% endif %}
+                                            <div class="qa-quiz-cell">
+                                                {% if quiz.image %}
+                                                    <img src="{{ quiz.image.url }}" class="qa-quiz-thumb" alt="">
+                                                {% else %}
+                                                    <div class="qa-quiz-thumb qa-quiz-thumb-empty">
+                                                        <i class="feather icon-image"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div class="qa-quiz-meta">
+                                                    <div class="qa-quiz-title">{{ quiz.title }}</div>
+                                                    <div class="qa-quiz-submeta">
+                                                        <span><i class="feather icon-help-circle"></i> {{ quiz.question_count }} question{{ quiz.question_count|pluralize }}</span>
+                                                        <span><i class="feather icon-users"></i> {{ quiz.attempt_count }} attempt{{ quiz.attempt_count|pluralize }}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
 
                                         <td>
-                                            <strong>{{ quiz.authority1_name }}</strong><br>
-                                            <small>{{ quiz.authority1_designation }}</small><br>
-                                            <img src="{{ quiz.authority1_logo.url }}" height="30">
+                                            <div class="qa-auth-cell">
+                                                {% if quiz.authority1_sign_image %}
+                                                    <img src="{{ quiz.authority1_sign_image.url }}" class="qa-auth-sig" alt="">
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ quiz.authority1_name }}</strong>
+                                                    <div class="qa-auth-desig">{{ quiz.authority1_designation }}</div>
+                                                </div>
+                                            </div>
                                         </td>
 
                                         <td>
-                                            <strong>{{ quiz.authority2_name }}</strong><br>
-                                            <small>{{ quiz.authority2_designation }}</small><br>
-                                            <img src="{{ quiz.authority2_logo.url }}" height="30">
+                                            <div class="qa-auth-cell">
+                                                {% if quiz.authority2_sign_image %}
+                                                    <img src="{{ quiz.authority2_sign_image.url }}" class="qa-auth-sig" alt="">
+                                                {% endif %}
+                                                <div>
+                                                    <strong>{{ quiz.authority2_name }}</strong>
+                                                    <div class="qa-auth-desig">{{ quiz.authority2_designation }}</div>
+                                                </div>
+                                            </div>
                                         </td>
 
                                         <td>
                                             {% if quiz.status %}
-                                                <span class="badge badge-success">Active</span>
+                                                <span class="qa-badge qa-badge-live"><i class="feather icon-check"></i> Active</span>
                                             {% else %}
-                                                <span class="badge badge-danger">Inactive</span>
+                                                <span class="qa-badge qa-badge-off"><i class="feather icon-x"></i> Inactive</span>
                                             {% endif %}
                                         </td>
 
                                         <td class="text-right">
+                                            <div class="qa-actions">
+                                                <a href="/admin/quiz/{{ quiz.id }}"
+                                                class="btn btn-success btn-sm" title="Edit quiz">
+                                                    <i class="feather icon-edit"></i>&nbsp;Edit
+                                                </a>
 
-                                            <a href="/admin/quiz/{{ quiz.id }}"
-                                            class="btn btn-success btn-sm">
-                                                <i class="feather icon-edit"></i>&nbsp;Edit
-                                            </a>
+                                                {% if quiz.slug %}
+                                                <a href="{% url 'quiz_landing' quiz.slug %}" target="_blank"
+                                                class="btn btn-outline-secondary btn-sm" title="View live page">
+                                                    <i class="feather icon-external-link"></i>
+                                                </a>
+                                                {% endif %}
 
-                                            <a href="/admin/quiz/{{ quiz.id }}/import-questions"
-                                            class="btn btn-primary btn-sm">
-                                                <i class="feather icon-upload"></i>&nbsp;Import Questions
-                                            </a>
-
-                                            {% if quiz.slug %}
-                                            <a href="{% url 'quiz_landing' quiz.slug %}" target="_blank"
-                                            class="btn btn-outline-secondary btn-sm">
-                                                <i class="feather icon-external-link"></i>&nbsp;View
-                                            </a>
-
-                                            <a href="{% url 'quiz_qr' quiz.slug %}" target="_blank"
-                                            class="btn btn-outline-secondary btn-sm">
-                                                <i class="feather icon-grid"></i>&nbsp;QR
-                                            </a>
-                                            {% endif %}
-
-                                            <a href="javascript:void(0)"
-                                            class="btn btn-danger btn-sm deleteButton"
-                                            data-id="{{ quiz.id }}">
-                                                <i class="feather icon-trash-2"></i>&nbsp;Delete
-                                            </a>
-
+                                                <div class="dropdown qa-more-dropdown">
+                                                    <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button"
+                                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" title="More actions">
+                                                        <i class="feather icon-more-horizontal"></i>
+                                                    </button>
+                                                    <div class="dropdown-menu dropdown-menu-right">
+                                                        <a class="dropdown-item" href="/admin/quiz/{{ quiz.id }}/import-questions">
+                                                            <i class="feather icon-upload"></i>&nbsp;Import Questions
+                                                        </a>
+                                                        <a class="dropdown-item" href="/admin/quiz/{{ quiz.id }}/generate-questions">
+                                                            <i class="feather icon-cpu"></i>&nbsp;Generate Questions (AI)
+                                                        </a>
+                                                        {% if quiz.slug %}
+                                                        <a class="dropdown-item" href="{% url 'quiz_qr' quiz.slug %}" target="_blank">
+                                                            <i class="feather icon-grid"></i>&nbsp;QR Code
+                                                        </a>
+                                                        {% endif %}
+                                                        <div class="dropdown-divider"></div>
+                                                        <a class="dropdown-item text-danger deleteButton" href="javascript:void(0)" data-id="{{ quiz.id }}">
+                                                            <i class="feather icon-trash-2"></i>&nbsp;Delete
+                                                        </a>
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </td>
 
                                     </tr>
@@ -180,9 +243,66 @@
     </div>
 </div>
 
+<style>
+    /* Quiz-admin "premium" visual layer -- purely additive on top of the
+       existing Bootstrap4/Able-Pro admin theme (.pcoded-*, .feather, .card,
+       .badge etc). Scoped to this page only via the qa- prefix so it never
+       bleeds into other (non-quiz) admin sections that share base.html. */
+    .qa-stats-row { margin-bottom: 4px; }
+    .qa-stat-card {
+        display: flex; align-items: center; gap: 14px;
+        background: #fff; border-radius: 14px; padding: 18px 20px;
+        margin-bottom: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.05);
+        border: 1px solid #eef0f4;
+    }
+    .qa-stat-icon {
+        width: 46px; height: 46px; border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; flex-shrink: 0;
+    }
+    .qa-stat-icon-blue   { background: rgba(70,128,255,.12); color: #4680ff; }
+    .qa-stat-icon-green  { background: rgba(45,177,113,.12); color: #2db171; }
+    .qa-stat-icon-gold   { background: rgba(201,162,39,.15); color: #a5820f; }
+    .qa-stat-icon-purple { background: rgba(139,92,246,.12); color: #8b5cf6; }
+    .qa-stat-num { font-size: 22px; font-weight: 800; color: #24272b; line-height: 1.1; }
+    .qa-stat-label { font-size: 12.5px; color: #8a8f98; font-weight: 600; margin-top: 2px; }
+
+    .qa-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .qa-table thead th { border-top: none; border-bottom: 2px solid #eef0f4; color: #6b7280; font-size: 12.5px; text-transform: uppercase; letter-spacing: .04em; }
+    .qa-table td { vertical-align: middle; border-color: #f1f2f5; }
+
+    .qa-quiz-cell { display: flex; align-items: center; gap: 12px; min-width: 260px; }
+    .qa-quiz-thumb { width: 56px; height: 42px; object-fit: cover; border-radius: 8px; flex-shrink: 0; }
+    .qa-quiz-thumb-empty { display: flex; align-items: center; justify-content: center; background: #f3f4f6; color: #b0b4bb; }
+    .qa-quiz-title { font-weight: 700; color: #24272b; font-size: 14px; line-height: 1.3; }
+    .qa-quiz-submeta { display: flex; gap: 12px; margin-top: 4px; font-size: 11.5px; color: #8a8f98; }
+    .qa-quiz-submeta i { width: 12px; height: 12px; margin-right: 3px; vertical-align: -1px; }
+
+    .qa-auth-cell { display: flex; align-items: center; gap: 8px; }
+    .qa-auth-sig { height: 26px; max-width: 60px; object-fit: contain; }
+    .qa-auth-desig { font-size: 11.5px; color: #8a8f98; }
+
+    .qa-badge {
+        display: inline-flex; align-items: center; gap: 5px;
+        padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: 700;
+    }
+    .qa-badge i { width: 13px; height: 13px; }
+    .qa-badge-live { background: rgba(45,177,113,.13); color: #1f8a58; }
+    .qa-badge-off  { background: rgba(220,53,69,.1); color: #c0392b; }
+
+    .qa-actions { display: flex; gap: 6px; justify-content: flex-end; align-items: center; }
+    .qa-more-dropdown .dropdown-menu { box-shadow: 0 8px 24px rgba(0,0,0,.12); border: none; border-radius: 10px; }
+    .qa-more-dropdown .dropdown-item { font-size: 13.5px; padding: 8px 16px; }
+    .qa-more-dropdown .dropdown-item i { width: 14px; margin-right: 6px; }
+
+    .qa-add-btn { box-shadow: 0 4px 12px rgba(40,167,69,.25); }
+</style>
+
 <script>
 
-$('.table').DataTable({});
+$('.table').DataTable({
+    columnDefs: [ { orderable: false, targets: -1 } ]
+});
 
 $(document).on('click', '.deleteButton', function(){
     var id = $(this).data('id');

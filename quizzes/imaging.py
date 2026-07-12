@@ -54,11 +54,11 @@ def validate_image_upload(django_file):
     it just resizes whatever it's given."""
     if django_file.size > MAX_UPLOAD_BYTES:
         max_mb = MAX_UPLOAD_BYTES // (1024 * 1024)
-        raise ValidationError(f"{django_file.name}: file {max_mb}MB se badi hai — chhoti karke dobara try karo.")
+        raise ValidationError(f"{django_file.name}: file is bigger than {max_mb}MB — shrink it and try again.")
 
     content_type = getattr(django_file, "content_type", None)
     if content_type and content_type not in ALLOWED_CONTENT_TYPES:
-        raise ValidationError(f"{django_file.name}: sirf PNG, JPG/JPEG ya WEBP allowed hai.")
+        raise ValidationError(f"{django_file.name}: only PNG, JPG/JPEG or WEBP allowed.")
 
     try:
         django_file.seek(0)
@@ -68,14 +68,14 @@ def validate_image_upload(django_file):
         im = Image.open(django_file)
         long_edge = max(im.size)
     except Exception:
-        raise ValidationError(f"{django_file.name}: ye ek valid image file nahi hai.")
+        raise ValidationError(f"{django_file.name}: this is not a valid image file.")
     finally:
         django_file.seek(0)
 
     if long_edge < MIN_LONG_EDGE_PX:
         raise ValidationError(
-            f"{django_file.name}: image bahut chhoti hai ({long_edge}px) — kam se kam "
-            f"{MIN_LONG_EDGE_PX}px chahiye, warna blurry dikhegi."
+            f"{django_file.name}: image is too small ({long_edge}px) — at least "
+            f"{MIN_LONG_EDGE_PX}px is needed, otherwise it will look blurry."
         )
 
 
@@ -99,11 +99,11 @@ def validate_certificate_background(django_file):
     caller decides how to surface that (e.g. messages.warning), since a low
     resolution is a "may look bad" not a "can't use this" situation."""
     if django_file.size > BG_MAX_BYTES:
-        raise ValidationError(f"{django_file.name}: file 4MB se badi hai.")
+        raise ValidationError(f"{django_file.name}: file is bigger than 4MB.")
 
     content_type = getattr(django_file, "content_type", None)
     if content_type and content_type not in ALLOWED_CONTENT_TYPES:
-        raise ValidationError(f"{django_file.name}: sirf PNG, JPG/JPEG ya WEBP allowed hai.")
+        raise ValidationError(f"{django_file.name}: only PNG, JPG/JPEG or WEBP allowed.")
 
     try:
         django_file.seek(0)
@@ -113,19 +113,19 @@ def validate_certificate_background(django_file):
         im = Image.open(django_file)
         width, height = im.size
     except Exception:
-        raise ValidationError(f"{django_file.name}: ye ek valid image file nahi hai.")
+        raise ValidationError(f"{django_file.name}: this is not a valid image file.")
     finally:
         django_file.seek(0)
 
     aspect = (width / height) if height else 0
     if not (BG_ASPECT_MIN <= aspect <= BG_ASPECT_MAX):
         raise ValidationError(
-            f"Certificate background A4 landscape hona chahiye (aspect ratio ~1.414). "
-            f"Aapka {width}:{height} hai."
+            f"Certificate background must be A4 landscape (aspect ratio ~1.414). "
+            f"Yours is {width}:{height}."
         )
 
     if width < BG_MIN_WIDTH_PX:
-        return f"{django_file.name}: chauda sirf {width}px hai — print karne par blurry lag sakta hai (min {BG_MIN_WIDTH_PX}px recommended)."
+        return f"{django_file.name}: width is only {width}px — may look blurry when printed (min {BG_MIN_WIDTH_PX}px recommended)."
     return None
 
 
@@ -157,11 +157,11 @@ BANNER_ASPECT_MAX = 1.65  # 16:10 = 1.60
 def validate_banner_image(django_file):
     """Raises ValidationError — banner must be 16:10, admin sees exactly why."""
     if django_file.size > BANNER_MAX_BYTES:
-        raise ValidationError(f"{django_file.name}: फ़ाइल 2 MB से कम रखें.")
+        raise ValidationError(f"{django_file.name}: keep the file under 2 MB.")
 
     content_type = getattr(django_file, "content_type", None)
     if content_type and content_type not in ALLOWED_CONTENT_TYPES:
-        raise ValidationError(f"{django_file.name}: सिर्फ PNG, JPG/JPEG ya WEBP allowed hai.")
+        raise ValidationError(f"{django_file.name}: only PNG, JPG/JPEG or WEBP allowed.")
 
     try:
         django_file.seek(0)
@@ -171,18 +171,18 @@ def validate_banner_image(django_file):
         im = Image.open(django_file)
         w, h = im.size
     except Exception:
-        raise ValidationError(f"{django_file.name}: ye ek valid image file nahi hai.")
+        raise ValidationError(f"{django_file.name}: this is not a valid image file.")
     finally:
         django_file.seek(0)
 
     ratio = (w / h) if h else 0
     if not (BANNER_ASPECT_MIN <= ratio <= BANNER_ASPECT_MAX):
         raise ValidationError(
-            f"बैनर 16:10 होना चाहिए (1.60:1). आपका {ratio:.2f}:1 है. "
-            f"सुझाव: 1200×750 px. वर्तमान: {w}×{h}"
+            f"Banner must be 16:10 (1.60:1). Yours is {ratio:.2f}:1. "
+            f"Suggested: 1200×750 px. Current: {w}×{h}"
         )
     if w < BANNER_MIN_WIDTH_PX:
-        raise ValidationError(f"चौड़ाई कम से कम {BANNER_MIN_WIDTH_PX}px चाहिए. आपकी {w}px है.")
+        raise ValidationError(f"Width must be at least {BANNER_MIN_WIDTH_PX}px. Yours is {w}px.")
 
 
 def normalized_banner(django_file):

@@ -4,24 +4,6 @@
 
 {% block body %}
 
-<style>
-    label {
-        font-weight: bold !important;
-    }
-
-    .question-card {
-        border: 1px solid #ddd;
-        padding: 15px;
-        margin-top: 15px;
-        border-radius: 8px;
-        background: #fafafa;
-    }
-
-    .remove-btn {
-        float: right;
-    }
-</style>
-
 <div class="pcoded-main-container">
     <div class="pcoded-content">
         <div class="page-header">
@@ -31,40 +13,55 @@
                         <div class="page-header-title">
                             <h5>Add Quiz</h5>
                         </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/admin/dashboard"><i class="feather icon-home"></i></a>
+                            </li>
+                            <li class="breadcrumb-item"><a href="/admin/quizzes">Quizzes</a></li>
+                            <li class="breadcrumb-item"><a href="#!">Add Quiz</a></li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
 
-        <div class="row">
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="card-body">
+        <form method="POST" enctype="multipart/form-data" id="quizForm">
+            {% csrf_token %}
 
-                        <form method="POST" enctype="multipart/form-data">
-                            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-12">
 
-                            <div class="row px-2">
+                    <!-- Section: Basic Info -->
+                    <div class="card qa-card qa-section">
+                        <div class="card-body">
+                            <div class="qa-section-head">
+                                <span class="qa-section-icon qa-section-icon-blue"><i class="feather icon-info"></i></span>
+                                <div>
+                                    <h5 class="qa-section-title">Basic Information</h5>
+                                    <p class="qa-section-sub">The quiz name, description and how it appears in the public listing.</p>
+                                </div>
+                            </div>
 
+                            <div class="row px-2 qa-field-row">
                                 <div class="col-12">
                                     <label>Quiz Title *</label>
                                     <input type="text" name="title" class="form-control" required>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Quiz Image</label>
                                     <input type="file" name="image" class="form-control" required>
                                     <small class="text-muted d-block mt-1">
-                                        16:10 ratio (जैसे 1200×750px), max 2MB. केवल art अपलोड करें — शीर्षक, समय, प्रश्न संख्या database से आते हैं, छवि में मत लिखें.
+                                        16:10 ratio (e.g. 1200×750px), max 2MB. Upload artwork only — title, time, question count come from the database, do not write them into the image.
                                     </small>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Quiz Time</label>
                                     <input type="number" name="quiz_time" class="form-control" required>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Status *</label>
                                     <select class="form-control" name="status" id="status" required>
                                         <option value="1">Active</option>
@@ -76,129 +73,154 @@
                                     <label>Description</label>
                                     <textarea name="description" id="description" class="form-control" required></textarea>
                                 </div>
+                            </div>
+                        </div>
+                    </div>
 
-                                <div class="d-flex justify-content-between mt-4">
-                                    <h4>Certificate</h4>
+                    <!-- Section: Certificate -->
+                    <div class="card qa-card qa-section">
+                        <div class="card-body">
+                            <div class="qa-section-head">
+                                <span class="qa-section-icon qa-section-icon-gold"><i class="feather icon-award"></i></span>
+                                <div>
+                                    <h5 class="qa-section-title">Certificate</h5>
+                                    <p class="qa-section-sub">What the participant's certificate says and how it's laid out.</p>
                                 </div>
+                            </div>
 
-                                <div class="col-12 mt-2">
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-12">
                                     <label>Certificate Text</label>
                                     <textarea name="certificate_text" id="certificate_text" class="form-control" required></textarea>
+                                    <small class="text-muted">Shown inside quotes on the certificate, e.g. "For successfully completing the &lsquo;...&rsquo; Quiz with outstanding performance." Keep the quiz name here consistent with the Quiz Title above.</small>
                                 </div>
 
-                                <div class="col-6 mt-2">
+                                <div class="col-md-6 mt-2">
                                     <label>Certificate Background (optional)</label>
                                     <input type="file" name="certificate_background" class="form-control">
-                                    <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB. Khaali chhod do to built-in frame use hoga.</small>
+                                    <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB. Leave empty to use the built-in frame.</small>
                                 </div>
 
-                                <div class="col-3 mt-2">
+                                <div class="col-md-3 mt-2">
                                     <label>Name Position (top %)</label>
-                                    <input type="number" step="0.1" min="0" max="100" name="name_top_pct" class="form-control" value="42.0">
+                                    <input type="number" step="0.1" min="0" max="100" name="name_top_pct" class="form-control" value="39.0">
                                 </div>
 
-                                <div class="col-3 mt-2">
+                                <div class="col-md-3 mt-2">
                                     <label>Score Position (top %)</label>
                                     <input type="number" step="0.1" min="0" max="100" name="score_top_pct" class="form-control" value="64.0">
                                 </div>
+                            </div>
 
-                                <hr class="col-12">
+                            <hr class="qa-divider">
 
-                                <div class="col-12">
-                                    <h5>Authority 1</h5>
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-12 mb-2">
+                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 1</span>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Name *</label>
                                     <input type="text" name="authority1_name" class="form-control" required>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Designation *</label>
                                     <input type="text" name="authority1_designation" class="form-control" required>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Signature *</label>
                                     <input type="file" name="authority1_sign_image" class="form-control" required>
                                 </div>
+                            </div>
 
-                                <hr class="col-12">
+                            <hr class="qa-divider">
 
-                                <div class="col-12">
-                                    <h5>Authority 2</h5>
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-12 mb-2">
+                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 2</span>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Name *</label>
                                     <input type="text" name="authority2_name" class="form-control" required>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Designation *</label>
                                     <input type="text" name="authority2_designation" class="form-control" required>
                                 </div>
 
-                                <div class="col-4">
+                                <div class="col-md-4">
                                     <label>Signature *</label>
                                     <input type="file" name="authority2_sign_image" class="form-control" required>
                                 </div>
+                            </div>
 
-                                <hr class="col-12">
+                            <hr class="qa-divider">
 
-                                <div class="col-6">
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-md-6">
                                     <label>Logo 1 *</label>
                                     <input type="file" name="logo_1" class="form-control" required>
                                 </div>
 
-                                <div class="col-6">
+                                <div class="col-md-6">
                                     <label>Logo 2 *</label>
                                     <input type="file" name="logo_2" class="form-control" required>
                                 </div>
-
                             </div>
+                        </div>
+                    </div>
 
-                            <hr>
-
-                            <div class="d-flex justify-content-between mt-4">
-
-                                <h4>Questions</h4>
-
-                                <button type="button" class="btn btn-success btn-sm" onclick="addQuestion()">
-                                    + Add Question
+                    <!-- Section: Questions -->
+                    <div class="card qa-card qa-section">
+                        <div class="card-body">
+                            <div class="qa-section-head qa-section-head-split">
+                                <div class="d-flex">
+                                    <span class="qa-section-icon qa-section-icon-purple"><i class="feather icon-help-circle"></i></span>
+                                    <div>
+                                        <h5 class="qa-section-title">Questions <span class="qa-q-count-badge" id="qCountBadge">1</span></h5>
+                                        <p class="qa-section-sub">Add each question with 4 options and mark the correct one.</p>
+                                    </div>
+                                </div>
+                                <button type="button" class="btn btn-success btn-sm qa-add-q-btn" onclick="addQuestion()">
+                                    <i class="feather icon-plus"></i> Add Question
                                 </button>
-
                             </div>
 
                             <div id="question-template" style="display:none;">
-
-                                <div class="question-card question-item">
-
-                                    <button type="button" class="btn btn-danger btn-sm remove-btn" onclick="removeQuestion(this)">Remove </button>
+                                <div class="qa-question-card question-item">
+                                    <div class="qa-question-head">
+                                        <span class="qa-question-num"></span>
+                                        <button type="button" class="btn btn-outline-danger btn-sm qa-remove-btn" onclick="removeQuestion(this)">
+                                            <i class="feather icon-trash-2"></i> Remove
+                                        </button>
+                                    </div>
 
                                     <div class="form-group">
                                         <label>Question *</label>
-                                        <textarea name="question[]" class="form-control question-field"></textarea>
+                                        <textarea name="question[]" class="form-control question-field" rows="2"></textarea>
                                     </div>
 
                                     <div class="row">
-
-                                        <div class="col-3">
+                                        <div class="col-md-3">
                                             <label>Option 1 *</label>
                                             <input type="text" name="option_1[]" class="form-control option-field">
                                         </div>
 
-                                        <div class="col-3">
+                                        <div class="col-md-3">
                                             <label>Option 2 *</label>
                                             <input type="text" name="option_2[]" class="form-control option-field">
                                         </div>
 
-                                        <div class="col-3">
+                                        <div class="col-md-3">
                                             <label>Option 3 *</label>
                                             <input type="text" name="option_3[]" class="form-control option-field">
                                         </div>
 
-                                        <div class="col-3">
+                                        <div class="col-md-3">
                                             <label>Option 4 *</label>
                                             <input type="text" name="option_4[]" class="form-control option-field">
                                         </div>
@@ -213,32 +235,82 @@
                                                 <option value="4">Option 4</option>
                                             </select>
                                         </div>
-
                                     </div>
-
                                 </div>
                             </div>
 
                             <div id="questions-container"></div>
-
-                            <center>
-                                <button type="submit" class="btn btn-primary mt-4">Create Quiz</button>
-                            </center>
-
-                        </form>
-
+                        </div>
                     </div>
+
+                    <div class="qa-submit-bar">
+                        <button type="submit" class="btn btn-primary btn-lg qa-submit-btn">
+                            <i class="feather icon-check-circle"></i> Create Quiz
+                        </button>
+                    </div>
+
                 </div>
             </div>
-        </div>
+        </form>
 
     </div>
 </div>
 
+<style>
+    label { font-weight: 700 !important; color: #3a3f47; font-size: 13.5px; }
 
+    .qa-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .qa-section { margin-bottom: 22px; }
+    .qa-section-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
+    .qa-section-head-split { justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+    .qa-section-icon {
+        width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 19px;
+    }
+    .qa-section-icon-blue   { background: rgba(70,128,255,.12); color: #4680ff; }
+    .qa-section-icon-gold   { background: rgba(201,162,39,.15); color: #a5820f; }
+    .qa-section-icon-purple { background: rgba(139,92,246,.12); color: #8b5cf6; }
+    .qa-section-title { margin: 0; font-size: 17px; font-weight: 800; color: #24272b; display: flex; align-items: center; gap: 10px; }
+    .qa-section-sub { margin: 2px 0 0; font-size: 12.5px; color: #8a8f98; }
+    .qa-q-count-badge {
+        background: #8b5cf6; color: #fff; font-size: 12px; font-weight: 700;
+        border-radius: 20px; padding: 2px 10px; display: inline-block;
+    }
 
+    .qa-field-row .col-12, .qa-field-row [class*="col-md"] { margin-bottom: 16px; }
+    .qa-field-row .form-control { border-radius: 8px; border-color: #e3e6ec; }
+    .qa-field-row .form-control:focus { border-color: #4680ff; box-shadow: 0 0 0 3px rgba(70,128,255,.12); }
 
+    .qa-divider { border-top: 1px dashed #e3e6ec; margin: 6px 0 20px; }
+    .qa-subhead {
+        display: inline-flex; align-items: center; gap: 7px;
+        font-weight: 800; font-size: 13.5px; color: #4680ff;
+        text-transform: uppercase; letter-spacing: .03em;
+    }
+    .qa-subhead i { width: 15px; height: 15px; }
 
+    .qa-add-q-btn { box-shadow: 0 4px 12px rgba(40,167,69,.22); border-radius: 8px; }
+
+    .qa-question-card {
+        border: 1px solid #eef0f4; padding: 18px 20px; margin-top: 16px;
+        border-radius: 12px; background: #fbfbfd;
+        transition: box-shadow .15s ease, border-color .15s ease;
+    }
+    .qa-question-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.05); border-color: #e3e6ec; }
+    .qa-question-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .qa-question-num {
+        display: inline-flex; align-items: center; justify-content: center;
+        width: 30px; height: 30px; border-radius: 50%;
+        background: rgba(139,92,246,.12); color: #7c3aed; font-weight: 800; font-size: 13px;
+    }
+    .qa-remove-btn { border-radius: 8px; }
+
+    .qa-submit-bar { text-align: center; margin: 8px 0 40px; }
+    .qa-submit-btn {
+        padding: 13px 42px; border-radius: 10px; font-weight: 700;
+        box-shadow: 0 8px 20px rgba(70,128,255,.28);
+    }
+</style>
 
 <script>
 
@@ -248,25 +320,35 @@
         addQuestion();
     });
 
+    function renumberQuestions() {
+        let items = document.querySelectorAll('#questions-container .question-item');
+        items.forEach((el, i) => {
+            el.querySelector('.qa-question-num').textContent = 'Q' + (i + 1);
+        });
+        document.getElementById('qCountBadge').textContent = items.length;
+    }
 
     function addQuestion() {
         let template = document.getElementById("question-template");
         let container = document.getElementById("questions-container");
         let clone = template.firstElementChild.cloneNode(true);
-        // add require dynamically
         clone.querySelectorAll(".question-field").forEach(el => el.required = true);
         clone.querySelectorAll(".option-field").forEach(el => el.required = true);
         clone.querySelectorAll(".correct-field").forEach(el => el.required = true);
         container.appendChild(clone);
+        renumberQuestions();
+        clone.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
 
 
     function removeQuestion(btn) {
         let container = document.getElementById("questions-container");
-        if (container.children.length > 1)
+        if (container.children.length > 1) {
             btn.closest(".question-item").remove();
-        else
+            renumberQuestions();
+        } else {
             alert("Minimum 1 question required");
+        }
     }
 </script>
 
