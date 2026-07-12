@@ -1,0 +1,120 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5>Translations — {{ quiz.title }}</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/admin/dashboard"><i class="feather icon-home"></i></a>
+                            </li>
+                            <li class="breadcrumb-item"><a href="/admin/quizzes">Quizzes</a></li>
+                            <li class="breadcrumb-item"><a href="#!">Translations</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <a href="/admin/quiz/{{ quiz.id }}" class="btn btn-outline-secondary btn-sm">
+                            <i class="feather icon-arrow-left"></i>&nbsp;Back to Quiz
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card qt-card">
+                    <div class="card-body">
+                        <div class="qt-head">
+                            <span class="qt-head-icon"><i class="feather icon-globe"></i></span>
+                            <div>
+                                <h5 class="qt-head-title">Languages</h5>
+                                <p class="qt-head-sub">Pick a language to add or edit its translation. Quiz has {{ question_count }} question{{ question_count|pluralize }}. English is the base language and is always shown — no translation needed for it.</p>
+                            </div>
+                        </div>
+
+                        {% if not question_count %}
+                        <div class="qt-empty-warning">
+                            <i class="feather icon-alert-triangle"></i>
+                            This quiz has no questions yet — add questions first, then come back here to translate them.
+                        </div>
+                        {% endif %}
+
+                        <div class="qt-lang-grid">
+                            {% for lang in languages %}
+                            <a href="/admin/quiz/{{ quiz.id }}/translations/{{ lang.code }}" class="qt-lang-card{% if lang.is_done %} qt-lang-done{% endif %}">
+                                <div class="qt-lang-native">{{ lang.native_name }}</div>
+                                <div class="qt-lang-name">{{ lang.name }}</div>
+                                <div class="qt-lang-progress">
+                                    {% if lang.is_done %}
+                                        <span class="qt-badge qt-badge-done"><i class="feather icon-check-circle"></i> Complete</span>
+                                    {% elif lang.translated_count or lang.has_title %}
+                                        <span class="qt-badge qt-badge-partial">{{ lang.translated_count }}/{{ question_count }} questions</span>
+                                    {% else %}
+                                        <span class="qt-badge qt-badge-none">Not started</span>
+                                    {% endif %}
+                                </div>
+                            </a>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .qt-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .qt-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+    .qt-head-icon {
+        width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 19px;
+        background: rgba(70,128,255,.12); color: #4680ff;
+    }
+    .qt-head-title { margin: 0; font-size: 17px; font-weight: 800; color: #24272b; }
+    .qt-head-sub { margin: 2px 0 0; font-size: 12.5px; color: #8a8f98; max-width: 640px; }
+
+    .qt-empty-warning {
+        background: rgba(247,201,72,.14); border: 1px solid rgba(247,201,72,.4); color: #a5820f;
+        padding: 12px 16px; border-radius: 10px; margin-bottom: 18px; font-weight: 600; font-size: 13.5px;
+    }
+    .qt-empty-warning i { margin-right: 6px; vertical-align: -2px; }
+
+    .qt-lang-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; }
+    .qt-lang-card {
+        border: 1px solid #eef0f4; border-radius: 12px; padding: 14px 16px;
+        text-decoration: none; color: inherit; background: #fbfbfd;
+        transition: box-shadow .15s ease, border-color .15s ease;
+        display: block;
+    }
+    .qt-lang-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.06); border-color: #c9d3e0; text-decoration: none; color: inherit; }
+    .qt-lang-card.qt-lang-done { border-color: rgba(45,177,113,.35); background: rgba(45,177,113,.05); }
+    .qt-lang-native { font-size: 16px; font-weight: 700; color: #24272b; }
+    .qt-lang-name { font-size: 12px; color: #8a8f98; margin-top: 1px; }
+    .qt-lang-progress { margin-top: 10px; }
+
+    .qt-badge { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+    .qt-badge i { width: 12px; height: 12px; }
+    .qt-badge-done    { background: rgba(45,177,113,.13); color: #1f8a58; }
+    .qt-badge-partial { background: rgba(201,162,39,.15); color: #a5820f; }
+    .qt-badge-none    { background: #f1f2f5; color: #9095a0; }
+</style>
+
+{% for message in messages %}
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+{% endfor %}
+
+{% endblock %}

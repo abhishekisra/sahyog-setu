@@ -103,6 +103,48 @@ class Quizzes(models.Model):
 
         super().save(*args, **kwargs)
 
+    def _translation(self, lang):
+        if not lang or lang == "en":
+            return None
+        # .translations is prefetched with to_attr="_prefetched_translations"
+        # in the hot paths (QuizLandingView, QuizTakeView) precisely so this
+        # never issues a query per quiz/question in a loop -- falls back to
+        # a real query here only for code paths that didn't prefetch (e.g.
+        # the admin edit form loading a single quiz).
+        cached = getattr(self, "_prefetched_translations", None)
+        if cached is not None:
+            return next((t for t in cached if t.language_id == lang), None)
+        return self.translations.filter(language_id=lang).first()
+
+    def title_for(self, lang="en"):
+        t = self._translation(lang)
+        return (t.title if t and t.title else self.title)
+
+    def description_for(self, lang="en"):
+        t = self._translation(lang)
+        return (t.description if t and t.description else self.description)
+
+
+class Language(models.Model):
+    """One row per supported language. Seeded via the seed_languages
+    management command with English + all 22 languages in the Indian
+    Constitution's Eighth Schedule -- 'code' is the field Questions/Quizzes
+    translations and QuizAttempt.language key off, kept as a plain string
+    (not a FK to this table) on those so a Language row can be deactivated
+    or even removed later without a cascading delete touching real
+    attempt/translation history."""
+    code = models.CharField(max_length=10, primary_key=True)  # ISO 639-1 where one exists, e.g. 'hi', 'ta'
+    name = models.CharField(max_length=50)          # English name, e.g. "Tamil"
+    native_name = models.CharField(max_length=50)   # e.g. "தமிழ்"
+    is_active = models.BooleanField(default=True, db_index=True)
+    sort_order = models.IntegerField(default=0)
+
+    class Meta:
+        ordering = ["sort_order", "name"]
+
+    def __str__(self):
+        return self.name
+
 
 class Questions(models.Model):
     quiz = models.ForeignKey(Quizzes, on_delete=models.CASCADE, related_name="questions")
@@ -118,6 +160,61 @@ class Questions(models.Model):
     @property
     def options_list(self):
         return [(1, self.option_1), (2, self.option_2), (3, self.option_3), (4, self.option_4)]
+
+    def _translation(self, lang):
+        if not lang or lang == "en":
+            return None
+        cached = getattr(self, "_prefetched_translations", None)
+        if cached is not None:
+            return next((t for t in cached if t.language_id == lang), None)
+        return self.translations.filter(language_id=lang).first()
+
+    def text_for(self, lang="en"):
+        t = self._translation(lang)
+        return (t.question_text if t and t.question_text else self.question)
+
+    def explanation_for(self, lang="en"):
+        t = self._translation(lang)
+        return (t.explanation if t and t.explanation else self.explanation)
+
+    def options_for(self, lang="en"):
+        """Same shape as options_list (kept as the untouched, pre-existing
+        no-arg property above -- two live call sites already use it as a
+        property, not a method) but language-aware, falling back to English
+        per-option whenever that specific option's translation is blank."""
+        t = self._translation(lang)
+        if t:
+            return [
+                (1, t.option_1 or self.option_1),
+                (2, t.option_2 or self.option_2),
+                (3, t.option_3 or self.option_3),
+                (4, t.option_4 or self.option_4),
+            ]
+        return self.options_list
+
+
+class QuizTranslation(models.Model):
+    quiz = models.ForeignKey(Quizzes, on_delete=models.CASCADE, related_name="translations")
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name="quiz_translations")
+    title = models.CharField(max_length=255, blank=True, default="")
+    description = models.TextField(blank=True, default="")
+
+    class Meta:
+        unique_together = [("quiz", "language")]
+
+
+class QuestionTranslation(models.Model):
+    question = models.ForeignKey(Questions, on_delete=models.CASCADE, related_name="translations")
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name="question_translations")
+    question_text = models.TextField(blank=True, default="")
+    option_1 = models.CharField(max_length=255, blank=True, default="")
+    option_2 = models.CharField(max_length=255, blank=True, default="")
+    option_3 = models.CharField(max_length=255, blank=True, default="")
+    option_4 = models.CharField(max_length=255, blank=True, default="")
+    explanation = models.TextField(blank=True, default="")
+
+    class Meta:
+        unique_together = [("question", "language")]
 
 
 class QuizAttempt(models.Model):
@@ -158,6 +255,16 @@ class QuizAttempt(models.Model):
     # quizzes.views.clean_source) -- it gets rendered back in the admin
     # analytics dashboard, so an unvalidated value would be an XSS vector.
     source = models.CharField(max_length=20, default="direct", db_index=True)
+
+    # Language the participant chose at Start Quiz -- 'en' or a Language.code
+    # (see clean_language() in views.py, which validates against active
+    # Language rows before this is ever set, same pattern as source/
+    # clean_source above). Not a FK to Language: fixed for the life of the
+    # attempt so the review/certificate screens stay consistent with what
+    # was actually shown during the attempt even if a Language row is later
+    # deactivated or a translation edited, and a plain string means neither
+    # of those admin actions ever has to worry about attempt history.
+    language = models.CharField(max_length=10, default="en")
 
     # Enforces "only one LIVE attempt per (user, quiz)" -- what actually
     # stops two simultaneous taps on "Start Quiz" (or two open tabs)

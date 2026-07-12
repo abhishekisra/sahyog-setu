@@ -134,6 +134,11 @@
                             <li class="breadcrumb-item"><a href="#!">{{ quiz.title }}</a></li>
                         </ul>
                     </div>
+                    <div class="col-md-6 text-right">
+                        <a href="/admin/quiz/{{ quiz.id }}/translations" class="btn btn-outline-primary btn-sm">
+                            <i class="feather icon-globe"></i>&nbsp;Manage Translations
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
@@ -142,6 +147,13 @@
         <div class="qa-live-alert">
             <i class="feather icon-alert-triangle"></i>
             {{ live_attempt_count }} people are taking this quiz right now — changing the questions may affect their in-progress attempt.
+        </div>
+        {% endif %}
+
+        {% if translated_lang_count > 0 %}
+        <div class="qa-live-alert">
+            <i class="feather icon-alert-triangle"></i>
+            This quiz has translations in {{ translated_lang_count }} language{{ translated_lang_count|pluralize }}. Adding, removing, or reordering questions below deletes and recreates every question, which also deletes their existing translations — you'll need to re-translate afterwards via Manage Translations. Editing question text in place doesn't avoid this; the save always replaces all questions.
         </div>
         {% endif %}
 

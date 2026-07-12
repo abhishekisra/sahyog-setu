@@ -180,6 +180,9 @@
                                                         <a class="dropdown-item" href="/admin/quiz/{{ quiz.id }}/generate-questions">
                                                             <i class="feather icon-cpu"></i>&nbsp;Generate Questions (AI)
                                                         </a>
+                                                        <a class="dropdown-item" href="/admin/quiz/{{ quiz.id }}/translations">
+                                                            <i class="feather icon-globe"></i>&nbsp;Translations
+                                                        </a>
                                                         {% if quiz.slug %}
                                                         <a class="dropdown-item" href="{% url 'quiz_qr' quiz.slug %}" target="_blank">
                                                             <i class="feather icon-grid"></i>&nbsp;QR Code

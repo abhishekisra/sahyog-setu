@@ -1,6 +1,7 @@
 import csv
 import html
 import random
+import urllib.parse
 from datetime import timedelta
 from io import BytesIO
 
@@ -24,7 +25,7 @@ from accounts.models import User
 from .certificates import generate_certificate_id
 from .cert_image import render_certificate_image
 from .imaging import validate_image_upload, validate_certificate_background, validate_banner_image
-from .models import Questions, Quizzes, QuizAttempt, QuestionResponse
+from .models import Questions, Quizzes, QuizAttempt, QuestionResponse, Language, QuizTranslation, QuestionTranslation
 from .question_import import SAMPLE_ROWS, normalize_correct_option, parse_upload, validate_rows
 from .ai_generate import AIGenerationError, MAX_QUESTIONS_PER_BATCH, generate_questions
 
@@ -200,10 +201,23 @@ class EditQuizView(View):
         preview_desc = html.unescape(strip_tags(quiz.description or ""))
         preview_desc = Truncator(preview_desc.strip()).chars(100)
 
+        # Warns the admin below (see edit-quiz.html) that saving this form
+        # deletes+recreates every Questions row, which cascades onto
+        # QuestionTranslation too -- surfaced here for the same reason as
+        # live_attempt_count above.
+        translated_lang_count = (
+            QuestionTranslation.objects.filter(question__quiz=quiz)
+            .exclude(question_text="")
+            .values("language_id")
+            .distinct()
+            .count()
+        )
+
         return render(request, "custom_admin/quizzes/edit-quiz.html", {
             "quiz": quiz,
             "live_attempt_count": live_attempt_count,
             "preview_desc": preview_desc,
+            "translated_lang_count": translated_lang_count,
         })
 
 
@@ -308,7 +322,131 @@ class EditQuizView(View):
             messages.error(request, "Update failed")
             return redirect("adminQuizzes")
 
-    
+
+
+class QuizTranslationsView(View):
+    """Picker page: one row per active Language, showing how many of this
+    quiz's questions (plus the title itself) already have a translation, and
+    a link into EditTranslationView for that language. No translator name is
+    ever recorded or shown anywhere in this flow (by design -- see
+    EditTranslationView)."""
+
+    def get(self, request, id):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+
+        quiz = get_object_or_404(Quizzes, id=id)
+        question_count = quiz.questions.count()
+
+        translated_counts = dict(
+            QuestionTranslation.objects.filter(question__quiz=quiz)
+            .exclude(question_text="")
+            .values_list("language_id")
+            .annotate(c=Count("id"))
+        )
+        titled_langs = set(
+            QuizTranslation.objects.filter(quiz=quiz)
+            .exclude(title="")
+            .values_list("language_id", flat=True)
+        )
+
+        languages = list(Language.objects.filter(is_active=True))
+        for lang in languages:
+            lang.translated_count = translated_counts.get(lang.code, 0)
+            lang.has_title = lang.code in titled_langs
+            lang.is_done = question_count > 0 and lang.translated_count == question_count and lang.has_title
+
+        return render(request, "custom_admin/quizzes/quiz_translations.html", {
+            "quiz": quiz,
+            "languages": languages,
+            "question_count": question_count,
+        })
+
+
+class EditTranslationView(View):
+    """Add/edit the translation of one quiz (title/description + every
+    question's text/options/explanation) into one language. English itself
+    is never edited here -- it's shown read-only alongside each field purely
+    as a reference for whoever is translating, and is stored as the base
+    Quizzes/Questions row, not a translation row. Leaving every field for a
+    question blank removes any existing translation for it instead of
+    saving an empty row, so a half-started translation never masquerades as
+    a finished one in QuizTranslationsView's progress count."""
+
+    def get(self, request, id, lang):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+
+        quiz = get_object_or_404(Quizzes, id=id)
+        language = get_object_or_404(Language, code=lang, is_active=True)
+        quiz_translation = QuizTranslation.objects.filter(quiz=quiz, language=language).first()
+
+        existing = {
+            t.question_id: t
+            for t in QuestionTranslation.objects.filter(question__quiz=quiz, language=language)
+        }
+        rows = [(q, existing.get(q.id)) for q in quiz.questions.all().order_by("id")]
+
+        return render(request, "custom_admin/quizzes/edit_translation.html", {
+            "quiz": quiz,
+            "language": language,
+            "quiz_translation": quiz_translation,
+            "rows": rows,
+        })
+
+    def post(self, request, id, lang):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect("adminLogin")
+
+        quiz = get_object_or_404(Quizzes, id=id)
+        language = get_object_or_404(Language, code=lang, is_active=True)
+
+        try:
+            with transaction.atomic():
+                title = (request.POST.get("title") or "").strip()
+                description = (request.POST.get("description") or "").strip()
+                if title or description:
+                    QuizTranslation.objects.update_or_create(
+                        quiz=quiz, language=language,
+                        defaults={"title": title, "description": description},
+                    )
+                else:
+                    QuizTranslation.objects.filter(quiz=quiz, language=language).delete()
+
+                for q in quiz.questions.all():
+                    prefix = f"q_{q.id}_"
+                    question_text = (request.POST.get(prefix + "question") or "").strip()
+                    option_1 = (request.POST.get(prefix + "option_1") or "").strip()
+                    option_2 = (request.POST.get(prefix + "option_2") or "").strip()
+                    option_3 = (request.POST.get(prefix + "option_3") or "").strip()
+                    option_4 = (request.POST.get(prefix + "option_4") or "").strip()
+                    explanation = (request.POST.get(prefix + "explanation") or "").strip()
+
+                    if any([question_text, option_1, option_2, option_3, option_4, explanation]):
+                        QuestionTranslation.objects.update_or_create(
+                            question=q, language=language,
+                            defaults={
+                                "question_text": question_text,
+                                "option_1": option_1,
+                                "option_2": option_2,
+                                "option_3": option_3,
+                                "option_4": option_4,
+                                "explanation": explanation,
+                            },
+                        )
+                    else:
+                        QuestionTranslation.objects.filter(question=q, language=language).delete()
+
+            messages.success(request, f"{language.name} translation saved.")
+        except Exception as e:
+            print("Translation Save Error:", e)
+            messages.error(request, "Something went wrong while saving the translation.")
+
+        return redirect("adminQuizTranslations", id=quiz.id)
+
 
 def deleteQuiz(request):
     if request.user.is_authenticated:
@@ -558,6 +696,18 @@ def _source_session_key(quiz_id):
     return f"quiz_{quiz_id}_src"
 
 
+def clean_language(raw):
+    """Whitelist ?lang= against active Language rows, same reasoning as
+    clean_source above -- 'en' is always valid without a DB row (it's the
+    base/fallback text on Quizzes/Questions themselves, not a translation),
+    anything else must be an active Language.code."""
+    if not raw or raw == "en":
+        return "en"
+    if Language.objects.filter(code=raw, is_active=True).exists():
+        return raw
+    return "en"
+
+
 # Hand-authored line-icons (24x24, stroke=currentColor) instead of emoji --
 # emoji render inconsistently across OS/browsers (different art style per
 # platform, some literally missing), so this keeps every card's icon
@@ -697,6 +847,34 @@ class QuizLandingView(View):
         # far more than the quiz actually delivers.
         question_count = min(quiz.questions_per_attempt, quiz.questions.count())
 
+        # Only offer languages that this SPECIFIC quiz actually has at least
+        # one translated question in -- an active Language with zero
+        # translations for this quiz would silently fall back to English
+        # everywhere (see Questions.text_for), which is a confusing,
+        # apparently-broken toggle to show at all. distinct() because a
+        # language could have translations on multiple questions.
+        translated_codes = list(
+            Language.objects.filter(
+                is_active=True, question_translations__question__quiz=quiz
+            ).exclude(question_translations__question_text="").distinct().values_list("code", flat=True)
+        )
+        available_languages = [{"code": "en", "name": "English", "native_name": "English"}] + [
+            {"code": l.code, "name": l.name, "native_name": l.native_name}
+            for l in Language.objects.filter(code__in=translated_codes)
+        ]
+
+        lang = clean_language(request.GET.get("lang", "en"))
+        if lang != "en" and lang not in translated_codes:
+            lang = "en"
+
+        # Built here (not in the template) so the ?lang= carries through to
+        # Start Quiz correctly encoded even when nested inside next= for the
+        # logged-out case -- letting the template hand-assemble a query
+        # string inside another query string is exactly how that kind of
+        # link quietly breaks.
+        take_url = reverse("quiz_take", kwargs={"quiz_id": quiz.id}) + f"?lang={lang}"
+        login_url = f"{reverse('login')}?next={urllib.parse.quote(take_url)}"
+
         return render(request, "custom_admin/quizzes/quiz_landing.html", {
             "quiz": quiz,
             "share_url": share_url,
@@ -704,6 +882,12 @@ class QuizLandingView(View):
             "og_image": og_image,
             "question_count": question_count,
             "total_marks": question_count * MARKS_PER_QUESTION,
+            "take_url": take_url,
+            "login_url": login_url,
+            "lang": lang,
+            "available_languages": available_languages,
+            "quiz_title": quiz.title_for(lang),
+            "quiz_description": quiz.description_for(lang),
         })
 
 
@@ -766,7 +950,8 @@ class QuizTakeView(View):
             if existing:
                 return redirect("quiz_result", pk=existing.id)
 
-        attempt = self._get_or_create_attempt(request, quiz)
+        lang = clean_language(request.GET.get("lang", "en"))
+        attempt = self._get_or_create_attempt(request, quiz, lang)
 
         # Resolve against attempt.question_ids -- NEVER request.session.
         # gunicorn restarts, session expiry, and a second browser tab all
@@ -816,8 +1001,8 @@ class QuizTakeView(View):
             "questions": [
                 {
                     "id": q.id,
-                    "text": q.question,
-                    "options": [text for _, text in q.options_list],
+                    "text": q.text_for(attempt.language),
+                    "options": [text for _, text in q.options_for(attempt.language)],
                 }
                 for q in questions
             ],
@@ -833,9 +1018,10 @@ class QuizTakeView(View):
             "completed_count": completed_attempts.count(),
             "avg_percentage": round(avg_percentage, 1),
             "quiz_data": quiz_data,
+            "lang": attempt.language,
         })
 
-    def _get_or_create_attempt(self, request, quiz):
+    def _get_or_create_attempt(self, request, quiz, lang="en"):
         # Reusing an in-progress attempt (rather than always creating a new
         # one) is what makes the timer un-resettable by just reloading the
         # page, AND is what makes a resubmit idempotent later in
@@ -859,6 +1045,7 @@ class QuizTakeView(View):
                         user=request.user, quiz=quiz,
                         live_lock=f"{request.user.id}_{quiz.id}",
                         source=clean_source(request.session.get(_source_session_key(quiz.id), "direct")),
+                        language=lang,
                     )
                     created = True
             except IntegrityError:
