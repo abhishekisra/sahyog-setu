@@ -10,6 +10,29 @@ from .models import Schemes, Categories
 from django.db.models import Q
 
 
+def schemeCounts(request):
+    """Active-record counts for every homepage quick-link card that lists
+    something (Central/State Schemes, Helplines, Important Portals,
+    Important Documents, Scheme Announcements) -- the React SPA build on
+    this box has no source available to wire these up itself, so
+    public_base.html's home-counts script (see index.html) fetches this
+    single endpoint and injects the numbers directly into each card's DOM."""
+    from helplines.models import Helplines
+    from important_portals.models import Important_Portals
+    from important_documents.models import Important_Documents
+    from scheme_announcements.models import Scheme_Announcements
+
+    return JsonResponse({
+        'central_schemes': Schemes.objects.filter(status=1, scheme_type=0).count(),
+        'state_schemes': Schemes.objects.filter(status=1, scheme_type=1).count(),
+        'helplines': Helplines.objects.filter(status=1).count(),
+        'important_portals': Important_Portals.objects.filter(status=1).count(),
+        'important_documents': Important_Documents.objects.filter(status=1).count(),
+        'scheme_announcements': Scheme_Announcements.objects.filter(status=1).count(),
+        'status': status.HTTP_200_OK,
+    }, status=status.HTTP_200_OK)
+
+
 def schemesServices(request):
     categories = Categories.objects.filter(status = 1)
     serializer = CategorySerializer(categories, many=True)
