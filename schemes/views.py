@@ -7,6 +7,24 @@ from occupations.models import Occupations
 from states.models import States
 from .models import Categories, Scheme_Occupations, Schemes, Scheme_Areas, Scheme_Employements
 
+# Every valid code for each CSV-stored eligibility field (see edit-scheme.html
+# select options) -- a scheme "open to everyone" on that dimension has ALL of
+# these codes present in its comma-separated field, same convention the
+# myscheme.gov.in import already uses for the vast majority of schemes.
+SCHEME_FOR_ALL = ['0', '1', '2']
+CASTES_ALL = ['0', '1', '2', '3', '4']
+RELIGIONS_ALL = ['0', '1', '2', '3', '4', '5', '6', '7']
+MARITAL_ALL = ['0', '1', '2', '3', '4']
+BENIFICIARIES_ALL = ['0', '1', '2', '3', '4', '5', '6']
+
+def _open_to_all_ids(qs, field, codes):
+    """IDs of schemes whose CSV `field` contains every code in `codes` --
+    i.e. not restricted on that dimension. codes/field are always from the
+    fixed lists above (never user input), so the raw FIND_IN_SET is safe."""
+    for code in codes:
+        qs = qs.extra(where=[f"FIND_IN_SET({code}, {field})"])
+    return qs.values_list('id', flat=True)
+
 
 
 # Create your views here.
@@ -96,6 +114,50 @@ class SchemesView(View):
             if category_id:
                 schemes = schemes.filter(category_id=category_id)
 
+            # Key-point eligibility filters -- lets an admin spot-check exactly
+            # the fields most likely to wrongly exclude someone if guessed
+            # wrong (gender/caste/religion), plus a catch-all "other" for
+            # marital status/beneficiary-type/divyang/age/income, each as a
+            # simple "has any restriction at all" vs "open to everyone" toggle
+            # rather than filtering to one specific code (the combinations are
+            # too numerous -- 16+ distinct caste combos alone -- to be a
+            # useful dropdown; what actually matters for review is "did we
+            # narrow this at all").
+            gender_filter = request.GET.get('gender', '')
+            if gender_filter in ('restricted', 'open'):
+                open_ids = _open_to_all_ids(schemes, 'scheme_for', SCHEME_FOR_ALL)
+                schemes = schemes.filter(id__in=open_ids) if gender_filter == 'open' else schemes.exclude(id__in=open_ids)
+
+            caste_filter = request.GET.get('caste', '')
+            if caste_filter in ('restricted', 'open'):
+                open_ids = _open_to_all_ids(schemes, 'castes', CASTES_ALL)
+                schemes = schemes.filter(id__in=open_ids) if caste_filter == 'open' else schemes.exclude(id__in=open_ids)
+
+            religion_filter = request.GET.get('religion', '')
+            if religion_filter in ('restricted', 'open'):
+                open_ids = _open_to_all_ids(schemes, 'religions', RELIGIONS_ALL)
+                schemes = schemes.filter(id__in=open_ids) if religion_filter == 'open' else schemes.exclude(id__in=open_ids)
+
+            age_filter = request.GET.get('age', '')
+            if age_filter == 'restricted':
+                schemes = schemes.exclude(age_min=0, age_max=100)
+            elif age_filter == 'open':
+                schemes = schemes.filter(age_min=0, age_max=100)
+
+            # Catch-all "other" -- marital status/beneficiary-type/divyang/income,
+            # each open only if every code is present (or, for divyang/income,
+            # the specific sentinel meaning "no restriction" -- divyang=2 is
+            # "Both" per the existing eligibility-checker convention, and
+            # income_max=0 is how every uncapped myscheme.gov.in import is
+            # stored, matching 3798/4485 schemes).
+            other_filter = request.GET.get('other', '')
+            if other_filter in ('restricted', 'open'):
+                open_ids = set(_open_to_all_ids(schemes, 'marital_status', MARITAL_ALL))
+                open_ids &= set(_open_to_all_ids(schemes, 'benificiaries', BENIFICIARIES_ALL))
+                open_ids &= set(schemes.filter(divyang=2).values_list('id', flat=True))
+                open_ids &= set(schemes.filter(income_max=0).values_list('id', flat=True))
+                schemes = schemes.filter(id__in=open_ids) if other_filter == 'open' else schemes.exclude(id__in=open_ids)
+
             paginator = Paginator(schemes, 50)
             page_obj = paginator.get_page(request.GET.get('page'))
 
@@ -108,6 +170,11 @@ class SchemesView(View):
                 'selected_status': status,
                 'selected_source': source,
                 'selected_category': category_id,
+                'selected_gender': gender_filter,
+                'selected_caste': caste_filter,
+                'selected_religion': religion_filter,
+                'selected_age': age_filter,
+                'selected_other': other_filter,
                 'querystring': querystring.urlencode(),
                 'total_count': paginator.count,
             })

@@ -166,9 +166,16 @@ def searchSchemes(request):
     if request_data['age']:
         schemes = schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
 
+    # income_max=0 is how 3,798 of 4,485 myscheme.gov.in-imported schemes
+    # store "no income cap" (never set on import) -- a plain income_max__gte
+    # comparison treats that literally, so a plain .filter() here would
+    # silently exclude the vast majority of schemes for any citizen with
+    # income > 0, same "untagged means excluded" bug already fixed above
+    # for area/employment/occupation.
     if request_data['family_income']:
-        schemes = schemes.filter(income_min__lte = request_data['family_income'], income_max__gte = request_data['family_income'])
-    
+        schemes = schemes.filter(income_min__lte = request_data['family_income']).filter(
+            Q(income_max__gte = request_data['family_income']) | Q(income_max = 0))
+
     if request_data['searched_text']:
         schemes = schemes.filter(title__icontains = request_data['searched_text'])
 
@@ -196,9 +203,13 @@ def checkEligibility(request):
         if request_data['state']:
             state_schemes = state_schemes.filter(state_id = request_data['state'])
 
+        # See searchSchemes() above -- income_max=0 means "no cap" for most
+        # imported schemes, so it has to match rather than exclude.
         if request_data['family_income']:
-            state_schemes = state_schemes.filter(income_min__lte = request_data['family_income'], income_max__gte = request_data['family_income'])
-            central_schemes = central_schemes.filter(income_min__lte = request_data['family_income'], income_max__gte = request_data['family_income'])
+            state_schemes = state_schemes.filter(income_min__lte = request_data['family_income']).filter(
+                Q(income_max__gte = request_data['family_income']) | Q(income_max = 0))
+            central_schemes = central_schemes.filter(income_min__lte = request_data['family_income']).filter(
+                Q(income_max__gte = request_data['family_income']) | Q(income_max = 0))
 
         if request_data['divyang_category']:
             state_schemes = state_schemes.filter(Q(divyang = request_data['divyang_category']) | Q(divyang = 2))

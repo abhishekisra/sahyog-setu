@@ -55,6 +55,45 @@
                                 <div class="col-md-3 d-flex align-items-center">
                                     <span class="text-muted">{{ total_count }} scheme{{ total_count|pluralize }} match{% if not total_count == 1 %}{% endif %}</span>
                                 </div>
+
+                                <div class="col-md-12 mt-2 mb-1">
+                                    <small class="text-muted">Eligibility key-points — spot-check whether a filter narrows the scheme at all:</small>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="gender" class="form-control" onchange="this.form.submit()">
+                                        <option value="">Gender: Any</option>
+                                        <option value="restricted" {% if selected_gender == 'restricted' %}selected{% endif %}>Restricted</option>
+                                        <option value="open" {% if selected_gender == 'open' %}selected{% endif %}>Open to all</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="caste" class="form-control" onchange="this.form.submit()">
+                                        <option value="">Caste: Any</option>
+                                        <option value="restricted" {% if selected_caste == 'restricted' %}selected{% endif %}>Restricted</option>
+                                        <option value="open" {% if selected_caste == 'open' %}selected{% endif %}>Open to all</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="religion" class="form-control" onchange="this.form.submit()">
+                                        <option value="">Religion: Any</option>
+                                        <option value="restricted" {% if selected_religion == 'restricted' %}selected{% endif %}>Restricted</option>
+                                        <option value="open" {% if selected_religion == 'open' %}selected{% endif %}>Open to all</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="age" class="form-control" onchange="this.form.submit()">
+                                        <option value="">Age: Any</option>
+                                        <option value="restricted" {% if selected_age == 'restricted' %}selected{% endif %}>Restricted</option>
+                                        <option value="open" {% if selected_age == 'open' %}selected{% endif %}>Open to all</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <select name="other" class="form-control" onchange="this.form.submit()">
+                                        <option value="">Other (marital/beneficiary/divyang/income): Any</option>
+                                        <option value="restricted" {% if selected_other == 'restricted' %}selected{% endif %}>Restricted</option>
+                                        <option value="open" {% if selected_other == 'open' %}selected{% endif %}>Open to all</option>
+                                    </select>
+                                </div>
                             </form>
 
                             {% if selected_status == '0' %}
@@ -64,6 +103,11 @@
                                 <input type="hidden" name="status" value="{{ selected_status }}">
                                 <input type="hidden" name="source" value="{{ selected_source }}">
                                 <input type="hidden" name="category" value="{{ selected_category }}">
+                                <input type="hidden" name="gender" value="{{ selected_gender }}">
+                                <input type="hidden" name="caste" value="{{ selected_caste }}">
+                                <input type="hidden" name="religion" value="{{ selected_religion }}">
+                                <input type="hidden" name="age" value="{{ selected_age }}">
+                                <input type="hidden" name="other" value="{{ selected_other }}">
                                 <button type="submit" class="btn btn-warning btn-sm">
                                     <i class="feather icon-check-circle"></i>&nbsp;Activate all {{ total_count }} filtered scheme{{ total_count|pluralize }}
                                 </button>
