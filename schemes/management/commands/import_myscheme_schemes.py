@@ -66,7 +66,15 @@ CATEGORY_KEYWORD_RULES = [
     # nothing to do with either; without this rule those fell through to
     # whatever unrelated keyword happened to match next.
     (("scholarship", "shiksha protsahan"), "EDUCATION & LEARNING"),
+    # myscheme buckets business loans/term-loans/share-capital schemes under
+    # the same "Banking,Financial Services and Insurance" label as genuine
+    # personal insurance/pension schemes -- checked before the pension rule
+    # below so e.g. "Term Loan Scheme for Backward Classes" lands in
+    # Livelihood (the actual catch-all for business/entrepreneurship
+    # schemes) instead of Insurance & Pension.
+    (("loan", "credit", "entrepreneur", "share capital", "term loan"), "LIVELIHOOD & EMPLOYBILITY"),
     (("pension", "insurance", "bima"), "INSURANCE & PENSION"),
+    (("bijli", "electricity bill", "vidyut bill"), "LIVELIHOOD & EMPLOYBILITY"),
     (("health", "hospital", "medical", "ayushman", "arogya", "sanitation", "hygiene"), "HEALTH & HYGIENE"),
     (("sports", "youth", "yuva", "culture", "khel"), "YOUTH AFFAIRS & SPORTS"),
 ]
