@@ -10,6 +10,59 @@ from .models import Schemes, Categories
 from django.db.models import Q
 
 
+def globalSearch(request):
+    """Search across everything a citizen might be looking for on the
+    portal -- schemes, helplines, important portals/documents, and scheme
+    announcements -- by title, in one call. Returns a flat, ranked-by-type
+    list so a single search bar (see index.html's injected search widget)
+    can cover the whole site instead of citizens having to know which
+    section a scheme/helpline/document lives in."""
+    from helplines.models import Helplines
+    from important_portals.models import Important_Portals
+    from important_documents.models import Important_Documents
+    from scheme_announcements.models import Scheme_Announcements
+
+    q = (request.GET.get('q') or '').strip()
+    if len(q) < 2:
+        return JsonResponse({'results': [], 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+
+    results = []
+
+    for s in Schemes.objects.filter(status=1, title__icontains=q)[:8]:
+        results.append({
+            'type': 'scheme',
+            'type_label': 'Central Scheme' if s.scheme_type == 0 else 'State Scheme',
+            'title': s.title,
+            'url': '/scheme/%d' % s.id,
+        })
+
+    for h in Helplines.objects.filter(status=1, title__icontains=q)[:5]:
+        results.append({
+            'type': 'helpline', 'type_label': 'Helpline',
+            'title': h.title, 'url': h.link or '/helplines',
+        })
+
+    for p in Important_Portals.objects.filter(status=1, title__icontains=q)[:5]:
+        results.append({
+            'type': 'portal', 'type_label': 'Important Portal',
+            'title': p.title, 'url': '/important-portals',
+        })
+
+    for d in Important_Documents.objects.filter(status=1, title__icontains=q)[:5]:
+        results.append({
+            'type': 'document', 'type_label': 'Important Document',
+            'title': d.title, 'url': '/important-documents',
+        })
+
+    for a in Scheme_Announcements.objects.filter(status=1, title__icontains=q)[:5]:
+        results.append({
+            'type': 'announcement', 'type_label': 'Scheme Announcement',
+            'title': a.title, 'url': a.link or '/scheme-announcements',
+        })
+
+    return JsonResponse({'results': results, 'status': status.HTTP_200_OK}, status=status.HTTP_200_OK)
+
+
 def schemeCounts(request):
     """Active-record counts for every homepage quick-link card that lists
     something (Central/State Schemes, Helplines, Important Portals,

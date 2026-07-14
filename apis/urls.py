@@ -38,6 +38,7 @@ from quizzes import apis as QuizzesView
 urlpatterns = [
     path('schemes-and-services', SchemeViews.schemesServices, name="schemesAndCategories"),
     path('schemes/counts', SchemeViews.schemeCounts, name="schemeCounts"),
+    path('search', SchemeViews.globalSearch, name="globalSearch"),
     path('category/<int:id>', SchemeViews.category, name="category"),
     path('schemes/central/<int:id>', SchemeViews.centralSchemes, name="centralSchemes"),
     path('schemes/state/<int:state>', SchemeViews.stateSchemes, name="centralSchemes"),
