@@ -72,14 +72,20 @@ def searchSchemes(request):
     if request_data['religion']:
         schemes = schemes.extra(where=['FIND_IN_SET('+str(request_data['religion'])+', religions)'])
         
+    # A scheme with NO area/employment/occupation tag at all (every
+    # myscheme.gov.in-imported scheme, since that source has no equivalent
+    # taxonomy) means "not tagged", not "excludes everyone" -- same principle
+    # as divyang's Q(divyang=2) "Both" above. A plain .filter() here is an
+    # inner join that would otherwise silently drop every untagged scheme
+    # the moment a user picks ANY value for these three fields.
     if request_data['area']:
-        schemes = schemes.filter(scheme_areas__area = request_data['area'])
+        schemes = schemes.filter(Q(scheme_areas__area = request_data['area']) | Q(scheme_areas__isnull=True)).distinct()
 
     if request_data['employment']:
-        schemes = schemes.filter(scheme_employment__employment = request_data['employment'])
+        schemes = schemes.filter(Q(scheme_employment__employment = request_data['employment']) | Q(scheme_employment__isnull=True)).distinct()
 
     if request_data['occupation']:
-        schemes = schemes.filter(scheme_occupations__occupation_id = request_data['occupation'])
+        schemes = schemes.filter(Q(scheme_occupations__occupation_id = request_data['occupation']) | Q(scheme_occupations__isnull=True)).distinct()
 
     if request_data['age']:
         schemes = schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
@@ -142,17 +148,23 @@ def checkEligibility(request):
             state_schemes = state_schemes.extra(where=['FIND_IN_SET('+str(request_data['religion'])+', religions)'])
             central_schemes = central_schemes.extra(where=['FIND_IN_SET('+str(request_data['religion'])+', religions)'])
             
+        # See searchSchemes() above for why an untagged scheme has to match
+        # rather than be excluded -- every myscheme.gov.in import has no
+        # area/employment/occupation tags at all (no equivalent taxonomy on
+        # that source), so a plain inner-join filter here would make all
+        # 4,485 imported schemes invisible on this page forever, the moment
+        # a real user picks any value for these three (required) fields.
         if request_data['area']:
-            state_schemes = state_schemes.filter(scheme_areas__area = request_data['area'])
-            central_schemes = central_schemes.filter(scheme_areas__area = request_data['area'])
+            state_schemes = state_schemes.filter(Q(scheme_areas__area = request_data['area']) | Q(scheme_areas__isnull=True)).distinct()
+            central_schemes = central_schemes.filter(Q(scheme_areas__area = request_data['area']) | Q(scheme_areas__isnull=True)).distinct()
 
         if request_data['employment']:
-            state_schemes = state_schemes.filter(scheme_employment__employment = request_data['employment'])
-            central_schemes = central_schemes.filter(scheme_employment__employment = request_data['employment'])
+            state_schemes = state_schemes.filter(Q(scheme_employment__employment = request_data['employment']) | Q(scheme_employment__isnull=True)).distinct()
+            central_schemes = central_schemes.filter(Q(scheme_employment__employment = request_data['employment']) | Q(scheme_employment__isnull=True)).distinct()
 
         if request_data['occupation']:
-            state_schemes = state_schemes.filter(scheme_occupations__occupation_id = request_data['occupation'])
-            central_schemes = central_schemes.filter(scheme_occupations__occupation_id = request_data['occupation'])
+            state_schemes = state_schemes.filter(Q(scheme_occupations__occupation_id = request_data['occupation']) | Q(scheme_occupations__isnull=True)).distinct()
+            central_schemes = central_schemes.filter(Q(scheme_occupations__occupation_id = request_data['occupation']) | Q(scheme_occupations__isnull=True)).distinct()
         
         state_serializer = SchemeSerializer(state_schemes, many=True)
         central_serializer = SchemeSerializer(central_schemes, many=True)
