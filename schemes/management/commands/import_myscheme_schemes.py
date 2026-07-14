@@ -54,8 +54,14 @@ CATEGORY_KEYWORD_RULES = [
     (("tribal", "scheduled tribe", " st ", "vanbandhu", "adivasi"), "TRIBAL WELFARE"),
     (("cooperative", "co-operative"), "COOPERATIVE DEVELOPMENT"),
     (("fisheries", "fisherman", "fishing", "animal husbandry", "livestock", "dairy", "poultry",
-      "piggery", " pig ", " pigs", "goat", "sheep", "cattle", "buffalo", "bakri", "gau palan"), "ANIMAL HUSBANDRY & FISHERIES"),
+      "piggery", " pig ", " pigs", "goat", "sheep", "cattle", "buffalo", "bakri", "gau palan",
+      "pmmsy", "aquaculture", "biofloc", "matsya"), "ANIMAL HUSBANDRY & FISHERIES"),
     (("women", "girl", "mahila", "balika", "child", "bal ", "matru"), "WOMEN & CHILD DEVELOPMENT"),
+    # myscheme's "Agriculture,Rural & Environment" label also covers generic
+    # rural/environment schemes with nothing to do with farming -- checked
+    # before the real agriculture rule so these route to the catch-all
+    # instead.
+    (("electric vehicle", "e-vehicle", "rural electrification", "solar rooftop"), "LIVELIHOOD & EMPLOYBILITY"),
     (("farmer", "farming", "agriculture", "kisan", "crop", "irrigation", "horticulture",
       "soil health", "soil testing", "rkvy"), "AGRICULTURE & FARMER WELFARE"),
     # Checked after every subject/group-specific rule above (so e.g. a tribal
