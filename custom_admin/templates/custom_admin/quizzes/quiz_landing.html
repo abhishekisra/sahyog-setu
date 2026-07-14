@@ -36,14 +36,6 @@
         <div class="sq-brand-inline"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
         <div class="sq-eyebrow">Government Scheme · Knowledge Test</div>
 
-        {% if available_languages|length > 1 %}
-        <div class="sq-lang-toggle" role="group" aria-label="Choose language">
-          {% for l in available_languages %}
-          <a href="?lang={{ l.code }}" class="sq-lang-btn{% if lang == l.code %} sq-lang-active{% endif %}">{{ l.name }}</a>
-          {% endfor %}
-        </div>
-        {% endif %}
-
         <h1 class="sq-land-title">{{ quiz_title }}</h1>
         {% if quiz_description %}
         <div class="sq-land-desc">{{ quiz_description|sanitize_html }}</div>
@@ -145,13 +137,6 @@
   .sq-brand-inline span{ color:var(--gold-hi); }
 
   .sq-eyebrow{ color:var(--gold-hi); font-weight:600; letter-spacing:2.5px; font-size:11.5px; text-transform:uppercase; margin-bottom:8px; }
-
-  .sq-lang-toggle{ display:flex; flex-wrap:wrap; gap:8px; justify-content:center; margin-bottom:16px; }
-  .sq-lang-btn{ padding:6px 14px; border-radius:20px; font-size:13px; font-weight:600;
-    color:var(--ink-soft); background:rgba(0,0,0,.18); border:1px solid var(--line);
-    text-decoration:none; transition:all .15s; }
-  .sq-lang-btn:hover{ color:var(--ink); border-color:var(--gold-hi); }
-  .sq-lang-btn.sq-lang-active{ color:#122019; background:var(--gold-hi); border-color:var(--gold-hi); }
 
   .sq-land-title{ font-family:'Fraunces'; font-weight:600; font-size:clamp(26px,6.5vw,36px); line-height:1.15; margin:0 0 12px; }
   .sq-land-desc{ color:var(--ink-soft); font-size:15px; line-height:1.6; max-width:440px; margin:0 auto 24px; }

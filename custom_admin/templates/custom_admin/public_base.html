@@ -312,16 +312,10 @@
         }
     </script>
 
-    <!-- Language selector (Google Website Translator) -- the React SPA
-         already has its own language switcher covering these same Indian
-         languages, but that only applies to SPA-rendered routes. These
-         Django-rendered pages (quiz section, login/signup) had no
-         translator at all, so this adds the same capability here,
-         scoped to the same language list, via Google's official
-         translate.google.com widget (no server-side i18n content exists
-         to translate against, so this is the only practical way to cover
-         quiz text in Indian languages without authoring parallel content
-         for every language). -->
+    <!-- Language selector (Google Website Translator) -- the one and only
+         translate control across all Django-rendered pages (quiz section,
+         login/signup, etc). Sits next to the top navbar/menu rather than
+         floating loose, so it reads as part of the site chrome. -->
     <div id="ssq-lang-root">
         <span id="ssq-lang-icon" aria-hidden="true">🌐</span>
         <div id="google_translate_element"></div>
@@ -415,6 +409,17 @@
            translation is active; the banner itself is hidden by the sweep()
            above (geometry-based), so undo that shift too. */
         body { top: 0 !important; }
+        /* Every page's own header row (logo + back-link, brand + nav, etc.)
+           also claims the top-right corner on narrow screens -- at 16px/16px
+           full-size the two collide (Google's own "Select Language" text is
+           wide). Shrinking + tucking it in tighter keeps it visually part of
+           the header band without overlapping that page's own header text. */
+        @media (max-width: 480px) {
+            #ssq-lang-root { top: 10px; right: 10px; padding: 3px 7px; gap: 4px; }
+            #ssq-lang-icon { font-size: 11px; }
+            #ssq-lang-root .goog-te-gadget,
+            #ssq-lang-root .goog-te-gadget * { font-size: 11px !important; }
+        }
     </style>
 
     <!-- Sahyog Setu FAQ chatbot widget -- same self-contained markup as
