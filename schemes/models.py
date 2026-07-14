@@ -22,6 +22,11 @@ class Categories(models.Model):
 class Schemes(models.Model):
     id : models.AutoField(primary_key=True)
     title = models.CharField(max_length=255, blank=False, null=False)
+    # Set only for schemes imported from myscheme.gov.in -- lets the import
+    # command re-run without creating duplicates (skips any slug already
+    # present) and is never touched by the manual admin CRUD forms, which
+    # don't have a field for it. Null for every hand-entered scheme.
+    myscheme_slug = models.CharField(max_length=255, blank=True, null=True, unique=True)
     banner = ResizedImageField(upload_to="schemes", default="", blank=True, null=True, quality=100, force_format='WEBP')
     types = ((0, 'Central'), (1, 'State'))
     scheme_type = models.IntegerField(default = 0, choices=types)
