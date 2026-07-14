@@ -53,9 +53,19 @@ CATEGORY_KEYWORD_RULES = [
     (("divyang", "disability", "disabled", "differently abled", "pwd "), "DIFFERENTLY ABLED"),
     (("tribal", "scheduled tribe", " st ", "vanbandhu", "adivasi"), "TRIBAL WELFARE"),
     (("cooperative", "co-operative"), "COOPERATIVE DEVELOPMENT"),
-    (("fisheries", "fisherman", "animal husbandry", "livestock", "dairy", "poultry"), "ANIMAL HUSBANDRY & FISHERIES"),
+    (("fisheries", "fisherman", "fishing", "animal husbandry", "livestock", "dairy", "poultry",
+      "piggery", " pig ", " pigs", "goat", "sheep", "cattle", "buffalo", "bakri", "gau palan"), "ANIMAL HUSBANDRY & FISHERIES"),
     (("women", "girl", "mahila", "balika", "child", "bal ", "matru"), "WOMEN & CHILD DEVELOPMENT"),
-    (("farmer", "agriculture", "kisan", "crop", "irrigation"), "AGRICULTURE & FARMER WELFARE"),
+    (("farmer", "farming", "agriculture", "kisan", "crop", "irrigation", "horticulture",
+      "soil health", "soil testing", "rkvy"), "AGRICULTURE & FARMER WELFARE"),
+    # Checked after every subject/group-specific rule above (so e.g. a tribal
+    # or agriculture-subject scholarship still lands in that more specific
+    # category), but before pension/health/sports below -- a bare "medical"
+    # or "hospital" scholarship is really an education scheme (it funds
+    # studying, not treatment), and "Chief Minister Scholarship Scheme" has
+    # nothing to do with either; without this rule those fell through to
+    # whatever unrelated keyword happened to match next.
+    (("scholarship", "shiksha protsahan"), "EDUCATION & LEARNING"),
     (("pension", "insurance", "bima"), "INSURANCE & PENSION"),
     (("health", "hospital", "medical", "ayushman", "arogya", "sanitation", "hygiene"), "HEALTH & HYGIENE"),
     (("sports", "youth", "yuva", "culture", "khel"), "YOUTH AFFAIRS & SPORTS"),
@@ -186,19 +196,38 @@ def guess_eligibility(eligibility_text, scheme_name, tags):
     if re.search(r"\bwidows?\s+only\b|\b(?:should|must)\s+be\s+a\s+widow(?:er)?\b|\bonly\s+widows?\b", haystack):
         marital_status = "2"
 
+    # A bare mention of a category name is not a restriction -- e.g. Udyogini's
+    # real text says "for women belonging to general AND special categories"
+    # (explicitly open to all), but a plain `\bgeneral\b` search matched it and
+    # wrongly narrowed the scheme to General-caste-only. Require the keyword to
+    # sit near an actual exclusivity marker ("only", "must be", "reserved for",
+    # "exclusively") before treating it as a real restriction -- checked against
+    # BOTH the scheme name (titles like "(General Category)" or "OBC Pre-Matric
+    # Scholarship" are a reliable, deliberate signal) and the eligibility text.
+    EXCL = r"(?:only|exclusiv\w*|reserved for|restrict\w*|(?:should|must)\s+(?:be|belong))"
+
+    def exclusive_match(text, keyword, window=30):
+        pat_before = rf"\b{keyword}\b.{{0,{window}}}?{EXCL}"
+        pat_after = rf"{EXCL}.{{0,{window}}}?\b{keyword}\b"
+        return bool(re.search(pat_before, text) or re.search(pat_after, text))
+
+    title_lower = (scheme_name or "").lower()
+
     benificiaries = BENIFICIARIES_ALL
-    if re.search(r"\bbpl\b|below poverty line", haystack) and "apl" not in haystack:
+    if re.search(r"\(\s*bpl\s*\)|\bbpl\s+only\b|\bonly\s+bpl\b", title_lower) or exclusive_match(haystack, "bpl"):
         benificiaries = "0"
 
     religions = RELIGIONS_ALL
-    found_religions = [code for name, code in RELIGION_CODES.items() if re.search(rf"\b{name}\b", haystack)]
+    found_religions = [code for name, code in RELIGION_CODES.items()
+                        if f"({name}" in title_lower or exclusive_match(haystack, name)]
     if found_religions and len(found_religions) < len(RELIGION_CODES):
         religions = ",".join(str(c) for c in sorted(set(found_religions)))
 
     castes = CASTES_ALL
     found_castes = set()
     for name, code in CASTE_CODES.items():
-        if re.search(rf"\b{name}\b", haystack):
+        title_signal = re.search(rf"\({name}\)|\b{name}\b.{{0,20}}scholarship|scholarship.{{0,20}}\b{name}\b", title_lower)
+        if title_signal or exclusive_match(haystack, name):
             found_castes.add(code)
     if found_castes and found_castes != {0, 1, 2, 3, 4}:
         castes = ",".join(str(c) for c in sorted(found_castes))
