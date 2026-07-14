@@ -24,28 +24,70 @@
                     </div>
                 </div>
             </div>
-            
+
             <div class="row">
                 <div class="col-xl-12">
                     <div class="card">
-                        <div class="card-body">                            
+                        <div class="card-body">
+                            <form method="GET" class="row mb-3" style="gap:8px 0">
+                                <div class="col-md-3">
+                                    <select name="status" class="form-control" onchange="this.form.submit()">
+                                        <option value="">All Statuses</option>
+                                        <option value="1" {% if selected_status == '1' %}selected{% endif %}>Active</option>
+                                        <option value="0" {% if selected_status == '0' %}selected{% endif %}>Inactive</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="source" class="form-control" onchange="this.form.submit()">
+                                        <option value="">All Sources</option>
+                                        <option value="myscheme" {% if selected_source == 'myscheme' %}selected{% endif %}>Imported from myScheme</option>
+                                        <option value="manual" {% if selected_source == 'manual' %}selected{% endif %}>Manually Entered</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <select name="category" class="form-control" onchange="this.form.submit()">
+                                        <option value="">All Categories</option>
+                                        {% for cat in categories %}
+                                        <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:'s' %}selected{% endif %}>{{ cat.title }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-3 d-flex align-items-center">
+                                    <span class="text-muted">{{ total_count }} scheme{{ total_count|pluralize }} match{% if not total_count == 1 %}{% endif %}</span>
+                                </div>
+                            </form>
+
+                            {% if selected_status == '0' %}
+                            <form method="POST" action="{% url 'adminBulkActivateSchemes' %}" class="mb-3"
+                                  onsubmit="return confirm('Activate all ' + '{{ total_count }}' + ' scheme(s) matching the current filters? This makes them live on the public site.');">
+                                {% csrf_token %}
+                                <input type="hidden" name="status" value="{{ selected_status }}">
+                                <input type="hidden" name="source" value="{{ selected_source }}">
+                                <input type="hidden" name="category" value="{{ selected_category }}">
+                                <button type="submit" class="btn btn-warning btn-sm">
+                                    <i class="feather icon-check-circle"></i>&nbsp;Activate all {{ total_count }} filtered scheme{{ total_count|pluralize }}
+                                </button>
+                            </form>
+                            {% endif %}
+
                             <div class="table-responsive">
-                                <table id="report-table" class="table mb-0">
+                                <table class="table mb-0">
                                     <thead>
                                         <tr>
                                             <th>S No.</th>
-                                            <th>Title</th>                                            
-                                            <th>Scheme Type</th>  
-                                            <th>Category</th>  
-                                            <th>DBT</th>                                                                                
+                                            <th>Title</th>
+                                            <th>Scheme Type</th>
+                                            <th>Category</th>
+                                            <th>DBT</th>
                                             <th>Status</th>
+                                            <th>Source</th>
                                             <th class="text-right">Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {% for scheme in schemes %} 
+                                        {% for scheme in page_obj %}
                                             <tr>
-                                                <td>{{forloop.counter}}</td>
+                                                <td>{{ page_obj.start_index|add:forloop.counter0 }}</td>
                                                 <td>{{scheme.title}}</td>
                                                 <td>
                                                     {% if scheme.scheme_type == 0 %}
@@ -53,7 +95,7 @@
                                                     {% else %}
                                                        State
                                                     {% endif %}
-                                                </td> 
+                                                </td>
                                                 <td>{{scheme.category.title}}</td>
                                                 <td>
                                                     {% if scheme.dbt == 0 %}
@@ -61,12 +103,19 @@
                                                     {% else %}
                                                         <span class="badge badge-success">Yes</span>
                                                     {% endif %}
-                                                </td>                                                                                       
+                                                </td>
                                                 <td>
                                                     {% if scheme.status == 1 %}
                                                         <span class="badge badge-success">Active</span>
                                                     {% else %}
                                                         <span class="badge badge-danger">Inactive</span>
+                                                    {% endif %}
+                                                </td>
+                                                <td>
+                                                    {% if scheme.myscheme_slug %}
+                                                        <span class="badge badge-info">myScheme</span>
+                                                    {% else %}
+                                                        <span class="badge badge-secondary">Manual</span>
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-right">
@@ -78,6 +127,20 @@
                                     </tbody>
                                 </table>
                             </div>
+
+                            {% if page_obj.paginator.num_pages > 1 %}
+                            <nav>
+                                <ul class="pagination justify-content-center mt-3">
+                                    {% if page_obj.has_previous %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Previous</a></li>
+                                    {% endif %}
+                                    <li class="page-item disabled"><span class="page-link">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span></li>
+                                    {% if page_obj.has_next %}
+                                    <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if querystring %}&{{ querystring }}{% endif %}">Next</a></li>
+                                    {% endif %}
+                                </ul>
+                            </nav>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
@@ -114,10 +177,6 @@
 
 
     <script>
-
-
-        $('.table').DataTable({});
-
 
         $('#newStatus').select2({
             dropdownParent: $('#newModel'),

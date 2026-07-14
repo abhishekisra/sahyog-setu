@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
+from django.core.paginator import Paginator
 
 from occupations.models import Occupations
 from states.models import States
@@ -79,11 +80,73 @@ def updateCategory(request, id):
 class SchemesView(View):
     def get(self, request):
         if request.user.is_authenticated:
-            schemes = Schemes.objects.all()
-            return render(request, "custom_admin/manage-schemes/schemes/schemes.html", {'schemes': schemes})
+            schemes = Schemes.objects.select_related('category').order_by('-id')
+
+            status = request.GET.get('status', '')
+            if status in ('0', '1'):
+                schemes = schemes.filter(status=int(status))
+
+            source = request.GET.get('source', '')
+            if source == 'myscheme':
+                schemes = schemes.filter(myscheme_slug__isnull=False)
+            elif source == 'manual':
+                schemes = schemes.filter(myscheme_slug__isnull=True)
+
+            category_id = request.GET.get('category', '')
+            if category_id:
+                schemes = schemes.filter(category_id=category_id)
+
+            paginator = Paginator(schemes, 50)
+            page_obj = paginator.get_page(request.GET.get('page'))
+
+            querystring = request.GET.copy()
+            querystring.pop('page', None)
+
+            return render(request, "custom_admin/manage-schemes/schemes/schemes.html", {
+                'page_obj': page_obj,
+                'categories': Categories.objects.all(),
+                'selected_status': status,
+                'selected_source': source,
+                'selected_category': category_id,
+                'querystring': querystring.urlencode(),
+                'total_count': paginator.count,
+            })
         else:
             messages.error(request, "You have to login first.")
             return redirect('adminLogin')
+
+
+class BulkActivateSchemesView(View):
+    """Activates every Schemes row matching the SAME filters currently applied
+    on the list page (not just the current page's 50 rows) -- lets an admin
+    approve, say, "all myScheme-imported Education schemes" in one action
+    after skimming them, rather than 50-at-a-time or one-by-one via the edit
+    form. Only ever flips status -- never touches any other field."""
+
+    def post(self, request):
+        if not request.user.is_authenticated:
+            messages.error(request, "You have to login first.")
+            return redirect('adminLogin')
+
+        schemes = Schemes.objects.all()
+
+        status = request.POST.get('status', '')
+        if status in ('0', '1'):
+            schemes = schemes.filter(status=int(status))
+
+        source = request.POST.get('source', '')
+        if source == 'myscheme':
+            schemes = schemes.filter(myscheme_slug__isnull=False)
+        elif source == 'manual':
+            schemes = schemes.filter(myscheme_slug__isnull=True)
+
+        category_id = request.POST.get('category', '')
+        if category_id:
+            schemes = schemes.filter(category_id=category_id)
+
+        updated = schemes.update(status=1)
+        messages.success(request, f"{updated} scheme(s) activated.")
+        return redirect(request.META.get('HTTP_REFERER') or 'adminSchemes')
 
 
 
