@@ -15,7 +15,14 @@
 
   <div class="sqz-topbar">
     <div class="sqz-brand"><div class="sqz-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-    <div class="sqz-navpill"><b>{{ quizzes|length }}</b> Quizzes · Earn Certificates 🎖️</div>
+    <div class="sqz-topbar-right">
+      <div class="sqz-navpill"><b>{{ quizzes|length }}</b> Quizzes · Earn Certificates 🎖️</div>
+      {% if is_authenticated %}
+      <a href="{% url 'my_results' %}" class="sqz-myresults">📊 My Results</a>
+      {% else %}
+      <a href="{% url 'login' %}" class="sqz-myresults">Login to track your results</a>
+      {% endif %}
+    </div>
   </div>
 
   <div class="sqz-hero">
@@ -27,12 +34,13 @@
 
   <div class="sqz-grid">
     {% for item in quizzes %}
-    <article class="sqz-card" style="--accent:{{ item.accent }}">
+    <article class="sqz-card{% if item.locked %} sqz-locked{% endif %}" style="--accent:{{ item.accent }}">
       <div class="sqz-media">
         <span class="sqz-tag">{{ item.tag }}</span>
         <span class="sqz-dur">⏱ 20s / Q</span>
         <span class="sqz-icon-badge">{{ item.icon_svg|safe }}</span>
         {% if item.quiz.certificate_enabled %}<span class="sqz-cert-badge">🎖️ Certificate</span>{% endif %}
+        {% if item.locked %}<span class="sqz-done-badge">🔒 Completed</span>{% endif %}
       </div>
       <div class="sqz-body">
         <div class="sqz-title">{{ item.quiz.title }}</div>
@@ -42,7 +50,12 @@
           <span class="sqz-chip">🏅 <b>{{ item.total_marks }} marks</b></span>
           <span class="sqz-chip">⏱ <b>~{{ item.estimated_minutes }} min</b></span>
         </div>
+        {% if item.locked %}
+        <div class="sqz-my-score">Your score: <b>{{ item.my_attempt.percentage|floatformat:0 }}%</b> {% if item.my_attempt.passed %}✅{% else %}❌{% endif %}</div>
+        <a class="sqz-go sqz-go-done" href="{% url 'quiz_result' pk=item.my_attempt.id %}">View Result →</a>
+        {% else %}
         <a class="sqz-go" href="{% url 'quiz_landing' item.quiz.slug %}">Start Quiz →</a>
+        {% endif %}
       </div>
     </article>
     {% empty %}
@@ -88,6 +101,12 @@
     background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(0,0,0,.14)); box-shadow:var(--shadow-sm);
   }
   .sqz-navpill b{ color:var(--gold-hi); }
+  .sqz-topbar-right{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .sqz-myresults{
+    font-family:'Mukta'; font-weight:600; font-size:13px; color:var(--ink-soft); text-decoration:none;
+    padding:9px 16px; border-radius:99px; border:1px solid var(--line); transition:border-color .2s, color .2s;
+  }
+  .sqz-myresults:hover{ color:var(--gold-hi); border-color:rgba(201,162,39,.4); }
 
   .sqz-hero{ text-align:center; margin:0 auto clamp(34px,6vw,54px); max-width:1180px; }
   .sqz-eyebrow{ color:var(--gold-hi); font-weight:600; letter-spacing:3px; font-size:12px; text-transform:uppercase; }
@@ -119,6 +138,8 @@
   .sqz-card:hover{ transform:translateY(-7px); box-shadow:var(--shadow-lg); border-color:rgba(201,162,39,.42); }
   .sqz-card:hover .sqz-icon-badge{ transform:scale(1.08) rotate(-4deg); }
   .sqz-card:hover .sqz-go{ filter:brightness(1.06); }
+  .sqz-card.sqz-locked{ opacity:.88; }
+  .sqz-card.sqz-locked .sqz-media{ filter:grayscale(.3); }
 
   .sqz-media{
     position:relative; height:132px; display:grid; place-items:center;
@@ -153,6 +174,10 @@
     position:absolute; bottom:10px; right:12px; font-size:11px; font-weight:700; color:var(--gold-hi);
     padding:4px 10px; border-radius:99px; border:1px solid var(--line); background:rgba(0,0,0,.3);
   }
+  .sqz-done-badge{
+    position:absolute; bottom:10px; left:12px; font-size:11px; font-weight:700; color:var(--ink);
+    padding:4px 10px; border-radius:99px; border:1px solid rgba(255,92,92,.35); background:rgba(255,92,92,.16);
+  }
 
   .sqz-body{ padding:18px 18px 20px; display:flex; flex-direction:column; flex:1; }
   .sqz-title{ font-family:'Fraunces'; font-weight:600; font-size:19px; line-height:1.25; margin-bottom:8px; }
@@ -173,6 +198,12 @@
     transition:transform .12s ease, box-shadow .12s ease, filter .2s;
   }
   .sqz-go:active{ transform:translateY(3px); border-bottom-width:1px; box-shadow:0 5px 12px rgba(201,162,39,.4); }
+  .sqz-my-score{ font-size:13.5px; color:var(--ink-soft); margin-bottom:10px; text-align:center; }
+  .sqz-my-score b{ color:var(--ink); }
+  .sqz-go-done{
+    background:linear-gradient(180deg,rgba(255,255,255,.1),rgba(0,0,0,.14)); color:var(--ink);
+    border-bottom:4px solid rgba(0,0,0,.3); box-shadow:none;
+  }
 
   .sqz-footer{ text-align:center; color:var(--ink-faint); font-size:13px; margin-top:46px; max-width:1180px; margin-left:auto; margin-right:auto; }
   .sqz-footer b{ color:var(--gold-hi); }

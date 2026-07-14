@@ -794,6 +794,23 @@ class QuizListView(View):
     the numbers shown here always match what the landing page promises."""
 
     def get(self, request):
+        # Logged-in participants: which of these quizzes they've already
+        # completed, so the card can show "Completed" + their score instead
+        # of "Start Quiz" -- QuizTakeView already redirects a one_attempt_only
+        # quiz straight to the old result if they click in anyway, this just
+        # makes that lock visible *before* the click instead of a surprise
+        # after it. is_demo=False for the same reason as MyResultsView: a
+        # stale/timed-out attempt auto-closed by _get_or_create_attempt was
+        # never really "completed" by the participant.
+        my_attempts_by_quiz = {}
+        if request.user.is_authenticated:
+            my_attempts = (
+                QuizAttempt.objects.filter(user=request.user, completed_at__isnull=False, is_demo=False)
+                .order_by("quiz_id", "-completed_at")
+            )
+            for a in my_attempts:
+                my_attempts_by_quiz.setdefault(a.quiz_id, a)
+
         quizzes = []
         for quiz in Quizzes.objects.filter(status=True).order_by("id"):
             if not quiz.is_live:
@@ -807,6 +824,7 @@ class QuizListView(View):
             # handle correctly, exactly once.
             short_desc = html.unescape(strip_tags(quiz.description or ""))
             short_desc = Truncator(short_desc.strip()).chars(140)
+            my_attempt = my_attempts_by_quiz.get(quiz.id)
             quizzes.append({
                 "quiz": quiz,
                 "icon_svg": QUIZ_ICON_SVGS[meta["icon"]],
@@ -819,8 +837,16 @@ class QuizListView(View):
                 # (not a separate guess), so this can never drift out of
                 # sync with the real per-question countdown.
                 "estimated_minutes": round(question_count * PER_QUESTION_SECONDS / 60),
+                # Only actually "locked" if the quiz itself is one-attempt --
+                # a repeatable quiz still shows the participant's last score
+                # but Start Quiz stays live.
+                "my_attempt": my_attempt,
+                "locked": bool(my_attempt) and quiz.one_attempt_only,
             })
-        return render(request, "custom_admin/quizzes/quiz_list.html", {"quizzes": quizzes})
+        return render(request, "custom_admin/quizzes/quiz_list.html", {
+            "quizzes": quizzes,
+            "is_authenticated": request.user.is_authenticated,
+        })
 
 
 class QuizLandingView(View):
@@ -1706,7 +1732,13 @@ class MyResultsView(View):
 
     def get(self, request):
         attempts = (
-            QuizAttempt.objects.filter(user=request.user, completed_at__isnull=False)
+            # is_demo=False -- excludes the auto-closed stale attempts
+            # QuizTakeView._get_or_create_attempt() marks that way (see its
+            # docstring): those are abandoned/timed-out rows, not a real
+            # completed 0-score quiz, and would otherwise show up here as a
+            # fake "Fail" entry for a quiz the participant never actually
+            # got to answer a single question on.
+            QuizAttempt.objects.filter(user=request.user, completed_at__isnull=False, is_demo=False)
             .select_related("quiz")
             .annotate(
                 marks=F("score") * MARKS_PER_QUESTION,
