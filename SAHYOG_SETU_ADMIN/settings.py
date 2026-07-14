@@ -27,6 +27,11 @@ DEBUG = False
 
 ALLOWED_HOSTS=['127.0.0.1', '212.38.94.162', 'sahyogsetu.in', 'www.sahyogsetu.in']
 
+# Same OAuth client the main React SPA already uses (see main.js) -- signing
+# in with this ID on the quiz login page too is what makes it feel like one
+# account instead of a second, unrelated login system.
+GOOGLE_CLIENT_ID = '493480542408-tas10l37f73mankcbegv9bu2s0mlk4df.apps.googleusercontent.com'
+
 CORS_ALLOW_CREDENTIALS = True
 # ALL_ORIGINS + CREDENTIALS together let any website make authenticated
 # (cookie-bearing) cross-origin requests and read the response -- restricted

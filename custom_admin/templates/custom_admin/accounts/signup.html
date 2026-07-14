@@ -7,6 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://accounts.google.com/gsi/client" async defer></script>
 {% endblock %}
 
 {% block body %}
@@ -28,6 +29,9 @@
         {% for error in form.non_field_errors %}
         <div class="sq-alert">{{ error }}</div>
         {% endfor %}
+
+        <div id="googleBtnBox" class="sq-google-box"></div>
+        <div class="sq-or"><span>or sign up with mobile number</span></div>
 
         <form method="post" novalidate class="sq-form">
           {% csrf_token %}
@@ -75,6 +79,36 @@
     </section>
   </main>
 </div>
+
+<script>
+(function(){
+  function onGoogleCredential(resp){
+    fetch("{% url 'google_login' %}", {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({credential: resp.credential, next: ''})
+    }).then(function(r){ return r.json(); }).then(function(j){
+      if(!j.ok){ alert('Google sign-in failed, please try again or sign up with mobile number.'); return; }
+      if(j.needsProfile){
+        window.location.href = "{% url 'complete_profile' %}?next=" + encodeURIComponent(j.next);
+      } else {
+        window.location.href = j.next;
+      }
+    }).catch(function(){ alert('Network error -- please try again.'); });
+  }
+  window.addEventListener('load', function(){
+    if(!window.google || !window.google.accounts) return;
+    google.accounts.id.initialize({
+      client_id: '493480542408-tas10l37f73mankcbegv9bu2s0mlk4df.apps.googleusercontent.com',
+      callback: onGoogleCredential
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('googleBtnBox'),
+      { theme: 'filled_black', size: 'large', width: 320, text: 'signup_with' }
+    );
+  });
+})();
+</script>
 
 <style>
   .sq-page{
@@ -153,6 +187,10 @@
   .sq-btn:hover{ filter:brightness(1.05); }
   .sq-btn:active{ transform:translateY(3px); border-bottom-width:1px; }
   .sq-btn-block{ width:100%; margin-top:6px; }
+
+  .sq-or{ display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--ink-faint); font-size:13px; }
+  .sq-or::before, .sq-or::after{ content:''; flex:1; height:1px; background:var(--line); }
+  .sq-google-box{ display:flex; justify-content:center; }
 
   .sq-switch{ text-align:center; color:var(--ink-soft); font-size:14px; margin:22px 0 0; }
   .sq-switch a{ color:var(--gold-hi); font-weight:600; text-decoration:none; }

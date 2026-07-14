@@ -5,4 +5,6 @@ urlpatterns = [
     path('signup/', views.SignupView.as_view(), name='signup'),
     path('login/', views.LoginView.as_view(), name='login'),
     path('logout/', views.LogoutView.as_view(), name='logout'),
+    path('google-login/', views.GoogleLoginView.as_view(), name='google_login'),
+    path('complete-profile/', views.CompleteProfileView.as_view(), name='complete_profile'),
 ]
