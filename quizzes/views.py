@@ -1036,6 +1036,33 @@ class QuizTakeView(View):
         # stops two simultaneous taps on "Start Quiz" from both
         # succeeding.
         attempt = QuizAttempt.objects.filter(user=request.user, quiz=quiz, completed_at__isnull=True).first()
+
+        # An incomplete attempt whose own time budget has already run out
+        # (abandoned tab, browser crash, or the participant simply never
+        # came back) was being resumed here unconditionally -- reloading
+        # attempt.started_at from hours/days ago, so elapsed already exceeds
+        # the budget and quiz_answer rejects the very first answer as
+        # time_up (403). The client correctly treats time_up as terminal
+        # and finishes immediately, which reads as the whole quiz being
+        # broken: every attempt instantly fails on question one. Close the
+        # stale row out here (is_demo=True so it never counts against
+        # one_attempt_only, certificates, or the average-score stat -- same
+        # exclusion seeded/demo rows already get) to free live_lock, then
+        # fall through and create a genuinely fresh attempt below.
+        if attempt:
+            stale_budget = (len(attempt.question_ids) or 1) * PER_QUESTION_SERVER_BUDGET
+            if (timezone.now() - attempt.started_at).total_seconds() > stale_budget:
+                attempt.completed_at = timezone.now()
+                attempt.is_demo = True
+                # Same release quiz_submit does on a normal finish (see
+                # below) -- live_lock is a real unique column that isn't
+                # freed just by setting completed_at, so skipping this
+                # would leave the stale row still holding "{user}_{quiz}"
+                # and the create() below would IntegrityError right away.
+                attempt.live_lock = None
+                attempt.save(update_fields=["completed_at", "is_demo", "live_lock"])
+                attempt = None
+
         created = False
 
         if not attempt:

@@ -54,6 +54,7 @@
           </div>
           <div class="sq-qhi" id="sqQHi"></div>
           <div class="sq-opts" id="sqOpts"></div>
+          <div class="sq-submitting" id="sqSubmitStatus" hidden><span class="sq-submitting-spinner"></span><span id="sqSubmitStatusText">Submitting your answer…</span></div>
           <div class="sq-explain" id="sqExplain"></div>
           <div class="sq-neterr" id="sqNetErr" hidden>
             <span>Answer could not be saved — check your network.</span>
@@ -85,23 +86,27 @@
   .sq-sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
 
   .sq-page{
-    --bg:#122019; --bg2:#17281f; --card:#213627; --card-hi:#2b4634;
-    --ink:#f4efe1; --ink-soft:#adc2b1; --ink-faint:#7d9583;
+    /* Light theme -- matches the rest of the site. State colors (green/red/
+       yellow) are darkened from their dark-surface originals so each still
+       clears WCAG AA against a white/cream card, not just against the old
+       dark green card. */
+    --bg:#ffffff; --bg2:#faf9f5; --card:#fffffe; --card-hi:#fdf6e3;
+    --ink:#17281f; --ink-soft:rgba(23,40,31,.65); --ink-faint:rgba(23,40,31,.45);
     --gold:#c9a227; --gold-hi:#ffd75e;
-    --green:#35d67f; --green-deep:#159a55; --green-glow:rgba(53,214,127,.4);
-    --red:#ff5c5c; --red-deep:#d43a3a; --red-glow:rgba(255,92,92,.4);
-    --yellow:#f7c948; --yellow-deep:#cf9c00; --yellow-glow:rgba(247,201,72,.42);
-    --line:rgba(201,162,39,.18);
-    --shadow-sm:0 4px 14px rgba(0,0,0,.28);
-    --shadow-md:0 14px 34px rgba(0,0,0,.4);
-    --shadow-lg:0 30px 70px rgba(0,0,0,.5);
+    --green:#1a8a4f; --green-deep:#106b3c; --green-glow:rgba(26,138,79,.18);
+    --red:#c0392b; --red-deep:#a12d20; --red-glow:rgba(192,57,43,.16);
+    --yellow:#a5811c; --yellow-deep:#8a6d16; --yellow-glow:rgba(165,129,28,.18);
+    --line:rgba(20,48,31,.1);
+    --shadow-sm:0 4px 14px rgba(20,48,31,.08);
+    --shadow-md:0 14px 34px rgba(20,48,31,.12);
+    --shadow-lg:0 30px 70px rgba(20,48,31,.16);
     --sq-font-scale:1;
     font-family:'Mukta',system-ui,sans-serif;
     font-size:calc(1rem * var(--sq-font-scale));
     color:var(--ink);
     background:
-      radial-gradient(1200px 700px at 80% -10%, #1d3628 0%, transparent 60%),
-      radial-gradient(900px 600px at -10% 110%, #1a2e22 0%, transparent 55%),
+      radial-gradient(1200px 700px at 80% -10%, rgba(255,215,0,.06) 0%, transparent 60%),
+      radial-gradient(900px 600px at -10% 110%, rgba(201,162,39,.05) 0%, transparent 55%),
       var(--bg);
     min-height:100dvh;
     padding:clamp(10px,2.5vw,34px);
@@ -119,20 +124,20 @@
     box-shadow:0 8px 20px rgba(201,162,39,.35), inset 0 0 0 3px rgba(18,32,25,.25);
   }
   .sq-brand b{ font-family:'Fraunces'; font-weight:600; letter-spacing:.3px; font-size:16px; color:var(--ink); }
-  .sq-brand span{ color:var(--gold-hi); }
+  .sq-brand span{ color:var(--yellow); }
   .sq-head-actions{ display:flex; align-items:center; gap:10px; }
 
   .sq-font-controls{ display:flex; gap:6px; }
   .sq-font-btn{
     min-width:34px;min-height:34px;border-radius:9px;font-weight:800;cursor:pointer;
-    background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.18));
+    background:linear-gradient(180deg,#fffffe,#fdf6e3);
     border:1px solid var(--line); color:var(--ink); box-shadow:var(--shadow-sm);
   }
   .sq-font-btn:hover{ filter:brightness(1.12); }
 
   .sq-mute-btn{
     cursor:pointer; width:38px;height:38px;border-radius:10px;font-size:16px;
-    background:linear-gradient(180deg,rgba(255,255,255,.07),rgba(0,0,0,.18));
+    background:linear-gradient(180deg,#fffffe,#fdf6e3);
     border:1px solid var(--line); box-shadow:var(--shadow-sm);
   }
 
@@ -145,37 +150,37 @@
     position:relative; border-radius:26px;
     background:linear-gradient(165deg,var(--card-hi),var(--card));
     border:1px solid var(--line);
-    box-shadow:var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,.06);
+    box-shadow:var(--shadow-lg), inset 0 1px 0 rgba(255,255,255,.7);
     overflow:hidden;
   }
   .sq-gold-line{ height:4px; background:linear-gradient(90deg,transparent,var(--gold),var(--gold-hi),var(--gold),transparent); }
 
   .sq-topbar{ display:flex; align-items:center; gap:12px; padding:16px 18px 10px; }
   .sq-qcount{ font-family:'Fraunces'; font-weight:600; font-size:15px; color:var(--ink-soft); white-space:nowrap; }
-  .sq-qcount b{ color:var(--gold-hi); font-size:19px; }
-  .sq-pbar{ flex:1; height:9px; border-radius:99px; background:rgba(0,0,0,.3); overflow:hidden; box-shadow:inset 0 1px 3px rgba(0,0,0,.5); }
+  .sq-qcount b{ color:var(--yellow); font-size:19px; }
+  .sq-pbar{ flex:1; height:9px; border-radius:99px; background:rgba(20,48,31,.12); overflow:hidden; box-shadow:inset 0 1px 3px rgba(20,48,31,.2); }
   .sq-pfill{ height:100%; width:0%; border-radius:99px; background:linear-gradient(90deg,var(--gold),var(--gold-hi)); transition:width .5s cubic-bezier(.4,1.3,.5,1); }
   .sq-stats{ display:flex; gap:8px; padding:0 18px 8px; }
-  .sq-stat{ flex:1; text-align:center; padding:8px 4px; border-radius:12px; background:rgba(0,0,0,.16); border:1px solid var(--line); }
-  .sq-stat .v{ font-family:'Fraunces'; font-size:19px; color:var(--gold-hi); line-height:1; }
+  .sq-stat{ flex:1; text-align:center; padding:8px 4px; border-radius:12px; background:rgba(20,48,31,.05); border:1px solid var(--line); }
+  .sq-stat .v{ font-family:'Fraunces'; font-size:19px; color:var(--yellow); line-height:1; }
   .sq-stat .k{ font-size:11px; color:var(--ink-faint); margin-top:2px; }
-  .sq-stat.sq-streak .v{ color:#ff9d3c; }
+  .sq-stat.sq-streak .v{ color:#b35900; }
 
   .sq-qwrap{ padding:6px 18px 20px; }
   .sq-qcard{
     position:relative; border-radius:22px; padding:22px 20px 20px;
-    background:linear-gradient(160deg,#254032,#1d3227);
+    background:linear-gradient(160deg,var(--card-hi),var(--card));
     border:1px solid var(--line);
-    box-shadow:var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.06);
+    box-shadow:var(--shadow-md), inset 0 1px 0 rgba(255,255,255,.7);
     animation:sqCardIn .5s cubic-bezier(.2,.9,.3,1.2) both;
   }
   @keyframes sqCardIn{ from{opacity:0; transform:translateY(22px) scale(.96);} to{opacity:1; transform:none;} }
   .sq-ring-row{ display:flex; align-items:center; justify-content:flex-end; margin-bottom:10px; }
   .sq-ring{ width:52px;height:52px; flex:none; position:relative; }
   .sq-ring svg{ transform:rotate(-90deg); }
-  .sq-track{ stroke:rgba(0,0,0,.35); }
+  .sq-track{ stroke:rgba(20,48,31,.15); }
   .sq-prog{ stroke:var(--gold-hi); stroke-linecap:round; transition:stroke-dashoffset 1s linear, stroke .3s; }
-  .sq-ring b{ position:absolute; inset:0; display:grid; place-items:center; font-family:'Fraunces'; font-size:16px; color:var(--gold-hi); }
+  .sq-ring b{ position:absolute; inset:0; display:grid; place-items:center; font-family:'Fraunces'; font-size:16px; color:var(--yellow); }
   .sq-ring.sq-low b{ color:var(--red)!important; animation:sqTick .5s ease-in-out infinite; }
   @keyframes sqTick{ 0%,100%{transform:scale(1);} 50%{transform:scale(1.24);} }
 
@@ -188,15 +193,15 @@
     font-family:'Mukta'; font-weight:600; font-size:16px; color:var(--ink);
     padding:15px 16px 15px 54px; border-radius:15px;
     background:linear-gradient(180deg,var(--card-hi),var(--card));
-    border:1px solid var(--line); border-bottom:4px solid rgba(0,0,0,.42);
-    box-shadow:var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.05);
+    border:1px solid var(--line); border-bottom:4px solid rgba(20,48,31,.28);
+    box-shadow:var(--shadow-sm), inset 0 1px 0 rgba(255,255,255,.6);
     transition:transform .12s ease, box-shadow .2s, background .25s, border-color .25s, color .2s;
   }
   .sq-opt .sq-key{
     position:absolute; left:12px; top:50%; transform:translateY(-50%);
     width:28px;height:28px;border-radius:9px; display:grid;place-items:center;
-    font-family:'Fraunces'; font-weight:600; font-size:14px; color:var(--gold-hi);
-    background:rgba(0,0,0,.25); border:1px solid var(--line);
+    font-family:'Fraunces'; font-weight:600; font-size:14px; color:var(--yellow);
+    background:rgba(20,48,31,.06); border:1px solid var(--line);
   }
   .sq-opt .sq-ic{ position:absolute; right:14px; top:50%; transform:translateY(-50%) scale(0); font-size:19px; font-weight:700; transition:transform .3s cubic-bezier(.3,1.6,.5,1); }
   .sq-opt:hover:not(.sq-locked){ transform:translateY(-2px); box-shadow:var(--shadow-md); border-color:rgba(201,162,39,.4); }
@@ -224,16 +229,36 @@
   .sq-explain{
     margin-top:15px; border-radius:16px; padding:14px 16px 14px 46px; position:relative;
     font-size:14.5px; color:var(--ink-soft); line-height:1.5;
-    background:rgba(0,0,0,.22); border:1px solid var(--line);
+    background:rgba(20,48,31,.05); border:1px solid var(--line);
     max-height:0; opacity:0; overflow:hidden; transition:max-height .5s ease, opacity .4s;
   }
   .sq-explain.sq-on{ max-height:320px; opacity:1; }
   .sq-explain::before{ content:"💡"; position:absolute; left:15px; top:13px; font-size:17px; }
-  .sq-explain b{ color:var(--gold-hi); }
+  .sq-explain b{ color:var(--yellow); }
   .sq-explain .sq-verdict{ display:block; font-family:'Fraunces'; font-weight:600; font-size:16px; margin-bottom:3px; }
-  .sq-explain .sq-correct-line{ color:var(--gold-hi); margin-bottom:4px; }
-  .sq-explain .sq-correct-line strong{ color:var(--gold-hi); }
+  .sq-explain .sq-correct-line{ color:var(--yellow); margin-bottom:4px; }
+  .sq-explain .sq-correct-line strong{ color:var(--yellow); }
   .sq-v-green{ color:var(--green)!important; } .sq-v-red{color:var(--red)!important;} .sq-v-yellow{color:var(--yellow)!important;}
+
+  /* Visible the instant a click is registered -- a slow/flaky connection
+     (this app's real userbase skews rural) can leave choose()'s submit
+     retrying silently for up to ~28s (three attempts, 8s timeout each,
+     backoff between); with zero feedback during that window the quiz reads
+     as frozen/unresponsive even though the click DID register. This closes
+     that gap so "stuck, option click nahi hota" has a visible answer:
+     it's submitting, not broken. */
+  .sq-submitting[hidden]{ display:none; }
+  .sq-submitting{
+    margin-top:14px; padding:11px 14px; border-radius:14px; display:flex; align-items:center;
+    gap:10px; background:rgba(20,48,31,.05); border:1px solid var(--line);
+    color:var(--ink-soft); font-size:13.5px;
+  }
+  .sq-submitting-spinner{
+    width:16px; height:16px; border-radius:50%; flex-shrink:0;
+    border:2px solid rgba(20,48,31,.18); border-top-color:var(--gold);
+    animation:sqSubmitSpin .7s linear infinite;
+  }
+  @keyframes sqSubmitSpin{ to{ transform:rotate(360deg); } }
 
   /* [hidden] must win over the flex display below -- otherwise the
      `hidden` attribute toggle in JS has no visual effect and this banner
@@ -242,7 +267,7 @@
   .sq-neterr{
     margin-top:14px; padding:12px 14px; border-radius:14px; display:flex; align-items:center;
     justify-content:space-between; gap:10px; flex-wrap:wrap;
-    background:rgba(255,92,92,.12); border:1px solid rgba(255,92,92,.4); color:#ffd7d7; font-size:13.5px;
+    background:rgba(192,57,43,.08); border:1px solid rgba(192,57,43,.35); color:#a12d20; font-size:13.5px;
   }
   .sq-neterr button{
     font-family:'Mukta'; font-weight:700; font-size:13px; cursor:pointer; color:#122019;
@@ -284,7 +309,7 @@
   .sq-redflash{ position:fixed; inset:0; z-index:90; pointer-events:none; background:radial-gradient(circle at center, transparent 40%, rgba(255,70,70,.42) 100%); animation:sqFlashOut .6s ease forwards; }
   @keyframes sqFlashOut{ from{opacity:1;} to{opacity:0;} }
   .sq-goldflash{ position:fixed; inset:0; z-index:88; pointer-events:none; background:radial-gradient(circle at center, transparent 42%, rgba(53,214,127,.28) 100%); animation:sqFlashOut .7s ease forwards; }
-  .sq-streakpop{ position:fixed; left:50%; top:23%; z-index:101; pointer-events:none; font-family:'Fraunces'; font-weight:700; color:#ff9d3c; font-size:clamp(26px,7.5vw,40px); text-shadow:0 0 28px rgba(255,157,60,.85); white-space:nowrap; animation:sqStreakPop 1.25s cubic-bezier(.2,1.5,.4,1) forwards; }
+  .sq-streakpop{ position:fixed; left:50%; top:23%; z-index:101; pointer-events:none; font-family:'Fraunces'; font-weight:700; color:#b35900; font-size:clamp(26px,7.5vw,40px); text-shadow:0 2px 10px rgba(179,89,0,.3); white-space:nowrap; animation:sqStreakPop 1.25s cubic-bezier(.2,1.5,.4,1) forwards; }
   @keyframes sqStreakPop{ 0%{opacity:0; transform:translate(-50%,12px) scale(.5);} 22%{opacity:1; transform:translate(-50%,0) scale(1.12);} 68%{opacity:1; transform:translate(-50%,-8px) scale(1);} 100%{opacity:0; transform:translate(-50%,-46px) scale(1);} }
 
   @media (min-width:768px){
@@ -396,8 +421,21 @@
   // a bounded number of times with backoff rather than queuing silently,
   // and surfaces a manual retry affordance if the network genuinely won't
   // cooperate, instead of ever fabricating a result client-side.
+  // Error codes the server returns for a genuinely final state (quiz_answer
+  // in views.py) -- these can't be fixed by retrying, since the server side
+  // fact (time budget exhausted, question no longer exists, attempt already
+  // closed) doesn't change between attempts. Retrying them anyway for up to
+  // ~28s (3 tries, 8s timeout, backoff) before showing a "check your
+  // network" message is exactly what used to make the quiz look frozen when
+  // the real cause was e.g. the per-attempt time budget running out after
+  // the participant's connection stalled or the app was backgrounded.
+  var TERMINAL_CODES = ['time_up', 'not_in_attempt', 'question_deleted', 'bad_question_id', 'no_active_attempt'];
+
   function submitAnswer(questionId, selectedOption, attemptNo){
     attemptNo = attemptNo || 1;
+    if(attemptNo > 1){
+      var t = $('sqSubmitStatusText'); if(t) t.textContent = 'Still trying — checking your connection…';
+    }
     var body = new URLSearchParams();
     body.set('question_id', questionId);
     body.set('selected_option', selectedOption);
@@ -406,13 +444,17 @@
       headers: { 'X-CSRFToken': getCsrfToken() },
       body: body,
     }, 8000).then(function(r){
-      if(!r.ok) throw new Error('http_' + r.status);
-      return r.json();
-    }).then(function(j){
-      if(!j.ok) throw new Error(j.error || 'not_ok');
-      return j;
+      return r.json().catch(function(){ return {}; }).then(function(j){
+        if(!r.ok || !j.ok){
+          var code = j.error || ('http_' + r.status);
+          var err = new Error(code);
+          err.terminal = TERMINAL_CODES.indexOf(code) > -1;
+          throw err;
+        }
+        return j;
+      });
     }).catch(function(err){
-      if(attemptNo < 3){
+      if(!err.terminal && attemptNo < 3){
         var delay = attemptNo === 1 ? 1200 : 2500;
         return new Promise(function(resolve){ setTimeout(resolve, delay); })
           .then(function(){ return submitAnswer(questionId, selectedOption, attemptNo+1); });
@@ -430,6 +472,7 @@
     $('sqQHi').textContent = q.text;
     $('sqExplain').className = 'sq-explain'; $('sqExplain').innerHTML = '';
     $('sqNetErr').hidden = true;
+    $('sqSubmitStatus').hidden = true;
     $('sqSkipBtn').style.display = ''; $('sqSkipBtn').disabled = false;
     $('sqNextBtn').style.display = 'none';
 
@@ -478,6 +521,12 @@
     document.querySelectorAll('#sqOpts .sq-opt').forEach(function(b){ b.classList.add('sq-locked'); });
   }
 
+  function showSubmitStatus(){
+    var t = $('sqSubmitStatusText'); if(t) t.textContent = 'Submitting your answer…';
+    $('sqSubmitStatus').hidden = false;
+  }
+  function hideSubmitStatus(){ $('sqSubmitStatus').hidden = true; }
+
   function choose(i){
     if(answered || pending) return;
     pending = true;
@@ -485,14 +534,32 @@
     var btns = document.querySelectorAll('#sqOpts .sq-opt');
     lockOptions();
     btns[i].classList.add('sq-pending');
+    showSubmitStatus();
     var q = QUESTIONS[idx];
     submitAnswer(q.id, String(i+1)).then(function(res){
       answered = true; pending = false;
+      hideSubmitStatus();
       btns[i].classList.remove('sq-pending');
       reveal(res.isCorrect, res.correctOption-1, i, res.explanation);
-    }).catch(function(){
-      pending = false;
+    }).catch(function(err){
+      hideSubmitStatus();
       btns[i].classList.remove('sq-pending');
+      if(err && err.message === 'time_up'){
+        // The attempt's whole server-side time budget is spent -- more
+        // retries can't change that, and there's nothing left to answer.
+        pending = false; answered = true;
+        finish();
+        return;
+      }
+      if(err && err.terminal){
+        // Question/attempt state changed server-side (deleted mid-attempt,
+        // stale id, etc.) -- not fixable by retrying; move on rather than
+        // stranding the participant on a dead question.
+        pending = false; answered = true;
+        showNext();
+        return;
+      }
+      pending = false;
       $('sqNetErr').hidden = false;
       $('sqRetryBtn').onclick = function(){ $('sqNetErr').hidden = true; choose(i); };
     });
@@ -507,16 +574,24 @@
     clearInterval(timer);
     lockOptions();
     $('sqSkipBtn').disabled = true;
+    showSubmitStatus();
     var q = QUESTIONS[idx];
     submitAnswer(q.id, '').then(function(res){
       answered = true; pending = false;
+      hideSubmitStatus();
       reveal(res.isCorrect, res.correctOption-1, -1, res.explanation, manual);
-    }).catch(function(){
-      // Network truly unavailable -- don't strand the participant on a
-      // dead question forever; move forward with no reveal. The server
-      // still holds the authoritative (empty/unanswered) score for this
-      // question regardless of what the client could show.
+    }).catch(function(err){
+      hideSubmitStatus();
       pending = false; answered = true;
+      if(err && err.message === 'time_up'){
+        finish();
+        return;
+      }
+      // Network truly unavailable (or another terminal, non-retriable
+      // state) -- don't strand the participant on a dead question forever;
+      // move forward with no reveal. The server still holds the
+      // authoritative (empty/unanswered) score for this question
+      // regardless of what the client could show.
       showNext();
     });
   }
@@ -541,8 +616,8 @@
       verdict('yellow', manualSkip ? 'Skipped' : 'Time up ⏳', explanation, correctText);
     } else if(isCorrect){
       score += 10; streak++; right++;
-      playDing(); burst(); flash('sq-goldflash'); cardCelebrate(); pulse('var(--green)'); stamp('✓','#8affc0');
-      floatPoints(btns[chosenIdx], '+10', '#8affc0');
+      playDing(); burst(); flash('sq-goldflash'); cardCelebrate(); pulse('var(--green)'); stamp('✓','#178a4c');
+      floatPoints(btns[chosenIdx], '+10', '#178a4c');
       if(streak >= 3) streakPop(streak);
       verdict('green', 'Correct answer! 🎉', explanation);
     } else {
@@ -591,7 +666,7 @@
   }
 
   // ---------- celebration fx ----------
-  function burst(){ spawn(60, ['#35d67f','#22b96a','#ffd75e','#c9a227','#ffffff','#8affc0'], {spread:600}); }
+  function burst(){ spawn(60, ['#1a8a4f','#159a55','#ffd75e','#c9a227','#8a6d16','#178a4c'], {spread:600}); }
   function spawn(n, cols, o){
     o = o || {};
     var shapes = ['','','sq-circ','sq-ribbon','sq-big'];
