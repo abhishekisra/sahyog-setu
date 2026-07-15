@@ -203,6 +203,15 @@ def checkEligibility(request):
         if request_data['state']:
             state_schemes = state_schemes.filter(state_id = request_data['state'])
 
+        # Age was collected on the form (it's a required question) but never
+        # actually sent to this endpoint or filtered on here at all -- every
+        # scheme matched regardless of the stated age range, so an 18-40
+        # scheme would show up for a 59-year-old and a 60+ scheme for a
+        # 40-year-old. Same age_min/age_max range check searchSchemes() uses.
+        if request_data.get('age'):
+            state_schemes = state_schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
+            central_schemes = central_schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
+
         # See searchSchemes() above -- income_max=0 means "no cap" for most
         # imported schemes, so it has to match rather than exclude.
         if request_data['family_income']:
