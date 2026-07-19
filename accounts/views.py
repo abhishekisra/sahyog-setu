@@ -197,3 +197,18 @@ class LogoutView(View):
         logout(request)
         return redirect('login')
 
+
+def auth_status(request):
+    """GET-only, read-only JSON check of the current session's auth state.
+    Used by the home page's injected Login/Register header links (no
+    source access to that React SPA, so it can't read request.user
+    server-side) to swap themselves for the logged-in user's name +
+    a Logout link once authenticated, instead of always showing
+    Login/Register even to someone who's already signed in."""
+    if request.user.is_authenticated:
+        return JsonResponse({
+            "authenticated": True,
+            "name": request.user.name or request.user.mobile or "Account",
+        })
+    return JsonResponse({"authenticated": False})
+
