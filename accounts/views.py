@@ -15,6 +15,8 @@ from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
 from .models import User
 from .forms import SignupForm
+from states.models import States, District
+from occupations.models import Occupations
 
 
 def visitors(request):
@@ -32,8 +34,15 @@ LOGIN_ATTEMPT_WINDOW = 15 * 60  # seconds
 
 class SignupView(View):
 
+    def _context(self, form):
+        return {
+            'form': form,
+            'states': States.objects.all().order_by('state'),
+            'occupations': Occupations.objects.filter(status=1).order_by('title'),
+        }
+
     def get(self, request):
-        return render(request, 'custom_admin/accounts/signup.html', {'form': SignupForm()})
+        return render(request, 'custom_admin/accounts/signup.html', self._context(SignupForm()))
 
     def post(self, request):
         form = SignupForm(request.POST)
@@ -41,7 +50,7 @@ class SignupView(View):
             user = form.save()
             login(request, user)
             return redirect(settings.LOGIN_REDIRECT_URL)
-        return render(request, 'custom_admin/accounts/signup.html', {'form': form})
+        return render(request, 'custom_admin/accounts/signup.html', self._context(form))
 
 
 class LoginView(View):
@@ -211,4 +220,16 @@ def auth_status(request):
             "name": request.user.name or request.user.mobile or "Account",
         })
     return JsonResponse({"authenticated": False})
+
+
+def districts_for_state(request):
+    """GET ?state_id=<id> -- read-only lookup backing the signup form's
+    State->District cascade. Returns [] (not an error) for a missing or
+    non-numeric state_id so the frontend can treat every response the
+    same way regardless of dropdown state."""
+    state_id = request.GET.get('state_id', '')
+    if not state_id.isdigit():
+        return JsonResponse({"districts": []})
+    rows = District.objects.filter(state_id=int(state_id)).order_by('name').values('id', 'name')
+    return JsonResponse({"districts": list(rows)})
 

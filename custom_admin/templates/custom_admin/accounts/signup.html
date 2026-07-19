@@ -7,7 +7,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://accounts.google.com/gsi/client" async defer></script>
 {% endblock %}
 
 {% block body %}
@@ -29,9 +28,6 @@
         {% for error in form.non_field_errors %}
         <div class="sq-alert">{{ error }}</div>
         {% endfor %}
-
-        <div id="googleBtnBox" class="sq-google-box"></div>
-        <div class="sq-or"><span>or sign up with mobile number</span></div>
 
         <form method="post" novalidate class="sq-form">
           {% csrf_token %}
@@ -71,6 +67,84 @@
             {% endfor %}
           </div>
 
+          <div class="sq-field">
+            <label for="id_gender">Gender</label>
+            <select name="gender" id="id_gender" class="sq-input" required>
+              <option value="" disabled {% if not form.gender.value %}selected{% endif %}>Select gender</option>
+              {% for value, label in form.gender.field.choices %}
+              <option value="{{ value }}" {% if form.gender.value == value %}selected{% endif %}>{{ label }}</option>
+              {% endfor %}
+            </select>
+            {% for error in form.gender.errors %}
+            <div class="sq-alert sq-alert-field">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="sq-field">
+            <label for="id_age">Age</label>
+            <input type="number" name="age" id="id_age" class="sq-input" min="1" max="120" placeholder="Your age"
+                value="{{ form.age.value|default:'' }}" required>
+            {% for error in form.age.errors %}
+            <div class="sq-alert sq-alert-field">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="sq-field">
+            <label for="id_state">State</label>
+            <select name="state" id="id_state" class="sq-input" required onchange="ssqLoadDistricts(this.value, '')">
+              <option value="" disabled {% if not form.state.value %}selected{% endif %}>Select state</option>
+              {% for state in states %}
+              <option value="{{ state.id }}" {% if form.state.value|stringformat:"s" == state.id|stringformat:"s" %}selected{% endif %}>{{ state.state }}</option>
+              {% endfor %}
+            </select>
+            {% for error in form.state.errors %}
+            <div class="sq-alert sq-alert-field">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="sq-field">
+            <label for="id_district">District</label>
+            <select name="district" id="id_district" class="sq-input" required {% if not form.state.value %}disabled{% endif %}>
+              <option value="">{% if form.state.value %}Loading districts…{% else %}Select state first{% endif %}</option>
+            </select>
+            {% for error in form.district.errors %}
+            <div class="sq-alert sq-alert-field">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="sq-field">
+            <label for="id_occupation">Occupation</label>
+            <select name="occupation" id="id_occupation" class="sq-input" required>
+              <option value="" disabled {% if not form.occupation.value %}selected{% endif %}>Select occupation</option>
+              {% for occ in occupations %}
+              <option value="{{ occ.id }}" {% if form.occupation.value|stringformat:"s" == occ.id|stringformat:"s" %}selected{% endif %}>{{ occ.title }}</option>
+              {% endfor %}
+            </select>
+            {% for error in form.occupation.errors %}
+            <div class="sq-alert sq-alert-field">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="sq-field">
+            <label for="id_ngo_shg_name">NGO / SHG Name <span class="sq-optional">(optional)</span></label>
+            <input type="text" name="ngo_shg_name" id="id_ngo_shg_name" class="sq-input" placeholder="If you're affiliated with one"
+                value="{{ form.ngo_shg_name.value|default:'' }}">
+            {% for error in form.ngo_shg_name.errors %}
+            <div class="sq-alert sq-alert-field">{{ error }}</div>
+            {% endfor %}
+          </div>
+
+          <div class="sq-field sq-consent-field">
+            <p class="sq-analytics-note">Your gender, age, location and occupation are used only for internal analytics, to understand who Sahyog Setu is reaching — never for commercial use or sale to third parties.</p>
+            <label class="sq-checkbox">
+              <input type="checkbox" name="consent" id="id_consent" {% if form.consent.value %}checked{% endif %} required>
+              <span>I agree to the Privacy Policy and Terms &amp; Conditions</span>
+            </label>
+            {% for error in form.consent.errors %}
+            <div class="sq-alert sq-alert-field">{{ error }}</div>
+            {% endfor %}
+          </div>
+
           <button type="submit" class="sq-btn sq-btn-block">Sign Up →</button>
         </form>
 
@@ -82,30 +156,45 @@
 
 <script>
 (function(){
-  function onGoogleCredential(resp){
-    fetch("{% url 'google_login' %}", {
-      method: 'POST',
-      headers: {'Content-Type':'application/json'},
-      body: JSON.stringify({credential: resp.credential, next: ''})
-    }).then(function(r){ return r.json(); }).then(function(j){
-      if(!j.ok){ alert('Google sign-in failed, please try again or sign up with mobile number.'); return; }
-      if(j.needsProfile){
-        window.location.href = "{% url 'complete_profile' %}?next=" + encodeURIComponent(j.next);
-      } else {
-        window.location.href = j.next;
-      }
-    }).catch(function(){ alert('Network error -- please try again.'); });
-  }
+  var initialDistrict = "{{ form.district.value|default:'' }}";
+
+  window.ssqLoadDistricts = function(stateId, selectDistrictId){
+    var sel = document.getElementById('id_district');
+    if(!stateId){
+      sel.innerHTML = '<option value="">Select state first</option>';
+      sel.disabled = true;
+      return;
+    }
+    sel.disabled = true;
+    sel.innerHTML = '<option value="">Loading districts…</option>';
+    fetch("{% url 'districts_for_state' %}?state_id=" + encodeURIComponent(stateId), { credentials: 'same-origin' })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var districts = data.districts || [];
+        if(!districts.length){
+          sel.innerHTML = '<option value="">No districts found</option>';
+          sel.disabled = true;
+          return;
+        }
+        var html = '<option value="" disabled' + (selectDistrictId ? '' : ' selected') + '>Select district</option>';
+        districts.forEach(function(d){
+          var sel_attr = (String(d.id) === String(selectDistrictId)) ? ' selected' : '';
+          html += '<option value="' + d.id + '"' + sel_attr + '>' + d.name + '</option>';
+        });
+        sel.innerHTML = html;
+        sel.disabled = false;
+      })
+      .catch(function(){
+        sel.innerHTML = '<option value="">Could not load districts</option>';
+        sel.disabled = true;
+      });
+  };
+
   window.addEventListener('load', function(){
-    if(!window.google || !window.google.accounts) return;
-    google.accounts.id.initialize({
-      client_id: '493480542408-tas10l37f73mankcbegv9bu2s0mlk4df.apps.googleusercontent.com',
-      callback: onGoogleCredential
-    });
-    google.accounts.id.renderButton(
-      document.getElementById('googleBtnBox'),
-      { theme: 'filled_black', size: 'large', width: 320, text: 'signup_with' }
-    );
+    var stateSel = document.getElementById('id_state');
+    if(stateSel && stateSel.value){
+      ssqLoadDistricts(stateSel.value, initialDistrict);
+    }
   });
 })();
 </script>
@@ -175,6 +264,13 @@
   }
   .sq-input::placeholder{ color:var(--ink-faint); }
   .sq-input:focus{ outline:none; border-color:var(--gold-hi); background:rgba(0,0,0,.32); }
+  select.sq-input{ cursor:pointer; }
+  select.sq-input:disabled{ cursor:not-allowed; opacity:.6; }
+
+  .sq-consent-field{ margin-top:2px; }
+  .sq-analytics-note{ font-size:12.5px; line-height:1.5; color:var(--ink-faint); margin:0 0 12px; }
+  .sq-checkbox{ display:flex; align-items:flex-start; gap:10px; font-size:13.5px; color:var(--ink-soft); cursor:pointer; font-weight:400; }
+  .sq-checkbox input{ margin-top:3px; width:16px; height:16px; accent-color:var(--gold-hi); flex-shrink:0; }
 
   .sq-btn{
     font-family:'Mukta'; font-weight:700; font-size:16px; cursor:pointer; border:none; text-decoration:none;
@@ -187,10 +283,6 @@
   .sq-btn:hover{ filter:brightness(1.05); }
   .sq-btn:active{ transform:translateY(3px); border-bottom-width:1px; }
   .sq-btn-block{ width:100%; margin-top:6px; }
-
-  .sq-or{ display:flex; align-items:center; gap:12px; margin:20px 0; color:var(--ink-faint); font-size:13px; }
-  .sq-or::before, .sq-or::after{ content:''; flex:1; height:1px; background:var(--line); }
-  .sq-google-box{ display:flex; justify-content:center; }
 
   .sq-switch{ text-align:center; color:var(--ink-soft); font-size:14px; margin:22px 0 0; }
   .sq-switch a{ color:var(--gold-hi); font-weight:600; text-decoration:none; }

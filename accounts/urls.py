@@ -8,4 +8,5 @@ urlpatterns = [
     path('google-login/', views.GoogleLoginView.as_view(), name='google_login'),
     path('complete-profile/', views.CompleteProfileView.as_view(), name='complete_profile'),
     path('status/', views.auth_status, name='auth_status'),
+    path('districts/', views.districts_for_state, name='districts_for_state'),
 ]

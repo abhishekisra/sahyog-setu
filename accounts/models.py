@@ -29,3 +29,27 @@ class User(AbstractUser):
     # rough geographic spread of participants without a live location feed.
     latitude = models.FloatField(null=True, blank=True)
     longitude = models.FloatField(null=True, blank=True)
+
+    # Signup demographic/location fields. state/district are FKs (not free
+    # text) so the cascading dropdowns on signup stay backed by a real,
+    # queryable hierarchy -- PROTECT (not CASCADE) so an admin can never
+    # accidentally delete a district that real users are already
+    # registered against.
+    GENDER_CHOICES = (("male", "Male"), ("female", "Female"), ("other", "Other"))
+    gender = models.CharField(max_length=10, choices=GENDER_CHOICES, blank=True, null=True)
+    age = models.PositiveSmallIntegerField(blank=True, null=True)
+    state = models.ForeignKey("states.States", on_delete=models.PROTECT, related_name="users", blank=True, null=True)
+    district = models.ForeignKey("states.District", on_delete=models.PROTECT, related_name="users", blank=True, null=True)
+    occupation = models.ForeignKey("occupations.Occupations", on_delete=models.PROTECT, related_name="users", blank=True, null=True)
+    # Optional -- most registrants aren't affiliated with an NGO/SHG, and
+    # there's no existing NGO/SHG directory in this project to FK against,
+    # so this stays a plain optional text field rather than a lookup table.
+    ngo_shg_name = models.CharField(max_length=255, blank=True, null=True)
+
+    # Explicit consent to the Privacy Policy / Terms & Conditions, required
+    # at signup (SignupForm rejects submission without it) -- a timestamp,
+    # not just a boolean, so there's a real record of *when* consent was
+    # given if the policy text is ever updated later. Never set retroactively
+    # for accounts that signed up before this field existed (stays NULL for
+    # those, which is the honest state -- they were never asked).
+    consent_accepted_at = models.DateTimeField(null=True, blank=True)
