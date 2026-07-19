@@ -1189,11 +1189,11 @@ def quiz_answer(request, quiz_id):
     try:
         response = QuestionResponse.objects.create(
             attempt=attempt, question=question,
-            question_text_snapshot=question.question,
+            question_text_snapshot=question.text_for(attempt.language),
             selected_option=selected_option,
             correct_option=correct_option,
             is_correct=is_correct,
-            explanation_snapshot=question.explanation,
+            explanation_snapshot=question.explanation_for(attempt.language),
         )
     except IntegrityError:
         # Two near-simultaneous POSTs for the same question (e.g. a
@@ -1324,6 +1324,7 @@ class QuizResultView(View):
         })
 
 
+@method_decorator(login_required, name='dispatch')
 class QuizLeaderboardView(View):
 
     def get(self, request, quiz_id):
@@ -1746,4 +1747,18 @@ class MyResultsView(View):
             )
             .order_by("-completed_at")
         )
-        return render(request, "custom_admin/quizzes/my_results.html", {"attempts": attempts})
+        passed_count = sum(1 for a in attempts if a.passed)
+        # Same eligibility rule quiz_result.html uses for its "View
+        # Certificate" link -- kept in lockstep so a certificate link never
+        # appears here for an attempt that would 404 on quiz_certificate.
+        certificates_earned = sum(
+            1 for a in attempts
+            if a.passed and a.quiz.certificate_enabled and a.percentage >= CERTIFICATE_MIN_PERCENTAGE
+        )
+        return render(request, "custom_admin/quizzes/my_results.html", {
+            "attempts": attempts,
+            "total_attempts": len(attempts),
+            "passed_count": passed_count,
+            "certificates_earned": certificates_earned,
+            "certificate_min_percentage": CERTIFICATE_MIN_PERCENTAGE,
+        })

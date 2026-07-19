@@ -26,6 +26,12 @@
         <h1 class="sq-title">My Results</h1>
         <p class="sq-sub">All of your completed quiz attempts.</p>
 
+        <div class="sq-stats">
+          <div class="sq-stat"><div class="sq-stat-n">{{ total_attempts }}</div><div class="sq-stat-l">Quizzes Taken</div></div>
+          <div class="sq-stat"><div class="sq-stat-n">{{ passed_count }}</div><div class="sq-stat-l">Passed</div></div>
+          <div class="sq-stat"><div class="sq-stat-n">{{ certificates_earned }}</div><div class="sq-stat-l">Certificates</div></div>
+        </div>
+
         <div class="sq-table-wrap">
           <table class="sq-table">
             <thead>
@@ -34,6 +40,7 @@
                 <th>Score</th>
                 <th>Result</th>
                 <th>Date</th>
+                <th></th>
                 <th></th>
               </tr>
             </thead>
@@ -50,11 +57,16 @@
                   {% endif %}
                 </td>
                 <td>{{ attempt.completed_at|date:"d M Y" }}</td>
+                <td>
+                  {% if attempt.passed and attempt.quiz.certificate_enabled and attempt.percentage >= certificate_min_percentage %}
+                  <a href="{% url 'quiz_certificate' attempt.id %}" class="sq-link">🏆 Certificate</a>
+                  {% endif %}
+                </td>
                 <td><a href="{% url 'quiz_result' pk=attempt.id %}" class="sq-link">View</a></td>
               </tr>
               {% empty %}
               <tr>
-                <td colspan="5" class="sq-empty-cell">No quizzes completed yet.</td>
+                <td colspan="6" class="sq-empty-cell">No quizzes completed yet.</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -113,6 +125,11 @@
   .sq-eyebrow{ color:var(--gold-hi); font-weight:600; letter-spacing:2.5px; font-size:11.5px; text-transform:uppercase; margin-bottom:8px; }
   .sq-title{ font-family:'Fraunces'; font-weight:600; font-size:clamp(24px,6vw,30px); margin:0 0 8px; }
   .sq-sub{ color:var(--ink-soft); font-size:14.5px; margin:0 0 26px; }
+
+  .sq-stats{ display:flex; gap:12px; margin-bottom:24px; flex-wrap:wrap; }
+  .sq-stat{ flex:1; min-width:110px; background:rgba(0,0,0,.2); border:1px solid var(--line); border-radius:14px; padding:14px 16px; text-align:center; }
+  .sq-stat-n{ font-family:'Fraunces'; font-weight:600; font-size:24px; color:var(--gold-hi); }
+  .sq-stat-l{ font-size:11.5px; color:var(--ink-faint); text-transform:uppercase; letter-spacing:.03em; margin-top:2px; }
 
   .sq-table-wrap{ overflow-x:auto; }
   .sq-table{ width:100%; border-collapse:collapse; font-size:14px; }
