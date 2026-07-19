@@ -32,6 +32,26 @@ ALLOWED_HOSTS=['127.0.0.1', '212.38.94.162', 'sahyogsetu.in', 'www.sahyogsetu.in
 # account instead of a second, unrelated login system.
 GOOGLE_CLIENT_ID = '493480542408-tas10l37f73mankcbegv9bu2s0mlk4df.apps.googleusercontent.com'
 
+# SMTP for forgot-password emails (and quizzes.cert_email). Credentials live
+# in /etc/sahyogsetu-secrets.env (loaded into the environment via
+# gunicorn.service's EnvironmentFile=, never committed to this repo). Falls
+# back to Django's console backend -- which just prints the email to the
+# gunicorn log instead of sending it -- when SMTP_HOST isn't set yet, so a
+# missing/incomplete env file degrades to "visible in logs" rather than a
+# 500 or a silently swallowed send.
+SMTP_HOST = os.environ.get('SMTP_HOST', '')
+if SMTP_HOST:
+    EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+    EMAIL_HOST = SMTP_HOST
+    EMAIL_PORT = int(os.environ.get('SMTP_PORT', '587'))
+    EMAIL_HOST_USER = os.environ.get('SMTP_USER', '')
+    EMAIL_HOST_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
+    EMAIL_USE_TLS = os.environ.get('SMTP_USE_TLS', 'true').lower() == 'true'
+    DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
+else:
+    EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+    DEFAULT_FROM_EMAIL = 'noreply@sahyogsetu.in'
+
 CORS_ALLOW_CREDENTIALS = True
 # ALL_ORIGINS + CREDENTIALS together let any website make authenticated
 # (cookie-bearing) cross-origin requests and read the response -- restricted

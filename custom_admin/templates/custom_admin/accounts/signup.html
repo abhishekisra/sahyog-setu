@@ -44,7 +44,8 @@
           <div class="sq-field">
             <label for="id_mobile">Mobile Number</label>
             <input type="tel" name="mobile" id="id_mobile" class="sq-input" maxlength="10" pattern="\d{10}" placeholder="10-digit mobile number"
-                value="{{ form.mobile.value|default:'' }}" required>
+                value="{{ form.mobile.value|default:'' }}" required autocomplete="off">
+            <div id="sqMobileHint" class="sq-hint"></div>
             {% for error in form.mobile.errors %}
             <div class="sq-alert sq-alert-field">{{ error }}</div>
             {% endfor %}
@@ -61,7 +62,8 @@
           <div class="sq-field">
             <label for="id_email">Email <span class="sq-optional">(optional)</span></label>
             <input type="email" name="email" id="id_email" class="sq-input" placeholder="you@example.com"
-                value="{{ form.email.value|default:'' }}">
+                value="{{ form.email.value|default:'' }}" autocomplete="off">
+            <div id="sqEmailHint" class="sq-hint"></div>
             {% for error in form.email.errors %}
             <div class="sq-alert sq-alert-field">{{ error }}</div>
             {% endfor %}
@@ -196,6 +198,49 @@
       ssqLoadDistricts(stateSel.value, initialDistrict);
     }
   });
+
+  // Live "an account already exists" hint -- checked against the exact
+  // same rules SignupForm.clean_mobile/clean_email use server-side (see
+  // accounts/views.check_availability), so this can never say "fine" for
+  // something that then fails at submit, or vice versa. Debounced so it
+  // doesn't fire a request on every keystroke, and each field tracks its
+  // own in-flight request token so a slow response for an old value can't
+  // clobber the hint for whatever's currently typed.
+  function wireAvailabilityCheck(inputId, hintId, field, isValid){
+    var input = document.getElementById(inputId);
+    var hint = document.getElementById(hintId);
+    if(!input || !hint) return;
+    var timer = null;
+    var requestId = 0;
+
+    function check(){
+      var value = input.value.trim();
+      hint.textContent = '';
+      hint.className = 'sq-hint';
+      if(!isValid(value)) return;
+      var thisRequest = ++requestId;
+      fetch("{% url 'check_availability' %}?field=" + field + "&value=" + encodeURIComponent(value), { credentials: 'same-origin' })
+        .then(function(r){ return r.json(); })
+        .then(function(data){
+          if(thisRequest !== requestId) return; // a newer keystroke already superseded this check
+          if(data.taken){
+            hint.innerHTML = 'This ' + (field === 'mobile' ? 'number' : 'email') +
+              ' already has an account. <a href="{% url "login" %}">Login instead</a>';
+            hint.className = 'sq-hint sq-hint-warn';
+          }
+        })
+        .catch(function(){ /* leave hint blank on network error -- submit-time validation still catches it */ });
+    }
+
+    input.addEventListener('input', function(){
+      clearTimeout(timer);
+      timer = setTimeout(check, 500);
+    });
+    input.addEventListener('blur', check);
+  }
+
+  wireAvailabilityCheck('id_mobile', 'sqMobileHint', 'mobile', function(v){ return /^\d{10}$/.test(v); });
+  wireAvailabilityCheck('id_email', 'sqEmailHint', 'email', function(v){ return v.length > 0 && v.indexOf('@') !== -1; });
 })();
 </script>
 
@@ -253,6 +298,11 @@
     padding:12px 16px; border-radius:12px; margin-bottom:20px; font-size:14px;
   }
   .sq-alert-field{ margin:8px 0 0; padding:8px 12px; font-size:13px; }
+
+  .sq-hint{ font-size:13px; margin-top:6px; min-height:0; }
+  .sq-hint:empty{ margin-top:0; }
+  .sq-hint-warn{ color:#ffd75e; }
+  .sq-hint-warn a{ color:#ffd75e; font-weight:700; text-decoration:underline; }
 
   .sq-form{ display:flex; flex-direction:column; gap:16px; }
   .sq-field label{ display:block; font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:7px; }

@@ -13,8 +13,13 @@ from django.contrib.auth import authenticate, login, logout
 from django.core.cache import cache
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
+from django.contrib.auth.tokens import default_token_generator
+from django.utils.encoding import force_bytes, force_str
+from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.core.mail import EmailMessage
+from django.urls import reverse
 from .models import User
-from .forms import SignupForm
+from .forms import SignupForm, ForgotPasswordForm, SetNewPasswordForm
 from states.models import States, District
 from occupations.models import Occupations
 
@@ -207,6 +212,79 @@ class LogoutView(View):
         return redirect('login')
 
 
+class ForgotPasswordView(View):
+    """Always renders the same generic "if that email is registered..."
+    result regardless of whether the email actually matched a user --
+    otherwise this endpoint would let anyone enumerate which emails have
+    accounts here just by watching which ones get a different response."""
+
+    def get(self, request):
+        return render(request, 'custom_admin/accounts/forgot_password.html', {'form': ForgotPasswordForm()})
+
+    def post(self, request):
+        form = ForgotPasswordForm(request.POST)
+        if form.is_valid():
+            user = form.get_user()
+            if user:
+                uid = urlsafe_base64_encode(force_bytes(user.pk))
+                token = default_token_generator.make_token(user)
+                reset_url = request.build_absolute_uri(
+                    reverse('reset_password_confirm', kwargs={'uidb64': uid, 'token': token})
+                )
+                subject = "Reset your Sahyog Setu password"
+                body = (
+                    f"Hi {user.get_full_name() or user.username},\n\n"
+                    f"Click the link below to reset your Sahyog Setu password. "
+                    f"This link works only once.\n\n{reset_url}\n\n"
+                    f"If you didn't request this, you can safely ignore this email "
+                    f"— your password will stay unchanged.\n\n— Sahyog Setu Team"
+                )
+                try:
+                    EmailMessage(subject=subject, body=body, to=[user.email]).send(fail_silently=False)
+                except Exception:
+                    pass  # send failure stays invisible -- same generic response either way
+            return render(request, 'custom_admin/accounts/forgot_password.html', {
+                'form': ForgotPasswordForm(), 'sent': True,
+            })
+        return render(request, 'custom_admin/accounts/forgot_password.html', {'form': form})
+
+
+class ResetPasswordConfirmView(View):
+    """uidb64/token pair follows Django's own PasswordResetConfirmView
+    convention (same encode/decode + default_token_generator), just with
+    templates matching this app's own design instead of the admin-styled
+    built-in ones."""
+
+    def _get_user(self, uidb64):
+        try:
+            uid = force_str(urlsafe_base64_decode(uidb64))
+            return User.objects.get(pk=uid)
+        except (TypeError, ValueError, OverflowError, User.DoesNotExist):
+            return None
+
+    def get(self, request, uidb64, token):
+        user = self._get_user(uidb64)
+        valid = user is not None and default_token_generator.check_token(user, token)
+        return render(request, 'custom_admin/accounts/reset_password_confirm.html', {
+            'form': SetNewPasswordForm() if valid else None,
+            'valid': valid,
+        })
+
+    def post(self, request, uidb64, token):
+        user = self._get_user(uidb64)
+        valid = user is not None and default_token_generator.check_token(user, token)
+        if not valid:
+            return render(request, 'custom_admin/accounts/reset_password_confirm.html', {'form': None, 'valid': False})
+
+        form = SetNewPasswordForm(request.POST)
+        if form.is_valid():
+            user.set_password(form.cleaned_data['password'])
+            user.save()
+            messages.success(request, "Your password has been reset. Please login with your new password.")
+            return redirect('login')
+        return render(request, 'custom_admin/accounts/reset_password_confirm.html', {'form': form, 'valid': True})
+
+
 def auth_status(request):
     """GET-only, read-only JSON check of the current session's auth state.
     Used by the home page's injected Login/Register header links (no
@@ -220,6 +298,31 @@ def auth_status(request):
             "name": request.user.name or request.user.mobile or "Account",
         })
     return JsonResponse({"authenticated": False})
+
+
+def check_availability(request):
+    """GET ?field=mobile|email&value=<...> -- read-only lookup backing the
+    signup form's live "an account already exists" hint. Deliberately
+    reuses the exact same matching rules as SignupForm.clean_mobile /
+    clean_email (see forms.py) so this can never say "available" for
+    something that would actually fail at submit time, or vice versa.
+    Empty/invalid input always reports not-taken rather than erroring --
+    there's nothing to warn about yet while the user is still typing."""
+    field = request.GET.get('field', '')
+    value = request.GET.get('value', '').strip()
+
+    if field == 'mobile':
+        if not (value.isdigit() and len(value) == 10):
+            return JsonResponse({"taken": False})
+        taken = User.objects.filter(username=value).exists()
+    elif field == 'email':
+        if not value:
+            return JsonResponse({"taken": False})
+        taken = User.objects.filter(email__iexact=value).exclude(email='').exists()
+    else:
+        return JsonResponse({"taken": False})
+
+    return JsonResponse({"taken": taken})
 
 
 def districts_for_state(request):

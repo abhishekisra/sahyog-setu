@@ -60,6 +60,12 @@ class SignupForm(forms.Form):
             raise ValidationError("This mobile number is already registered.")
         return mobile
 
+    def clean_email(self):
+        email = self.cleaned_data.get('email', '').strip()
+        if email and User.objects.filter(email__iexact=email).exclude(email='').exists():
+            raise ValidationError("An account with this email already exists.")
+        return email
+
     def clean_password(self):
         password = self.cleaned_data['password']
         password_validation.validate_password(password)
@@ -89,3 +95,32 @@ class SignupForm(forms.Form):
         user.set_password(self.cleaned_data['password'])
         user.save()
         return user
+
+
+class ForgotPasswordForm(forms.Form):
+    email = forms.EmailField(label="Email")
+
+    def get_user(self):
+        """Returns the matching active user, or None. Deliberately never
+        raises/exposes whether the email is registered -- the view always
+        shows the same generic "if that email exists..." message either
+        way, so this isn't a form-level validation error (that would leak
+        registration status through the error message itself)."""
+        email = self.cleaned_data.get('email', '').strip()
+        return User.objects.filter(email__iexact=email).exclude(email='').first()
+
+
+class SetNewPasswordForm(forms.Form):
+    password = forms.CharField(label="New Password", widget=forms.PasswordInput)
+    password_confirm = forms.CharField(label="Confirm New Password", widget=forms.PasswordInput)
+
+    def clean_password(self):
+        password = self.cleaned_data['password']
+        password_validation.validate_password(password)
+        return password
+
+    def clean(self):
+        cleaned = super().clean()
+        if cleaned.get('password') and cleaned.get('password_confirm') and cleaned['password'] != cleaned['password_confirm']:
+            raise ValidationError("Passwords do not match.")
+        return cleaned
