@@ -1089,6 +1089,22 @@ class QuizTakeView(View):
                 attempt.save(update_fields=["completed_at", "is_demo", "live_lock"])
                 attempt = None
 
+        # A resumed attempt kept its ORIGINAL locked language regardless of
+        # what the landing page's dropdown was just showing/set to, which
+        # reads as "language selector doesn't do anything" -- reload the
+        # landing page after starting a Hindi attempt, it still defaults to
+        # showing English, but clicking Start/Continue silently dropped you
+        # right back into Hindi. take_url always threads the landing page's
+        # current lang through as ?lang=... (see QuizLandingView.get), so
+        # arriving here with a different lang than the attempt's is always
+        # a genuine, explicit choice, not incidental -- safe to honor it:
+        # remaining unanswered questions render fresh via text_for(attempt.
+        # language) every time anyway, nothing about already-answered ones
+        # (frozen in their QuestionResponse snapshots) changes retroactively.
+        if attempt and attempt.language != lang:
+            attempt.language = lang
+            attempt.save(update_fields=["language"])
+
         created = False
 
         if not attempt:
