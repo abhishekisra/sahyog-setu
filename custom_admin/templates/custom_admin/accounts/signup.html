@@ -314,7 +314,17 @@
   }
   .sq-input::placeholder{ color:var(--ink-faint); }
   .sq-input:focus{ outline:none; border-color:var(--gold-hi); background:rgba(0,0,0,.32); }
-  select.sq-input{ cursor:pointer; }
+  /* Native <select> arrows render in whatever color the browser/OS
+     picks -- CSS `color` never reaches them, so without appearance:none
+     + a hand-drawn icon here, closed dropdowns show no gold at all
+     (only the border goes gold, and only on focus). This SVG chevron is
+     baked to var(--gold-hi)'s value directly since url()-embedded SVGs
+     can't reference CSS custom properties. */
+  select.sq-input{
+    cursor:pointer; appearance:none; -webkit-appearance:none; -moz-appearance:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' stroke='%23ffd700' stroke-width='2' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+    background-repeat:no-repeat; background-position:right 15px center; padding-right:40px;
+  }
   select.sq-input:disabled{ cursor:not-allowed; opacity:.6; }
 
   .sq-consent-field{ margin-top:2px; }

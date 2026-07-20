@@ -7,7 +7,13 @@ class EmailBackEnd(ModelBackend):
     def authenticate(self, request, username=None, password=None, **kwargs):
         UserModel = get_user_model()
         try:
-            user = UserModel.objects.get(Q(Q(mobile=username) | Q(email = username))  & Q(Q(user_type = 2) | Q(user_type = 1)))
+            # email__iexact -- mobile keyboards auto-capitalize a plain
+            # text field's first letter by default, and this login field
+            # now accepts email as well as mobile (see login.html), so a
+            # case mismatch here would otherwise fail a login that should
+            # succeed. mobile itself is untouched (digits only, case is
+            # never in play).
+            user = UserModel.objects.get(Q(Q(mobile=username) | Q(email__iexact=username))  & Q(Q(user_type = 2) | Q(user_type = 1)))
             # Hundreds of user_type=2 rows exist with password=None -- old
             # lightweight identity records the React SPA's separate
             # client_id-based user-sync endpoint (apis.user()) created for
