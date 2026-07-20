@@ -72,7 +72,14 @@ class SignupForm(forms.Form):
         return password
 
     def save(self):
-        full_name = self.cleaned_data['full_name'].strip()
+        # .title() -- signup never normalized casing at all, so a name
+        # typed "abhishek agrawal" or "RAVI KUMAR" was stored and shown
+        # exactly as typed everywhere downstream (certificate, my-results,
+        # Partner Portal, the injected home-page header). Certificates are
+        # the one place this is genuinely visible/embarrassing, so it's
+        # worth fixing at the source rather than only patching the
+        # certificate renderer.
+        full_name = self.cleaned_data['full_name'].strip().title()
         parts = full_name.split(None, 1)
         first_name = parts[0] if parts else ''
         last_name = parts[1] if len(parts) > 1 else ''

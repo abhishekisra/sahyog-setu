@@ -225,7 +225,19 @@
     @media print {
         .sheet { box-shadow: none; width: 100%; }
         .no-print { display: none !important; }
-        body, .ss-certificate-page { background: var(--white) !important; }
+        /* Only the "Back to Result" link inside this header carried
+           .no-print -- the Sahyog Setu logo/brand row around it did not,
+           so it kept printing above the certificate sheet, adding height
+           that (combined with the min-height fix below) was enough to
+           spill onto a second, near-empty page. */
+        .ss-quiz-header { display: none !important; }
+        /* .ss-certificate-page's min-height:100vh + padding-bottom:80px
+           (further down, unconditional) is fine on screen but was NEVER
+           reset here -- the wrapper kept claiming a full viewport's worth
+           of height plus 80px on top of the actual A4-sized .sheet, so
+           the printed/PDF output always ran to a second, almost-blank
+           page past the real certificate content. */
+        body, .ss-certificate-page { background: var(--white) !important; min-height: 0 !important; padding-bottom: 0 !important; }
         .ss-cert-container { display: block !important; max-width: none !important; }
         .ss-cert-preview-card { box-shadow: none !important; padding: 0 !important; }
     }
