@@ -71,7 +71,14 @@ class PartnerLoginView(View):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "")
 
-        partner = Partner.objects.filter(username=username, is_active=True).first()
+        # iexact -- mobile keyboards auto-capitalize the first letter of a
+        # plain text field by default (autocapitalize="off" on the input
+        # now stops that going forward, but this also protects against it
+        # for anyone who already has the page cached, and against a
+        # partner just habitually typing their username differently).
+        # Passwords are still matched exactly via check_password below --
+        # only the username lookup is case-insensitive.
+        partner = Partner.objects.filter(username__iexact=username, is_active=True).first()
         if not partner or not partner.check_password(password):
             return render(request, "partners/login.html", {
                 "error": "Invalid username or password.",
@@ -392,7 +399,7 @@ class ManagePartnersView(View):
             messages.error(request, "Name, username, and password are required.")
             return redirect("adminManagePartners")
 
-        if Partner.objects.filter(username=username).exists():
+        if Partner.objects.filter(username__iexact=username).exists():
             messages.error(request, "This username is already taken.")
             return redirect("adminManagePartners")
 
@@ -422,7 +429,7 @@ def updatePartner(request, id):
         messages.error(request, "Name and username are required.")
         return redirect("adminManagePartners")
 
-    if Partner.objects.filter(username=username).exclude(pk=partner.pk).exists():
+    if Partner.objects.filter(username__iexact=username).exclude(pk=partner.pk).exists():
         messages.error(request, "This username is already taken by another partner.")
         return redirect("adminManagePartners")
 

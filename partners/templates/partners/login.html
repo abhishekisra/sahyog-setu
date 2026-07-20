@@ -68,11 +68,12 @@
         {% csrf_token %}
         <div class="field">
           <label for="id_username">Username</label>
-          <input type="text" name="username" id="id_username" class="input" value="{{ username|default:'' }}" required autofocus>
+          <input type="text" name="username" id="id_username" class="input" value="{{ username|default:'' }}"
+              autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="username" required autofocus>
         </div>
         <div class="field">
           <label for="id_password">Password</label>
-          <input type="password" name="password" id="id_password" class="input" required>
+          <input type="password" name="password" id="id_password" class="input" autocomplete="current-password" required>
         </div>
         <button type="submit" class="btn">Login →</button>
       </form>
