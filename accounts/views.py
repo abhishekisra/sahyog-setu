@@ -293,9 +293,18 @@ def auth_status(request):
     a Logout link once authenticated, instead of always showing
     Login/Register even to someone who's already signed in."""
     if request.user.is_authenticated:
+        # get_full_name() first: SignupForm.save() splits "Full Name" into
+        # first_name/last_name (Django's built-in fields) but never touches
+        # the separate .name field, so checking .name before mobile was
+        # always empty for a mobile+password signup and fell straight
+        # through to showing the mobile number instead of the name the
+        # user actually typed in. Some older/admin-created accounts have
+        # .name set with no first/last name instead, hence still checking
+        # both rather than just switching which one to prefer.
+        display_name = request.user.get_full_name() or request.user.name or request.user.mobile or "Account"
         return JsonResponse({
             "authenticated": True,
-            "name": request.user.name or request.user.mobile or "Account",
+            "name": display_name,
         })
     return JsonResponse({"authenticated": False})
 
