@@ -1220,6 +1220,7 @@ def quiz_answer(request, quiz_id):
             correct_option=correct_option,
             is_correct=is_correct,
             explanation_snapshot=question.explanation_for(attempt.language),
+            answered_at=timezone.now(),
         )
     except IntegrityError:
         # Two near-simultaneous POSTs for the same question (e.g. a

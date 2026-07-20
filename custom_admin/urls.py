@@ -23,6 +23,7 @@ from entrepreneurship.legal_registrations import views as LegalRegistrations
 from entrepreneurship.artificial_intelligence import views as ArtificialIntelligence
 from entrepreneurship.marketing import views as Marketing
 from quizzes import views as Quizzes
+from partners import views as Partners
 
 urlpatterns = [
 
@@ -124,7 +125,11 @@ urlpatterns = [
     path('quiz/<int:id>/review-generated-questions', Quizzes.ReviewGeneratedQuestionsView.as_view(), name="adminReviewGeneratedQuestions"),
     path('quiz/<int:id>/translations', Quizzes.QuizTranslationsView.as_view(), name="adminQuizTranslations"),
     path('quiz/<int:id>/translations/<str:lang>', Quizzes.EditTranslationView.as_view(), name="adminEditTranslation"),
-    
+
+    path('partners', Partners.ManagePartnersView.as_view(), name="adminManagePartners"),
+    path('partner/<int:id>', Partners.updatePartner, name="adminUpdatePartner"),
+    path('partner/toggle-active', Partners.togglePartnerActive, name="adminTogglePartnerActive"),
+
 
 
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

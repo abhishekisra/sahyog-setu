@@ -111,7 +111,8 @@ INSTALLED_APPS = [
     'entrepreneurship.legal_registrations',
     'entrepreneurship.artificial_intelligence',
     'entrepreneurship.marketing',
-    'quizzes'
+    'quizzes',
+    'partners'
 ]
 
 MIDDLEWARE = [

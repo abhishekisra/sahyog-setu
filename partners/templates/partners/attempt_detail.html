@@ -1,0 +1,40 @@
+{% extends "partners/base.html" %}
+{% block title %}Attempt Detail — {{ quiz.title }}{% endblock %}
+{% block body %}
+
+<a href="{% url 'partner_participants' quiz.id %}" class="pp-link">← Back to Participants</a>
+
+<div class="pp-card" style="margin:16px 0 20px;">
+  <div style="font-family:'Fraunces'; font-weight:600; font-size:18px; margin-bottom:4px;">
+    {{ attempt.user.get_full_name|default:attempt.user.name|default:attempt.user.mobile }}
+  </div>
+  <div style="color:var(--ink-soft); font-size:13px;">
+    {{ attempt.user.state.state|default:"—" }}{% if attempt.user.district %}, {{ attempt.user.district.name }}{% endif %}
+    · Score {{ attempt.score }}/{{ attempt.total_questions }} ({{ attempt.percentage|floatformat:0 }}%)
+    {% if attempt.passed %}<span class="pp-pill pp-pill-pass">Pass</span>{% else %}<span class="pp-pill pp-pill-fail">Fail</span>{% endif %}
+    · {{ attempt.completed_at|date:"d M Y, H:i" }}
+  </div>
+</div>
+
+{% for row in rows %}
+<div class="pp-card" style="margin-bottom:12px; {% if row.is_correct %}border-color:rgba(53,214,127,.35);{% else %}border-color:rgba(255,92,92,.3);{% endif %}">
+  <div style="display:flex; justify-content:space-between; gap:12px; flex-wrap:wrap; margin-bottom:8px;">
+    <div style="font-weight:600; font-size:14px;">Q{{ forloop.counter }}. {{ row.question_text }}</div>
+    <div style="display:flex; gap:8px; flex-shrink:0; align-items:center;">
+      {% if row.is_correct %}<span class="pp-pill pp-pill-pass">Correct</span>{% else %}<span class="pp-pill pp-pill-fail">Wrong</span>{% endif %}
+      <span style="color:var(--ink-faint); font-size:12px;">{% if row.time_taken_seconds is not None %}{{ row.time_taken_seconds }}s{% else %}N/A{% endif %}</span>
+    </div>
+  </div>
+  <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:4px;">Answered: <b style="color:var(--ink);">{{ row.selected_label }}</b></div>
+  {% if not row.is_correct %}
+  <div style="font-size:13.5px; color:var(--ink-soft); margin-bottom:4px;">Correct answer: <b style="color:var(--green);">{{ row.correct_label }}</b></div>
+  {% endif %}
+  {% if row.explanation %}
+  <div style="font-size:12.5px; color:var(--ink-faint); margin-top:8px; padding-top:8px; border-top:1px solid var(--line);">{{ row.explanation }}</div>
+  {% endif %}
+</div>
+{% empty %}
+<div class="pp-card pp-empty">No responses recorded for this attempt.</div>
+{% endfor %}
+
+{% endblock %}

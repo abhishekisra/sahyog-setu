@@ -293,6 +293,15 @@ class QuestionResponse(models.Model):
     selected_option = models.CharField(max_length=10)
     correct_option = models.CharField(max_length=10)
     is_correct = models.BooleanField(default=False)
+    # null=True, not auto_now_add: added after this table already had real
+    # rows, and auto_now_add would have needed a backfill default for all of
+    # them anyway. Set explicitly in quiz_answer() at answer time instead --
+    # per-question time-taken (Partner Portal's question-wise view) is then
+    # this minus the PREVIOUS response's answered_at (or attempt.started_at
+    # for the first question), so it's only ever available for attempts
+    # answered after this field existed; older ones show "N/A" rather than
+    # a fabricated number.
+    answered_at = models.DateTimeField(null=True, blank=True)
     # Snapshotted for the same reason as question_text_snapshot: EditQuizView
     # deletes and recreates all Questions rows, which would otherwise orphan
     # this FK (on_delete=SET_NULL) and silently blank the explanation shown

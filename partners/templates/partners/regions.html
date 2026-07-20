@@ -1,0 +1,37 @@
+{% extends "partners/base.html" %}
+{% block title %}State / District — {{ quiz.title }}{% endblock %}
+{% block body %}
+
+<div class="pp-card" style="margin-bottom:20px;">
+  <div style="font-weight:700; margin-bottom:14px; font-size:14px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">Participants by State</div>
+  {% for r in state_rows %}
+  <a href="?state={{ r.user__state_id|default:'' }}" style="text-decoration:none; color:inherit; display:block;">
+    <div class="pp-bar-row" style="{% if selected_state_id == r.user__state_id|stringformat:'s' %}background:rgba(255,215,94,.06);{% endif %}">
+      <div class="pp-bar-label">{{ r.user__state__state|default:"Unknown" }} <span style="color:var(--ink-faint); font-size:11.5px;">({{ r.avg_pct }}% avg)</span></div>
+      <div class="pp-bar-track"><div class="pp-bar-fill" style="width:{{ r.bar_pct }}%"></div></div>
+      <div class="pp-bar-n">{{ r.n }}</div>
+    </div>
+  </a>
+  {% empty %}
+  <div class="pp-empty">No completed attempts yet.</div>
+  {% endfor %}
+</div>
+
+{% if selected_state_id %}
+<div class="pp-card">
+  <div style="font-weight:700; margin-bottom:14px; font-size:14px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">
+    Districts in {{ selected_state_name|default:"this state" }}
+  </div>
+  {% for r in district_rows %}
+  <div class="pp-bar-row">
+    <div class="pp-bar-label">{{ r.user__district__name|default:"Unknown" }} <span style="color:var(--ink-faint); font-size:11.5px;">({{ r.avg_pct }}% avg)</span></div>
+    <div class="pp-bar-track"><div class="pp-bar-fill" style="width:{{ r.bar_pct }}%"></div></div>
+    <div class="pp-bar-n">{{ r.n }}</div>
+  </div>
+  {% empty %}
+  <div class="pp-empty">No district data for this state.</div>
+  {% endfor %}
+</div>
+{% endif %}
+
+{% endblock %}

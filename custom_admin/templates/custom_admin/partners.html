@@ -1,0 +1,266 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+    <div class="pcoded-main-container">
+        <div class="pcoded-content">
+            <!-- [ breadcrumb ] start -->
+            <div class="page-header">
+                <div class="page-block">
+                    <div class="row align-items-center">
+                        <div class="col-md-6">
+                            <div class="page-header-title">
+                                <h5 class="m-b-10">Manage Partners</h5>
+                            </div>
+                            <ul class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="index.html"><i class="feather icon-home"></i></a></li>
+                                <li class="breadcrumb-item"><a href="#!">Partners</a></li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6 text-right">
+                            <button class="btn btn-success btn-sm btn-round has-ripple" data-toggle="modal" data-target="#newModel"><i class="feather icon-plus"></i> Add Partner</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ breadcrumb ] end -->
+            <!-- [ Main Content ] start -->
+            <div class="row">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table id="report-table" class="table mb-0">
+                                    <thead>
+                                        <tr>
+                                            <th>S No.</th>
+                                            <th>Name</th>
+                                            <th>Organization</th>
+                                            <th>Username</th>
+                                            <th>Assigned Quizzes</th>
+                                            <th>Status</th>
+                                            <th class="text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for partner in partners %}
+                                        <tr>
+                                            <td>{{ forloop.counter }}</td>
+                                            <td>{{ partner.name }}</td>
+                                            <td>{{ partner.organization|default:"—" }}</td>
+                                            <td>{{ partner.username }}</td>
+                                            <td>{{ partner.quiz_count }}</td>
+                                            <td>
+                                                {% if partner.is_active %}
+                                                    <span class="badge badge-success">Active</span>
+                                                {% else %}
+                                                    <span class="badge badge-danger">Inactive</span>
+                                                {% endif %}
+                                            </td>
+                                            <td class="text-right">
+                                                <button type="button" class="btn btn-info btn-sm editButton"
+                                                    data-id="{{ partner.id }}"
+                                                    data-name="{{ partner.name }}"
+                                                    data-organization="{{ partner.organization }}"
+                                                    data-username="{{ partner.username }}"
+                                                    data-active="{% if partner.is_active %}1{% else %}0{% endif %}"
+                                                    data-quiz-ids="{% for a in partner.quiz_access.all %}{{ a.quiz_id }}{% if not forloop.last %},{% endif %}{% endfor %}">
+                                                    <i class="feather icon-edit"></i>&nbsp;Edit
+                                                </button>
+                                                <a href="javascript:void(0)" data-id="{{ partner.id }}" class="btn btn-warning btn-sm toggleActiveButton">
+                                                    <i class="feather icon-power"></i>&nbsp;{% if partner.is_active %}Deactivate{% else %}Activate{% endif %}
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% empty %}
+                                        <tr><td colspan="7" class="text-center">No partners added yet.</td></tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- [ Main Content ] end -->
+        </div>
+    </div>
+
+    <!-- Add Partner Modal -->
+    <div id="newModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="color: #000000;">Add Partner</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" action="/admin/partners">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" class="form-control" name="name" placeholder="Partner's name" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Organization</label>
+                                    <input type="text" class="form-control" name="organization" placeholder="Organization name">
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mt-3">
+                                <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" class="form-control" name="username" placeholder="Login username" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mt-3">
+                                <div class="form-group">
+                                    <label>Password</label>
+                                    <input type="text" class="form-control" name="password" placeholder="Set a password" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 mt-3">
+                                <div class="form-group">
+                                    <label>Assign Quizzes</label>
+                                    <div style="max-height:220px; overflow-y:auto; border:1px solid #ddd; border-radius:6px; padding:10px;">
+                                        {% for quiz in quizzes %}
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" name="quiz_ids" value="{{ quiz.id }}" id="newQuiz{{ quiz.id }}">
+                                            <label class="form-check-label" for="newQuiz{{ quiz.id }}">{{ quiz.title }}</label>
+                                        </div>
+                                        {% empty %}
+                                        <div class="text-muted">No quizzes exist yet.</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="justify-content-center d-flex align-items-center flex-row mt-3">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            <input type="submit" class="btn btn-success ml-3" value="Save">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Partner Modal -->
+    <div id="editModel" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" style="color: #000000;">Edit Partner</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body">
+                    <form method="POST" id="editForm" action="/admin/partner/">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Name</label>
+                                    <input type="text" class="form-control" id="editName" name="name" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="form-group">
+                                    <label>Organization</label>
+                                    <input type="text" class="form-control" id="editOrganization" name="organization">
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mt-3">
+                                <div class="form-group">
+                                    <label>Username</label>
+                                    <input type="text" class="form-control" id="editUsername" name="username" required>
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mt-3">
+                                <div class="form-group">
+                                    <label>Password <small class="text-muted">(leave blank to keep unchanged)</small></label>
+                                    <input type="text" class="form-control" id="editPassword" name="password" placeholder="New password (optional)">
+                                </div>
+                            </div>
+                            <div class="col-sm-6 mt-3">
+                                <div class="form-group">
+                                    <label>Status</label>
+                                    <select class="form-control" id="editActive" name="is_active">
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-sm-12 mt-3">
+                                <div class="form-group">
+                                    <label>Assign Quizzes</label>
+                                    <div id="editQuizList" style="max-height:220px; overflow-y:auto; border:1px solid #ddd; border-radius:6px; padding:10px;">
+                                        {% for quiz in quizzes %}
+                                        <div class="form-check">
+                                            <input class="form-check-input edit-quiz-checkbox" type="checkbox" name="quiz_ids" value="{{ quiz.id }}" id="editQuiz{{ quiz.id }}">
+                                            <label class="form-check-label" for="editQuiz{{ quiz.id }}">{{ quiz.title }}</label>
+                                        </div>
+                                        {% empty %}
+                                        <div class="text-muted">No quizzes exist yet.</div>
+                                        {% endfor %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="justify-content-center d-flex align-items-center flex-row mt-3">
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+                            <input type="submit" class="btn btn-success ml-3" value="Save">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toggle Active (hidden form) -->
+    <form method="POST" id="toggleActiveForm" action="/admin/partner/toggle-active">
+        {% csrf_token %}
+        <input type="hidden" id="toggleActivePartnerId" name="partner_id" value="">
+    </form>
+
+{% endblock %}
+
+<script>
+
+    $('.table').DataTable({});
+
+    $(document).on('click', '.editButton', function(){
+        var id = $(this).attr('data-id');
+        var action = '/admin/partner/' + id;
+        $('#editForm').attr('action', action);
+        $('#editName').val($(this).attr('data-name'));
+        $('#editOrganization').val($(this).attr('data-organization'));
+        $('#editUsername').val($(this).attr('data-username'));
+        $('#editPassword').val('');
+        $('#editActive').val($(this).attr('data-active'));
+
+        var assignedIds = ($(this).attr('data-quiz-ids') || '').split(',').filter(Boolean);
+        $('.edit-quiz-checkbox').prop('checked', false);
+        assignedIds.forEach(function(qid){
+            $('#editQuiz' + qid).prop('checked', true);
+        });
+
+        $('#editModel').modal('show');
+    });
+
+    $(document).on('click', '.toggleActiveButton', function(){
+        var id = $(this).attr('data-id');
+        $('#toggleActivePartnerId').val(id);
+        $('#toggleActiveForm').submit();
+    });
+
+</script>
+
+{% for message in messages %}
+    <script>
+        showNotification('{{message}}', '{{message.tags}}')
+    </script>
+{% endfor %}

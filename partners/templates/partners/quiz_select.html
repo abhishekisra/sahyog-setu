@@ -1,0 +1,18 @@
+{% extends "partners/base.html" %}
+{% block title %}Select Quiz — Partner Portal{% endblock %}
+{% block body %}
+<h1 class="pp-quiz-title">Select a Quiz</h1>
+
+{% if access %}
+<div class="pp-grid">
+  {% for a in access %}
+  <a href="{% url 'partner_overview' a.quiz_id %}" class="pp-card" style="text-decoration:none; display:block;">
+    <div style="font-family:'Fraunces'; font-weight:600; font-size:16px; color:var(--ink); margin-bottom:6px;">{{ a.quiz.title }}</div>
+    <div style="color:var(--ink-faint); font-size:12.5px;">Assigned {{ a.assigned_at|date:"d M Y" }}</div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="pp-card pp-empty">No quizzes have been assigned to your account yet. Please contact the Sahyog Setu team.</div>
+{% endif %}
+{% endblock %}

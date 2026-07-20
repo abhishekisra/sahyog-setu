@@ -1,0 +1,26 @@
+{% extends "partners/base.html" %}
+{% block title %}Overview — {{ quiz.title }}{% endblock %}
+{% block body %}
+
+<div class="pp-grid">
+  <div class="pp-card pp-stat"><div class="n">{{ total_participants }}</div><div class="l">Participants</div></div>
+  <div class="pp-card pp-stat"><div class="n">{{ avg_pct }}%</div><div class="l">Average Score</div></div>
+  <div class="pp-card pp-stat"><div class="n">{{ completion_pct }}%</div><div class="l">Completion Rate</div></div>
+  <div class="pp-card pp-stat"><div class="n">{{ pass_rate }}%</div><div class="l">Pass Rate</div></div>
+</div>
+
+<div class="pp-card">
+  <div style="font-weight:700; margin-bottom:14px; font-size:14px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">Pass / Fail Split</div>
+  <div class="pp-bar-row">
+    <div class="pp-bar-label">Passed</div>
+    <div class="pp-bar-track"><div class="pp-bar-fill correct" style="width:{% if total_completed %}{% widthratio passed total_completed 100 %}{% else %}0{% endif %}%"></div></div>
+    <div class="pp-bar-n">{{ passed }}</div>
+  </div>
+  <div class="pp-bar-row">
+    <div class="pp-bar-label">Failed</div>
+    <div class="pp-bar-track"><div class="pp-bar-fill wrong" style="width:{% if total_completed %}{% widthratio failed total_completed 100 %}{% else %}0{% endif %}%"></div></div>
+    <div class="pp-bar-n">{{ failed }}</div>
+  </div>
+</div>
+
+{% endblock %}

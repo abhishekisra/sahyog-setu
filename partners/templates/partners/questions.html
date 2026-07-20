@@ -1,0 +1,27 @@
+{% extends "partners/base.html" %}
+{% block title %}Question-wise — {{ quiz.title }}{% endblock %}
+{% block body %}
+
+{% for row in question_rows %}
+<div class="pp-card" style="margin-bottom:16px;">
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:12px; margin-bottom:14px; flex-wrap:wrap;">
+    <div style="font-weight:700; font-size:14.5px; max-width:600px;">Q{{ forloop.counter }}. {{ row.question.question }}</div>
+    <div style="display:flex; gap:8px; flex-shrink:0;">
+      <span class="pp-pill pp-pill-pass">{{ row.pct_correct }}% correct</span>
+      <span class="pp-pill pp-pill-fail">{{ row.pct_wrong }}% wrong</span>
+    </div>
+  </div>
+  <div style="color:var(--ink-faint); font-size:12px; margin-bottom:10px;">{{ row.total }} attempts{% if row.skipped %} · {{ row.skipped }} skipped{% endif %}</div>
+  {% for opt in row.option_breakdown %}
+  <div class="pp-bar-row">
+    <div class="pp-bar-label">{{ opt.label }}{% if opt.is_correct %} ✓{% endif %}</div>
+    <div class="pp-bar-track"><div class="pp-bar-fill {% if opt.is_correct %}correct{% endif %}" style="width:{{ opt.pct }}%"></div></div>
+    <div class="pp-bar-n">{{ opt.count }} ({{ opt.pct }}%)</div>
+  </div>
+  {% endfor %}
+</div>
+{% empty %}
+<div class="pp-card pp-empty">This quiz has no questions.</div>
+{% endfor %}
+
+{% endblock %}
