@@ -708,6 +708,27 @@ def clean_language(raw):
     return "en"
 
 
+def available_languages_for(quiz):
+    """Only offer languages this SPECIFIC quiz actually has at least one
+    translated question in -- an active Language with zero translations
+    for this quiz would silently fall back to English everywhere (see
+    Questions.text_for), which is a confusing, apparently-broken toggle to
+    show at all. Shared by QuizLandingView (pre-start) and QuizTakeView
+    (mid-quiz) so both ever show exactly the same set of languages for a
+    given quiz -- distinct() because a language could have translations on
+    multiple questions."""
+    translated_codes = list(
+        Language.objects.filter(
+            is_active=True, question_translations__question__quiz=quiz
+        ).exclude(question_translations__question_text="").distinct().values_list("code", flat=True)
+    )
+    languages = [{"code": "en", "name": "English", "native_name": "English"}] + [
+        {"code": l.code, "name": l.name, "native_name": l.native_name}
+        for l in Language.objects.filter(code__in=translated_codes)
+    ]
+    return languages, translated_codes
+
+
 # Hand-authored line-icons (24x24, stroke=currentColor) instead of emoji --
 # emoji render inconsistently across OS/browsers (different art style per
 # platform, some literally missing), so this keeps every card's icon
@@ -873,21 +894,7 @@ class QuizLandingView(View):
         # far more than the quiz actually delivers.
         question_count = min(quiz.questions_per_attempt, quiz.questions.count())
 
-        # Only offer languages that this SPECIFIC quiz actually has at least
-        # one translated question in -- an active Language with zero
-        # translations for this quiz would silently fall back to English
-        # everywhere (see Questions.text_for), which is a confusing,
-        # apparently-broken toggle to show at all. distinct() because a
-        # language could have translations on multiple questions.
-        translated_codes = list(
-            Language.objects.filter(
-                is_active=True, question_translations__question__quiz=quiz
-            ).exclude(question_translations__question_text="").distinct().values_list("code", flat=True)
-        )
-        available_languages = [{"code": "en", "name": "English", "native_name": "English"}] + [
-            {"code": l.code, "name": l.name, "native_name": l.native_name}
-            for l in Language.objects.filter(code__in=translated_codes)
-        ]
+        available_languages, translated_codes = available_languages_for(quiz)
 
         lang = clean_language(request.GET.get("lang", "en"))
         if lang != "en" and lang not in translated_codes:
@@ -1034,6 +1041,8 @@ class QuizTakeView(View):
             ],
         }
 
+        available_languages, _ = available_languages_for(quiz)
+
         return render(request, "custom_admin/quizzes/quiz_take.html", {
             "quiz": quiz,
             "attempt": attempt,
@@ -1045,6 +1054,7 @@ class QuizTakeView(View):
             "avg_percentage": round(avg_percentage, 1),
             "quiz_data": quiz_data,
             "lang": attempt.language,
+            "available_languages": available_languages,
         })
 
     def _get_or_create_attempt(self, request, quiz, lang="en"):
