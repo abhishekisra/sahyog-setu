@@ -223,3 +223,31 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'public/static')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
+# Without this, Django's default logging config only writes 500 tracebacks
+# to the console when DEBUG=True (which it never is here) and otherwise
+# only emails ADMINS -- which was never configured either, so every
+# unhandled exception in production was being silently swallowed with
+# nothing to debug from except the bare "500" access-log line. This writes
+# full tracebacks for any 5xx to a plain file instead, and keeps the
+# built-in mail_admins/console handlers untouched (django.utils.log's
+# defaults still apply for anything not explicitly overridden here since
+# this doesn't set disable_existing_loggers).
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.FileHandler',
+            'filename': '/var/log/sahyogsetu_django_errors.log',
+        },
+    },
+    'loggers': {
+        'django.request': {
+            'handlers': ['file'],
+            'level': 'ERROR',
+            'propagate': True,
+        },
+    },
+}
+
