@@ -37,7 +37,13 @@
             <script src="{% static 'custom_admin/js/plugins/apexcharts.min.js' %}"></script>
             <script src="{% static 'custom_admin/js/pages/dashboard-analytics.js' %}"></script>
             <script src="{% static 'custom_admin/js/pages/dashboard-main.js' %}"></script>
-            <script src="{% static 'custom_admin/js/vendor-all.min.js' %}"></script>
+            <!-- vendor-all.min.js (bundles jQuery + friends) was loaded a
+                 second time here -- reloading jQuery mid-page wipes its
+                 internal event-data store, orphaning any click handlers
+                 bound against the FIRST instance by scripts above (ripple.js,
+                 pcoded.min.js, the dashboard scripts). That's what caused
+                 admin panel buttons/links to need an extra click to
+                 register -- removed, keeping only the one load at the top. -->
             <script src="{% static 'custom_admin/js/plugins/jquery.dataTables.min.js' %}"></script>
             <script src="{% static 'custom_admin/js/plugins/dataTables.bootstrap4.min.js' %}"></script>
             <script src="{% static 'custom_admin/js/pages/form-advance-custom.js' %}"></script>
