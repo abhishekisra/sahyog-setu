@@ -1350,7 +1350,7 @@ class QuizResultView(View):
 
     def get(self, request, pk):
         attempt = get_object_or_404(QuizAttempt, pk=pk, user=request.user)
-        responses = attempt.responses.all()
+        responses = attempt.responses.select_related("question").all()
         correct = responses.filter(is_correct=True).count()
         # "Wrong" (picked an option, got it wrong) vs "missed" (skipped, or
         # timed out with no answer -- quiz_answer records those with
@@ -1365,6 +1365,33 @@ class QuizResultView(View):
         wrong = responses.filter(is_correct=False).exclude(selected_option="").count()
         missed = attempt.total_questions - correct - wrong
         incorrect = attempt.total_questions - correct
+
+        # The number-grid navigator only ever showed a color per question --
+        # no way to see WHAT was skipped or wrong, just an abstract green/red/
+        # yellow square. Built here (not in the template) because "your
+        # answer" / "correct answer" need the actual option TEXT, not just
+        # the option number stored on the response -- and that text only
+        # exists live on Questions (option_1..4), not snapshotted. Falls back
+        # to "Option N" for the rare case the question was later deleted
+        # (question=NULL via on_delete=SET_NULL).
+        def _option_text(question, option_num):
+            if not option_num:
+                return None
+            if question:
+                return getattr(question, f"option_{option_num}", None) or f"Option {option_num}"
+            return f"Option {option_num}"
+
+        review_items = []
+        for i, r in enumerate(responses, start=1):
+            status = "correct" if r.is_correct else ("wrong" if r.selected_option else "missed")
+            review_items.append({
+                "num": i,
+                "question_text": r.question_text_snapshot,
+                "status": status,
+                "your_answer": _option_text(r.question, r.selected_option) if r.selected_option else None,
+                "correct_answer": _option_text(r.question, r.correct_option),
+                "explanation": r.explanation_snapshot,
+            })
 
         marks = attempt.score * MARKS_PER_QUESTION
         total_marks = attempt.total_questions * MARKS_PER_QUESTION
@@ -1382,6 +1409,7 @@ class QuizResultView(View):
         return render(request, "custom_admin/quizzes/quiz_result.html", {
             "attempt": attempt,
             "responses": responses,
+            "review_items": review_items,
             "correct": correct,
             "wrong": wrong,
             "missed": missed,

@@ -67,13 +67,52 @@
           <div class="sq-rvh">All Questions</div>
           <div class="sq-qnav">
             {% for response in responses %}
-            <span class="sq-ncell {% if response.is_correct %}sq-correct{% elif response.selected_option %}sq-wrong{% else %}sq-missed{% endif %}">{{ forloop.counter }}</span>
+            <span class="sq-ncell {% if response.is_correct %}sq-correct{% elif response.selected_option %}sq-wrong{% else %}sq-missed{% endif %}"
+                  onclick="ssJumpToReview({{ forloop.counter }})">{{ forloop.counter }}</span>
             {% endfor %}
           </div>
           <div class="sq-navlegend">
             <span><i class="sq-ndot sq-c"></i>Correct</span>
             <span><i class="sq-ndot sq-w"></i>Wrong</span>
             <span><i class="sq-ndot sq-m"></i>Missed</span>
+          </div>
+
+          <!-- Answer review -- the grid above only ever showed a color per
+               question with no way to see WHAT was skipped or wrong. This
+               lists every question with its own answer vs the correct one,
+               open by default for wrong/missed so the participant sees
+               exactly what to revisit, collapsed for ones already correct. -->
+          <div class="sq-rvh sq-rvh-2">Answer Review</div>
+          <div class="sq-answer-review">
+            {% for item in review_items %}
+            <div class="sq-rv-item sq-rv-{{ item.status }} {% if item.status != 'correct' %}sq-rv-open{% endif %}" id="sqReviewQ{{ item.num }}">
+              <button type="button" class="sq-rv-head" onclick="this.parentElement.classList.toggle('sq-rv-open')">
+                <span class="sq-rv-num">{{ item.num }}</span>
+                <span class="sq-rv-q">{{ item.question_text }}</span>
+                <span class="sq-rv-tag">
+                  {% if item.status == 'correct' %}Correct
+                  {% elif item.status == 'wrong' %}Wrong
+                  {% else %}Skipped{% endif %}
+                </span>
+                <i class="sq-rv-chevron">▾</i>
+              </button>
+              <div class="sq-rv-body">
+                {% if item.your_answer %}
+                <p class="sq-rv-line {% if item.status == 'wrong' %}sq-rv-bad{% endif %}">
+                  <span>Your answer:</span> {{ item.your_answer }}
+                </p>
+                {% else %}
+                <p class="sq-rv-line sq-rv-bad"><span>Your answer:</span> Not answered</p>
+                {% endif %}
+                {% if item.status != 'correct' %}
+                <p class="sq-rv-line sq-rv-good"><span>Correct answer:</span> {{ item.correct_answer }}</p>
+                {% endif %}
+                {% if item.explanation %}
+                <p class="sq-rv-explain">{{ item.explanation }}</p>
+                {% endif %}
+              </div>
+            </div>
+            {% endfor %}
           </div>
         </div>
         {% endif %}
@@ -187,7 +226,7 @@
     aspect-ratio:1; border-radius:12px; display:grid; place-items:center;
     font-family:'Fraunces'; font-weight:600; font-size:15px; color:#fff;
     border:1px solid rgba(255,255,255,.14); border-bottom-width:3px;
-    box-shadow:var(--shadow-sm);
+    box-shadow:var(--shadow-sm); cursor:pointer;
   }
   .sq-ncell.sq-correct{ background:linear-gradient(180deg,var(--green-deep),#0f7a41); border-bottom-color:#0c6836; }
   .sq-ncell.sq-wrong{ background:linear-gradient(180deg,var(--red-deep),#a72e2e); border-bottom-color:#8f2626; }
@@ -197,6 +236,47 @@
   .sq-ndot{ width:11px; height:11px; border-radius:4px; display:inline-block; margin-right:6px; vertical-align:-1px; }
   .sq-ndot.sq-c{ background:var(--green); } .sq-ndot.sq-w{ background:var(--red); } .sq-ndot.sq-m{ background:var(--yellow); }
 
+  /* Answer Review -- per-question detail (question text, your answer vs
+     correct answer, explanation), so a colored grid cell isn't the only
+     thing a participant ever sees for a skipped/wrong question. */
+  .sq-rvh-2{ margin-top:8px; }
+  .sq-answer-review{ display:flex; flex-direction:column; gap:10px; }
+  .sq-rv-item{
+    border-radius:12px; background:var(--card); border:1px solid rgba(255,255,255,.08);
+    overflow:hidden; scroll-margin-top:90px;
+  }
+  .sq-rv-item.sq-rv-wrong{ border-color:rgba(255,92,92,.3); }
+  .sq-rv-item.sq-rv-missed{ border-color:rgba(247,201,72,.3); }
+  .sq-rv-head{
+    width:100%; display:flex; align-items:center; gap:12px; padding:13px 16px;
+    background:none; border:none; text-align:left; cursor:pointer; color:var(--ink);
+    font-family:inherit;
+  }
+  .sq-rv-num{
+    flex-shrink:0; width:26px; height:26px; border-radius:50%; display:grid; place-items:center;
+    font-family:'Fraunces'; font-weight:600; font-size:12.5px; background:rgba(255,255,255,.08);
+  }
+  .sq-rv-item.sq-rv-correct .sq-rv-num{ background:rgba(53,214,127,.18); color:var(--green); }
+  .sq-rv-item.sq-rv-wrong .sq-rv-num{ background:rgba(255,92,92,.18); color:var(--red); }
+  .sq-rv-item.sq-rv-missed .sq-rv-num{ background:rgba(247,201,72,.2); color:var(--yellow); }
+  .sq-rv-q{ flex:1; font-size:13.5px; font-weight:500; line-height:1.4; }
+  .sq-rv-tag{
+    flex-shrink:0; font-size:11px; font-weight:700; padding:3px 10px; border-radius:20px;
+    text-transform:uppercase; letter-spacing:.03em; white-space:nowrap;
+  }
+  .sq-rv-item.sq-rv-correct .sq-rv-tag{ background:rgba(53,214,127,.15); color:var(--green); }
+  .sq-rv-item.sq-rv-wrong .sq-rv-tag{ background:rgba(255,92,92,.15); color:var(--red); }
+  .sq-rv-item.sq-rv-missed .sq-rv-tag{ background:rgba(247,201,72,.18); color:var(--yellow); }
+  .sq-rv-chevron{ flex-shrink:0; font-style:normal; color:var(--ink-faint); transition:transform .15s ease; }
+  .sq-rv-item.sq-rv-open .sq-rv-chevron{ transform:rotate(180deg); }
+  .sq-rv-body{ display:none; padding:0 16px 16px 54px; }
+  .sq-rv-item.sq-rv-open .sq-rv-body{ display:block; }
+  .sq-rv-line{ margin:0 0 6px; font-size:13px; color:var(--ink-soft); }
+  .sq-rv-line span{ font-weight:700; color:var(--ink); }
+  .sq-rv-line.sq-rv-bad{ color:var(--red); }
+  .sq-rv-line.sq-rv-good{ color:var(--green); }
+  .sq-rv-explain{ margin:8px 0 0; font-size:12.5px; color:var(--ink-faint); font-style:italic; line-height:1.5; }
+
   .sq-footer-links{ display:flex; justify-content:center; margin-top:26px; }
   .sq-link{ color:var(--gold-hi); font-weight:700; text-decoration:none; font-size:14px; }
   .sq-link:hover{ text-decoration:underline; }
@@ -205,4 +285,13 @@
 
   @media (max-width:600px){ .sq-result-body{ padding:28px 18px 24px; } }
 </style>
+
+<script>
+  function ssJumpToReview(num) {
+    var item = document.getElementById('sqReviewQ' + num);
+    if (!item) return;
+    item.classList.add('sq-rv-open');
+    item.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+</script>
 {% endblock %}
