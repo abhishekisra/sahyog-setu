@@ -61,9 +61,20 @@
                 <li class="nav-item"><a href="/admin/helplines" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Helplines</span></a></li>
                 <li class="nav-item"><a href="/admin/pages" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Pages</span></a></li>
                 <li class="nav-item"><a href="/admin/settings" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Settings</span></a></li>
-                <li class="nav-item"><a href="/admin/quizzes" class="nav-link "><span class="pcoded-micon"><i class="feather icon-home"></i></span><span class="pcoded-mtext">Quizzes</span></a></li>
-                <li class="nav-item"><a href="/quiz-analytics/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-bar-chart-2"></i></span><span class="pcoded-mtext">Quiz Analytics</span></a></li>
-                <li class="nav-item"><a href="/quiz-analytics/participants/" class="nav-link "><span class="pcoded-micon"><i class="feather icon-users"></i></span><span class="pcoded-mtext">Participants</span></a></li>
+                <li class="nav-item pcoded-hasmenu {% if '/admin/quiz' in request.path or '/quiz-analytics' in request.path %}pcoded-trigger active{% endif %}">
+                    <a href="#!" class="nav-link "><span class="pcoded-micon"><i class="feather icon-award"></i></span><span class="pcoded-mtext">Quiz Management</span></a>
+                    <ul class="pcoded-submenu">
+                        <li class="{% if request.path == '/admin/quizzes' or request.path|slice:':12' == '/admin/quiz/' or request.path == '/admin/quiz' %}active{% endif %}">
+                            <a href="/admin/quizzes">Quizzes</a>
+                        </li>
+                        <li class="{% if request.path == '/quiz-analytics/' %}active{% endif %}">
+                            <a href="/quiz-analytics/">Quiz Analytics</a>
+                        </li>
+                        <li class="{% if '/quiz-analytics/participants' in request.path %}active{% endif %}">
+                            <a href="/quiz-analytics/participants/">Participants</a>
+                        </li>
+                    </ul>
+                </li>
                 <li class="nav-item"><a href="/admin/partners" class="nav-link "><span class="pcoded-micon"><i class="feather icon-briefcase"></i></span><span class="pcoded-mtext">Manage Partners</span></a></li>
                 <!-- <li class="nav-item pcoded-hasmenu">
                 <!-- <li class="nav-item pcoded-hasmenu">
