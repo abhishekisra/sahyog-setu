@@ -23,7 +23,7 @@ from django.db.models.functions import TruncDate
 from django.core.exceptions import ValidationError
 from accounts.models import User
 from .certificates import generate_certificate_id
-from .cert_image import render_certificate_image
+from .cert_image import render_certificate_image, render_certificate_story_image
 from .imaging import validate_image_upload, validate_certificate_background, validate_banner_image
 from .models import Questions, Quizzes, QuizAttempt, QuestionResponse, Language, QuizTranslation, QuestionTranslation
 from .question_import import SAMPLE_ROWS, normalize_correct_option, parse_upload, validate_rows
@@ -681,7 +681,7 @@ def download_question_template(request):
 # PARTICIPANT QUIZ FLOW
 # ======================================================================
 
-ALLOWED_SOURCES = {"whatsapp", "sms", "facebook", "email", "qr", "direct"}
+ALLOWED_SOURCES = {"whatsapp", "sms", "facebook", "email", "qr", "story", "direct"}
 
 
 def clean_source(raw):
@@ -1458,6 +1458,33 @@ class CertificateImageDownloadView(View):
         image_bytes = render_certificate_image(attempt)
         response = HttpResponse(image_bytes, content_type="image/png")
         response["Content-Disposition"] = f'attachment; filename="certificate_{attempt.certificate_id}.png"'
+        return response
+
+
+@method_decorator(login_required, name='dispatch')
+class CertificateStoryDownloadView(View):
+    """Vertical 9:16 share-card version (same eligibility checks as
+    CertificateImageDownloadView) -- for posting to WhatsApp/Instagram
+    Status, where a landscape A4 certificate would render tiny and
+    illegible. Bakes the quiz's own landing-page link into the image
+    itself (QR + printed domain) so it travels with however this actually
+    gets shared, tagged ?src=story the same way other share channels are."""
+
+    def get(self, request, pk):
+        attempt = get_object_or_404(
+            QuizAttempt, pk=pk, user=request.user, passed=True, is_demo=False,
+            percentage__gte=CERTIFICATE_MIN_PERCENTAGE,
+        )
+        if not attempt.certificate_id:
+            messages.error(request, "Certificate has not been issued yet.")
+            return redirect("quiz_result", pk=attempt.id)
+
+        landing_path = reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug})
+        quiz_url = request.build_absolute_uri(landing_path) + "?src=story"
+
+        image_bytes = render_certificate_story_image(attempt, quiz_url)
+        response = HttpResponse(image_bytes, content_type="image/png")
+        response["Content-Disposition"] = f'attachment; filename="sahyogsetu_status_{attempt.certificate_id}.png"'
         return response
 
 

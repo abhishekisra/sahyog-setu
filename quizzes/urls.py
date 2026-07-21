@@ -14,6 +14,7 @@ urlpatterns = [
     path('quiz/<int:quiz_id>/leaderboard/', views.QuizLeaderboardView.as_view(), name='quiz_leaderboard'),
     path('quiz/certificate/<int:pk>/', views.CertificateView.as_view(), name='quiz_certificate'),
     path('quiz/certificate/<int:pk>/download/', views.CertificateImageDownloadView.as_view(), name='quiz_certificate_download'),
+    path('quiz/certificate/<int:pk>/story/', views.CertificateStoryDownloadView.as_view(), name='quiz_certificate_story'),
     path('certificate/verify/<str:cert_id>/', views.verify_certificate, name='verify_certificate'),
     path('quiz-analytics/', views.QuizAnalyticsView.as_view(), name='quiz_analytics'),
     path('quiz-analytics/export/', views.quiz_analytics_export, name='quiz_analytics_export'),

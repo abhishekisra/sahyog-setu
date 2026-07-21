@@ -69,19 +69,57 @@ def _paste_contain(base, img_path, box_center_x, box_center_y, box_w, box_h):
 
 def _default_background():
     """Guilloche-style frame -- a Pillow equivalent of the SVG fallback
-    used in certificate.html when no custom background is uploaded."""
+    used in certificate.html when no custom background is uploaded.
+
+    Was a completely flat CREAM rectangle behind two plain outline
+    rectangles -- readable, but visibly flatter than the browser preview
+    (which gets free depth from CSS box-shadow/gradients Pillow has no
+    equivalent for). Adds a subtle vertical gradient (reads as a soft
+    vignette, the classic "premium certificate paper" cue), a third
+    hairline between the two existing borders so the frame is a proper
+    triple-line border instead of two disconnected rectangles, and small
+    diamond flourishes at the inner corners -- the kind of hand-finished
+    detail that's normally the first thing missing from an auto-generated
+    certificate."""
     im = Image.new("RGBA", (CANVAS_W, CANVAS_H), CREAM + (255,))
     d = ImageDraw.Draw(im)
+    # Vertical gradient: a hair lighter at the very top/bottom edges,
+    # a hair deeper through the vertical center -- subtle on purpose,
+    # this is meant to read as "not perfectly flat", not as a visible band.
+    top = (252, 250, 242)
+    bottom = (244, 240, 226)
+    for y in range(CANVAS_H):
+        t = abs(y - CANVAS_H / 2) / (CANVAS_H / 2)  # 0 at center, 1 at edges
+        r = int(bottom[0] + (top[0] - bottom[0]) * t)
+        g = int(bottom[1] + (top[1] - bottom[1]) * t)
+        b = int(bottom[2] + (top[2] - bottom[2]) * t)
+        d.line([(0, y), (CANVAS_W, y)], fill=(r, g, b, 255))
     margin_outer = 50
+    margin_mid = 84
     margin_inner = 118
     d.rectangle(
         [margin_outer, margin_outer, CANVAS_W - margin_outer, CANVAS_H - margin_outer],
         outline=GOLD, width=8,
     )
     d.rectangle(
+        [margin_mid, margin_mid, CANVAS_W - margin_mid, CANVAS_H - margin_mid],
+        outline=GOLD, width=2,
+    )
+    d.rectangle(
         [margin_inner, margin_inner, CANVAS_W - margin_inner, CANVAS_H - margin_inner],
         outline=INK, width=3,
     )
+
+    # Small diamond flourish at each of the four inner-border corners.
+    flourish_r = 14
+    for cx, cy in (
+        (margin_inner, margin_inner), (CANVAS_W - margin_inner, margin_inner),
+        (margin_inner, CANVAS_H - margin_inner), (CANVAS_W - margin_inner, CANVAS_H - margin_inner),
+    ):
+        d.polygon(
+            [(cx, cy - flourish_r), (cx + flourish_r, cy), (cx, cy + flourish_r), (cx - flourish_r, cy)],
+            outline=GOLD, width=3,
+        )
     return im
 
 
@@ -165,5 +203,137 @@ def render_certificate_image(attempt):
 
     buf = BytesIO()
     bg.convert("RGB").save(buf, format="PNG", optimize=True)
+    buf.seek(0)
+    return buf.getvalue()
+
+
+# ======================================================================
+# Story/Status share image -- vertical 9:16, sized for WhatsApp/Instagram
+# Status rather than the landscape certificate above. Bakes the quiz's
+# own shareable link into the image itself (as both a scannable QR code
+# and plain text) rather than relying on accompanying share-sheet text,
+# which many apps silently drop when the share payload includes an image
+# file -- the link survives however this image actually gets shared.
+# ======================================================================
+
+STORY_W, STORY_H = 1080, 1920
+STORY_BG_TOP = (24, 42, 31)      # matches the site's own dark-green gradient
+STORY_BG_BOTTOM = (14, 22, 17)
+STORY_GOLD = (255, 215, 0)       # #ffd700, the site's current accent
+STORY_GOLD_DIM = (201, 162, 39)  # #c9a227
+STORY_CREAM = (244, 239, 225)
+STORY_MUTED = (173, 194, 177)    # matches --ink-soft elsewhere on the site
+
+
+def _qr_image(url, scale=8, border=3, fg="black", bg="white"):
+    """Same reportlab-encode + Pillow-rasterize approach as
+    quizzes.views.quiz_qr_code (kept as a separate, small copy here
+    rather than importing from views.py -- views.py imports from this
+    module already, and importing back would be circular)."""
+    from reportlab.graphics.barcode.qr import QrCodeWidget
+
+    widget = QrCodeWidget(url)
+    widget.qr.make()
+    matrix = widget.qr.modules
+    module_count = widget.qr.moduleCount
+
+    size = (module_count + border * 2) * scale
+    img = Image.new("RGB", (size, size), bg)
+    draw = ImageDraw.Draw(img)
+    for row in range(module_count):
+        for col in range(module_count):
+            if matrix[row][col]:
+                x0, y0 = (col + border) * scale, (row + border) * scale
+                draw.rectangle([x0, y0, x0 + scale - 1, y0 + scale - 1], fill=fg)
+    return img
+
+
+def render_certificate_story_image(attempt, quiz_url):
+    """Returns PNG bytes: a 1080x1920 shareable card for WhatsApp/Instagram
+    Status, distinct from (not a resized crop of) the landscape
+    certificate -- a formal A4 layout rotated/squeezed into a vertical
+    frame reads cramped and illegible at Status size, so this is a
+    purpose-built composition instead: big score number as the visual
+    centerpiece, name and quiz title, and a QR code + printed URL for
+    quiz_url so anyone who sees the story can go take the quiz themselves."""
+    quiz = attempt.quiz
+    name = attempt.user.get_full_name().strip() or attempt.user.username
+    score = round(attempt.percentage)
+    cx = STORY_W / 2
+
+    im = Image.new("RGB", (STORY_W, STORY_H), STORY_BG_TOP)
+    d = ImageDraw.Draw(im)
+    for y in range(STORY_H):
+        t = y / STORY_H
+        r = int(STORY_BG_TOP[0] + (STORY_BG_BOTTOM[0] - STORY_BG_TOP[0]) * t)
+        g = int(STORY_BG_TOP[1] + (STORY_BG_BOTTOM[1] - STORY_BG_TOP[1]) * t)
+        b = int(STORY_BG_TOP[2] + (STORY_BG_BOTTOM[2] - STORY_BG_TOP[2]) * t)
+        d.line([(0, y), (STORY_W, y)], fill=(r, g, b))
+
+    margin = 36
+    d.rectangle([margin, margin, STORY_W - margin, STORY_H - margin], outline=STORY_GOLD_DIM, width=3)
+    d.rectangle([margin + 14, margin + 14, STORY_W - margin - 14, STORY_H - margin - 14], outline=STORY_GOLD, width=1)
+
+    # Brand row
+    seal_r = 46
+    seal_cy = 150
+    d.ellipse([cx - seal_r, seal_cy - seal_r, cx + seal_r, seal_cy + seal_r], fill=STORY_GOLD)
+    seal_font = _font("Cinzel-Bold.ttf", 52)
+    _draw_centered(d, cx, seal_cy - 32, "S", seal_font, (18, 32, 25))
+    brand_font = _font("Cinzel-Bold.ttf", 44)
+    _draw_centered(d, cx, seal_cy + seal_r + 24, "SAHYOG SETU", brand_font, STORY_GOLD)
+
+    # Headline
+    head_font = _font("Cinzel-Bold.ttf", 40)
+    _draw_centered(d, cx, 330, "CERTIFICATE OF ACHIEVEMENT", head_font, STORY_CREAM)
+
+    # Name
+    name_len = len(name)
+    name_size = 90 if name_len <= 15 else 70 if name_len <= 25 else 54
+    name_font = _font("GreatVibes-Regular.ttf", name_size)
+    _draw_centered(d, cx, 420, name, name_font, STORY_CREAM)
+
+    # Quiz title (wrapped, may be long)
+    title_font = _font("Cormorant-Regular.ttf", 42)
+    _wrap_and_draw_centered(d, cx, 560, quiz.title, title_font, STORY_MUTED,
+                             max_width=STORY_W * 0.78, line_height=52)
+
+    # Score -- the visual centerpiece
+    score_font = _font("Cinzel-Bold.ttf", 220)
+    _draw_centered(d, cx, 760, f"{score}%", score_font, STORY_GOLD)
+    score_label_font = _font("Cormorant-Regular.ttf", 36)
+    _draw_centered(d, cx, 1000, "SCORE", score_label_font, STORY_MUTED)
+
+    pass_font = _font("Cinzel-Bold.ttf", 34)
+    _draw_centered(d, cx, 1070, "PASSED ✓" if attempt.passed else "COMPLETED", pass_font, STORY_CREAM)
+
+    # QR + link -- this is what makes the quiz link travel with the image
+    # itself regardless of how it's shared.
+    qr = _qr_image(quiz_url, scale=7, border=2)
+    qr_size = 300
+    qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
+    qr_box_pad = 20
+    qr_top = 1220
+    d.rectangle(
+        [cx - qr_size / 2 - qr_box_pad, qr_top - qr_box_pad,
+         cx + qr_size / 2 + qr_box_pad, qr_top + qr_size + qr_box_pad],
+        fill=STORY_CREAM,
+    )
+    im.paste(qr, (int(cx - qr_size / 2), qr_top))
+
+    scan_font = _font("Cormorant-Regular.ttf", 34)
+    _draw_centered(d, cx, qr_top + qr_size + qr_box_pad + 20, "Scan to take this quiz", scan_font, STORY_CREAM)
+
+    url_font = _font("Cormorant-Regular.ttf", 28)
+    # Long URLs (with ?src=... etc.) wrap ugly at this width -- show just
+    # the bare domain, the QR code carries the full link for anyone who
+    # actually wants to follow it precisely.
+    _draw_centered(d, cx, qr_top + qr_size + qr_box_pad + 70, "sahyogsetu.in", url_font, STORY_GOLD)
+
+    footer_font = _font("Cormorant-Regular.ttf", 26)
+    _draw_centered(d, cx, STORY_H - 90, f"Certificate ID: {attempt.certificate_id}", footer_font, STORY_MUTED)
+
+    buf = BytesIO()
+    im.save(buf, format="PNG", optimize=True)
     buf.seek(0)
     return buf.getvalue()
