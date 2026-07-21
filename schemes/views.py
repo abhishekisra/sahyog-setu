@@ -387,7 +387,7 @@ def deleteScheme(request):
 
 
 def scheme_finder(request):
-    """Public, no login -- the "Yojana Khoj" scheme finder. All actual
+    """Public, no login -- the "Scheme Eligibility" finder. All actual
     searching/filtering happens client-side against the existing public
     /api/schemes, /api/schemes-and-services, /api/scheme/<id> endpoints
     (the same ones the React SPA already uses) -- this view just renders
