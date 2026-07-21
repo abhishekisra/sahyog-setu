@@ -1,7 +1,14 @@
+import html as html_module
+import json
+
 from django.shortcuts import render, redirect
 from django.views import View
+from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.utils.html import strip_tags
+from django.utils.text import Truncator
 
 from occupations.models import Occupations
 from states.models import States
@@ -387,16 +394,97 @@ def deleteScheme(request):
 
 
 def scheme_finder(request):
-    """Public, no login -- the "Scheme Eligibility" finder. All actual
-    searching/filtering happens client-side against the existing public
-    /api/schemes, /api/schemes-and-services, /api/scheme/<id> endpoints
-    (the same ones the React SPA already uses) -- this view just renders
-    the page shell and a couple of real counts for the hero stats."""
+    """Public, no login -- the "Scheme Eligibility" finder. Filtering hits
+    scheme_search_light below (NOT the existing /api/schemes -- see there
+    for why), and opening a card's detail view hits the existing, already-
+    small /api/scheme/<id>. This view just renders the page shell and a
+    couple of real counts for the hero stats."""
     total_schemes = Schemes.objects.filter(status=1).count()
     total_categories = Categories.objects.filter(status=1).count()
     return render(request, "custom_admin/schemes/scheme_finder.html", {
         "total_schemes": total_schemes,
         "total_categories": total_categories,
+    })
+
+
+@csrf_exempt
+def scheme_search_light(request):
+    """Filtered scheme search for the Scheme Eligibility page -- deliberately
+    NOT reusing the existing /api/schemes (schemes.apis.searchSchemes): that
+    endpoint returns the FULL SchemeSerializer (description, eligibility,
+    required_documents, web_links, mode_of_application -- every long-text
+    field) for EVERY matching row with no pagination at all. A plain,
+    no-filter page load matched 710 schemes and shipped ~4MB of JSON before
+    a single card could render, which is what made the page feel like it
+    hung on load, especially on the slow mobile connections most of this
+    site's real visitors are on.
+
+    Same filter semantics as searchSchemes (scheme_type, category, age,
+    family_income, marital_status, religion, caste, divyang_category,
+    searched_text), but returns only list-card-sized fields, paginated at
+    PAGE_SIZE, so a page load/filter change only ever ships the ~8-16
+    schemes actually about to be shown. Full detail (all those long-text
+    fields) loads separately, on demand, via the existing /api/scheme/<id>
+    when a visitor actually opens a card -- that response is already small
+    since it's a single scheme, not a whole result set.
+    """
+    PAGE_SIZE = 8
+    try:
+        body = json.loads(request.body)
+    except (ValueError, TypeError):
+        body = {}
+
+    schemes = Schemes.objects.filter(status=1, scheme_type=int(body.get('scheme_type') or 0))
+
+    if body.get('category'):
+        schemes = schemes.filter(category_id=body['category'])
+    if body.get('state'):
+        schemes = schemes.filter(state_id=body['state'])
+    if body.get('divyang_category') not in (None, ''):
+        from django.db.models import Q
+        schemes = schemes.filter(Q(divyang=body['divyang_category']) | Q(divyang=2))
+    if body.get('caste') not in (None, ''):
+        schemes = schemes.extra(where=['FIND_IN_SET(%s, castes)' % int(body['caste'])])
+    if body.get('marital_status') not in (None, ''):
+        schemes = schemes.extra(where=['FIND_IN_SET(%s, marital_status)' % int(body['marital_status'])])
+    if body.get('religion') not in (None, ''):
+        schemes = schemes.extra(where=['FIND_IN_SET(%s, religions)' % int(body['religion'])])
+    if body.get('gender') not in (None, ''):
+        schemes = schemes.extra(where=['FIND_IN_SET(%s, scheme_for)' % int(body['gender'])])
+    if body.get('age'):
+        schemes = schemes.filter(age_min__lte=body['age'], age_max__gte=body['age'])
+    if body.get('family_income'):
+        from django.db.models import Q
+        schemes = schemes.filter(income_min__lte=body['family_income']).filter(
+            Q(income_max__gte=body['family_income']) | Q(income_max=0))
+    if body.get('searched_text'):
+        schemes = schemes.filter(title__icontains=body['searched_text'])
+
+    schemes = schemes.select_related('state').order_by('-id')
+    total = schemes.count()
+    page = max(1, int(body.get('page') or 1))
+    paginator = Paginator(schemes, PAGE_SIZE)
+    page_obj = paginator.get_page(page)
+
+    results = []
+    for s in page_obj.object_list:
+        desc = html_module.unescape(strip_tags(s.description or ""))
+        results.append({
+            "id": s.id,
+            "title": s.title,
+            "state": s.state.state if s.state_id else "",
+            "short_description": Truncator(desc.strip()).chars(130),
+            "age_min": s.age_min,
+            "age_max": s.age_max,
+            "income_max": s.income_max,
+        })
+
+    return JsonResponse({
+        "results": results,
+        "total": total,
+        "page": page,
+        "page_size": PAGE_SIZE,
+        "num_pages": paginator.num_pages,
     })
         
 

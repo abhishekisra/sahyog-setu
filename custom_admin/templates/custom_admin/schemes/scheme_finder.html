@@ -5,6 +5,9 @@
 
 {% block head %}
 <meta name="description" content="Search {{ total_schemes }}+ Indian government welfare schemes and find the ones you actually qualify for, filtered by your age, category, income and more." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
@@ -24,10 +27,10 @@
     --good:#2F7A4D;
     --shadow: 0 10px 30px -12px rgba(24,32,25,.18);
     background:var(--paper); color:var(--text);
-    font-family: -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
   }
   .yk-page h1,.yk-page h2,.yk-page h3,.yk-page h4{
-    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    font-family:'Fraunces',Georgia,serif;
     font-weight:600; margin:0;
   }
   .yk-page *{box-sizing:border-box;}
@@ -36,20 +39,20 @@
   .yk-nav{background:var(--brand-deep);color:#EDEAE0;}
   .yk-nav-inner{max-width:1180px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;}
   .yk-brand{display:flex;align-items:center;gap:11px;}
-  .yk-brand-mark{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:var(--brand-deeper);font-family:"Iowan Old Style",Georgia,serif;font-weight:700;font-size:17px;flex-shrink:0;}
-  .yk-brand-text .t1{font-family:"Iowan Old Style",Georgia,serif;font-size:18px;font-weight:600;line-height:1.15;}
+  .yk-brand-mark{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:var(--brand-deeper);font-family:'Fraunces',Georgia,serif;font-weight:700;font-size:17px;flex-shrink:0;}
+  .yk-brand-text .t1{font-family:'Fraunces',Georgia,serif;font-size:18px;font-weight:600;line-height:1.15;}
   .yk-brand-text .t2{font-size:11px;color:#B9C6B4;}
   .yk-nav-search{flex:1;max-width:400px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:22px;display:flex;align-items:center;gap:9px;padding:9px 15px;min-width:200px;}
   .yk-nav-search svg{flex-shrink:0;opacity:.65;}
-  .yk-nav-search input{background:transparent;border:none;outline:none;color:#fff;font-size:13.5px;width:100%;font-family:inherit;}
+  .yk-nav-search input{background:transparent;border:none;outline:none;color:#fff;font-size:14px;width:100%;font-family:inherit;}
   .yk-nav-search input::placeholder{color:#9CAB95;}
 
   .yk-hero{padding:40px 0 26px;}
-  .yk-eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--sunken);color:var(--brand-deep);font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 13px;border-radius:20px;margin-bottom:16px;}
+  .yk-eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--sunken);color:var(--brand-deep);font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 13px;border-radius:20px;margin-bottom:16px;}
   .yk-hero h1{font-size:30px;line-height:1.24;max-width:660px;}
-  .yk-hero p{color:var(--text-muted);font-size:14.5px;margin-top:12px;max-width:580px;line-height:1.6;}
+  .yk-hero p{color:var(--text-muted);font-size:15px;margin-top:12px;max-width:580px;line-height:1.6;}
   .yk-hero-stats{display:flex;gap:32px;margin-top:24px;flex-wrap:wrap;}
-  .yk-hero-stat .num{font-family:"Iowan Old Style",Georgia,serif;font-size:25px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .yk-hero-stat .num{font-family:'Fraunces',Georgia,serif;font-size:25px;font-weight:600;font-variant-numeric:tabular-nums;}
   .yk-hero-stat .lbl{font-size:12px;color:var(--text-muted);margin-top:2px;}
 
   .yk-layout{display:grid;grid-template-columns:272px 1fr;gap:24px;margin-top:24px;align-items:start;}
@@ -60,7 +63,7 @@
   .yk-panel-head h3{font-size:15px;}
   .yk-clear-btn{font-size:12px;color:var(--terracotta);cursor:pointer;font-weight:600;background:none;border:none;font-family:inherit;padding:0;}
   .yk-field{margin-bottom:20px;}
-  .yk-field label{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:9px;}
+  .yk-field label{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:700;color:var(--text);margin-bottom:9px;}
   .yk-field-icon{width:16px;height:16px;color:var(--gold-ink);flex-shrink:0;}
   .yk-page select,.yk-field input[type="text"]{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--paper);font-family:inherit;font-size:13px;color:var(--text);appearance:none;}
   .yk-page select:focus,.yk-field input:focus{outline:2px solid var(--gold-ink);outline-offset:1px;}
@@ -70,24 +73,24 @@
   .yk-chip{padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--paper);font-size:12px;color:var(--text-muted);cursor:pointer;user-select:none;}
   .yk-chip:hover{border-color:var(--gold-ink);}
   .yk-chip.active{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep);}
-  .yk-btn-apply{width:100%;background:var(--gold);color:var(--brand-deeper);border:none;padding:11px;border-radius:9px;font-weight:700;font-size:13.5px;margin-top:4px;cursor:pointer;font-family:inherit;}
+  .yk-btn-apply{width:100%;background:var(--gold);color:var(--brand-deeper);border:none;padding:11px;border-radius:9px;font-weight:700;font-size:14px;margin-top:4px;cursor:pointer;font-family:inherit;}
 
   .yk-results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .yk-results-head h3{font-size:16px;}
-  .yk-sort{font-size:12.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .yk-sort{font-size:13px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
   .yk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
   @media (max-width:640px){.yk-grid{grid-template-columns:1fr;}}
   .yk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;cursor:pointer;}
   .yk-card:hover{box-shadow:var(--shadow);}
   .yk-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
-  .yk-tag{display:inline-block;background:var(--sunken);color:var(--brand-deep);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:4px 9px;border-radius:6px;margin-bottom:9px;}
+  .yk-tag{display:inline-block;background:var(--sunken);color:var(--brand-deep);font-size:11px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:4px 9px;border-radius:6px;margin-bottom:9px;}
   .yk-card h4{font-size:16px;font-weight:600;line-height:1.32;margin:0 0 8px;}
-  .yk-card p{font-size:12.6px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;max-height:57px;overflow:hidden;}
+  .yk-card p{font-size:13px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;max-height:57px;overflow:hidden;}
   .yk-card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:12px;}
   .yk-verified{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);}
   .yk-verified svg{color:var(--good);flex-shrink:0;}
-  .yk-view-link{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--terracotta);}
-  .yk-empty,.yk-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);border:1px dashed var(--border);border-radius:14px;font-size:13.5px;}
+  .yk-view-link{display:flex;align-items:center;gap:5px;font-size:13px;font-weight:600;color:var(--terracotta);}
+  .yk-empty,.yk-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);border:1px dashed var(--border);border-radius:14px;font-size:14px;}
   .yk-pagination{display:flex;justify-content:center;gap:8px;margin-top:22px;}
   .yk-page-btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
   .yk-page-btn:disabled{opacity:.4;cursor:default;}
@@ -98,7 +101,7 @@
   .yk-detail-sheet{background:var(--paper);border-radius:16px;max-width:880px;width:100%;box-shadow:0 30px 70px -20px rgba(0,0,0,.4);}
   .yk-detail-hero{background:var(--brand-deep);color:#EDEAE0;border-radius:16px 16px 0 0;padding:28px 30px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;}
   .yk-detail-hero .yk-tags{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
-  .yk-detail-hero .yk-tags span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:10.5px;padding:4px 10px;border-radius:13px;color:#E6DFC9;}
+  .yk-detail-hero .yk-tags span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:11px;padding:4px 10px;border-radius:13px;color:#E6DFC9;}
   .yk-detail-hero h2{font-size:22px;color:#fff;max-width:520px;line-height:1.32;}
   .yk-close-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .yk-detail-body{padding:26px 30px 30px;}
@@ -109,13 +112,13 @@
   .yk-block h3 svg{color:var(--gold-ink);flex-shrink:0;}
   .yk-block p, .yk-block div{font-size:13px;color:var(--text-muted);line-height:1.68;margin:0;}
   .yk-side-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:15px;}
-  .yk-side-card h4{font-size:12.5px;margin-bottom:12px;font-family:"Iowan Old Style",Georgia,serif;}
-  .yk-fact{display:flex;justify-content:space-between;font-size:12.3px;padding:8px 0;border-bottom:1px solid var(--border);gap:10px;}
+  .yk-side-card h4{font-size:13px;margin-bottom:12px;font-family:'Fraunces',Georgia,serif;}
+  .yk-fact{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);gap:10px;}
   .yk-fact:last-child{border-bottom:none;}
   .yk-fact .lbl{color:var(--text-muted);}
   .yk-fact .val{font-weight:600;text-align:right;}
   .yk-apply-card{background:linear-gradient(150deg,var(--brand-deep) 0%,var(--brand-deeper) 100%);color:#fff;border-radius:12px;padding:20px;text-align:center;}
-  .yk-apply-card p{font-size:11.5px;color:#C4D0BE;margin:0 0 13px;line-height:1.5;}
+  .yk-apply-card p{font-size:12px;color:#C4D0BE;margin:0 0 13px;line-height:1.5;}
   .yk-apply-btn{width:100%;background:var(--gold);color:var(--brand-deeper);border:none;padding:11px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;}
 </style>
 
@@ -244,9 +247,8 @@
 
 <script>
 (function(){
-  var PAGE_SIZE = 8;
   var currentPage = 1;
-  var lastResults = [];
+  var lastFilters = {};
 
   function csrfToken(){
     var m = document.cookie.match(/csrftoken=([^;]+)/);
@@ -301,7 +303,6 @@
     } else {
       list.forEach(function(s){
         var pct = matchScore(s, filters);
-        var desc = stripTags(s.description).slice(0, 130);
         var card = document.createElement('div');
         card.className = 'yk-card';
         card.tabIndex = 0;
@@ -311,41 +312,32 @@
             '<div><div class="yk-tag">'+(s.state || 'Central Scheme')+'</div><h4>'+s.title+'</h4></div>' +
             ringSVG(pct) +
           '</div>' +
-          '<p>'+(desc || 'No description available yet for this scheme.')+'</p>' +
+          '<p>'+(s.short_description || 'No description available yet for this scheme.')+'</p>' +
           '<div class="yk-card-foot">' +
             '<div class="yk-verified"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg> Verified scheme</div>' +
             '<div class="yk-view-link">View details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>' +
           '</div>';
-        card.addEventListener('click', function(){ openDetail(s, pct); });
-        card.addEventListener('keydown', function(e){ if(e.key === 'Enter') openDetail(s, pct); });
+        card.addEventListener('click', function(){ openDetail(s.id, pct); });
+        card.addEventListener('keydown', function(e){ if(e.key === 'Enter') openDetail(s.id, pct); });
         grid.appendChild(card);
       });
     }
   }
 
-  function renderPagination(total){
+  function renderPagination(numPages){
     var wrap = document.getElementById('ykPagination');
     wrap.innerHTML = '';
-    var pages = Math.ceil(total / PAGE_SIZE);
-    if(pages <= 1) return;
-    for(var i=1; i<=pages; i++){
+    if(numPages <= 1) return;
+    for(var i=1; i<=numPages; i++){
       (function(p){
         var btn = document.createElement('button');
         btn.className = 'yk-page-btn' + (p === currentPage ? ' active' : '');
         btn.textContent = p;
-        btn.addEventListener('click', function(){ currentPage = p; renderPage(); });
+        btn.addEventListener('click', function(){ currentPage = p; runSearch(true); });
         wrap.appendChild(btn);
       })(i);
     }
   }
-
-  function renderPage(){
-    var start = (currentPage-1)*PAGE_SIZE;
-    renderCards(lastResults.slice(start, start+PAGE_SIZE), lastFilters);
-    renderPagination(lastResults.length);
-  }
-
-  var lastFilters = {};
 
   function currentFilters(){
     var age = document.getElementById('ykAge').value;
@@ -361,33 +353,37 @@
     };
   }
 
-  function runSearch(){
+  function runSearch(keepPage){
     var f = currentFilters();
     lastFilters = f;
+    if(!keepPage) currentPage = 1;
     document.getElementById('ykResultsHeading').textContent = 'Searching…';
     document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-loading">Searching live schemes…</div>';
 
     var body = {
-      scheme_type: 0, category: f.category || null, state: null, dbt: null,
-      divyang_category: f.divyang || null, beneficiary: null, caste: f.caste || null,
-      gender: null, marital_status: f.marital_status || null, religion: f.religion || null,
-      area: null, employment: null, occupation: null,
-      age: f.age, family_income: f.income, searched_text: f.search || null
+      scheme_type: 0, category: f.category || null,
+      divyang_category: f.divyang || null, caste: f.caste || null,
+      marital_status: f.marital_status || null, religion: f.religion || null,
+      age: f.age, family_income: f.income, searched_text: f.search || null,
+      page: currentPage
     };
 
-    fetch('/api/schemes', {
+    // Hits scheme_search_light (this app's own lightweight endpoint), NOT
+    // /api/schemes -- that one returns full long-text fields for every
+    // matching row with no pagination, which was the ~4MB-per-load slowdown.
+    fetch('{% url "scheme_search_light" %}', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken()},
       body: JSON.stringify(body)
     })
       .then(function(r){ return r.json(); })
       .then(function(data){
-        lastResults = data.schemes || [];
-        currentPage = 1;
+        var results = data.results || [];
         document.getElementById('ykResultsHeading').textContent =
-          'Showing ' + lastResults.length + ' scheme' + (lastResults.length===1?'':'s');
-        document.getElementById('ykStatShown').textContent = lastResults.length;
-        renderPage();
+          'Showing ' + results.length + ' of ' + data.total + ' scheme' + (data.total===1?'':'s');
+        document.getElementById('ykStatShown').textContent = data.total;
+        renderCards(results, f);
+        renderPagination(data.num_pages || 1);
       })
       .catch(function(){
         document.getElementById('ykResultsHeading').textContent = 'Something went wrong';
@@ -421,7 +417,26 @@
     runSearch();
   });
 
-  function openDetail(s, pct){
+  // Detail is fetched on demand, per scheme, from the existing
+  // /api/scheme/<id> -- that endpoint was always fine size-wise (a single
+  // scheme's full text, not hundreds at once), so it's kept as-is rather
+  // than duplicated into scheme_search_light.
+  function openDetail(id, pct){
+    var overlay = document.getElementById('ykDetailOverlay');
+    var sheet = document.getElementById('ykDetailSheet');
+    sheet.innerHTML = '<div class="yk-loading" style="border:none;padding:60px 30px;">Loading scheme details…</div>';
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    fetch('/api/scheme/' + id)
+      .then(function(r){ return r.json(); })
+      .then(function(data){ renderDetail(data.scheme, pct); })
+      .catch(function(){
+        sheet.innerHTML = '<div class="yk-loading" style="border:none;padding:60px 30px;">Could not load this scheme\'s details — please try again.</div>';
+      });
+  }
+
+  function renderDetail(s, pct){
     var sheet = document.getElementById('ykDetailSheet');
     var elig = stripTags(s.eligibility);
     var docs = stripTags(s.required_documents);
