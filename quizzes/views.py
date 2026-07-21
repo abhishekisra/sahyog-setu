@@ -1580,7 +1580,12 @@ class CertificateImageDownloadView(View):
 
         image_bytes = render_certificate_image(attempt)
         response = HttpResponse(image_bytes, content_type="image/png")
-        response["Content-Disposition"] = f'attachment; filename="certificate_{attempt.certificate_id}.png"'
+        # certificate_id now contains "/" (SAHYOG/MM/YY/NN) -- can't go
+        # straight into a filename (nested-path-like, and rejected/mangled
+        # by most OSes/browsers), so swap it for "-" here only. The stored
+        # ID and every displayed/verify-link use of it keep the real slashes.
+        safe_id = attempt.certificate_id.replace("/", "-")
+        response["Content-Disposition"] = f'attachment; filename="certificate_{safe_id}.png"'
         return response
 
 
@@ -1607,7 +1612,9 @@ class CertificateStoryDownloadView(View):
 
         image_bytes = render_certificate_story_image(attempt, quiz_url)
         response = HttpResponse(image_bytes, content_type="image/png")
-        response["Content-Disposition"] = f'attachment; filename="sahyogsetu_status_{attempt.certificate_id}.png"'
+        # Same filename-safe swap as CertificateImageDownloadView above.
+        safe_id = attempt.certificate_id.replace("/", "-")
+        response["Content-Disposition"] = f'attachment; filename="sahyogsetu_status_{safe_id}.png"'
         return response
 
 
