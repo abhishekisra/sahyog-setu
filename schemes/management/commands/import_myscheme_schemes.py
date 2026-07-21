@@ -387,11 +387,25 @@ class Command(BaseCommand):
                         mode_parts.append(f"<h4>{mode_label} Apply:</h4>{mode_html}")
                     mode_of_application_html = "".join(mode_parts) or "<p>Refer to the official scheme page for how to apply.</p>"
 
-                    links = [f'<p><a href="https://www.myscheme.gov.in/schemes/{slug}" target="_blank">View on myScheme (Government of India)</a></p>']
-                    for ref in content.get("references") or []:
-                        if ref.get("url"):
-                            links.append(f'<p><a href="{ref["url"]}" target="_blank">{ref.get("title") or "Reference"}</a></p>')
-                    web_links_html = "".join(links)
+                    # Prefer the scheme's own specific official links (ministry/
+                    # department site, guidelines PDF, application portal --
+                    # myscheme.gov.in's "references") over myscheme.gov.in's own
+                    # generic aggregator page for that scheme -- visitors should
+                    # land on the actual issuing authority's page, not a second
+                    # discovery layer. Only fall back to the myscheme.gov.in page
+                    # (relabeled, no "myScheme" wording) when a scheme has no
+                    # specific references at all (~4 in 4485 at last count).
+                    ref_links = [
+                        f'<p><a href="{ref["url"]}" target="_blank">{ref.get("title") or "Reference"}</a></p>'
+                        for ref in (content.get("references") or []) if ref.get("url")
+                    ]
+                    if ref_links:
+                        web_links_html = "".join(ref_links)
+                    else:
+                        web_links_html = (
+                            f'<p><a href="https://www.myscheme.gov.in/schemes/{slug}" target="_blank">'
+                            f'View Official Scheme Details (Government of India)</a></p>'
+                        )
 
                     elig = guess_eligibility(
                         eligibility_block.get("eligibilityDescription_md", ""), name, tags,
