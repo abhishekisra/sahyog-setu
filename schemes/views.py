@@ -377,13 +377,27 @@ class EditSchemeView(View):
 def deleteScheme(request):
     if request.user.is_authenticated:
         id = request.POST.get('id')
-        scheme = Schemes.objects.get(id = id) 
+        scheme = Schemes.objects.get(id = id)
         scheme.delete()
         messages.success(request, "Scheme deleted successfully.")
         return redirect('adminSchemes')
     else:
         messages.error(request, "You have to login first.")
         return redirect('adminLogin')
+
+
+def scheme_finder(request):
+    """Public, no login -- the "Yojana Khoj" scheme finder. All actual
+    searching/filtering happens client-side against the existing public
+    /api/schemes, /api/schemes-and-services, /api/scheme/<id> endpoints
+    (the same ones the React SPA already uses) -- this view just renders
+    the page shell and a couple of real counts for the hero stats."""
+    total_schemes = Schemes.objects.filter(status=1).count()
+    total_categories = Categories.objects.filter(status=1).count()
+    return render(request, "custom_admin/schemes/scheme_finder.html", {
+        "total_schemes": total_schemes,
+        "total_categories": total_categories,
+    })
         
 
 

@@ -28,5 +28,6 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('', include('partners.urls')),
     path('', include('quizzes.urls')),
+    path('', include('schemes.urls')),
 
  ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

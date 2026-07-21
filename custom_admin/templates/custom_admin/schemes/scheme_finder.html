@@ -1,0 +1,472 @@
+{% extends 'custom_admin/public_base.html' %}
+{% load static %}
+
+{% block title %}Yojana Khoj — Find Schemes You're Eligible For | Sahyog Setu{% endblock %}
+
+{% block head %}
+<meta name="description" content="Search {{ total_schemes }}+ Indian government welfare schemes and find the ones you actually qualify for, filtered by your age, category, income and more." />
+{% endblock %}
+
+{% block body %}
+<style>
+  .yk-page{
+    --brand-deep:#28352A;
+    --brand-deeper:#182019;
+    --gold:#FFD700;
+    --gold-ink:#8A6C09;
+    --paper:#FAF6EC;
+    --card:#FFFFFF;
+    --sunken:#EEF1E5;
+    --terracotta:#B8532F;
+    --text:#26251F;
+    --text-muted:#6B6A5E;
+    --border:#E3DCC7;
+    --good:#2F7A4D;
+    --shadow: 0 10px 30px -12px rgba(24,32,25,.18);
+    background:var(--paper); color:var(--text);
+    font-family: -apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  .yk-page h1,.yk-page h2,.yk-page h3,.yk-page h4{
+    font-family:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,"Times New Roman",serif;
+    font-weight:600; margin:0;
+  }
+  .yk-page *{box-sizing:border-box;}
+  .yk-wrap{max-width:1180px;margin:0 auto;padding:0 24px 90px;}
+
+  .yk-nav{background:var(--brand-deep);color:#EDEAE0;}
+  .yk-nav-inner{max-width:1180px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;}
+  .yk-brand{display:flex;align-items:center;gap:11px;}
+  .yk-brand-mark{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:var(--brand-deeper);font-family:"Iowan Old Style",Georgia,serif;font-weight:700;font-size:17px;flex-shrink:0;}
+  .yk-brand-text .t1{font-family:"Iowan Old Style",Georgia,serif;font-size:18px;font-weight:600;line-height:1.15;}
+  .yk-brand-text .t2{font-size:11px;color:#B9C6B4;}
+  .yk-nav-search{flex:1;max-width:400px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:22px;display:flex;align-items:center;gap:9px;padding:9px 15px;min-width:200px;}
+  .yk-nav-search svg{flex-shrink:0;opacity:.65;}
+  .yk-nav-search input{background:transparent;border:none;outline:none;color:#fff;font-size:13.5px;width:100%;font-family:inherit;}
+  .yk-nav-search input::placeholder{color:#9CAB95;}
+
+  .yk-hero{padding:40px 0 26px;}
+  .yk-eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--sunken);color:var(--brand-deep);font-size:11.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 13px;border-radius:20px;margin-bottom:16px;}
+  .yk-hero h1{font-size:30px;line-height:1.24;max-width:660px;}
+  .yk-hero p{color:var(--text-muted);font-size:14.5px;margin-top:12px;max-width:580px;line-height:1.6;}
+  .yk-hero-stats{display:flex;gap:32px;margin-top:24px;flex-wrap:wrap;}
+  .yk-hero-stat .num{font-family:"Iowan Old Style",Georgia,serif;font-size:25px;font-weight:600;font-variant-numeric:tabular-nums;}
+  .yk-hero-stat .lbl{font-size:12px;color:var(--text-muted);margin-top:2px;}
+
+  .yk-layout{display:grid;grid-template-columns:272px 1fr;gap:24px;margin-top:24px;align-items:start;}
+  @media (max-width:860px){.yk-layout{grid-template-columns:1fr;}}
+  .yk-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:sticky;top:20px;}
+  @media (max-width:860px){.yk-panel{position:static;}}
+  .yk-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
+  .yk-panel-head h3{font-size:15px;}
+  .yk-clear-btn{font-size:12px;color:var(--terracotta);cursor:pointer;font-weight:600;background:none;border:none;font-family:inherit;padding:0;}
+  .yk-field{margin-bottom:20px;}
+  .yk-field label{display:flex;align-items:center;gap:8px;font-size:12.5px;font-weight:700;color:var(--text);margin-bottom:9px;}
+  .yk-field-icon{width:16px;height:16px;color:var(--gold-ink);flex-shrink:0;}
+  .yk-page select,.yk-field input[type="text"]{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--paper);font-family:inherit;font-size:13px;color:var(--text);appearance:none;}
+  .yk-page select:focus,.yk-field input:focus{outline:2px solid var(--gold-ink);outline-offset:1px;}
+  .yk-field.range input[type=range]{width:100%;accent-color:var(--gold-ink);}
+  .yk-range-val{display:flex;justify-content:space-between;font-size:11px;color:var(--text-muted);margin-top:5px;font-variant-numeric:tabular-nums;}
+  .yk-chip-row{display:flex;flex-wrap:wrap;gap:7px;}
+  .yk-chip{padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--paper);font-size:12px;color:var(--text-muted);cursor:pointer;user-select:none;}
+  .yk-chip:hover{border-color:var(--gold-ink);}
+  .yk-chip.active{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep);}
+  .yk-btn-apply{width:100%;background:var(--gold);color:var(--brand-deeper);border:none;padding:11px;border-radius:9px;font-weight:700;font-size:13.5px;margin-top:4px;cursor:pointer;font-family:inherit;}
+
+  .yk-results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
+  .yk-results-head h3{font-size:16px;}
+  .yk-sort{font-size:12.5px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
+  .yk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  @media (max-width:640px){.yk-grid{grid-template-columns:1fr;}}
+  .yk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;cursor:pointer;}
+  .yk-card:hover{box-shadow:var(--shadow);}
+  .yk-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .yk-tag{display:inline-block;background:var(--sunken);color:var(--brand-deep);font-size:10px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:4px 9px;border-radius:6px;margin-bottom:9px;}
+  .yk-card h4{font-size:16px;font-weight:600;line-height:1.32;margin:0 0 8px;}
+  .yk-card p{font-size:12.6px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;max-height:57px;overflow:hidden;}
+  .yk-card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:12px;}
+  .yk-verified{display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);}
+  .yk-verified svg{color:var(--good);flex-shrink:0;}
+  .yk-view-link{display:flex;align-items:center;gap:5px;font-size:12.5px;font-weight:600;color:var(--terracotta);}
+  .yk-empty,.yk-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);border:1px dashed var(--border);border-radius:14px;font-size:13.5px;}
+  .yk-pagination{display:flex;justify-content:center;gap:8px;margin-top:22px;}
+  .yk-page-btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px;font-size:13px;cursor:pointer;font-family:inherit;}
+  .yk-page-btn:disabled{opacity:.4;cursor:default;}
+  .yk-page-btn.active{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep);}
+
+  .yk-detail-overlay{position:fixed;inset:0;background:rgba(20,26,19,.5);display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;z-index:9999;}
+  .yk-detail-overlay.open{display:flex;}
+  .yk-detail-sheet{background:var(--paper);border-radius:16px;max-width:880px;width:100%;box-shadow:0 30px 70px -20px rgba(0,0,0,.4);}
+  .yk-detail-hero{background:var(--brand-deep);color:#EDEAE0;border-radius:16px 16px 0 0;padding:28px 30px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;}
+  .yk-detail-hero .yk-tags{display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;}
+  .yk-detail-hero .yk-tags span{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);font-size:10.5px;padding:4px 10px;border-radius:13px;color:#E6DFC9;}
+  .yk-detail-hero h2{font-size:22px;color:#fff;max-width:520px;line-height:1.32;}
+  .yk-close-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .yk-detail-body{padding:26px 30px 30px;}
+  .yk-detail-layout{display:grid;grid-template-columns:1fr 260px;gap:22px;}
+  @media (max-width:680px){.yk-detail-layout{grid-template-columns:1fr;}}
+  .yk-block{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:19px 20px;margin-bottom:15px;}
+  .yk-block h3{font-size:14px;margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+  .yk-block h3 svg{color:var(--gold-ink);flex-shrink:0;}
+  .yk-block p, .yk-block div{font-size:13px;color:var(--text-muted);line-height:1.68;margin:0;}
+  .yk-side-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:15px;}
+  .yk-side-card h4{font-size:12.5px;margin-bottom:12px;font-family:"Iowan Old Style",Georgia,serif;}
+  .yk-fact{display:flex;justify-content:space-between;font-size:12.3px;padding:8px 0;border-bottom:1px solid var(--border);gap:10px;}
+  .yk-fact:last-child{border-bottom:none;}
+  .yk-fact .lbl{color:var(--text-muted);}
+  .yk-fact .val{font-weight:600;text-align:right;}
+  .yk-apply-card{background:linear-gradient(150deg,var(--brand-deep) 0%,var(--brand-deeper) 100%);color:#fff;border-radius:12px;padding:20px;text-align:center;}
+  .yk-apply-card p{font-size:11.5px;color:#C4D0BE;margin:0 0 13px;line-height:1.5;}
+  .yk-apply-btn{width:100%;background:var(--gold);color:var(--brand-deeper);border:none;padding:11px;border-radius:9px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;}
+</style>
+
+<div class="yk-page">
+  <div class="yk-nav">
+    <div class="yk-nav-inner">
+      <div class="yk-brand">
+        <div class="yk-brand-mark">स</div>
+        <div class="yk-brand-text">
+          <div class="t1">Yojana Khoj</div>
+          <div class="t2">Sahyog Setu · find schemes you're eligible for</div>
+        </div>
+      </div>
+      <div class="yk-nav-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="ykSearch" placeholder="Search schemes, e.g. widow pension, student scholarship...">
+      </div>
+    </div>
+  </div>
+
+  <div class="yk-wrap">
+    <div class="yk-hero">
+      <div class="yk-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.1L12 16.3l-6.3 4.4L8 13.6 2 9.2h7.6z"/></svg>
+        Live scheme database
+      </div>
+      <h1>{{ total_schemes }} schemes, narrowed to the ones <em>you</em> qualify for</h1>
+      <p>Set your age, category and household details — Sahyog Setu ranks every central scheme by how well you match its real eligibility rules, not just its category.</p>
+      <div class="yk-hero-stats">
+        <div class="yk-hero-stat"><div class="num">{{ total_schemes }}</div><div class="lbl">Schemes tracked</div></div>
+        <div class="yk-hero-stat"><div class="num" id="ykStatShown">—</div><div class="lbl">Matching your filters</div></div>
+        <div class="yk-hero-stat"><div class="num">{{ total_categories }}</div><div class="lbl">Categories</div></div>
+      </div>
+    </div>
+
+    <div class="yk-layout">
+      <div class="yk-panel">
+        <div class="yk-panel-head"><h3>Filters</h3><button class="yk-clear-btn" id="ykClearBtn">Clear all</button></div>
+
+        <div class="yk-field range">
+          <label><svg class="yk-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a5 5 0 015 5c0 3-2 4-2 6h-6c0-2-2-3-2-6a5 5 0 015-5z"/><path d="M9 21h6M10 18h4"/></svg> Age</label>
+          <input type="range" id="ykAge" min="0" max="100" value="100">
+          <div class="yk-range-val"><span>0</span><span id="ykAgeVal">Any age</span><span>100</span></div>
+        </div>
+
+        <div class="yk-field">
+          <label><svg class="yk-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 3"/></svg> Category</label>
+          <select id="ykCategory"><option value="">All categories</option></select>
+        </div>
+
+        <div class="yk-field">
+          <label><svg class="yk-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="6" width="18" height="13" rx="1"/><path d="M8 6V4h8v2"/></svg> Annual household income</label>
+          <select id="ykIncome">
+            <option value="">Any income</option>
+            <option value="50000">Under ₹50,000</option>
+            <option value="100000">Under ₹1,00,000</option>
+            <option value="250000">Under ₹2,50,000</option>
+            <option value="800000">Under ₹8,00,000</option>
+          </select>
+        </div>
+
+        <div class="yk-field">
+          <label><svg class="yk-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M8 15s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg> Marital status</label>
+          <select id="ykMarital">
+            <option value="">Any</option>
+            <option value="0">Married</option>
+            <option value="1">Unmarried</option>
+            <option value="2">Widowed</option>
+          </select>
+        </div>
+
+        <div class="yk-field">
+          <label><svg class="yk-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21V5a2 2 0 012-2h8l6 6v12a2 2 0 01-2 2H6a2 2 0 01-2-2z"/></svg> Religion</label>
+          <select id="ykReligion">
+            <option value="">Any</option>
+            <option value="0">Hindu</option>
+            <option value="1">Muslim</option>
+            <option value="2">Christian</option>
+            <option value="3">Sikh</option>
+            <option value="4">Parsi</option>
+            <option value="5">Buddhist</option>
+          </select>
+        </div>
+
+        <div class="yk-field">
+          <label><svg class="yk-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg> Category (social)</label>
+          <div class="yk-chip-row" id="ykCasteChips">
+            <div class="yk-chip active" data-val="">Any</div>
+            <div class="yk-chip" data-val="0">General</div>
+            <div class="yk-chip" data-val="1">OBC</div>
+            <div class="yk-chip" data-val="2">SC</div>
+            <div class="yk-chip" data-val="3">ST</div>
+          </div>
+        </div>
+
+        <div class="yk-field">
+          <label><svg class="yk-field-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="7" r="3"/><path d="M2 20c0-3.5 3-6 7-6s7 2.5 7 6M17 8l3 3-3 3"/></svg> Differently abled</label>
+          <div class="yk-chip-row" id="ykDivyangChips">
+            <div class="yk-chip active" data-val="">Any</div>
+            <div class="yk-chip" data-val="1">Yes</div>
+            <div class="yk-chip" data-val="0">No</div>
+          </div>
+        </div>
+
+        <button class="yk-btn-apply" id="ykApplyBtn">Apply filters</button>
+      </div>
+
+      <div>
+        <div class="yk-results-head">
+          <h3 id="ykResultsHeading">Loading schemes…</h3>
+          <div class="yk-sort">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13M3 12h9M3 17h5"/></svg>
+            Central government schemes
+          </div>
+        </div>
+        <div class="yk-grid" id="ykCardsGrid"><div class="yk-loading">Loading schemes from the live database…</div></div>
+        <div class="yk-pagination" id="ykPagination"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="yk-detail-overlay" id="ykDetailOverlay">
+    <div class="yk-detail-sheet" id="ykDetailSheet"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var PAGE_SIZE = 8;
+  var currentPage = 1;
+  var lastResults = [];
+
+  function csrfToken(){
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  }
+
+  function stripTags(html){
+    var d = document.createElement('div');
+    d.innerHTML = html || '';
+    return (d.textContent || '').trim();
+  }
+
+  // Populate category dropdown from the real live API.
+  fetch('/api/schemes-and-services')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      var sel = document.getElementById('ykCategory');
+      (data.categories || []).forEach(function(c){
+        var opt = document.createElement('option');
+        opt.value = c.id; opt.textContent = c.title;
+        sel.appendChild(opt);
+      });
+    })
+    .catch(function(){ /* category list is a nice-to-have -- search still works without it */ });
+
+  function ringSVG(pct){
+    var r = 20, c = 2*Math.PI*r;
+    var offset = c - (pct/100)*c;
+    return '<svg width="48" height="48" viewBox="0 0 48 48" style="flex-shrink:0">' +
+      '<circle cx="24" cy="24" r="'+r+'" fill="none" stroke-width="4.5" stroke="var(--sunken)"/>' +
+      '<circle cx="24" cy="24" r="'+r+'" fill="none" stroke-width="4.5" stroke="var(--gold-ink)" stroke-linecap="round" ' +
+      'transform="rotate(-90 24 24)" stroke-dasharray="'+c+'" stroke-dashoffset="'+offset+'"/>' +
+      '</svg>';
+  }
+
+  // Rough match score: how many of the filters actually in effect this
+  // scheme satisfies vs merely "doesn't exclude" -- purely a UI ranking
+  // signal, not sent to/from the server.
+  function matchScore(s, f){
+    var checks = 0, hits = 0;
+    if(f.age !== null){ checks++; if(s.age_min <= f.age && s.age_max >= f.age) hits++; }
+    if(f.income !== null){ checks++; if(s.income_min <= f.income && (s.income_max === 0 || s.income_max >= f.income)) hits++; }
+    if(checks === 0) return 92;
+    return Math.round(55 + (hits/checks)*40);
+  }
+
+  function renderCards(list, filters){
+    var grid = document.getElementById('ykCardsGrid');
+    grid.innerHTML = '';
+    if(list.length === 0){
+      grid.innerHTML = '<div class="yk-empty">No schemes match these filters yet — try widening the age range or clearing a filter.</div>';
+    } else {
+      list.forEach(function(s){
+        var pct = matchScore(s, filters);
+        var desc = stripTags(s.description).slice(0, 130);
+        var card = document.createElement('div');
+        card.className = 'yk-card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.innerHTML =
+          '<div class="yk-card-top">' +
+            '<div><div class="yk-tag">'+(s.state || 'Central Scheme')+'</div><h4>'+s.title+'</h4></div>' +
+            ringSVG(pct) +
+          '</div>' +
+          '<p>'+(desc || 'No description available yet for this scheme.')+'</p>' +
+          '<div class="yk-card-foot">' +
+            '<div class="yk-verified"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg> Verified scheme</div>' +
+            '<div class="yk-view-link">View details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>' +
+          '</div>';
+        card.addEventListener('click', function(){ openDetail(s, pct); });
+        card.addEventListener('keydown', function(e){ if(e.key === 'Enter') openDetail(s, pct); });
+        grid.appendChild(card);
+      });
+    }
+  }
+
+  function renderPagination(total){
+    var wrap = document.getElementById('ykPagination');
+    wrap.innerHTML = '';
+    var pages = Math.ceil(total / PAGE_SIZE);
+    if(pages <= 1) return;
+    for(var i=1; i<=pages; i++){
+      (function(p){
+        var btn = document.createElement('button');
+        btn.className = 'yk-page-btn' + (p === currentPage ? ' active' : '');
+        btn.textContent = p;
+        btn.addEventListener('click', function(){ currentPage = p; renderPage(); });
+        wrap.appendChild(btn);
+      })(i);
+    }
+  }
+
+  function renderPage(){
+    var start = (currentPage-1)*PAGE_SIZE;
+    renderCards(lastResults.slice(start, start+PAGE_SIZE), lastFilters);
+    renderPagination(lastResults.length);
+  }
+
+  var lastFilters = {};
+
+  function currentFilters(){
+    var age = document.getElementById('ykAge').value;
+    return {
+      age: age === '100' ? null : parseInt(age, 10),
+      category: document.getElementById('ykCategory').value,
+      income: document.getElementById('ykIncome').value ? parseInt(document.getElementById('ykIncome').value, 10) : null,
+      marital_status: document.getElementById('ykMarital').value,
+      religion: document.getElementById('ykReligion').value,
+      caste: document.querySelector('#ykCasteChips .yk-chip.active').getAttribute('data-val'),
+      divyang: document.querySelector('#ykDivyangChips .yk-chip.active').getAttribute('data-val'),
+      search: document.getElementById('ykSearch').value.trim()
+    };
+  }
+
+  function runSearch(){
+    var f = currentFilters();
+    lastFilters = f;
+    document.getElementById('ykResultsHeading').textContent = 'Searching…';
+    document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-loading">Searching live schemes…</div>';
+
+    var body = {
+      scheme_type: 0, category: f.category || null, state: null, dbt: null,
+      divyang_category: f.divyang || null, beneficiary: null, caste: f.caste || null,
+      gender: null, marital_status: f.marital_status || null, religion: f.religion || null,
+      area: null, employment: null, occupation: null,
+      age: f.age, family_income: f.income, searched_text: f.search || null
+    };
+
+    fetch('/api/schemes', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken()},
+      body: JSON.stringify(body)
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        lastResults = data.schemes || [];
+        currentPage = 1;
+        document.getElementById('ykResultsHeading').textContent =
+          'Showing ' + lastResults.length + ' scheme' + (lastResults.length===1?'':'s');
+        document.getElementById('ykStatShown').textContent = lastResults.length;
+        renderPage();
+      })
+      .catch(function(){
+        document.getElementById('ykResultsHeading').textContent = 'Something went wrong';
+        document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-empty">Could not load schemes right now — please try again in a moment.</div>';
+      });
+  }
+
+  document.getElementById('ykAge').addEventListener('input', function(){
+    document.getElementById('ykAgeVal').textContent = this.value === '100' ? 'Any age' : this.value + ' yrs';
+  });
+  document.querySelectorAll('#ykCasteChips .yk-chip, #ykDivyangChips .yk-chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      var siblings = chip.parentElement.querySelectorAll('.yk-chip');
+      siblings.forEach(function(c){ c.classList.remove('active'); });
+      chip.classList.add('active');
+    });
+  });
+  document.getElementById('ykApplyBtn').addEventListener('click', runSearch);
+  document.getElementById('ykSearch').addEventListener('keydown', function(e){ if(e.key === 'Enter') runSearch(); });
+  document.getElementById('ykClearBtn').addEventListener('click', function(){
+    document.getElementById('ykAge').value = 100;
+    document.getElementById('ykAgeVal').textContent = 'Any age';
+    document.getElementById('ykCategory').value = '';
+    document.getElementById('ykIncome').value = '';
+    document.getElementById('ykMarital').value = '';
+    document.getElementById('ykReligion').value = '';
+    document.getElementById('ykSearch').value = '';
+    document.querySelectorAll('#ykCasteChips .yk-chip, #ykDivyangChips .yk-chip').forEach(function(c){ c.classList.remove('active'); });
+    document.querySelector('#ykCasteChips .yk-chip[data-val=""]').classList.add('active');
+    document.querySelector('#ykDivyangChips .yk-chip[data-val=""]').classList.add('active');
+    runSearch();
+  });
+
+  function openDetail(s, pct){
+    var sheet = document.getElementById('ykDetailSheet');
+    var elig = stripTags(s.eligibility);
+    var docs = stripTags(s.required_documents);
+    var howTo = stripTags(s.mode_of_application);
+    sheet.innerHTML =
+      '<div class="yk-detail-hero">' +
+        '<div>' +
+          '<div class="yk-tags"><span>'+(s.state || 'Central Scheme')+'</span><span>'+pct+'% match</span></div>' +
+          '<h2>'+s.title+'</h2>' +
+        '</div>' +
+        '<button class="yk-close-btn" id="ykCloseDetail" aria-label="Close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>' +
+      '</div>' +
+      '<div class="yk-detail-body">' +
+        '<div class="yk-detail-layout">' +
+          '<div>' +
+            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Overview</h3><p>'+(stripTags(s.description) || 'No overview available yet.')+'</p></div>' +
+            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3><p>'+(elig || 'Refer to the official scheme page for eligibility details.')+'</p></div>' +
+            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3><p>'+(docs || 'Refer to the official scheme page for the documents list.')+'</p></div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="yk-side-card"><h4>Quick facts</h4>' +
+              '<div class="yk-fact"><span class="lbl">Age range</span><span class="val">'+s.age_min+'–'+s.age_max+' yrs</span></div>' +
+              '<div class="yk-fact"><span class="lbl">Income cap</span><span class="val">'+(s.income_max == 0 ? 'No cap' : '₹'+Number(s.income_max).toLocaleString('en-IN'))+'</span></div>' +
+              '<div class="yk-fact"><span class="lbl">How to apply</span><span class="val">'+(howTo ? howTo.slice(0,40) : 'See details') +'</span></div>' +
+            '</div>' +
+            '<div class="yk-apply-card">' +
+              "<p>Applications go through the scheme's own official portal or office.</p>" +
+              '<a class="yk-apply-btn" href="#" onclick="var w=document.createElement(\'div\');w.innerHTML='+JSON.stringify(s.web_links||'')+';var a=w.querySelector(\'a\');if(a){window.open(a.href,\'_blank\');}return false;">' +
+              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>Go to official portal</a>' +
+            '</div>' +
+          '</div>' +
+        '</div>' +
+      '</div>';
+    document.getElementById('ykCloseDetail').addEventListener('click', closeDetail);
+    document.getElementById('ykDetailOverlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeDetail(){
+    document.getElementById('ykDetailOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('ykDetailOverlay').addEventListener('click', function(e){ if(e.target === this) closeDetail(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDetail(); });
+
+  runSearch();
+})();
+</script>
+{% endblock %}
