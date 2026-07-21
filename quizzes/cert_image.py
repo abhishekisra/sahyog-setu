@@ -67,20 +67,59 @@ def _paste_contain(base, img_path, box_center_x, box_center_y, box_w, box_h):
     base.alpha_composite(im, (x, y))
 
 
+def _guilloche_band(im, y_center, band_height, n_waves=5, alpha=34):
+    """A band of thin offset sine-wave lines -- the classic engraved
+    "security paper" texture real certificates/currency use. Drawn on its
+    own transparent layer and alpha-composited on, so it reads as subtle
+    texture rather than clutter, and only in the top/bottom strips where
+    there's no text sitting on top of it."""
+    import math
+    layer = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    ld = ImageDraw.Draw(layer)
+    w = im.width
+    for i in range(n_waves):
+        phase = i * (math.pi / n_waves)
+        amp = band_height * 0.32
+        points = []
+        for x in range(0, w + 1, 6):
+            yy = y_center + amp * math.sin((x / w) * math.pi * 6 + phase)
+            points.append((x, yy))
+        ld.line(points, fill=GOLD + (alpha,), width=2)
+    im.alpha_composite(layer)
+
+
+def _medallion_watermark(im, cx, cy, radius, alpha=22):
+    """Large, very faint concentric-ring medallion behind the certificate
+    body -- an official-document watermark cue, kept light enough (alpha
+    ~20/255) to sit behind every line of text without hurting legibility."""
+    layer = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    ld = ImageDraw.Draw(layer)
+    for r, width in ((radius, 3), (radius * 0.82, 2), (radius * 0.64, 2)):
+        ld.ellipse([cx - r, cy - r, cx + r, cy + r], outline=GOLD + (alpha,), width=width)
+    # Radiating tick marks around the outer ring -- reads as a rosette/seal
+    # rather than a plain bullseye.
+    import math
+    n_ticks = 48
+    for i in range(n_ticks):
+        angle = (i / n_ticks) * 2 * math.pi
+        r1, r2 = radius * 0.9, radius * 1.02
+        x1, y1 = cx + r1 * math.cos(angle), cy + r1 * math.sin(angle)
+        x2, y2 = cx + r2 * math.cos(angle), cy + r2 * math.sin(angle)
+        ld.line([(x1, y1), (x2, y2)], fill=GOLD + (alpha,), width=2)
+    im.alpha_composite(layer)
+
+
 def _default_background():
     """Guilloche-style frame -- a Pillow equivalent of the SVG fallback
     used in certificate.html when no custom background is uploaded.
 
-    Was a completely flat CREAM rectangle behind two plain outline
-    rectangles -- readable, but visibly flatter than the browser preview
-    (which gets free depth from CSS box-shadow/gradients Pillow has no
-    equivalent for). Adds a subtle vertical gradient (reads as a soft
-    vignette, the classic "premium certificate paper" cue), a third
-    hairline between the two existing borders so the frame is a proper
-    triple-line border instead of two disconnected rectangles, and small
-    diamond flourishes at the inner corners -- the kind of hand-finished
-    detail that's normally the first thing missing from an auto-generated
-    certificate."""
+    Layers, back to front: a soft vertical gradient (the "premium paper"
+    cue), a large faint medallion watermark behind the certificate body
+    (official-document cue, alpha-composited so it never fights with the
+    text sitting on top of it), fine sine-wave guilloche bands in the top/
+    bottom strips where no text sits, the triple-line gold/ink border, and
+    ornate quatrefoil corner flourishes (upgraded from a plain diamond
+    outline) at the inner border's four corners."""
     im = Image.new("RGBA", (CANVAS_W, CANVAS_H), CREAM + (255,))
     d = ImageDraw.Draw(im)
     # Vertical gradient: a hair lighter at the very top/bottom edges,
@@ -94,6 +133,20 @@ def _default_background():
         g = int(bottom[1] + (top[1] - bottom[1]) * t)
         b = int(bottom[2] + (top[2] - bottom[2]) * t)
         d.line([(0, y), (CANVAS_W, y)], fill=(r, g, b, 255))
+
+    # Medallion watermark, centered a little above canvas-middle (roughly
+    # behind the name/description block) -- large enough to read as texture
+    # across most of the certificate body without concentrating on any one
+    # line of text.
+    _medallion_watermark(im, CANVAS_W / 2, CANVAS_H * 0.48, radius=CANVAS_H * 0.34)
+
+    # Guilloche wave bands in the low-text top/bottom strips only (logos/
+    # title row, and below the signature line) -- kept out of the dense
+    # text column in the middle.
+    _guilloche_band(im, CANVAS_H * 0.045, band_height=60, n_waves=6, alpha=30)
+    _guilloche_band(im, CANVAS_H * 0.975, band_height=50, n_waves=6, alpha=30)
+
+    d = ImageDraw.Draw(im)  # re-bind: alpha_composite() above replaced pixel data
     margin_outer = 50
     margin_mid = 84
     margin_inner = 118
@@ -110,16 +163,17 @@ def _default_background():
         outline=INK, width=3,
     )
 
-    # Small diamond flourish at each of the four inner-border corners.
-    flourish_r = 14
+    # Quatrefoil (4-lobed) flourish at each inner-border corner -- upgraded
+    # from a plain diamond outline for a more hand-finished, ornate feel.
     for cx, cy in (
         (margin_inner, margin_inner), (CANVAS_W - margin_inner, margin_inner),
         (margin_inner, CANVAS_H - margin_inner), (CANVAS_W - margin_inner, CANVAS_H - margin_inner),
     ):
-        d.polygon(
-            [(cx, cy - flourish_r), (cx + flourish_r, cy), (cx, cy + flourish_r), (cx - flourish_r, cy)],
-            outline=GOLD, width=3,
-        )
+        lobe_r = 15
+        for dx, dy in ((lobe_r, 0), (-lobe_r, 0), (0, lobe_r), (0, -lobe_r)):
+            d.ellipse([cx + dx - lobe_r, cy + dy - lobe_r, cx + dx + lobe_r, cy + dy + lobe_r],
+                      outline=GOLD, width=2)
+        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=GOLD)
     return im
 
 
