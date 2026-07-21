@@ -903,11 +903,13 @@ class QuizListView(View):
                 # (not a separate guess), so this can never drift out of
                 # sync with the real per-question countdown.
                 "estimated_minutes": round(question_count * PER_QUESTION_SECONDS / 60),
-                # Only actually "locked" if the quiz itself is one-attempt --
-                # a repeatable quiz still shows the participant's last score
-                # but Start Quiz stays live.
+                # Only actually "locked" if the quiz itself is one-attempt AND
+                # that attempt was a PASS -- a repeatable quiz still shows the
+                # participant's last score but Start Quiz stays live, and so
+                # does a one-attempt quiz someone previously failed (see the
+                # matching passed-only check in QuizTakeView.get).
                 "my_attempt": my_attempt,
-                "locked": bool(my_attempt) and quiz.one_attempt_only,
+                "locked": bool(my_attempt) and my_attempt.passed and quiz.one_attempt_only,
             })
         return render(request, "custom_admin/quizzes/quiz_list.html", {
             "quizzes": quizzes,
@@ -1025,7 +1027,13 @@ class QuizTakeView(View):
 
         if quiz.one_attempt_only:
             existing = completed_attempts.filter(user=request.user).order_by('-completed_at').first()
-            if existing:
+            # Only a PASSED attempt locks retakes -- one_attempt_only exists
+            # to stop someone re-rolling for a better score/another
+            # certificate once they've already passed, not to permanently
+            # lock out someone who failed. Blocking on any completed attempt
+            # regardless of pass/fail meant "Try Again" on the result page
+            # just redirected back to the same failed result forever.
+            if existing and existing.passed:
                 return redirect("quiz_result", pk=existing.id)
 
         lang = clean_language(request.GET.get("lang", "en"))

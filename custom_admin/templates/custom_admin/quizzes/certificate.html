@@ -119,6 +119,21 @@
                         </svg>
                         Download for Status
                     </a>
+                    <button type="button" id="ssShareCertBtn" class="btn-outline-ss no-print"
+                        onclick="ssShareCertificateImage(this)"
+                        data-url="{% url 'quiz_certificate_story' attempt.id %}"
+                        data-title="{{ quiz.title }} - Certificate"
+                        data-text="I completed the &quot;{{ quiz.title }}&quot; quiz on Sahyog Setu! 🎓">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                        <span>Share Certificate</span>
+                    </button>
                     <div class="ss-share-section">
                         <span class="ss-share-title">Share Quiz (Share the quiz, not this certificate)</span>
                         <div class="ss-share-grid">
@@ -573,4 +588,51 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Great+Vibes&display=swap"
     rel="stylesheet">
+
+<script>
+    // "Share Quiz" below only ever shares a bare link -- WhatsApp/etc show
+    // just a URL, not the certificate itself, which is the "only link
+    // shares, certificate doesn't show" gap this closes. Fetches the
+    // certificate PNG and hands it to the OS share sheet as an actual file
+    // (navigator.share({files:...})), so WhatsApp/Instagram/etc attach the
+    // real image instead of a link. Falls back to a plain download (so the
+    // user can still attach it manually) on browsers without file-share
+    // support -- iOS Safari/Chrome Android support this, but not every
+    // desktop browser does.
+    async function ssShareCertificateImage(btn) {
+        var url = btn.getAttribute("data-url");
+        var title = btn.getAttribute("data-title");
+        var text = btn.getAttribute("data-text");
+        var span = btn.querySelector("span");
+        var original = span.textContent;
+
+        try {
+            span.textContent = "Preparing...";
+            var resp = await fetch(url);
+            var blob = await resp.blob();
+            var file = new File([blob], "certificate.png", { type: blob.type || "image/png" });
+
+            if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                await navigator.share({ files: [file], title: title, text: text });
+            } else {
+                var link = document.createElement("a");
+                link.href = URL.createObjectURL(blob);
+                link.download = "certificate.png";
+                link.click();
+                if (window.showNotification) {
+                    showNotification("Certificate downloaded — attach it manually to share.", "success");
+                } else {
+                    alert("Certificate downloaded — attach it manually to share.");
+                }
+            }
+        } catch (e) {
+            if (e.name !== "AbortError") {  // AbortError = user cancelled the share sheet, not a real failure
+                console.error(e);
+                alert("Couldn't prepare the certificate for sharing. Try 'Download for Status' instead.");
+            }
+        } finally {
+            span.textContent = original;
+        }
+    }
+</script>
 {% endblock %}
