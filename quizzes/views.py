@@ -28,7 +28,7 @@ from .cert_image import render_certificate_image, render_certificate_story_image
 from .imaging import validate_image_upload, validate_certificate_background, validate_banner_image
 from .models import Questions, Quizzes, QuizAttempt, QuestionResponse, Language, QuizTranslation, QuestionTranslation
 from .question_import import SAMPLE_ROWS, normalize_correct_option, parse_upload, validate_rows
-from .ai_generate import AIGenerationError, MAX_QUESTIONS_PER_BATCH, generate_questions
+from .ai_generate import AIGenerationError, MAX_QUESTIONS_PER_BATCH, generate_questions, generate_explanation
 
 logger = logging.getLogger("django.request")
 
@@ -566,6 +566,30 @@ class GenerateQuestionsView(View):
 
         request.session[_ai_draft_session_key(quiz.id)] = draft_rows
         return redirect("adminReviewGeneratedQuestions", id=quiz.id)
+
+
+@method_decorator(staff_member_required(login_url="adminLogin"), name="dispatch")
+class GenerateExplanationView(View):
+    """AJAX-only: the admin has already typed a question/options/correct
+    answer by hand in add-quiz.html/edit-quiz.html and just wants AI to
+    draft the Explanation field for that one question -- see the "Generate
+    with AI" button next to each question's Explanation textarea. Never
+    touches the database; just returns the drafted text for the admin to
+    review/edit before Save, same "AI never saves directly" rule as
+    generate_questions()."""
+
+    def post(self, request):
+        question = request.POST.get("question", "")
+        options = [request.POST.get(f"option_{n}", "") for n in (1, 2, 3, 4)]
+        correct_raw = request.POST.get("correct_option", "")
+        correct_option = int(correct_raw) if correct_raw.isdigit() else None
+
+        try:
+            explanation = generate_explanation(question, options, correct_option)
+        except AIGenerationError as e:
+            return JsonResponse({"error": str(e)}, status=400)
+
+        return JsonResponse({"explanation": explanation})
 
 
 class ReviewGeneratedQuestionsView(View):

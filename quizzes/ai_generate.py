@@ -147,3 +147,70 @@ def generate_questions(topic, count):
         raise AIGenerationError("Not a single valid question could be built from the AI's output -- try again.")
 
     return clean_rows
+
+
+def _build_explanation_prompt(question, options, correct_option):
+    options_block = "\n".join(f"Option {n}: {text}" for n, text in enumerate(options, start=1))
+    correct_text = options[correct_option - 1]
+    return f"""A quiz has this question and answer options:
+
+Question: {question}
+{options_block}
+
+The correct answer is Option {correct_option} ("{correct_text}").
+
+Write a 2-3 sentence explanation, shown to the learner after they answer (whether right or wrong), that confirms why this option is correct AND briefly notes why the others are wrong or less accurate. Plain, direct, professional English -- no markdown, no preamble like "Explanation:", just the explanation text itself."""
+
+
+def generate_explanation(question, options, correct_option):
+    """Single-question version of generate_questions() -- the admin has
+    already written the question/options/correct answer by hand (or via
+    bulk import) and just wants AI to fill in the Explanation field for
+    that one question, not generate a whole new question. Returns a plain
+    string, never touches the database."""
+    question = (question or "").strip()
+    options = [(o or "").strip() for o in options]
+    if not question or any(not o for o in options):
+        raise AIGenerationError("Fill in the question and all 4 options first, then generate an explanation.")
+    if correct_option not in (1, 2, 3, 4):
+        raise AIGenerationError("Pick the correct option first, then generate an explanation.")
+
+    api_key = get_api_key()
+    if not api_key:
+        raise AIGenerationError(
+            "ANTHROPIC_API_KEY is not set on the server -- configure the API key first."
+        )
+
+    try:
+        resp = requests.post(
+            ANTHROPIC_API_URL,
+            headers={
+                "x-api-key": api_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json",
+            },
+            json={
+                "model": ANTHROPIC_MODEL,
+                "max_tokens": 400,
+                "messages": [{"role": "user", "content": _build_explanation_prompt(question, options, correct_option)}],
+            },
+            timeout=30,
+        )
+    except requests.RequestException as e:
+        raise AIGenerationError(f"Could not reach the Anthropic API: {e}")
+
+    if resp.status_code != 200:
+        raise AIGenerationError(
+            f"Anthropic API ne error diya (HTTP {resp.status_code}): {resp.text[:300]}"
+        )
+
+    try:
+        data = resp.json()
+        text = data["content"][0]["text"].strip()
+    except (KeyError, IndexError, ValueError) as e:
+        raise AIGenerationError(f"Could not understand the API response format: {e}")
+
+    if not text:
+        raise AIGenerationError("The AI returned an empty explanation -- try again.")
+
+    return text

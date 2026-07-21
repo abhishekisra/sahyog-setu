@@ -122,6 +122,7 @@ urlpatterns = [
     path('quiz/<int:id>/import-questions', Quizzes.ImportQuestionsView.as_view(), name="adminImportQuestions"),
     path('quiz/import-questions/template', Quizzes.download_question_template, name="adminImportQuestionsTemplate"),
     path('quiz/<int:id>/generate-questions', Quizzes.GenerateQuestionsView.as_view(), name="adminGenerateQuestions"),
+    path('quiz/generate-explanation', Quizzes.GenerateExplanationView.as_view(), name="adminGenerateExplanation"),
     path('quiz/<int:id>/review-generated-questions', Quizzes.ReviewGeneratedQuestionsView.as_view(), name="adminReviewGeneratedQuestions"),
     path('quiz/<int:id>/translations', Quizzes.QuizTranslationsView.as_view(), name="adminQuizTranslations"),
     path('quiz/<int:id>/translations/<str:lang>', Quizzes.EditTranslationView.as_view(), name="adminEditTranslation"),
