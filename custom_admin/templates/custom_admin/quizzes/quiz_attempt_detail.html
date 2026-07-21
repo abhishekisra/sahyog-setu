@@ -34,7 +34,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <div class="page-header-title">
-                            <h5 class="m-b-10">{{ attempt.quiz.title }} — {{ attempt.user.name|default:attempt.user.username }}</h5>
+                            <h5 class="m-b-10">{{ attempt.quiz.title }} — {{ attempt.user.get_full_name|default:attempt.user.name|default:attempt.user.mobile|default:attempt.user.username }}</h5>
                         </div>
                     </div>
                     <div class="col-md-6 text-md-right">

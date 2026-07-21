@@ -1701,7 +1701,10 @@ class ParticipantsListView(View):
 
         rows = (
             QuizAttempt.objects.filter(completed_at__isnull=False, is_demo=False)
-            .values("user_id", "user__name", "user__mobile", "user__email")
+            .values(
+                "user_id", "user__name", "user__first_name", "user__last_name",
+                "user__mobile", "user__email",
+            )
             .annotate(
                 attempts=Count("id"),
                 quizzes_taken=Count("quiz_id", distinct=True),
@@ -1714,13 +1717,21 @@ class ParticipantsListView(View):
 
         if q:
             rows = rows.filter(
-                Q(user__name__icontains=q) | Q(user__mobile__icontains=q) | Q(user__email__icontains=q)
+                Q(user__name__icontains=q) | Q(user__first_name__icontains=q)
+                | Q(user__last_name__icontains=q) | Q(user__mobile__icontains=q)
+                | Q(user__email__icontains=q)
             )
 
         rows = list(rows)
         for row in rows:
             row["avg_pct"] = round(row["avg_pct"] or 0, 1)
             row["pass_rate"] = round(row["passed"] / row["attempts"] * 100, 1) if row["attempts"] else 0
+            # Real signups only ever populate first_name/last_name (see
+            # SignupForm.save()) -- the legacy `name` field is blank for
+            # essentially every participant, which is why this list showed
+            # no names at all before this fallback chain was added.
+            full_name = f"{row['user__first_name'] or ''} {row['user__last_name'] or ''}".strip()
+            row["display_name"] = full_name or row["user__name"] or row["user__mobile"] or "—"
 
         paginator = Paginator(rows, PARTICIPANTS_PER_PAGE)
         page = paginator.get_page(request.GET.get("page"))

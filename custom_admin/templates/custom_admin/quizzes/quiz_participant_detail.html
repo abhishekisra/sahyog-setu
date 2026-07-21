@@ -29,7 +29,7 @@
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <div class="page-header-title">
-                            <h5 class="m-b-10">{{ participant.name|default:participant.username }}</h5>
+                            <h5 class="m-b-10">{{ participant.get_full_name|default:participant.name|default:participant.mobile|default:participant.username }}</h5>
                         </div>
                     </div>
                     <div class="col-md-6 text-md-right">

@@ -74,7 +74,7 @@
                         <tr>
                             <td>
                                 <a class="qa-row-link" href="{% url 'quiz_participant_detail' row.user_id %}">
-                                    {{ row.user__name|default:"—" }}
+                                    {{ row.display_name }}
                                 </a>
                             </td>
                             <td>{{ row.user__mobile|default:"—" }}</td>
