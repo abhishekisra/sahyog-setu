@@ -248,17 +248,27 @@ def _qr_image(url, scale=8, border=3, fg="black", bg="white"):
     return img
 
 
+def _draw_check(draw, cx, cy, size, color, width=6):
+    """Small checkmark drawn as two line segments instead of a Unicode ✓ --
+    Cinzel-Bold has no glyph for U+2713, which was rendering as a visible
+    tofu box next to "PASSED" instead of a checkmark."""
+    draw.line([
+        (cx - size * 0.5, cy),
+        (cx - size * 0.15, cy + size * 0.4),
+        (cx + size * 0.55, cy - size * 0.5),
+    ], fill=color, width=width, joint="curve")
+
+
 def render_certificate_story_image(attempt, quiz_url):
     """Returns PNG bytes: a 1080x1920 shareable card for WhatsApp/Instagram
-    Status, distinct from (not a resized crop of) the landscape
-    certificate -- a formal A4 layout rotated/squeezed into a vertical
-    frame reads cramped and illegible at Status size, so this is a
-    purpose-built composition instead: big score number as the visual
-    centerpiece, name and quiz title, and a QR code + printed URL for
-    quiz_url so anyone who sees the story can go take the quiz themselves."""
+    Status. Was a purely abstract score card (big number + QR, no actual
+    certificate visual at all) -- when shared, that read as "just a link
+    and a score", not a certificate, which is the whole point of a status
+    share. Now embeds the REAL rendered certificate (render_certificate_image,
+    same landscape PNG "Download as Image" produces) as a bordered thumbnail,
+    so what gets shared actually looks like the certificate, plus a QR code
+    + printed URL so anyone who sees the story can go take the quiz too."""
     quiz = attempt.quiz
-    name = attempt.user.get_full_name().strip() or attempt.user.username
-    score = round(attempt.percentage)
     cx = STORY_W / 2
 
     im = Image.new("RGB", (STORY_W, STORY_H), STORY_BG_TOP)
@@ -275,45 +285,63 @@ def render_certificate_story_image(attempt, quiz_url):
     d.rectangle([margin + 14, margin + 14, STORY_W - margin - 14, STORY_H - margin - 14], outline=STORY_GOLD, width=1)
 
     # Brand row
-    seal_r = 46
-    seal_cy = 150
+    seal_r = 40
+    seal_cy = 120
     d.ellipse([cx - seal_r, seal_cy - seal_r, cx + seal_r, seal_cy + seal_r], fill=STORY_GOLD)
-    seal_font = _font("Cinzel-Bold.ttf", 52)
-    _draw_centered(d, cx, seal_cy - 32, "S", seal_font, (18, 32, 25))
-    brand_font = _font("Cinzel-Bold.ttf", 44)
-    _draw_centered(d, cx, seal_cy + seal_r + 24, "SAHYOG SETU", brand_font, STORY_GOLD)
+    seal_font = _font("Cinzel-Bold.ttf", 46)
+    _draw_centered(d, cx, seal_cy - 28, "S", seal_font, (18, 32, 25))
+    brand_font = _font("Cinzel-Bold.ttf", 38)
+    _draw_centered(d, cx, seal_cy + seal_r + 18, "SAHYOG SETU", brand_font, STORY_GOLD)
 
-    # Headline
-    head_font = _font("Cinzel-Bold.ttf", 40)
-    _draw_centered(d, cx, 330, "CERTIFICATE OF ACHIEVEMENT", head_font, STORY_CREAM)
+    # The actual certificate, embedded as a bordered thumbnail -- this IS
+    # the certificate, not a stand-in stat card, which is what a "share my
+    # certificate" status is supposed to show.
+    cert_png = render_certificate_image(attempt)
+    cert_im = Image.open(BytesIO(cert_png)).convert("RGB")
+    thumb_w = int(STORY_W * 0.87)
+    thumb_h = int(thumb_w * cert_im.height / cert_im.width)
+    cert_im = cert_im.resize((thumb_w, thumb_h), Image.LANCZOS)
 
-    # Name
-    name_len = len(name)
-    name_size = 90 if name_len <= 15 else 70 if name_len <= 25 else 54
-    name_font = _font("GreatVibes-Regular.ttf", name_size)
-    _draw_centered(d, cx, 420, name, name_font, STORY_CREAM)
+    thumb_top = 250
+    frame_pad = 10
+    d.rectangle(
+        [cx - thumb_w / 2 - frame_pad, thumb_top - frame_pad,
+         cx + thumb_w / 2 + frame_pad, thumb_top + thumb_h + frame_pad],
+        fill=STORY_CREAM,
+    )
+    d.rectangle(
+        [cx - thumb_w / 2 - frame_pad, thumb_top - frame_pad,
+         cx + thumb_w / 2 + frame_pad, thumb_top + thumb_h + frame_pad],
+        outline=STORY_GOLD, width=2,
+    )
+    im.paste(cert_im, (int(cx - thumb_w / 2), thumb_top))
 
-    # Quiz title (wrapped, may be long)
-    title_font = _font("Cormorant-Regular.ttf", 42)
-    _wrap_and_draw_centered(d, cx, 560, quiz.title, title_font, STORY_MUTED,
-                             max_width=STORY_W * 0.78, line_height=52)
+    # Score + pass/complete status just below the certificate thumbnail --
+    # keeps the "flex" appeal of a visible number without it being the ONLY
+    # thing the card shows.
+    score = round(attempt.percentage)
+    status_y = thumb_top + thumb_h + frame_pad + 50
+    score_font = _font("Cinzel-Bold.ttf", 90)
+    _draw_centered(d, cx, status_y, f"{score}%", score_font, STORY_GOLD)
 
-    # Score -- the visual centerpiece
-    score_font = _font("Cinzel-Bold.ttf", 220)
-    _draw_centered(d, cx, 760, f"{score}%", score_font, STORY_GOLD)
-    score_label_font = _font("Cormorant-Regular.ttf", 36)
-    _draw_centered(d, cx, 1000, "SCORE", score_label_font, STORY_MUTED)
-
+    pass_y = status_y + 120
     pass_font = _font("Cinzel-Bold.ttf", 34)
-    _draw_centered(d, cx, 1070, "PASSED ✓" if attempt.passed else "COMPLETED", pass_font, STORY_CREAM)
+    if attempt.passed:
+        label = "PASSED"
+        bbox = d.textbbox((0, 0), label, font=pass_font)
+        label_w = bbox[2] - bbox[0]
+        _draw_centered(d, cx - 24, pass_y, label, pass_font, STORY_CREAM)
+        _draw_check(d, cx + label_w / 2 + 10, pass_y + 22, 34, STORY_GOLD)
+    else:
+        _draw_centered(d, cx, pass_y, "COMPLETED", pass_font, STORY_CREAM)
 
     # QR + link -- this is what makes the quiz link travel with the image
     # itself regardless of how it's shared.
-    qr = _qr_image(quiz_url, scale=7, border=2)
-    qr_size = 300
+    qr = _qr_image(quiz_url, scale=6, border=2)
+    qr_size = 220
     qr = qr.resize((qr_size, qr_size), Image.LANCZOS)
-    qr_box_pad = 20
-    qr_top = 1220
+    qr_box_pad = 16
+    qr_top = pass_y + 90
     d.rectangle(
         [cx - qr_size / 2 - qr_box_pad, qr_top - qr_box_pad,
          cx + qr_size / 2 + qr_box_pad, qr_top + qr_size + qr_box_pad],
@@ -321,17 +349,17 @@ def render_certificate_story_image(attempt, quiz_url):
     )
     im.paste(qr, (int(cx - qr_size / 2), qr_top))
 
-    scan_font = _font("Cormorant-Regular.ttf", 34)
-    _draw_centered(d, cx, qr_top + qr_size + qr_box_pad + 20, "Scan to take this quiz", scan_font, STORY_CREAM)
+    scan_font = _font("Cormorant-Regular.ttf", 32)
+    _draw_centered(d, cx, qr_top + qr_size + qr_box_pad + 18, "Scan to take this quiz", scan_font, STORY_CREAM)
 
-    url_font = _font("Cormorant-Regular.ttf", 28)
+    url_font = _font("Cormorant-Regular.ttf", 26)
     # Long URLs (with ?src=... etc.) wrap ugly at this width -- show just
     # the bare domain, the QR code carries the full link for anyone who
     # actually wants to follow it precisely.
-    _draw_centered(d, cx, qr_top + qr_size + qr_box_pad + 70, "sahyogsetu.in", url_font, STORY_GOLD)
+    _draw_centered(d, cx, qr_top + qr_size + qr_box_pad + 60, "sahyogsetu.in", url_font, STORY_GOLD)
 
-    footer_font = _font("Cormorant-Regular.ttf", 26)
-    _draw_centered(d, cx, STORY_H - 90, f"Certificate ID: {attempt.certificate_id}", footer_font, STORY_MUTED)
+    footer_font = _font("Cormorant-Regular.ttf", 24)
+    _draw_centered(d, cx, STORY_H - 50, f"Certificate ID: {attempt.certificate_id}", footer_font, STORY_MUTED)
 
     buf = BytesIO()
     im.save(buf, format="PNG", optimize=True)
