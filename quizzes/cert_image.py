@@ -312,10 +312,19 @@ def render_certificate_image(attempt):
     _draw_centered(draw, right_cx, sign_y + 15, quiz.authority2_name or "Verified By", auth_name_font, INK)
     _draw_centered(draw, right_cx, sign_y + 60, quiz.authority2_designation or "Admin", auth_desig_font, MUTED)
 
-    # Meta line (~96%)
-    meta_font = _font("Cormorant-Regular.ttf", 26)
+    # Meta line -- was drawn at 0.955*CANVAS_H, which sat almost exactly ON
+    # the outer gold border line (_default_background()'s margin_outer=50
+    # puts that border at CANVAS_H-50 -- hardcoded here too since this
+    # function doesn't share that scope, and a custom certificate_background
+    # has no border to align to anyway), so the certificate ID text
+    # rendered visually crossed by/merged into the border instead of
+    # sitting cleanly in either the frame gap or the outer margin. Moved
+    # below the outer border position entirely, with a smaller font so it
+    # comfortably clears both the border above it and the canvas edge
+    # below it.
+    meta_font = _font("Cormorant-Regular.ttf", 22)
     meta_text = f"Certificate ID: {attempt.certificate_id} · Verify at sahyogsetu.in/certificate/verify/{attempt.certificate_id}/"
-    _draw_centered(draw, cx, CANVAS_H * 0.955, meta_text, meta_font, (136, 136, 136))
+    _draw_centered(draw, cx, CANVAS_H - 50 + 14, meta_text, meta_font, (136, 136, 136))
 
     buf = BytesIO()
     bg.convert("RGB").save(buf, format="PNG", optimize=True)
@@ -474,8 +483,13 @@ def render_certificate_story_image(attempt, quiz_url):
     # actually wants to follow it precisely.
     _draw_centered(d, cx, qr_top + qr_size + qr_box_pad + 60, "sahyogsetu.in", url_font, STORY_GOLD)
 
-    footer_font = _font("Cormorant-Regular.ttf", 24)
-    _draw_centered(d, cx, STORY_H - 50, f"Certificate ID: {attempt.certificate_id}", footer_font, STORY_MUTED)
+    # Was drawn at STORY_H-50, which landed almost exactly on the inner gold
+    # border line (margin=36 + inner offset 14 puts it at STORY_H-50) --
+    # same overlap bug as the landscape certificate's meta line. Moved
+    # below the outer border into the true margin strip, smaller font so
+    # it clears both the border above and the canvas edge below.
+    footer_font = _font("Cormorant-Regular.ttf", 18)
+    _draw_centered(d, cx, STORY_H - margin + 10, f"Certificate ID: {attempt.certificate_id}", footer_font, STORY_MUTED)
 
     buf = BytesIO()
     im.save(buf, format="PNG", optimize=True)
