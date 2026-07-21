@@ -67,6 +67,35 @@ def _paste_contain(base, img_path, box_center_x, box_center_y, box_w, box_h):
     base.alpha_composite(im, (x, y))
 
 
+def _paper_grain(im, sigma=26, alpha=16):
+    """Fine cardstock-grain texture across the ENTIRE background -- real
+    premium certificate paper is never perfectly flat/smooth the way a
+    plain gradient is; this is the texture that actually reads as
+    "expensive paper" rather than "a plain digital rectangle".
+
+    Generated at low resolution, upscaled, then Gaussian-blurred -- full-
+    resolution per-pixel noise defeats PNG's compression almost entirely
+    (a first version of this blew the certificate from ~220KB to ~2.3MB
+    and pushed render time up several seconds; even a 1/4-res upscale
+    alone still landed north of 1MB, since BICUBIC-interpolated noise is
+    still continuously-varying per pixel). The blur is what actually
+    restores compressibility -- it smooths local pixel-to-pixel variation
+    down to the point PNG's row filters find long, cheap-to-encode runs
+    again, while still reading as soft fiber/blotch texture at normal
+    viewing size, arguably closer to real paper grain than sharp noise
+    would be anyway."""
+    from PIL import ImageFilter
+    small_size = (im.width // 10, im.height // 10)
+    noise = Image.effect_noise(small_size, sigma).convert("L")
+    noise = noise.resize(im.size, Image.BICUBIC).filter(ImageFilter.GaussianBlur(radius=6))
+    # effect_noise centers around 128 -- darken-only tint (ink-colored,
+    # not white speckle) reads as paper fiber, not digital static.
+    tint = Image.new("RGBA", im.size, INK + (0,))
+    alpha_mask = noise.point(lambda v: max(0, (128 - v)) * alpha // 128)
+    tint.putalpha(alpha_mask)
+    im.alpha_composite(tint)
+
+
 def _guilloche_band(im, y_center, band_height, n_waves=5, alpha=34):
     """A band of thin offset sine-wave lines -- the classic engraved
     "security paper" texture real certificates/currency use. Drawn on its
@@ -85,6 +114,31 @@ def _guilloche_band(im, y_center, band_height, n_waves=5, alpha=34):
             yy = y_center + amp * math.sin((x / w) * math.pi * 6 + phase)
             points.append((x, yy))
         ld.line(points, fill=GOLD + (alpha,), width=2)
+    im.alpha_composite(layer)
+
+
+def _full_guilloche_wash(im, alpha=13, n_families=3, lines_per_family=14):
+    """A faint interference pattern of overlapping sine-wave families
+    across the WHOLE canvas -- the engraved-line texture on currency/
+    security paper, at low enough alpha to read as texture, not lines.
+    Distinct from _guilloche_band() (which draws a few bold, opaque-ish
+    waves in a specific strip) -- this covers the full page at a much
+    lower opacity so it can safely sit behind every line of text too."""
+    import math
+    layer = Image.new("RGBA", im.size, (0, 0, 0, 0))
+    ld = ImageDraw.Draw(layer)
+    w, h = im.size
+    for fam in range(n_families):
+        base_period = w / (2.2 + fam * 0.9)
+        amp = h * (0.05 + fam * 0.015)
+        for i in range(lines_per_family):
+            phase = (i / lines_per_family) * 2 * math.pi
+            y0 = h * (i / lines_per_family)
+            points = []
+            for x in range(0, w + 1, 8):
+                yy = y0 + amp * math.sin((x / base_period) + phase)
+                points.append((x, yy))
+            ld.line(points, fill=GOLD + (alpha,), width=1)
     im.alpha_composite(layer)
 
 
@@ -134,15 +188,23 @@ def _default_background():
         b = int(bottom[2] + (top[2] - bottom[2]) * t)
         d.line([(0, y), (CANVAS_W, y)], fill=(r, g, b, 255))
 
+    # Full-page guilloche interference wash + paper grain FIRST, both at
+    # ultra-low alpha -- this is the actual "premium paper" texture across
+    # the whole certificate, not just isolated bands. Everything drawn
+    # after this (medallion, borders, corners) sits on top of it.
+    _full_guilloche_wash(im)
+    _paper_grain(im)
+
     # Medallion watermark, centered a little above canvas-middle (roughly
     # behind the name/description block) -- large enough to read as texture
     # across most of the certificate body without concentrating on any one
     # line of text.
     _medallion_watermark(im, CANVAS_W / 2, CANVAS_H * 0.48, radius=CANVAS_H * 0.34)
 
-    # Guilloche wave bands in the low-text top/bottom strips only (logos/
-    # title row, and below the signature line) -- kept out of the dense
-    # text column in the middle.
+    # Guilloche wave BANDS (bolder, denser) in the low-text top/bottom
+    # strips only (logos/title row, and below the signature line) -- on
+    # top of the fainter full-page wash above, for extra texture where
+    # there's no text to interfere with.
     _guilloche_band(im, CANVAS_H * 0.045, band_height=60, n_waves=6, alpha=30)
     _guilloche_band(im, CANVAS_H * 0.975, band_height=50, n_waves=6, alpha=30)
 
