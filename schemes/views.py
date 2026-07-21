@@ -394,7 +394,7 @@ def deleteScheme(request):
 
 
 def scheme_finder(request):
-    """Public, no login -- the "Scheme Eligibility" finder. Filtering hits
+    """Public, no login -- the "Scheme Viewer" finder. Filtering hits
     scheme_search_light below (NOT the existing /api/schemes -- see there
     for why), and opening a card's detail view hits the existing, already-
     small /api/scheme/<id>. This view just renders the page shell and a
@@ -409,7 +409,7 @@ def scheme_finder(request):
 
 @csrf_exempt
 def scheme_search_light(request):
-    """Filtered scheme search for the Scheme Eligibility page -- deliberately
+    """Filtered scheme search for the Scheme Viewer page -- deliberately
     NOT reusing the existing /api/schemes (schemes.apis.searchSchemes): that
     endpoint returns the FULL SchemeSerializer (description, eligibility,
     required_documents, web_links, mode_of_application -- every long-text
