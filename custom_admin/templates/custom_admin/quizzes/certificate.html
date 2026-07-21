@@ -246,7 +246,11 @@
     }
 
     @media print {
-        .sheet { box-shadow: none; width: 100%; }
+        /* max-width:1000px (screen-only sizing, further down) was never
+           reset here -- true A4 landscape is ~1122px wide at 96dpi, so the
+           certificate printed/exported at a smaller-than-page size instead
+           of filling the actual A4 sheet, with blank space around it. */
+        .sheet { box-shadow: none; width: 100%; max-width: none; }
         .no-print { display: none !important; }
         /* Only the "Back to Result" link inside this header carried
            .no-print -- the Sahyog Setu logo/brand row around it did not,

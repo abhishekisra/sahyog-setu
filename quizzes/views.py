@@ -1586,6 +1586,10 @@ class CertificateImageDownloadView(View):
         # ID and every displayed/verify-link use of it keep the real slashes.
         safe_id = attempt.certificate_id.replace("/", "-")
         response["Content-Disposition"] = f'attachment; filename="certificate_{safe_id}.png"'
+        # Regenerated fresh every request (background texture has changed
+        # more than once already) -- no-store so a browser/proxy never
+        # hands back a stale pre-fix copy instead of re-fetching.
+        response["Cache-Control"] = "no-store"
         return response
 
 
@@ -1615,6 +1619,7 @@ class CertificateStoryDownloadView(View):
         # Same filename-safe swap as CertificateImageDownloadView above.
         safe_id = attempt.certificate_id.replace("/", "-")
         response["Content-Disposition"] = f'attachment; filename="sahyogsetu_status_{safe_id}.png"'
+        response["Cache-Control"] = "no-store"
         return response
 
 

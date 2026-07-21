@@ -67,7 +67,7 @@ def _paste_contain(base, img_path, box_center_x, box_center_y, box_w, box_h):
     base.alpha_composite(im, (x, y))
 
 
-def _paper_grain(im, sigma=26, alpha=16):
+def _paper_grain(im, sigma=26, alpha=24):
     """Fine cardstock-grain texture across the ENTIRE background -- real
     premium certificate paper is never perfectly flat/smooth the way a
     plain gradient is; this is the texture that actually reads as
@@ -117,7 +117,7 @@ def _guilloche_band(im, y_center, band_height, n_waves=5, alpha=34):
     im.alpha_composite(layer)
 
 
-def _full_guilloche_wash(im, alpha=13, n_families=3, lines_per_family=14):
+def _full_guilloche_wash(im, alpha=20, n_families=3, lines_per_family=14):
     """A faint interference pattern of overlapping sine-wave families
     across the WHOLE canvas -- the engraved-line texture on currency/
     security paper, at low enough alpha to read as texture, not lines.
@@ -142,7 +142,7 @@ def _full_guilloche_wash(im, alpha=13, n_families=3, lines_per_family=14):
     im.alpha_composite(layer)
 
 
-def _medallion_watermark(im, cx, cy, radius, alpha=22):
+def _medallion_watermark(im, cx, cy, radius, alpha=30):
     """Large, very faint concentric-ring medallion behind the certificate
     body -- an official-document watermark cue, kept light enough (alpha
     ~20/255) to sit behind every line of text without hurting legibility."""
