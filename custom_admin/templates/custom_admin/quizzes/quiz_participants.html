@@ -62,6 +62,9 @@
                         <tr>
                             <th>Name</th>
                             <th>Mobile</th>
+                            <th>Email</th>
+                            <th>State</th>
+                            <th>District</th>
                             <th>Quizzes Taken</th>
                             <th>Attempts</th>
                             <th>Avg %</th>
@@ -78,6 +81,9 @@
                                 </a>
                             </td>
                             <td>{{ row.user__mobile|default:"—" }}</td>
+                            <td>{{ row.user__email|default:"—" }}</td>
+                            <td>{{ row.user__state__state|default:"—" }}</td>
+                            <td>{{ row.user__district__name|default:"—" }}</td>
                             <td>{{ row.quizzes_taken }}</td>
                             <td>{{ row.attempts }}</td>
                             <td>{{ row.avg_pct }}%</td>

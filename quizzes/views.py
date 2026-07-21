@@ -1211,6 +1211,15 @@ class QuizTakeView(View):
                         live_lock=f"{request.user.id}_{quiz.id}",
                         source=clean_source(request.session.get(_source_session_key(quiz.id), "direct")),
                         language=lang,
+                        # Staff/admin accounts taking a quiz (testing a fix,
+                        # spot-checking a new question set, etc.) is real
+                        # activity but not a real PARTICIPANT -- several
+                        # places already assumed this was excluded via
+                        # is_demo (see the stats-bar comment in EditQuizView),
+                        # but nothing ever actually set it, so admin test
+                        # attempts sat in is_demo=False and quietly counted
+                        # toward real participant lists/analytics.
+                        is_demo=request.user.is_staff,
                     )
                     created = True
             except IntegrityError:
@@ -1797,7 +1806,7 @@ class ParticipantsListView(View):
             QuizAttempt.objects.filter(completed_at__isnull=False, is_demo=False)
             .values(
                 "user_id", "user__name", "user__first_name", "user__last_name",
-                "user__mobile", "user__email",
+                "user__mobile", "user__email", "user__state__state", "user__district__name",
             )
             .annotate(
                 attempts=Count("id"),

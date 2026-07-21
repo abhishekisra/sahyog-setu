@@ -45,6 +45,8 @@
             <div class="qa-profile">
                 <div class="qa-profile-field"><label>Mobile</label><span>{{ participant.mobile|default:"—" }}</span></div>
                 <div class="qa-profile-field"><label>Email</label><span>{{ participant.email|default:"—" }}</span></div>
+                <div class="qa-profile-field"><label>State</label><span>{{ participant.state.state|default:"—" }}</span></div>
+                <div class="qa-profile-field"><label>District</label><span>{{ participant.district.name|default:"—" }}</span></div>
                 <div class="qa-profile-field"><label>Total Attempts</label><span>{{ total }}</span></div>
                 <div class="qa-profile-field"><label>Avg Score</label><span>{{ avg_pct }}%</span></div>
                 <div class="qa-profile-field"><label>Passed</label><span>{{ passed }}/{{ total }}</span></div>
