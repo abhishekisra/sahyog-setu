@@ -149,19 +149,24 @@ class QuizView(View):
                                     score_top_pct = request.POST.get("score_top_pct") or 64.0,
                                     status = request.POST.get("status") == "1" )
                                     
-            # ====================== # GET QUESTIONS DATA # ====================== 
-            questions = request.POST.getlist("question[]") 
-            option_1 = request.POST.getlist("option_1[]") 
-            option_2 = request.POST.getlist("option_2[]") 
-            option_3 = request.POST.getlist("option_3[]") 
-            option_4 = request.POST.getlist("option_4[]") 
+            # ====================== # GET QUESTIONS DATA # ======================
+            questions = request.POST.getlist("question[]")
+            option_1 = request.POST.getlist("option_1[]")
+            option_2 = request.POST.getlist("option_2[]")
+            option_3 = request.POST.getlist("option_3[]")
+            option_4 = request.POST.getlist("option_4[]")
             correct_option = request.POST.getlist("correct_option[]")
-            # ====================== # SAVE QUESTIONS # ====================== 
-            question_list = [] 
-            for i in range(len(questions)): 
-                if not questions[i].strip(): 
-                    continue 
-                question_list.append(Questions( quiz = quiz, question = questions[i], option_1 = option_1[i], option_2 = option_2[i], option_3 = option_3[i], option_4 = option_4[i], correct_option = int(correct_option[i]) ) )
+            explanation = request.POST.getlist("explanation[]")
+            # ====================== # SAVE QUESTIONS # ======================
+            question_list = []
+            for i in range(len(questions)):
+                if not questions[i].strip():
+                    continue
+                question_list.append(Questions(
+                    quiz = quiz, question = questions[i], option_1 = option_1[i], option_2 = option_2[i],
+                    option_3 = option_3[i], option_4 = option_4[i], correct_option = int(correct_option[i]),
+                    explanation = explanation[i].strip() if i < len(explanation) else "",
+                ) )
             Questions.objects.bulk_create(question_list)
             messages.success(request, "Quiz created successfully")
             if not question_list:
@@ -317,6 +322,7 @@ class EditQuizView(View):
                 option_3 = request.POST.getlist("option_3[]")
                 option_4 = request.POST.getlist("option_4[]")
                 correct_option = request.POST.getlist("correct_option[]")
+                explanation = request.POST.getlist("explanation[]")
 
                 kept_ids = []
                 for i in range(len(questions)):
@@ -326,6 +332,7 @@ class EditQuizView(View):
 
                     raw_qid = question_ids[i].strip() if i < len(question_ids) else ""
                     existing = Questions.objects.filter(id=raw_qid, quiz=quiz).first() if raw_qid.isdigit() else None
+                    exp_text = explanation[i].strip() if i < len(explanation) else ""
 
                     if existing:
                         existing.question = questions[i]
@@ -334,6 +341,7 @@ class EditQuizView(View):
                         existing.option_3 = option_3[i]
                         existing.option_4 = option_4[i]
                         existing.correct_option = int(correct_option[i])
+                        existing.explanation = exp_text
                         existing.save()
                         kept_ids.append(existing.id)
                     else:
@@ -344,7 +352,8 @@ class EditQuizView(View):
                             option_2=option_2[i],
                             option_3=option_3[i],
                             option_4=option_4[i],
-                            correct_option=int(correct_option[i])
+                            correct_option=int(correct_option[i]),
+                            explanation=exp_text,
                         )
                         kept_ids.append(new_q.id)
 
