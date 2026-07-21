@@ -37,7 +37,8 @@
     label { font-weight: 700 !important; color: #3a3f47; font-size: 13.5px; }
 
     .qa-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
-    .qa-section { margin-bottom: 22px; }
+    .qa-card > .card-body { padding: 28px; }
+    .qa-section { margin-bottom: 24px; }
     .qa-section-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
     .qa-section-head-split { justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .qa-section-icon {
@@ -52,16 +53,31 @@
     .qa-q-count-badge { background: #8b5cf6; color: #fff; font-size: 12px; font-weight: 700; border-radius: 20px; padding: 2px 10px; display: inline-block; }
 
     .qa-field-row .col-12, .qa-field-row [class*="col-md"] { margin-bottom: 16px; }
-    .qa-field-row .form-control { border-radius: 8px; border-color: #e3e6ec; }
-    .qa-field-row .form-control:focus { border-color: #4680ff; box-shadow: 0 0 0 3px rgba(70,128,255,.12); }
+
+    /* Consistent input height/focus across the whole form -- Basic Info,
+       Certificate and per-question fields alike, not just qa-field-row,
+       so the form doesn't feel like stitched-together sections with
+       different input sizes and a stray blue focus ring. */
+    .qa-card input.form-control,
+    .qa-card select.form-control { border-radius: 8px; border-color: #e3e6ec; height: 44px; }
+    .qa-card textarea.form-control { border-radius: 8px; border-color: #e3e6ec; height: auto; }
+    .qa-card .form-control:focus { border-color: #c9a227; box-shadow: 0 0 0 3px rgba(255,215,0,.18); }
+    .qa-card input[type="file"].form-control { height: auto; padding-top: 9px; padding-bottom: 9px; }
 
     .qa-divider { border-top: 1px dashed #e3e6ec; margin: 6px 0 20px; }
-    .qa-subhead {
-        display: inline-flex; align-items: center; gap: 7px;
-        font-weight: 800; font-size: 13.5px; color: #4680ff;
-        text-transform: uppercase; letter-spacing: .03em;
+
+    /* Authority sub-section header -- same icon+title+subtitle treatment as
+       the top-level section headers (Basic Information, Certificate, etc.),
+       just smaller, so Authority 1/2 don't read as a lesser, unstyled label
+       stuck in between two properly-designed sections. */
+    .qa-authority-head { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+    .qa-authority-icon {
+        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 16px;
+        background: rgba(50,63,47,.1); color: #323f2f;
     }
-    .qa-subhead i { width: 15px; height: 15px; }
+    .qa-authority-title { font-size: 14.5px; font-weight: 800; color: #24272b; }
+    .qa-authority-sub { font-size: 12px; color: #8a8f98; margin-top: 1px; }
 
     .qa-live-alert {
         border-radius: 12px; border: none; background: #fff7e6; color: #92660b;
@@ -69,12 +85,26 @@
         margin-bottom: 20px;
     }
 
-    .qa-preview-thumb { width: 200px; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-top: 8px; background: #f2f2f2; }
+    .qa-preview-thumb {
+        width: 200px; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-top: 8px;
+        background: #f7f6f2; border: 1px solid #e8e6de;
+    }
     .qa-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .qa-sig-preview { height: 64px; width: 168px; display: grid; place-items: end center; margin-top: 8px; }
+    .qa-sig-preview {
+        height: 72px; width: 180px; display: grid; place-items: end center; margin-top: 8px;
+        background: #f7f6f2; border: 1px solid #e8e6de; border-radius: 8px; padding: 8px;
+    }
     .qa-sig-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; object-position: bottom; }
-    .qa-logo-preview { height: 64px; width: 168px; display: grid; place-items: center; margin-top: 8px; }
+    .qa-logo-preview {
+        height: 72px; width: 180px; display: grid; place-items: center; margin-top: 8px;
+        background: #f7f6f2; border: 1px solid #e8e6de; border-radius: 8px; padding: 8px;
+    }
     .qa-logo-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; }
+    .qa-certbg-preview {
+        width: 220px; aspect-ratio: 1.414; margin-top: 8px; overflow: hidden;
+        background: #f7f6f2; border: 1px solid #e8e6de; border-radius: 8px;
+    }
+    .qa-certbg-preview img { width: 100%; height: 100%; object-fit: cover; }
 
     .qa-new-file-badge {
         display: flex; align-items: center; gap: 5px; margin-top: 6px;
@@ -99,9 +129,11 @@
     }
     .qa-question-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.05); border-color: #e3e6ec; }
     .qa-question-summary {
-        display: flex; align-items: center; gap: 12px; padding: 12px 16px;
-        cursor: pointer; user-select: none;
+        display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+        cursor: pointer; user-select: none; border-radius: 12px;
+        transition: background-color .15s ease;
     }
+    .qa-question-summary:hover { background: rgba(50,63,47,.035); }
     .qa-question-num {
         display: inline-flex; align-items: center; justify-content: center;
         width: 30px; height: 30px; border-radius: 50%; flex-shrink: 0;
@@ -115,6 +147,7 @@
     .qa-correct-chip {
         font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px;
         background: rgba(45,177,113,.13); color: #1f8a58; white-space: nowrap; flex-shrink: 0;
+        margin-right: 6px;
     }
     .qa-correct-chip.qa-missing { background: rgba(220,53,69,.1); color: #c0392b; }
     .qa-question-chevron { transition: transform .15s ease; color: #8a8f98; flex-shrink: 0; }
@@ -159,6 +192,10 @@
     @media (max-width: 767px) {
         .qa-stats-bar { padding: 16px; }
         .qa-stat-link { margin-left: 0; width: 100%; justify-content: center; margin-top: 6px; }
+        .qa-card > .card-body { padding: 20px; }
+        .qa-question-summary { flex-wrap: wrap; gap: 8px; }
+        .qa-question-preview { flex-basis: 100%; order: 3; white-space: normal; }
+        .qa-preview-thumb, .qa-certbg-preview { width: 100%; }
     }
 </style>
 
@@ -324,8 +361,8 @@
 
                                 <div class="col-md-6 mt-2">
                                     <label>Certificate Background (optional)</label>
-                                    <div class="mb-1" id="previewCertBg" style="{% if not quiz.certificate_background %}display:none;{% endif %}">
-                                        <img src="{% if quiz.certificate_background %}{{ quiz.certificate_background.url }}{% endif %}" style="max-height:60px;border-radius:6px;">
+                                    <div class="qa-certbg-preview" id="previewCertBg" style="{% if not quiz.certificate_background %}display:none;{% endif %}">
+                                        <img src="{% if quiz.certificate_background %}{{ quiz.certificate_background.url }}{% endif %}">
                                     </div>
                                     <input type="file" name="certificate_background" class="form-control" onchange="qaPreviewFile(this,'previewCertBg')">
                                     <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB.</small>
@@ -345,8 +382,14 @@
                             <hr class="qa-divider">
 
                             <div class="row px-2 qa-field-row">
-                                <div class="col-12 mb-2">
-                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 1</span>
+                                <div class="col-12">
+                                    <div class="qa-authority-head">
+                                        <span class="qa-authority-icon"><i class="feather icon-user-check"></i></span>
+                                        <div>
+                                            <div class="qa-authority-title">Authority 1</div>
+                                            <div class="qa-authority-sub">First signing authority on the certificate</div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -371,8 +414,14 @@
                             <hr class="qa-divider">
 
                             <div class="row px-2 qa-field-row">
-                                <div class="col-12 mb-2">
-                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 2</span>
+                                <div class="col-12">
+                                    <div class="qa-authority-head">
+                                        <span class="qa-authority-icon"><i class="feather icon-user-check"></i></span>
+                                        <div>
+                                            <div class="qa-authority-title">Authority 2</div>
+                                            <div class="qa-authority-sub">Second signing authority on the certificate</div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -534,7 +583,12 @@
 <script>
 
     $('#status').select2();
-    new RichTextEditor("#description");
+    // "basic" toolbar (bold/italic/underline, font, link/image/video, remove
+    // format) instead of the site-wide "default" one -- a quiz description
+    // doesn't need the full justify/indent/blockquote row, and this option
+    // is passed per-instance so it doesn't touch RTE_DefaultConfig, which
+    // every other admin page's RichTextEditor call also relies on.
+    new RichTextEditor("#description", { toolbar: "basic" });
 
     function toggleQuestion(card, forceOpen) {
         let shouldOpen = forceOpen !== undefined ? forceOpen : !card.classList.contains('qa-open');

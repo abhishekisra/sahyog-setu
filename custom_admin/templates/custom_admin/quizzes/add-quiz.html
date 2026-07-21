@@ -99,7 +99,7 @@
                                 <div class="col-md-6 mt-2">
                                     <label>Certificate Background (optional)</label>
                                     <input type="file" name="certificate_background" class="form-control" onchange="qaPreviewFile(this,'previewCertBg')">
-                                    <div class="mb-1" id="previewCertBg" style="display:none;"><img src="" style="max-height:60px;border-radius:6px;"></div>
+                                    <div class="qa-certbg-preview" id="previewCertBg" style="display:none;"><img src=""></div>
                                     <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB. Leave empty to use the built-in frame.</small>
                                 </div>
 
@@ -117,8 +117,14 @@
                             <hr class="qa-divider">
 
                             <div class="row px-2 qa-field-row">
-                                <div class="col-12 mb-2">
-                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 1</span>
+                                <div class="col-12">
+                                    <div class="qa-authority-head">
+                                        <span class="qa-authority-icon"><i class="feather icon-user-check"></i></span>
+                                        <div>
+                                            <div class="qa-authority-title">Authority 1</div>
+                                            <div class="qa-authority-sub">First signing authority on the certificate</div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -141,8 +147,14 @@
                             <hr class="qa-divider">
 
                             <div class="row px-2 qa-field-row">
-                                <div class="col-12 mb-2">
-                                    <span class="qa-subhead"><i class="feather icon-user-check"></i> Authority 2</span>
+                                <div class="col-12">
+                                    <div class="qa-authority-head">
+                                        <span class="qa-authority-icon"><i class="feather icon-user-check"></i></span>
+                                        <div>
+                                            <div class="qa-authority-title">Authority 2</div>
+                                            <div class="qa-authority-sub">Second signing authority on the certificate</div>
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div class="col-md-4">
@@ -266,7 +278,8 @@
     label { font-weight: 700 !important; color: #3a3f47; font-size: 13.5px; }
 
     .qa-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
-    .qa-section { margin-bottom: 22px; }
+    .qa-card > .card-body { padding: 28px; }
+    .qa-section { margin-bottom: 24px; }
     .qa-section-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 18px; }
     .qa-section-head-split { justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
     .qa-section-icon {
@@ -284,8 +297,12 @@
     }
 
     .qa-field-row .col-12, .qa-field-row [class*="col-md"] { margin-bottom: 16px; }
-    .qa-field-row .form-control { border-radius: 8px; border-color: #e3e6ec; }
-    .qa-field-row .form-control:focus { border-color: #4680ff; box-shadow: 0 0 0 3px rgba(70,128,255,.12); }
+
+    .qa-card input.form-control,
+    .qa-card select.form-control { border-radius: 8px; border-color: #e3e6ec; height: 44px; }
+    .qa-card textarea.form-control { border-radius: 8px; border-color: #e3e6ec; height: auto; }
+    .qa-card .form-control:focus { border-color: #c9a227; box-shadow: 0 0 0 3px rgba(255,215,0,.18); }
+    .qa-card input[type="file"].form-control { height: auto; padding-top: 9px; padding-bottom: 9px; }
 
     .qa-divider { border-top: 1px dashed #e3e6ec; margin: 6px 0 20px; }
     .qa-subhead {
@@ -295,14 +312,37 @@
     }
     .qa-subhead i { width: 15px; height: 15px; }
 
+    .qa-authority-head { display: flex; gap: 12px; align-items: center; margin-bottom: 16px; }
+    .qa-authority-icon {
+        width: 36px; height: 36px; border-radius: 10px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 16px;
+        background: rgba(50,63,47,.1); color: #323f2f;
+    }
+    .qa-authority-title { font-size: 14.5px; font-weight: 800; color: #24272b; }
+    .qa-authority-sub { font-size: 12px; color: #8a8f98; margin-top: 1px; }
+
     .qa-add-q-btn { box-shadow: 0 4px 12px rgba(40,167,69,.22); border-radius: 8px; }
 
-    .qa-preview-thumb { width: 200px; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-top: 8px; background: #f2f2f2; }
+    .qa-preview-thumb {
+        width: 200px; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-top: 8px;
+        background: #f7f6f2; border: 1px solid #e8e6de;
+    }
     .qa-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .qa-sig-preview { height: 64px; width: 168px; display: grid; place-items: end center; margin-top: 8px; }
+    .qa-sig-preview {
+        height: 72px; width: 180px; display: grid; place-items: end center; margin-top: 8px;
+        background: #f7f6f2; border: 1px solid #e8e6de; border-radius: 8px; padding: 8px;
+    }
     .qa-sig-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; object-position: bottom; }
-    .qa-logo-preview { height: 64px; width: 168px; display: grid; place-items: center; margin-top: 8px; }
+    .qa-logo-preview {
+        height: 72px; width: 180px; display: grid; place-items: center; margin-top: 8px;
+        background: #f7f6f2; border: 1px solid #e8e6de; border-radius: 8px; padding: 8px;
+    }
     .qa-logo-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; }
+    .qa-certbg-preview {
+        width: 220px; aspect-ratio: 1.414; margin-top: 8px; overflow: hidden;
+        background: #f7f6f2; border: 1px solid #e8e6de; border-radius: 8px;
+    }
+    .qa-certbg-preview img { width: 100%; height: 100%; object-fit: cover; }
     .qa-new-file-badge {
         display: flex; align-items: center; gap: 5px; margin-top: 6px;
         font-size: 11.5px; font-weight: 700; color: #1f8a58;
@@ -316,7 +356,7 @@
         transition: box-shadow .15s ease, border-color .15s ease;
     }
     .qa-question-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,.05); border-color: #e3e6ec; }
-    .qa-question-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+    .qa-question-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; gap: 10px; }
     .qa-question-num {
         display: inline-flex; align-items: center; justify-content: center;
         width: 30px; height: 30px; border-radius: 50%;
@@ -327,7 +367,17 @@
     .qa-submit-bar { text-align: center; margin: 8px 0 40px; }
     .qa-submit-btn {
         padding: 13px 42px; border-radius: 10px; font-weight: 700;
-        box-shadow: 0 8px 20px rgba(70,128,255,.28);
+        background: linear-gradient(135deg, #3a4a38, #243122); border: none;
+        box-shadow: 0 8px 22px rgba(36,49,34,.35);
+    }
+    .qa-submit-btn:hover, .qa-submit-btn:focus {
+        background: linear-gradient(135deg, #445243, #2c3a2a);
+        box-shadow: 0 10px 26px rgba(36,49,34,.42);
+    }
+
+    @media (max-width: 767px) {
+        .qa-card > .card-body { padding: 20px; }
+        .qa-preview-thumb, .qa-certbg-preview { width: 100%; }
     }
 </style>
 
@@ -335,7 +385,7 @@
 
     $(document).ready(function () {
         $('#status').select2();
-        new RichTextEditor("#description");
+        new RichTextEditor("#description", { toolbar: "basic" });
         addQuestion();
     });
 
