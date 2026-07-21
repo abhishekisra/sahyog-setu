@@ -237,7 +237,7 @@
         {% if translated_lang_count > 0 %}
         <div class="qa-live-alert">
             <i class="feather icon-alert-triangle"></i>
-            This quiz has translations in {{ translated_lang_count }} language{{ translated_lang_count|pluralize }}. Adding, removing, or reordering questions below deletes and recreates every question, which also deletes their existing translations — you'll need to re-translate afterwards via Manage Translations. Editing question text in place doesn't avoid this; the save always replaces all questions.
+            This quiz has translations in {{ translated_lang_count }} language{{ translated_lang_count|pluralize }}. Saving keeps existing questions' translations intact — only a question you actually delete (trash icon) loses its translation. If you edit a question's English wording, its translation isn't deleted but won't match anymore until you update it via Manage Translations.
         </div>
         {% endif %}
 
@@ -518,6 +518,11 @@
                                     </div>
 
                                     <div class="qa-question-body">
+                                        <!-- Carries this question's real PK through the save so the view can
+                                             UPDATE it in place instead of delete+recreate -- that's what was
+                                             silently wiping every question's translations on every save,
+                                             even when nothing about the questions changed. -->
+                                        <input type="hidden" name="question_id[]" value="{{ q.id }}">
                                         <div class="form-group">
                                             <label>Question *</label>
                                             <textarea name="question[]" class="form-control question-field" rows="2">{{ q.question }}</textarea>
@@ -674,6 +679,7 @@
                 </div>
 
                 <div class="qa-question-body">
+                    <input type="hidden" name="question_id[]" value="">
                     <div class="form-group">
                         <label>Question *</label>
                         <textarea name="question[]" class="form-control question-field" required rows="2"></textarea>

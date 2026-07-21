@@ -302,10 +302,15 @@ class EditQuizView(View):
                     quiz.certificate_background = request.FILES.get("certificate_background")
                 quiz.save()
 
-                # ❌ Remove all old questions
-                Questions.objects.filter(quiz=quiz).delete()
-
-                # ✅ Get new questions
+                # Update existing questions IN PLACE (matched by the hidden
+                # question_id[] each row carries -- see edit-quiz.html) instead
+                # of deleting and recreating every row on every save. The old
+                # delete-all-then-recreate approach always assigned fresh PKs,
+                # which cascade-deleted every QuestionTranslation for the whole
+                # quiz on ANY save, even one that didn't touch a single
+                # question -- exactly what wiped every quiz's Hindi
+                # translations the first time this form became submittable.
+                question_ids = request.POST.getlist("question_id[]")
                 questions = request.POST.getlist("question[]")
                 option_1 = request.POST.getlist("option_1[]")
                 option_2 = request.POST.getlist("option_2[]")
@@ -313,12 +318,26 @@ class EditQuizView(View):
                 option_4 = request.POST.getlist("option_4[]")
                 correct_option = request.POST.getlist("correct_option[]")
 
-                # ✅ Create new questions
+                kept_ids = []
                 for i in range(len(questions)):
 
-                    if questions[i].strip():   # skip empty
+                    if not questions[i].strip():   # skip empty
+                        continue
 
-                        Questions.objects.create(
+                    raw_qid = question_ids[i].strip() if i < len(question_ids) else ""
+                    existing = Questions.objects.filter(id=raw_qid, quiz=quiz).first() if raw_qid.isdigit() else None
+
+                    if existing:
+                        existing.question = questions[i]
+                        existing.option_1 = option_1[i]
+                        existing.option_2 = option_2[i]
+                        existing.option_3 = option_3[i]
+                        existing.option_4 = option_4[i]
+                        existing.correct_option = int(correct_option[i])
+                        existing.save()
+                        kept_ids.append(existing.id)
+                    else:
+                        new_q = Questions.objects.create(
                             quiz=quiz,
                             question=questions[i],
                             option_1=option_1[i],
@@ -327,6 +346,12 @@ class EditQuizView(View):
                             option_4=option_4[i],
                             correct_option=int(correct_option[i])
                         )
+                        kept_ids.append(new_q.id)
+
+                # Only a question actually removed by the admin (trash icon,
+                # so it's missing from kept_ids) should cascade-delete its
+                # translations -- that's the only case where that's correct.
+                Questions.objects.filter(quiz=quiz).exclude(id__in=kept_ids).delete()
 
             messages.success(request, "Quiz updated successfully")
 
