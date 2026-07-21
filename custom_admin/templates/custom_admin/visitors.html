@@ -39,20 +39,30 @@
                                     <thead>
                                         <tr>
                                             <th>S No.</th>
-                                            <th>Profile pic</th>
-                                            <th>Name</th> 
+                                            <th>Name</th>
+                                            <th>Mobile</th>
                                             <th>Email</th>
+                                            <th>Gender</th>
+                                            <th>Age</th>
+                                            <th>State</th>
+                                            <th>District</th>
+                                            <th>Occupation</th>
+                                            <th>Signed Up</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for visitor in visitors %}
                                             <tr>
                                                 <td>{{forloop.counter}}</td>
-                                                <td>
-                                                    <img src="{{visitor.profile_pic.url}}" class="img-fluid wid-100" alt="">
-                                                </td>
-                                                <td>{{visitor.name}}</td>    
-                                                <td>{{visitor.email}}</td>
+                                                <td>{{ visitor.get_full_name|default:visitor.name|default:visitor.mobile|default:"—" }}</td>
+                                                <td>{{ visitor.mobile|default:"—" }}</td>
+                                                <td>{{ visitor.email|default:"—" }}</td>
+                                                <td>{{ visitor.get_gender_display|default:"—" }}</td>
+                                                <td>{{ visitor.age|default:"—" }}</td>
+                                                <td>{{ visitor.state.state|default:"—" }}</td>
+                                                <td>{{ visitor.district.name|default:"—" }}</td>
+                                                <td>{{ visitor.occupation.title|default:"—" }}</td>
+                                                <td>{{ visitor.date_joined|date:"d M Y" }}</td>
                                             </tr>
                                         {% endfor %}
                                     </tbody>

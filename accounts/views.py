@@ -10,6 +10,7 @@ from django.utils.decorators import method_decorator
 from django.http import JsonResponse
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.admin.views.decorators import staff_member_required
 from django.core.cache import cache
 from google.oauth2 import id_token as google_id_token
 from google.auth.transport import requests as google_requests
@@ -24,13 +25,14 @@ from states.models import States, District
 from occupations.models import Occupations
 
 
+@staff_member_required(login_url="adminLogin")
 def visitors(request):
-    if request.user.is_authenticated:
-        visitors = User.objects.filter(user_type = 2)
-        return render(request, 'custom_admin/visitors.html', {'visitors': visitors})
-    else:
-        messages.error(request, "you have to login first")
-        return redirect('adminLogin')
+    # Was request.user.is_authenticated only -- any logged-in QUIZ USER
+    # (not just admin/staff) could reach this page and see every other
+    # user's name/email/mobile/state/district, a real privacy gap. Now
+    # gated the same way every other admin-only page in this codebase is.
+    visitors = User.objects.filter(user_type=2).select_related('state', 'district', 'occupation').order_by('-id')
+    return render(request, 'custom_admin/visitors.html', {'visitors': visitors})
 
 
 LOGIN_ATTEMPT_LIMIT = 5
