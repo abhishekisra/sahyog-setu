@@ -1,5 +1,6 @@
 import csv
 import html
+import logging
 import random
 import urllib.parse
 from datetime import timedelta
@@ -28,6 +29,8 @@ from .imaging import validate_image_upload, validate_certificate_background, val
 from .models import Questions, Quizzes, QuizAttempt, QuestionResponse, Language, QuizTranslation, QuestionTranslation
 from .question_import import SAMPLE_ROWS, normalize_correct_option, parse_upload, validate_rows
 from .ai_generate import AIGenerationError, MAX_QUESTIONS_PER_BATCH, generate_questions
+
+logger = logging.getLogger("django.request")
 
 # Every quiz now runs a fixed 20s-per-question timer (forward-only, no
 # going back) instead of quiz.quiz_time as an overall countdown -- that
@@ -213,11 +216,26 @@ class EditQuizView(View):
             .count()
         )
 
+        # Quick performance snapshot for the admin, right on the edit page --
+        # completed_at__isnull=False so in-progress attempts (score still 0)
+        # don't drag the average down; is_demo=False so admin/staff test runs
+        # don't pollute a real quiz's numbers.
+        completed_attempts = QuizAttempt.objects.filter(
+            quiz=quiz, completed_at__isnull=False, is_demo=False
+        )
+        stats_total = completed_attempts.count()
+        stats_passed = completed_attempts.filter(passed=True).count()
+        stats_avg_pct = completed_attempts.aggregate(avg=Avg("percentage"))["avg"] or 0
+
         return render(request, "custom_admin/quizzes/edit-quiz.html", {
             "quiz": quiz,
             "live_attempt_count": live_attempt_count,
             "preview_desc": preview_desc,
             "translated_lang_count": translated_lang_count,
+            "stats_total": stats_total,
+            "stats_passed": stats_passed,
+            "stats_pass_rate": round((stats_passed / stats_total * 100), 1) if stats_total else 0,
+            "stats_avg_pct": round(stats_avg_pct, 1),
         })
 
 
@@ -259,68 +277,70 @@ class EditQuizView(View):
                 return render(request, "custom_admin/quizzes/edit-quiz.html", {"quiz": quiz})
 
         try:
-            quiz = Quizzes.objects.get(id=id)
+            with transaction.atomic():
+                quiz = Quizzes.objects.get(id=id)
 
-            # Update quiz
-            quiz.title = request.POST.get("title")
-            quiz.description = request.POST.get("description")
-            quiz.certificate_text = request.POST.get("certificate_text")
-            quiz.status = request.POST.get("status")
-            quiz.quiz_time = request.POST.get("quiz_time")
-            quiz.name_top_pct = request.POST.get("name_top_pct") or quiz.name_top_pct
-            quiz.score_top_pct = request.POST.get("score_top_pct") or quiz.score_top_pct
-            if request.FILES.get("image"):
-                quiz.image = request.FILES.get("image")
-            if request.FILES.get("logo_1"):
-                quiz.logo_1 = request.FILES.get("logo_1")
-            if request.FILES.get("logo_2"):
-                quiz.logo_2 = request.FILES.get("logo_2")
-            if request.FILES.get("authority1_sign_image"):
-                quiz.authority1_sign_image = request.FILES.get("authority1_sign_image")
-            if request.FILES.get("authority2_sign_image"):
-                quiz.authority2_sign_image = request.FILES.get("authority2_sign_image")
-            if request.FILES.get("certificate_background"):
-                quiz.certificate_background = request.FILES.get("certificate_background")
-            quiz.save()
+                # Update quiz
+                quiz.title = request.POST.get("title")
+                quiz.description = request.POST.get("description")
+                quiz.certificate_text = request.POST.get("certificate_text")
+                quiz.status = request.POST.get("status")
+                quiz.quiz_time = request.POST.get("quiz_time")
+                quiz.name_top_pct = request.POST.get("name_top_pct") or quiz.name_top_pct
+                quiz.score_top_pct = request.POST.get("score_top_pct") or quiz.score_top_pct
+                if request.FILES.get("image"):
+                    quiz.image = request.FILES.get("image")
+                if request.FILES.get("logo_1"):
+                    quiz.logo_1 = request.FILES.get("logo_1")
+                if request.FILES.get("logo_2"):
+                    quiz.logo_2 = request.FILES.get("logo_2")
+                if request.FILES.get("authority1_sign_image"):
+                    quiz.authority1_sign_image = request.FILES.get("authority1_sign_image")
+                if request.FILES.get("authority2_sign_image"):
+                    quiz.authority2_sign_image = request.FILES.get("authority2_sign_image")
+                if request.FILES.get("certificate_background"):
+                    quiz.certificate_background = request.FILES.get("certificate_background")
+                quiz.save()
 
+                # ❌ Remove all old questions
+                Questions.objects.filter(quiz=quiz).delete()
 
-            # ❌ Remove all old questions
-            Questions.objects.filter(quiz=quiz).delete()
+                # ✅ Get new questions
+                questions = request.POST.getlist("question[]")
+                option_1 = request.POST.getlist("option_1[]")
+                option_2 = request.POST.getlist("option_2[]")
+                option_3 = request.POST.getlist("option_3[]")
+                option_4 = request.POST.getlist("option_4[]")
+                correct_option = request.POST.getlist("correct_option[]")
 
+                # ✅ Create new questions
+                for i in range(len(questions)):
 
-            # ✅ Get new questions
-            questions = request.POST.getlist("question[]")
-            option_1 = request.POST.getlist("option_1[]")
-            option_2 = request.POST.getlist("option_2[]")
-            option_3 = request.POST.getlist("option_3[]")
-            option_4 = request.POST.getlist("option_4[]")
-            correct_option = request.POST.getlist("correct_option[]")
+                    if questions[i].strip():   # skip empty
 
-
-            # ✅ Create new questions
-            for i in range(len(questions)):
-
-                if questions[i].strip():   # skip empty
-
-                    Questions.objects.create(
-                        quiz=quiz,
-                        question=questions[i],
-                        option_1=option_1[i],
-                        option_2=option_2[i],
-                        option_3=option_3[i],
-                        option_4=option_4[i],
-                        correct_option=int(correct_option[i])
-                    )
-
+                        Questions.objects.create(
+                            quiz=quiz,
+                            question=questions[i],
+                            option_1=option_1[i],
+                            option_2=option_2[i],
+                            option_3=option_3[i],
+                            option_4=option_4[i],
+                            correct_option=int(correct_option[i])
+                        )
 
             messages.success(request, "Quiz updated successfully")
 
             return redirect("adminQuizzes")
 
         except Exception as e:
-            print(e)
-            messages.error(request, "Update failed")
-            return redirect("adminQuizzes")
+            # transaction.atomic() above means a failure anywhere in this
+            # block (bad file, bad question row, etc.) rolls back the WHOLE
+            # update -- so this never leaves the quiz half-saved (new logo
+            # persisted but questions gone) while telling the admin it failed.
+            logger.error("EditQuizView save failed for quiz id=%s: %s", id, e, exc_info=True)
+            messages.error(request, f"Update failed: {e}")
+            quiz = get_object_or_404(Quizzes, id=id)
+            return render(request, "custom_admin/quizzes/edit-quiz.html", {"quiz": quiz})
 
 
 

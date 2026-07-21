@@ -117,7 +117,42 @@
     .qa-remove-btn { border-radius: 8px; }
 
     .qa-submit-bar { text-align: center; margin: 8px 0 40px; }
-    .qa-submit-btn { padding: 13px 42px; border-radius: 10px; font-weight: 700; box-shadow: 0 8px 20px rgba(70,128,255,.28); }
+    .qa-submit-btn {
+        padding: 13px 42px; border-radius: 10px; font-weight: 700;
+        background: linear-gradient(135deg, #3a4a38, #243122); border: none;
+        box-shadow: 0 8px 22px rgba(36,49,34,.35);
+    }
+    .qa-submit-btn:hover, .qa-submit-btn:focus {
+        background: linear-gradient(135deg, #445243, #2c3a2a);
+        box-shadow: 0 10px 26px rgba(36,49,34,.42);
+    }
+
+    /* Stats snapshot bar -- brand dark-green/gold, sits above the form */
+    .qa-stats-bar {
+        display: flex; align-items: center; gap: 14px; flex-wrap: wrap;
+        background: #24312e; border-radius: 14px; padding: 18px 22px;
+        margin-bottom: 22px; box-shadow: 0 6px 20px rgba(36,49,34,.2);
+    }
+    .qa-stat-tile { display: flex; align-items: center; gap: 12px; padding-right: 14px; }
+    .qa-stat-icon {
+        width: 42px; height: 42px; border-radius: 11px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 18px;
+        background: rgba(255,215,0,.14); color: #ffd700;
+    }
+    .qa-stat-icon-green { background: rgba(45,177,113,.18); color: #4ade80; }
+    .qa-stat-icon-gold { background: rgba(255,215,0,.18); color: #ffd700; }
+    .qa-stat-value { font-size: 20px; font-weight: 800; color: #fff; line-height: 1.1; }
+    .qa-stat-value-sub { font-size: 13px; font-weight: 600; color: rgba(255,255,255,.55); }
+    .qa-stat-label { font-size: 11.5px; font-weight: 600; color: rgba(255,255,255,.6); text-transform: uppercase; letter-spacing: .03em; }
+    .qa-stat-link {
+        margin-left: auto; color: #ffd700; font-weight: 700; font-size: 13px;
+        display: inline-flex; align-items: center; white-space: nowrap;
+    }
+    .qa-stat-link:hover { color: #fff; text-decoration: none; }
+    @media (max-width: 767px) {
+        .qa-stats-bar { padding: 16px; }
+        .qa-stat-link { margin-left: 0; width: 100%; justify-content: center; margin-top: 6px; }
+    }
 </style>
 
 <div class="pcoded-main-container">
@@ -135,6 +170,11 @@
                         </ul>
                     </div>
                     <div class="col-md-6 text-right">
+                        {% if quiz.slug %}
+                        <a href="{% url 'quiz_landing' quiz.slug %}" target="_blank" class="btn btn-outline-secondary btn-sm">
+                            <i class="feather icon-external-link"></i>&nbsp;Preview on Site
+                        </a>
+                        {% endif %}
                         <a href="/admin/quiz/{{ quiz.id }}/translations" class="btn btn-outline-primary btn-sm">
                             <i class="feather icon-globe"></i>&nbsp;Manage Translations
                         </a>
@@ -156,6 +196,31 @@
             This quiz has translations in {{ translated_lang_count }} language{{ translated_lang_count|pluralize }}. Adding, removing, or reordering questions below deletes and recreates every question, which also deletes their existing translations — you'll need to re-translate afterwards via Manage Translations. Editing question text in place doesn't avoid this; the save always replaces all questions.
         </div>
         {% endif %}
+
+        <div class="qa-stats-bar">
+            <div class="qa-stat-tile">
+                <div class="qa-stat-icon"><i class="feather icon-users"></i></div>
+                <div>
+                    <div class="qa-stat-value">{{ stats_total }}</div>
+                    <div class="qa-stat-label">Attempts Completed</div>
+                </div>
+            </div>
+            <div class="qa-stat-tile">
+                <div class="qa-stat-icon qa-stat-icon-green"><i class="feather icon-check-circle"></i></div>
+                <div>
+                    <div class="qa-stat-value">{{ stats_passed }}<span class="qa-stat-value-sub">/{{ stats_total }}</span></div>
+                    <div class="qa-stat-label">Passed ({{ stats_pass_rate }}%)</div>
+                </div>
+            </div>
+            <div class="qa-stat-tile">
+                <div class="qa-stat-icon qa-stat-icon-gold"><i class="feather icon-percent"></i></div>
+                <div>
+                    <div class="qa-stat-value">{{ stats_avg_pct }}%</div>
+                    <div class="qa-stat-label">Average Score</div>
+                </div>
+            </div>
+            <a href="/quiz-analytics/" class="qa-stat-link">Full Analytics&nbsp;<i class="feather icon-arrow-right"></i></a>
+        </div>
 
         <form method="POST" enctype="multipart/form-data">
             {% csrf_token %}
@@ -399,34 +464,34 @@
                                     <div class="qa-question-body">
                                         <div class="form-group">
                                             <label>Question *</label>
-                                            <textarea name="question[]" class="form-control question-field" required rows="2">{{ q.question }}</textarea>
+                                            <textarea name="question[]" class="form-control question-field" rows="2">{{ q.question }}</textarea>
                                         </div>
 
                                         <div class="row mt-2">
 
                                             <div class="col-md-3">
                                                 <label>Option 1 *</label>
-                                                <input type="text" name="option_1[]" value="{{ q.option_1 }}" class="form-control option-field" required>
+                                                <input type="text" name="option_1[]" value="{{ q.option_1 }}" class="form-control option-field">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>Option 2 *</label>
-                                                <input type="text" name="option_2[]" value="{{ q.option_2 }}" class="form-control option-field" required>
+                                                <input type="text" name="option_2[]" value="{{ q.option_2 }}" class="form-control option-field">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>Option 3 *</label>
-                                                <input type="text" name="option_3[]" value="{{ q.option_3 }}" class="form-control option-field" required>
+                                                <input type="text" name="option_3[]" value="{{ q.option_3 }}" class="form-control option-field">
                                             </div>
 
                                             <div class="col-md-3">
                                                 <label>Option 4 *</label>
-                                                <input type="text" name="option_4[]" value="{{ q.option_4 }}" class="form-control option-field" required>
+                                                <input type="text" name="option_4[]" value="{{ q.option_4 }}" class="form-control option-field">
                                             </div>
 
                                             <div class="col-12 mt-2">
                                                 <label>Correct Option *</label>
-                                                <select name="correct_option[]" class="form-control correct-field" required>
+                                                <select name="correct_option[]" class="form-control correct-field">
                                                     <option value="1" {% if q.correct_option == 1 %}selected{% endif %}>Option 1</option>
                                                     <option value="2" {% if q.correct_option == 2 %}selected{% endif %}>Option 2</option>
                                                     <option value="3" {% if q.correct_option == 3 %}selected{% endif %}>Option 3</option>

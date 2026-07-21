@@ -92,6 +92,72 @@
                     vertical-align: middle;
                 }
 
+                /* --- Premium brand reskin (dark-green #313f2f / gold #ffd700),
+                   layered on top of the stock Able-Pro theme via !important --
+                   the theme's own CSS runs ~27k lines with selectors this can't
+                   reliably out-specificity otherwise. Sidebar stays menu-light
+                   (its logo image has no light/white variant, so a dark sidebar
+                   would swallow it) -- only accent colors move to gold, plus a
+                   dark-green header, so branding shows without any contrast risk. */
+                .pcoded-header.header-blue {
+                    background: linear-gradient(90deg, #263329, #313f2f) !important;
+                    border-bottom: 2px solid #ffd700 !important;
+                }
+                .pcoded-header.header-blue .feather,
+                .pcoded-header.header-blue .dud-logout,
+                .pcoded-header.header-blue .pop-search,
+                .pcoded-header.header-blue .mob-toggler,
+                .pcoded-header.header-blue .mobile-menu span {
+                    color: #f5f0e0 !important;
+                }
+                .pcoded-header.header-blue .mobile-menu span { background: #f5f0e0 !important; }
+
+                .pcoded-navbar .pcoded-inner-navbar > li > a:hover,
+                .pcoded-navbar .pcoded-inner-navbar > li > a:focus {
+                    color: #a5820f !important;
+                    background: rgba(255, 215, 0, .1) !important;
+                }
+                .pcoded-navbar .pcoded-inner-navbar > li.active > a,
+                .pcoded-navbar .pcoded-inner-navbar > li.pcoded-trigger > a {
+                    color: #24312e !important;
+                    background: rgba(255, 215, 0, .16) !important;
+                    border-left: 3px solid #ffd700 !important;
+                    font-weight: 700 !important;
+                }
+                .pcoded-navbar .pcoded-inner-navbar > li.active > a .pcoded-micon i,
+                .pcoded-navbar .pcoded-inner-navbar > li.pcoded-trigger > a .pcoded-micon i {
+                    color: #a5820f !important;
+                }
+
+                .btn-primary {
+                    background: linear-gradient(135deg, #3a4a38, #263329) !important;
+                    border-color: #263329 !important;
+                }
+                .btn-primary:hover, .btn-primary:focus {
+                    background: linear-gradient(135deg, #445243, #2c3a2a) !important;
+                    border-color: #1e2a1f !important;
+                }
+                .btn-outline-primary {
+                    color: #313f2f !important;
+                    border-color: #313f2f !important;
+                }
+                .btn-outline-primary:hover {
+                    background: #313f2f !important;
+                    color: #fff !important;
+                }
+
+                .card {
+                    border-radius: 12px !important;
+                    box-shadow: 0 2px 14px rgba(36, 49, 34, .08) !important;
+                }
+                .page-header .page-header-title h5 {
+                    position: relative; padding-left: 12px;
+                }
+                .page-header .page-header-title h5:before {
+                    content: ""; position: absolute; left: 0; top: 2px; bottom: 2px;
+                    width: 4px; border-radius: 4px; background: #ffd700;
+                }
+
             </style>
         </head>
         <body class="">
