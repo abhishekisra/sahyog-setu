@@ -50,7 +50,8 @@
 
                                 <div class="col-md-4">
                                     <label>Quiz Image</label>
-                                    <input type="file" name="image" class="form-control" required>
+                                    <input type="file" name="image" class="form-control" required onchange="qaPreviewFile(this,'previewImage')">
+                                    <div class="qa-preview-thumb" id="previewImage" style="display:none;"><img src=""></div>
                                     <small class="text-muted d-block mt-1">
                                         16:10 ratio (e.g. 1200×750px), max 2MB. Upload artwork only — title, time, question count come from the database, do not write them into the image.
                                     </small>
@@ -97,7 +98,8 @@
 
                                 <div class="col-md-6 mt-2">
                                     <label>Certificate Background (optional)</label>
-                                    <input type="file" name="certificate_background" class="form-control">
+                                    <input type="file" name="certificate_background" class="form-control" onchange="qaPreviewFile(this,'previewCertBg')">
+                                    <div class="mb-1" id="previewCertBg" style="display:none;"><img src="" style="max-height:60px;border-radius:6px;"></div>
                                     <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB. Leave empty to use the built-in frame.</small>
                                 </div>
 
@@ -131,7 +133,8 @@
 
                                 <div class="col-md-4">
                                     <label>Signature *</label>
-                                    <input type="file" name="authority1_sign_image" class="form-control" required>
+                                    <input type="file" name="authority1_sign_image" class="form-control" required onchange="qaPreviewFile(this,'previewSig1')">
+                                    <div class="qa-sig-preview" id="previewSig1" style="display:none;"><img src=""></div>
                                 </div>
                             </div>
 
@@ -154,7 +157,8 @@
 
                                 <div class="col-md-4">
                                     <label>Signature *</label>
-                                    <input type="file" name="authority2_sign_image" class="form-control" required>
+                                    <input type="file" name="authority2_sign_image" class="form-control" required onchange="qaPreviewFile(this,'previewSig2')">
+                                    <div class="qa-sig-preview" id="previewSig2" style="display:none;"><img src=""></div>
                                 </div>
                             </div>
 
@@ -163,12 +167,14 @@
                             <div class="row px-2 qa-field-row">
                                 <div class="col-md-6">
                                     <label>Logo 1 *</label>
-                                    <input type="file" name="logo_1" class="form-control" required>
+                                    <input type="file" name="logo_1" class="form-control" required onchange="qaPreviewFile(this,'previewLogo1')">
+                                    <div class="qa-logo-preview" id="previewLogo1" style="display:none;"><img src=""></div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label>Logo 2 *</label>
-                                    <input type="file" name="logo_2" class="form-control" required>
+                                    <input type="file" name="logo_2" class="form-control" required onchange="qaPreviewFile(this,'previewLogo2')">
+                                    <div class="qa-logo-preview" id="previewLogo2" style="display:none;"><img src=""></div>
                                 </div>
                             </div>
                         </div>
@@ -291,6 +297,19 @@
 
     .qa-add-q-btn { box-shadow: 0 4px 12px rgba(40,167,69,.22); border-radius: 8px; }
 
+    .qa-preview-thumb { width: 200px; aspect-ratio: 16/10; border-radius: 8px; overflow: hidden; margin-top: 8px; background: #f2f2f2; }
+    .qa-preview-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .qa-sig-preview { height: 64px; width: 168px; display: grid; place-items: end center; margin-top: 8px; }
+    .qa-sig-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; object-position: bottom; }
+    .qa-logo-preview { height: 64px; width: 168px; display: grid; place-items: center; margin-top: 8px; }
+    .qa-logo-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; }
+    .qa-new-file-badge {
+        display: flex; align-items: center; gap: 5px; margin-top: 6px;
+        font-size: 11.5px; font-weight: 700; color: #1f8a58;
+        background: rgba(45,177,113,.12); border-radius: 6px; padding: 3px 9px;
+        width: fit-content;
+    }
+
     .qa-question-card {
         border: 1px solid #eef0f4; padding: 18px 20px; margin-top: 16px;
         border-radius: 12px; background: #fbfbfd;
@@ -319,6 +338,32 @@
         new RichTextEditor("#description");
         addQuestion();
     });
+
+    // Instant local preview for logo/signature/certificate-background uploads --
+    // see edit-quiz.html for the fuller explanation; same function here since
+    // add-quiz.html doesn't share a script include with it.
+    function qaPreviewFile(input, wrapperId) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const wrapper = document.getElementById(wrapperId);
+        const url = URL.createObjectURL(file);
+        let img = wrapper.querySelector('img');
+        if (!img) {
+            img = document.createElement('img');
+            wrapper.appendChild(img);
+        }
+        img.src = url;
+        wrapper.style.display = '';
+
+        let badge = document.getElementById(wrapperId + '_badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = wrapperId + '_badge';
+            badge.className = 'qa-new-file-badge';
+            wrapper.insertAdjacentElement('afterend', badge);
+        }
+        badge.innerHTML = '<i class="feather icon-check-circle"></i> New file selected — will replace on Save';
+    }
 
     function renumberQuestions() {
         let items = document.querySelectorAll('#questions-container .question-item');

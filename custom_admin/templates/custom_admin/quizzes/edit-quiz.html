@@ -76,6 +76,13 @@
     .qa-logo-preview { height: 64px; width: 168px; display: grid; place-items: center; margin-top: 8px; }
     .qa-logo-preview img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; }
 
+    .qa-new-file-badge {
+        display: flex; align-items: center; gap: 5px; margin-top: 6px;
+        font-size: 11.5px; font-weight: 700; color: #1f8a58;
+        background: rgba(45,177,113,.12); border-radius: 6px; padding: 3px 9px;
+        width: fit-content;
+    }
+
     /* Question toolbar (search + expand/collapse all) */
     .qa-q-toolbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
     .qa-q-search { max-width: 280px; border-radius: 8px; }
@@ -247,10 +254,10 @@
 
                                 <div class="col-md-4">
                                     <label>Quiz Image</label>
-                                    <input type="file" name="image" class="form-control">
-                                    {% if quiz.image %}
-                                    <div class="qa-preview-thumb"><img src="{{ quiz.image.url }}"></div>
-                                    {% endif %}
+                                    <input type="file" name="image" class="form-control" onchange="qaPreviewFile(this,'previewImage')">
+                                    <div class="qa-preview-thumb" id="previewImage" style="{% if not quiz.image %}display:none;{% endif %}">
+                                        <img src="{% if quiz.image %}{{ quiz.image.url }}{% endif %}">
+                                    </div>
                                     <small class="text-muted d-block mt-1">
                                         16:10 ratio (e.g. 1200×750px), max 2MB. Upload artwork only — title, time, question count come from the database, do not write them into the image.
                                     </small>
@@ -317,10 +324,10 @@
 
                                 <div class="col-md-6 mt-2">
                                     <label>Certificate Background (optional)</label>
-                                    {% if quiz.certificate_background %}
-                                    <div class="mb-1"><img src="{{ quiz.certificate_background.url }}" style="max-height:60px;border-radius:6px;"></div>
-                                    {% endif %}
-                                    <input type="file" name="certificate_background" class="form-control">
+                                    <div class="mb-1" id="previewCertBg" style="{% if not quiz.certificate_background %}display:none;{% endif %}">
+                                        <img src="{% if quiz.certificate_background %}{{ quiz.certificate_background.url }}{% endif %}" style="max-height:60px;border-radius:6px;">
+                                    </div>
+                                    <input type="file" name="certificate_background" class="form-control" onchange="qaPreviewFile(this,'previewCertBg')">
                                     <small class="text-muted">A4 landscape image (aspect ~1.414), min 1600px wide, max 4MB.</small>
                                 </div>
 
@@ -354,10 +361,10 @@
 
                                 <div class="col-md-4">
                                     <label>Signature</label>
-                                    <input type="file" name="authority1_sign_image" class="form-control">
-                                    {% if quiz.authority1_sign_image %}
-                                    <div class="qa-sig-preview"><img src="{{ quiz.authority1_sign_image.url }}"></div>
-                                    {% endif %}
+                                    <input type="file" name="authority1_sign_image" class="form-control" onchange="qaPreviewFile(this,'previewSig1')">
+                                    <div class="qa-sig-preview" id="previewSig1" style="{% if not quiz.authority1_sign_image %}display:none;{% endif %}">
+                                        <img src="{% if quiz.authority1_sign_image %}{{ quiz.authority1_sign_image.url }}{% endif %}">
+                                    </div>
                                 </div>
                             </div>
 
@@ -380,10 +387,10 @@
 
                                 <div class="col-md-4">
                                     <label>Signature</label>
-                                    <input type="file" name="authority2_sign_image" class="form-control">
-                                    {% if quiz.authority2_sign_image %}
-                                    <div class="qa-sig-preview"><img src="{{ quiz.authority2_sign_image.url }}"></div>
-                                    {% endif %}
+                                    <input type="file" name="authority2_sign_image" class="form-control" onchange="qaPreviewFile(this,'previewSig2')">
+                                    <div class="qa-sig-preview" id="previewSig2" style="{% if not quiz.authority2_sign_image %}display:none;{% endif %}">
+                                        <img src="{% if quiz.authority2_sign_image %}{{ quiz.authority2_sign_image.url }}{% endif %}">
+                                    </div>
                                 </div>
                             </div>
 
@@ -392,18 +399,18 @@
                             <div class="row px-2 qa-field-row">
                                 <div class="col-md-6">
                                     <label>Logo 1</label>
-                                    <input type="file" name="logo_1" class="form-control">
-                                    {% if quiz.logo_1 %}
-                                    <div class="qa-logo-preview"><img src="{{ quiz.logo_1.url }}"></div>
-                                    {% endif %}
+                                    <input type="file" name="logo_1" class="form-control" onchange="qaPreviewFile(this,'previewLogo1')">
+                                    <div class="qa-logo-preview" id="previewLogo1" style="{% if not quiz.logo_1 %}display:none;{% endif %}">
+                                        <img src="{% if quiz.logo_1 %}{{ quiz.logo_1.url }}{% endif %}">
+                                    </div>
                                 </div>
 
                                 <div class="col-md-6">
                                     <label>Logo 2</label>
-                                    <input type="file" name="logo_2" class="form-control">
-                                    {% if quiz.logo_2 %}
-                                    <div class="qa-logo-preview"><img src="{{ quiz.logo_2.url }}"></div>
-                                    {% endif %}
+                                    <input type="file" name="logo_2" class="form-control" onchange="qaPreviewFile(this,'previewLogo2')">
+                                    <div class="qa-logo-preview" id="previewLogo2" style="{% if not quiz.logo_2 %}display:none;{% endif %}">
+                                        <img src="{% if quiz.logo_2 %}{{ quiz.logo_2.url }}{% endif %}">
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -532,6 +539,34 @@
     function toggleQuestion(card, forceOpen) {
         let shouldOpen = forceOpen !== undefined ? forceOpen : !card.classList.contains('qa-open');
         card.classList.toggle('qa-open', shouldOpen);
+    }
+
+    // Instant local preview for logo/signature/certificate-background uploads --
+    // without this, the old saved image just sits there after picking a new
+    // file, with nothing changing until the form is submitted and the page
+    // reloads. Uses URL.createObjectURL so no upload/round-trip is needed to
+    // confirm which file got picked.
+    function qaPreviewFile(input, wrapperId) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const wrapper = document.getElementById(wrapperId);
+        const url = URL.createObjectURL(file);
+        let img = wrapper.querySelector('img');
+        if (!img) {
+            img = document.createElement('img');
+            wrapper.appendChild(img);
+        }
+        img.src = url;
+        wrapper.style.display = '';
+
+        let badge = document.getElementById(wrapperId + '_badge');
+        if (!badge) {
+            badge = document.createElement('div');
+            badge.id = wrapperId + '_badge';
+            badge.className = 'qa-new-file-badge';
+            wrapper.insertAdjacentElement('afterend', badge);
+        }
+        badge.innerHTML = '<i class="feather icon-check-circle"></i> New file selected — will replace on Save';
     }
 
     function setAllOpen(open) {
