@@ -12,6 +12,13 @@
             <!-- Favicon icon -->
             <link rel="icon" href="{% static 'custom_admin/images/favicon.ico' %}" type="image/x-icon">
 
+            <!-- Mukta -- same body font as the partner portal and the public
+                 Scheme Eligibility page, so the brand reads consistently
+                 across all three Django-rendered surfaces. -->
+            <link rel="preconnect" href="https://fonts.googleapis.com">
+            <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+            <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
             <!-- vendor css -->
             
             <link rel="stylesheet" href="{% static 'custom_admin/css/plugins/dataTables.bootstrap4.min.css' %}">
@@ -92,16 +99,35 @@
                     vertical-align: middle;
                 }
 
-                /* --- Premium brand reskin (dark-green #313f2f / gold #ffd700),
-                   layered on top of the stock Able-Pro theme via !important --
-                   the theme's own CSS runs ~27k lines with selectors this can't
-                   reliably out-specificity otherwise. Sidebar stays menu-light
-                   (its logo image has no light/white variant, so a dark sidebar
+                /* --- Premium brand reskin (dark-green / gold), layered on top
+                   of the stock Able-Pro theme via !important -- the theme's
+                   own CSS runs ~27k lines with selectors this can't reliably
+                   out-specificity otherwise. Sidebar stays menu-light (its
+                   logo image has no light/white variant, so a dark sidebar
                    would swallow it) -- only accent colors move to gold, plus a
-                   dark-green header, so branding shows without any contrast risk. */
+                   dark-green header, so branding shows without any contrast
+                   risk. Tokens converge with the public Scheme Eligibility
+                   page's palette (custom_admin/schemes/scheme_finder.html)
+                   and the partner portal's, so all three Django-rendered
+                   surfaces read as one brand. */
+                :root {
+                    --brand-deep: #28352A;
+                    --brand-deeper: #182019;
+                    --gold: #FFD700;
+                    --gold-ink: #8A6C09;
+                    --paper: #F5F2E8;
+                    --border: #E3DCC7;
+                    --text-muted: #6B6A5E;
+                }
+
+                body {
+                    font-family: 'Mukta', -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif !important;
+                    background-color: var(--paper) !important;
+                }
+
                 .pcoded-header.header-blue {
-                    background: linear-gradient(90deg, #263329, #313f2f) !important;
-                    border-bottom: 2px solid #ffd700 !important;
+                    background: linear-gradient(90deg, var(--brand-deeper), var(--brand-deep)) !important;
+                    border-bottom: 2px solid var(--gold) !important;
                 }
                 .pcoded-header.header-blue .feather,
                 .pcoded-header.header-blue .dud-logout,
@@ -114,48 +140,83 @@
 
                 .pcoded-navbar .pcoded-inner-navbar > li > a:hover,
                 .pcoded-navbar .pcoded-inner-navbar > li > a:focus {
-                    color: #a5820f !important;
+                    color: var(--gold-ink) !important;
                     background: rgba(255, 215, 0, .1) !important;
                 }
                 .pcoded-navbar .pcoded-inner-navbar > li.active > a,
                 .pcoded-navbar .pcoded-inner-navbar > li.pcoded-trigger > a {
-                    color: #24312e !important;
+                    color: var(--brand-deeper) !important;
                     background: rgba(255, 215, 0, .16) !important;
-                    border-left: 3px solid #ffd700 !important;
+                    border-left: 3px solid var(--gold) !important;
                     font-weight: 700 !important;
                 }
                 .pcoded-navbar .pcoded-inner-navbar > li.active > a .pcoded-micon i,
                 .pcoded-navbar .pcoded-inner-navbar > li.pcoded-trigger > a .pcoded-micon i {
-                    color: #a5820f !important;
+                    color: var(--gold-ink) !important;
                 }
 
                 .btn-primary {
-                    background: linear-gradient(135deg, #3a4a38, #263329) !important;
-                    border-color: #263329 !important;
+                    background: linear-gradient(135deg, #3a4a38, var(--brand-deeper)) !important;
+                    border-color: var(--brand-deeper) !important;
                 }
                 .btn-primary:hover, .btn-primary:focus {
                     background: linear-gradient(135deg, #445243, #2c3a2a) !important;
                     border-color: #1e2a1f !important;
                 }
                 .btn-outline-primary {
-                    color: #313f2f !important;
-                    border-color: #313f2f !important;
+                    color: var(--brand-deep) !important;
+                    border-color: var(--brand-deep) !important;
                 }
                 .btn-outline-primary:hover {
-                    background: #313f2f !important;
+                    background: var(--brand-deep) !important;
                     color: #fff !important;
+                }
+                .btn-success, .btn-danger, .btn-warning, .btn-info {
+                    border-radius: 8px !important;
+                    font-weight: 600 !important;
                 }
 
                 .card {
                     border-radius: 12px !important;
                     box-shadow: 0 2px 14px rgba(36, 49, 34, .08) !important;
+                    border: 1px solid var(--border) !important;
                 }
                 .page-header .page-header-title h5 {
                     position: relative; padding-left: 12px;
                 }
                 .page-header .page-header-title h5:before {
                     content: ""; position: absolute; left: 0; top: 2px; bottom: 2px;
-                    width: 4px; border-radius: 4px; background: #ffd700;
+                    width: 4px; border-radius: 4px; background: var(--gold);
+                }
+
+                .table thead th {
+                    background: rgba(40, 53, 42, .05) !important;
+                    color: var(--brand-deep) !important;
+                    text-transform: uppercase;
+                    font-size: 12px;
+                    letter-spacing: .04em;
+                    font-weight: 700 !important;
+                    border-bottom: 2px solid var(--border) !important;
+                }
+                .table tbody tr:hover {
+                    background: rgba(255, 215, 0, .06) !important;
+                }
+
+                .form-control {
+                    border-radius: 8px !important;
+                    border-color: var(--border) !important;
+                }
+                .form-control:focus {
+                    border-color: var(--gold-ink) !important;
+                    box-shadow: 0 0 0 3px rgba(138, 108, 9, .12) !important;
+                }
+                label {
+                    font-weight: 600 !important;
+                    color: var(--brand-deep) !important;
+                }
+
+                .breadcrumb .breadcrumb-item a {
+                    color: var(--gold-ink) !important;
                 }
 
             </style>

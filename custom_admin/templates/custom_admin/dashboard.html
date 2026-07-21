@@ -25,163 +25,159 @@
 			</div>
 			<!-- [ breadcrumb ] end -->
 			<!-- [ Main Content ] start -->
+			<style>
+				.stat-tile .card-body { display: flex; align-items: center; gap: 16px; }
+				.stat-tile .stat-icon {
+					width: 46px; height: 46px; border-radius: 10px; flex-shrink: 0;
+					background: var(--brand-deep); color: var(--gold);
+					display: flex; align-items: center; justify-content: center;
+				}
+				.stat-tile .stat-icon i { font-size: 20px; }
+				.stat-tile h2 { font-variant-numeric: tabular-nums; color: var(--brand-deeper); margin: 0; }
+				.stat-tile p { margin: 2px 0 0; }
+			</style>
 			<div class="row">
 				<!-- amount start -->
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{occupations}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Occupations</span></p>
+							<div class="stat-icon"><i class="feather icon-briefcase"></i></div>
+							<div><h2 class="f-w-600">{{occupations}}</h2><p class="text-muted f-w-600 f-16">Occupations</p></div>
 						</div>
-						<div id="amount-processed"></div>
 					</div>
 				</div>
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{categories}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-yellow">Categories</span></p>
+							<div class="stat-icon"><i class="feather icon-tag"></i></div>
+							<div><h2 class="f-w-600">{{categories}}</h2><p class="text-muted f-w-600 f-16">Categories</p></div>
 						</div>
-						<div id="amount-spent"></div>
-					</div>
-				</div>
-
-				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
-						<div class="card-body">
-							<h2 class="f-w-400">{{state_schemes}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-red">State Schemes</span></p>
-						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{central_schemes}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Central Schemes</span></p>
+							<div class="stat-icon"><i class="feather icon-map"></i></div>
+							<div><h2 class="f-w-600">{{state_schemes}}</h2><p class="text-muted f-w-600 f-16">State Schemes</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{important_documents}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-red">Important Documents</span></p>
+							<div class="stat-icon"><i class="feather icon-file-text"></i></div>
+							<div><h2 class="f-w-600">{{central_schemes}}</h2><p class="text-muted f-w-600 f-16">Central Schemes</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{important_portals}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Important Portals</span></p>
+							<div class="stat-icon"><i class="feather icon-file"></i></div>
+							<div><h2 class="f-w-600">{{important_documents}}</h2><p class="text-muted f-w-600 f-16">Important Documents</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{scheme_announcements}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-yellow">Scheme Announcements</span></p>
+							<div class="stat-icon"><i class="feather icon-link"></i></div>
+							<div><h2 class="f-w-600">{{important_portals}}</h2><p class="text-muted f-w-600 f-16">Important Portals</p></div>
 						</div>
-						<div id="amount-spent"></div>
+					</div>
+				</div>
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card stat-tile overflow-hidden">
+						<div class="card-body">
+							<div class="stat-icon"><i class="feather icon-bell"></i></div>
+							<div><h2 class="f-w-600">{{scheme_announcements}}</h2><p class="text-muted f-w-600 f-16">Scheme Announcements</p></div>
+						</div>
 					</div>
 				</div>
 
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{testimonials}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Testimonials</span></p>
+							<div class="stat-icon"><i class="feather icon-message-square"></i></div>
+							<div><h2 class="f-w-600">{{testimonials}}</h2><p class="text-muted f-w-600 f-16">Testimonials</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{visitors}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-red">Visitors</span></p>
+							<div class="stat-icon"><i class="feather icon-eye"></i></div>
+							<div><h2 class="f-w-600">{{visitors}}</h2><p class="text-muted f-w-600 f-16">Visitors</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{helplines}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Helplines</span></p>
+							<div class="stat-icon"><i class="feather icon-phone-call"></i></div>
+							<div><h2 class="f-w-600">{{helplines}}</h2><p class="text-muted f-w-600 f-16">Helplines</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{business_plans}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-yellow">Business Plans</span></p>
+							<div class="stat-icon"><i class="feather icon-trending-up"></i></div>
+							<div><h2 class="f-w-600">{{business_plans}}</h2><p class="text-muted f-w-600 f-16">Business Plans</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{artificial_intelligence}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Artificial Intelligence</span></p>
+							<div class="stat-icon"><i class="feather icon-cpu"></i></div>
+							<div><h2 class="f-w-600">{{artificial_intelligence}}</h2><p class="text-muted f-w-600 f-16">Artificial Intelligence</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{organization_registration}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-red">Organization Registrations</span></p>
+							<div class="stat-icon"><i class="feather icon-clipboard"></i></div>
+							<div><h2 class="f-w-600">{{organization_registration}}</h2><p class="text-muted f-w-600 f-16">Organization Registrations</p></div>
 						</div>
-						<div id="amount-spent"></div>
-					</div>
-				</div>
-				
-				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
-						<div class="card-body">
-							<h2 class="f-w-400">{{legal_registrations}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-green">Legal Registrations</span></p>
-						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
 
 				<div class="col-md-4 col-xl-4">
-					<div class="card amount-card overflow-hidden">
+					<div class="card amount-card stat-tile overflow-hidden">
 						<div class="card-body">
-							<h2 class="f-w-400">{{marketing}}</h2>
-							<p class="text-muted f-w-600 f-16"><span class="text-c-blue">Marketing</span></p>
+							<div class="stat-icon"><i class="feather icon-shield"></i></div>
+							<div><h2 class="f-w-600">{{legal_registrations}}</h2><p class="text-muted f-w-600 f-16">Legal Registrations</p></div>
 						</div>
-						<div id="amount-spent"></div>
 					</div>
 				</div>
-				
+
+				<div class="col-md-4 col-xl-4">
+					<div class="card amount-card stat-tile overflow-hidden">
+						<div class="card-body">
+							<div class="stat-icon"><i class="feather icon-target"></i></div>
+							<div><h2 class="f-w-600">{{marketing}}</h2><p class="text-muted f-w-600 f-16">Marketing</p></div>
+						</div>
+					</div>
+				</div>
+
 			</div>
 			<!-- [ Main Content ] end -->
 
