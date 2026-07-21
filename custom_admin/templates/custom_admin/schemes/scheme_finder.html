@@ -112,6 +112,9 @@
   .yk-block h3{font-size:16px;margin-bottom:11px;display:flex;align-items:center;gap:8px;}
   .yk-block h3 svg{color:var(--gold-ink);flex-shrink:0;}
   .yk-block p, .yk-block div{font-size:15px;color:var(--text-muted);line-height:1.68;margin:0;}
+  .yk-block-list{font-size:15px;color:var(--text-muted);line-height:1.68;margin:0;padding-left:20px;}
+  .yk-block-list li{margin-bottom:8px;}
+  .yk-block-list li:last-child{margin-bottom:0;}
   .yk-side-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:15px;}
   .yk-side-card h4{font-size:15px;margin-bottom:12px;font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
   .yk-fact{display:flex;justify-content:space-between;font-size:15px;padding:8px 0;border-bottom:1px solid var(--border);gap:10px;}
@@ -260,6 +263,53 @@
     var d = document.createElement('div');
     d.innerHTML = html || '';
     return (d.textContent || '').trim();
+  }
+
+  function escapeHtml(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // Admin-entered description/eligibility/required_documents come from a
+  // rich-text editor and are usually already structured as separate
+  // <li>/<h4>/<p> blocks (one per point) -- stripTags() used to flatten all
+  // of that straight to .textContent, which drops every inter-block
+  // boundary and dumps everything as one run-on paragraph. This keeps the
+  // original structure: each list item (or, failing that, each heading/
+  // paragraph block) becomes its own bullet; only genuinely unstructured
+  // content falls back to a single paragraph.
+  function renderRichText(html, fallback){
+    if(!html) return '<p>' + escapeHtml(fallback) + '</p>';
+    var container = document.createElement('div');
+    container.innerHTML = html;
+    var items = [];
+    var blocks = container.querySelectorAll('li');
+    if(!blocks.length) blocks = container.querySelectorAll('h4, p');
+    blocks.forEach(function(b){
+      var t = b.textContent.replace(/\s+/g, ' ').trim();
+      if(t) items.push(t);
+    });
+    if(items.length > 1){
+      return '<ul class="yk-block-list">' + items.map(function(t){ return '<li>' + escapeHtml(t) + '</li>'; }).join('') + '</ul>';
+    }
+    var flat = items[0] || stripTags(html);
+    return flat ? '<p>' + escapeHtml(flat) + '</p>' : '<p>' + escapeHtml(fallback) + '</p>';
+  }
+
+  // Pulls the first real <a href> out of a web_links HTML blob. Renders as
+  // an actual href (not an inline onclick built by string-concatenating
+  // JSON.stringify(...) into an HTML attribute) -- that older approach
+  // broke as soon as web_links contained a literal double-quote (i.e.
+  // almost always, since the source is itself `<a href="...">`), closing
+  // the onclick="..." attribute early and spilling the rest of the JS as
+  // visible page text.
+  function extractFirstHref(html){
+    if(!html) return null;
+    var d = document.createElement('div');
+    d.innerHTML = html;
+    var a = d.querySelector('a[href]');
+    return a ? a.getAttribute('href') : null;
   }
 
   // Populate category dropdown from the real live API.
@@ -439,34 +489,36 @@
 
   function renderDetail(s, pct){
     var sheet = document.getElementById('ykDetailSheet');
-    var elig = stripTags(s.eligibility);
-    var docs = stripTags(s.required_documents);
     var howTo = stripTags(s.mode_of_application);
+    var applyHref = extractFirstHref(s.web_links);
+    var applyBtn = applyHref
+      ? '<a class="yk-apply-btn" href="'+escapeHtml(applyHref)+'" target="_blank" rel="noopener noreferrer">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>Go to official portal</a>'
+      : '<span class="yk-apply-btn" style="opacity:.6;cursor:default;">Official link not available</span>';
     sheet.innerHTML =
       '<div class="yk-detail-hero">' +
         '<div>' +
-          '<div class="yk-tags"><span>'+(s.state || 'Central Scheme')+'</span><span>'+pct+'% match</span></div>' +
-          '<h2>'+s.title+'</h2>' +
+          '<div class="yk-tags"><span>'+escapeHtml(s.state || 'Central Scheme')+'</span><span>'+pct+'% match</span></div>' +
+          '<h2>'+escapeHtml(s.title)+'</h2>' +
         '</div>' +
         '<button class="yk-close-btn" id="ykCloseDetail" aria-label="Close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>' +
       '</div>' +
       '<div class="yk-detail-body">' +
         '<div class="yk-detail-layout">' +
           '<div>' +
-            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Overview</h3><p>'+(stripTags(s.description) || 'No overview available yet.')+'</p></div>' +
-            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3><p>'+(elig || 'Refer to the official scheme page for eligibility details.')+'</p></div>' +
-            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3><p>'+(docs || 'Refer to the official scheme page for the documents list.')+'</p></div>' +
+            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Overview</h3>'+renderRichText(s.description, 'No overview available yet.')+'</div>' +
+            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3>'+renderRichText(s.eligibility, 'Refer to the official scheme page for eligibility details.')+'</div>' +
+            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3>'+renderRichText(s.required_documents, 'Refer to the official scheme page for the documents list.')+'</div>' +
           '</div>' +
           '<div>' +
             '<div class="yk-side-card"><h4>Quick facts</h4>' +
               '<div class="yk-fact"><span class="lbl">Age range</span><span class="val">'+s.age_min+'–'+s.age_max+' yrs</span></div>' +
               '<div class="yk-fact"><span class="lbl">Income cap</span><span class="val">'+(s.income_max == 0 ? 'No cap' : '₹'+Number(s.income_max).toLocaleString('en-IN'))+'</span></div>' +
-              '<div class="yk-fact"><span class="lbl">How to apply</span><span class="val">'+(howTo ? howTo.slice(0,40) : 'See details') +'</span></div>' +
+              '<div class="yk-fact"><span class="lbl">How to apply</span><span class="val">'+(howTo ? escapeHtml(howTo.slice(0,40)) : 'See details') +'</span></div>' +
             '</div>' +
             '<div class="yk-apply-card">' +
               "<p>Applications go through the scheme's own official portal or office.</p>" +
-              '<a class="yk-apply-btn" href="#" onclick="var w=document.createElement(\'div\');w.innerHTML='+JSON.stringify(s.web_links||'')+';var a=w.querySelector(\'a\');if(a){window.open(a.href,\'_blank\');}return false;">' +
-              '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>Go to official portal</a>' +
+              applyBtn +
             '</div>' +
           '</div>' +
         '</div>' +
