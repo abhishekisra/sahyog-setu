@@ -4,7 +4,7 @@
 
 <div class="pp-toolbar">
   <form method="get" class="pp-toolbar-left">
-    <input type="text" name="q" class="pp-input" placeholder="Search name, mobile, state, district…" value="{{ q }}" style="min-width:260px;">
+    <input type="text" name="q" class="pp-input" placeholder="Search name, mobile, state, district…" value="{{ q }}" style="flex:1 1 180px; max-width:260px;">
     <input type="hidden" name="sort" value="{{ sort }}">
     <button type="submit" class="pp-btn-outline">Search</button>
     {% if q %}<a href="{% url 'partner_participants' quiz.id %}" class="pp-btn-outline">Clear</a>{% endif %}

@@ -135,8 +135,14 @@
 </header>
 
 <script src="{% static 'custom_admin/js/plugins/bootstrap.min.js' %}"></script>
-<script src="{% static 'custom_admin/js/pcoded.min.js' %}"></script>
-<script src="{% static 'custom_admin/js/pages/dashboard-main.js' %}"></script>
+<!-- pcoded.min.js and dashboard-main.js were loaded a second time here --
+     base.html already loads both in <head>. Same bug as the vendor-all.min.js
+     double-load documented there: pcoded.min.js binds its .mob-toggler/
+     .mobile-menu click handlers with plain .on('click', ...) (no .off()
+     first), so with two loads a single tap fired both handlers, toggling
+     the same class twice and cancelling out -- on screens <992px this made
+     the header's mobile search/logout reveal (and the hamburger's own
+     active-state styling) silently do nothing. -->
 <script src="{% static 'custom_admin/js/plugins/trumbowyg.min.js' %}"></script>
 
 {% endblock %}

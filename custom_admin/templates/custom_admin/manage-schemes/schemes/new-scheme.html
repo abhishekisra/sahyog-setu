@@ -40,21 +40,21 @@
                                     <form method="POST" action="/admin/manage-schemes/scheme" enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="row">
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Title *</label>
                                                     <input type="text" name="title" class="form-control border px-3" placeholder="Enter title *" required>
                                                 </div>
                                             </div>
 
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Banner (1920 * 400 px)*</label>
                                                     <input type="file" name="banner" class="form-control border px-3" placeholder="Enter title *" required>
                                                 </div>
                                             </div>
 
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Category *</label>
                                                     <select class="form-control" id="category" name="category_id" required>
@@ -65,7 +65,7 @@
                                                     </select>
                                                 </div>
                                             </div> 
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Scheme Type *</label>
                                                     <select class="form-control" id="scheme_type" name="scheme_type" required>
@@ -79,7 +79,7 @@
                                             
                                             
                                             
-                                            <div class="col-4 mt-2 state-container">
+                                            <div class="col-12 col-md-4 mt-2 state-container">
                                                 <div class="form-group">
                                                     <label>State</label>
                                                     <select class="form-control" id="state" name="state">
@@ -92,7 +92,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>DBT *</label>
                                                     <select class="form-control" id="dbt" name="dbt" required>
@@ -104,7 +104,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Business Related *</label>
                                                     <select class="form-control" id="business_related" name="business_related" required>
@@ -116,7 +116,7 @@
                                             </div>
                                            
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Status</label>
                                                     <select class="form-control" name="status" id="status" value="" required>
@@ -127,7 +127,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>For Divyang Category</label>
                                                     <select class="form-control" name="divyang" id="divyang" value="" required>
@@ -139,7 +139,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Benificiary</label>
                                                     <select class="form-control w-100" name="benificiaries" id="benificiaries" value="" multiple required>
@@ -155,7 +155,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Caste</label>
                                                     <select class="form-control" name="caste" id="caste" value="" multiple required>
@@ -169,7 +169,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Scheme For</label>
                                                     <select class="form-control" name="scheme_for" id="scheme_for" value="" multiple required>
@@ -181,7 +181,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Marital Status</label>
                                                     <select class="form-control" name="marital_status" id="marital_status" value="" multiple required>
@@ -195,7 +195,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Religions</label>
                                                     <select class="form-control" name="religions" id="religions" value="" multiple required>
@@ -212,7 +212,7 @@
                                             </div>
                                             
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Employment Status</label>
                                                     <select class="form-control" name="employments" id="employment" value="" multiple required>
@@ -224,7 +224,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Area of Residence</label>
                                                     <select class="form-control" name="areas" id="area" value="" multiple required>
@@ -248,14 +248,14 @@
                                             </div>
 
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Min Age</label>
                                                     <input type="number" name="age_min" value="0" min="0" max="100" class="form-control border px-3" placeholder="" required>
                                                 </div>
                                             </div>
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Max Age</label>
                                                     <input type="number" name="age_max" value="1" min="1" max="100" class="form-control border px-3" placeholder="" required>
@@ -263,7 +263,7 @@
                                             </div>
 
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Min Income</label>
                                                     <input type="number" name="income_min" value="0" min="0" class="form-control border px-3" placeholder="" required>
@@ -271,7 +271,7 @@
                                             </div>
 
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Max Income</label>
                                                     <input type="number" name="income_max" value="0" min="0"  class="form-control border px-3" placeholder="" required>

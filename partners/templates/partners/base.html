@@ -113,7 +113,12 @@
     .pp-toolbar{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; margin-bottom:16px; justify-content:space-between; }
     .pp-toolbar-left{ display:flex; gap:10px; flex-wrap:wrap; }
 
-    @media (max-width:640px){ .pp-who{ display:none; } }
+    /* Hiding the whole .pp-who block below 640px used to take the Logout
+       link down with it -- the partner name/org text is what doesn't fit,
+       not the logout link, and this was the only logout affordance in the
+       header, so it became completely unreachable on any phone/tablet
+       under 640px. Now only the name/org text hides; Logout stays visible. */
+    @media (max-width:640px){ .pp-who span{ display:none; } .pp-who{ gap:0; } }
   </style>
   {% block head %}{% endblock %}
 </head>

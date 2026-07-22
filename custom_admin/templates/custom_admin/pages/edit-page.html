@@ -39,21 +39,21 @@
                                     <form method="POST" action="/admin/page/{{page.id}}" enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="row">
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Title</label>
                                                     <input type="text" name="title" class="form-control" value="{{page.title}}" placeholder="Enter title *" required>
                                                 </div>
                                             </div>
 
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Image</label>
                                                     <input type="file" name="image" class="form-control" placeholder="Enter title *">
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Status</label>
                                                     <select class="form-control" name="status" id="status" value="" data-value="{{page.status}}" value="{{page.status}}" required>

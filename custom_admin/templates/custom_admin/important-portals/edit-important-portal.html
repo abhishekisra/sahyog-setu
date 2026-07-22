@@ -39,28 +39,28 @@
                                     <form method="POST" action="/admin/important-portal/{{important_portal.id}}" enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="row">
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Title *</label>
                                                     <input type="text" name="title" class="form-control" value="{{important_portal.title}}" placeholder="Enter title *" required>
                                                 </div>
                                             </div>
 
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Image (2000 * 2000 px)</label>
                                                     <input type="file" name="image" class="form-control" value="" placeholder="">
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-6">
+                                            <div class="col-12 col-md-6">
                                                 <div class="form-group">
                                                     <label>Banner (1920 * 400 px)</label>
                                                     <input type="file" name="banner" class="form-control" placeholder="">
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Status *</label>
                                                     <select class="form-control" name="status" id="status" value="" data-value="{{important_portal.status}}" value="{{important_portal.status}}" required>

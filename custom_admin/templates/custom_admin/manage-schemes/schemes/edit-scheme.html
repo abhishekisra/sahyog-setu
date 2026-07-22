@@ -40,19 +40,19 @@
                                     <form method="POST" action="/admin/manage-schemes/scheme/{{scheme.id}}" enctype="multipart/form-data">
                                         {% csrf_token %}
                                         <div class="row">
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Title *</label>
                                                     <input type="text" name="title" class="form-control" value="{{scheme.title}}" placeholder="Enter title *" required>
                                                 </div>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Banner (1920 * 400 px)</label>
                                                     <input type="file" name="banner" class="form-control border px-3" placeholder="Enter title *">
                                                 </div>
                                             </div>
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Category *</label>
                                                     <select class="form-control" id="category" name="category_id" data-value="{{scheme.category_id}}" value="{{scheme.category_id}}" required>
@@ -64,7 +64,7 @@
                                                 </div>
                                             </div> 
                                             
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Scheme Type *</label>
                                                     <select class="form-control" id="scheme_type" name="scheme_type" data-value="{{scheme.scheme_type}}" value="{{scheme.scheme_type}}" required>
@@ -75,7 +75,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-4 mt-2 state-container">
+                                            <div class="col-12 col-md-4 mt-2 state-container">
                                                 <div class="form-group">
                                                     <label>State</label>
                                                     <select class="form-control"  id="state" name="state" data-value="{{scheme.state_id}}" value="{{scheme.state_id}}">
@@ -87,7 +87,7 @@
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>DBT *</label>
                                                     <select class="form-control" id="dbt" data-value="{{scheme.dbt}}" value="{{scheme.dbt}}" name="dbt" required>
@@ -98,7 +98,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-4">
+                                            <div class="col-12 col-md-4">
                                                 <div class="form-group">
                                                     <label>Business Related *</label>
                                                     <select class="form-control" id="business_related" data-value="{{scheme.business_related}}" value="{{scheme.business_related}}" name="business_related" required>
@@ -109,7 +109,7 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Status</label>
                                                     <select class="form-control" name="status" id="status" value="" data-value="{{scheme.status}}" value="{{scheme.status}}" required>
@@ -120,7 +120,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>For Divyang Category</label>
                                                     <select class="form-control" name="divyang" id="divyang" data-value="{{scheme.divyang}}" value="{{scheme.divyang}}" required>
@@ -132,7 +132,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Benificiary</label>
                                                     <select class="form-control w-100" name="benificiaries" id="benificiaries" data-value="{{scheme.benificiaries}}" value="{{scheme.benificiaries}}" multiple required>
@@ -148,7 +148,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Caste</label>
                                                     <select class="form-control" name="caste" id="caste" data-value="{{scheme.castes}}" value="{{scheme.castes}}" multiple required>
@@ -162,7 +162,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Scheme For</label>
                                                     <select class="form-control" name="scheme_for" id="scheme_for" data-value="{{scheme.scheme_for}}" value="{{scheme.scheme_for}}" multiple required>
@@ -174,7 +174,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Marital Status</label>
                                                     <select class="form-control" name="marital_status" id="marital_status" data-value="{{scheme.marital_status}}" value="{{scheme.marital_status}}" multiple required>
@@ -188,7 +188,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Religions</label>
                                                     <select class="form-control" name="religions" id="religions" data-value="{{scheme.religions}}" value="{{scheme.religions}}" multiple required>
@@ -204,7 +204,7 @@
                                                 </div>
                                             </div>
                                             
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Employment Status</label>
                                                     <select class="form-control" name="employments" id="employment" data-value="{{employments}}" value="{{employments}}" multiple required>
@@ -216,7 +216,7 @@
                                             </div>
 
 
-                                            <div class="col-4 mt-2">
+                                            <div class="col-12 col-md-4 mt-2">
                                                 <div class="form-group">
                                                     <label>Area of Residence</label>
                                                     <select class="form-control" name="areas" id="area" data-value="{{areas}}" value="{{areas}}" multiple required>
@@ -238,21 +238,21 @@
                                                 </div>
                                             </div>
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Min Age</label>
                                                     <input type="number" name="age_min" value="{{scheme.age_min}}" min="0" max="100" class="form-control border px-3" placeholder="" required>
                                                 </div>
                                             </div>
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Max Age</label>
                                                     <input type="number" name="age_max" value="{{scheme.age_max}}" min="1" max="100" class="form-control border px-3" placeholder="" required>
                                                 </div>
                                             </div>
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Min Income</label>
                                                     <input type="number" name="income_min" value="{{scheme.income_min}}" min="0" class="form-control border px-3" placeholder="" required>
@@ -260,7 +260,7 @@
                                             </div>
 
 
-                                            <div class="col-3 mt-2">
+                                            <div class="col-12 col-md-3 mt-2">
                                                 <div class="form-group">
                                                     <label>Max Income</label>
                                                     <input type="number" name="income_max" value="{{scheme.income_max}}" min="0"  class="form-control border px-3" placeholder="" required>
