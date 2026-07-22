@@ -33,7 +33,7 @@
           <button type="button" class="sq-font-btn" data-scale="reset" aria-label="Reset font size">A</button>
           <button type="button" class="sq-font-btn" data-scale="up" aria-label="Increase font size">A+</button>
         </div>
-        <button class="sq-mute-btn" id="sqMuteBtn" title="Toggle sound">🔊</button>
+        <button class="sq-mute-btn" id="sqMuteBtn" title="Toggle sound" aria-label="Mute sound">🔊</button>
       </div>
     </div>
   </header>
@@ -374,7 +374,7 @@
 
   var idx = data.resumeIndex || 0;
   var score = 0, shownScore = 0, streak = 0, right = 0, answered = false, pending = false;
-  var timeLeft = T, timer = null, questionEndTime = 0, announced = {};
+  var timer = null, questionEndTime = 0, announced = {};
 
   var $ = function(id){ return document.getElementById(id); };
 
@@ -421,9 +421,11 @@
     muted = !muted;
     try{ localStorage.setItem('sq_muted', muted?'1':'0'); }catch(e){}
     $('sqMuteBtn').textContent = muted ? '🔇' : '🔊';
+    $('sqMuteBtn').setAttribute('aria-label', muted ? 'Unmute sound' : 'Mute sound');
     if(!muted) initAudio();
   });
   $('sqMuteBtn').textContent = muted ? '🔇' : '🔊';
+  $('sqMuteBtn').setAttribute('aria-label', muted ? 'Unmute sound' : 'Mute sound');
   document.addEventListener('click', initAudio, {once:true});
 
   // ---------- font size controls ----------
@@ -507,7 +509,7 @@
 
   // ---------- render current question ----------
   function loadQ(){
-    answered = false; pending = false; timeLeft = T;
+    answered = false; pending = false;
     var q = QUESTIONS[idx];
     $('sqQNow').textContent = idx+1;
     $('sqPfill').style.width = (idx/QUESTIONS.length*100)+'%';

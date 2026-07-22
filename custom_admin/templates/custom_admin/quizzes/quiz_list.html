@@ -50,9 +50,13 @@
           <span class="sqz-chip">🏅 <b>{{ item.total_marks }} marks</b></span>
           <span class="sqz-chip">⏱ <b>~{{ item.estimated_minutes }} min</b></span>
         </div>
-        {% if item.locked %}
+        {% if item.my_attempt %}
         <div class="sqz-my-score">Your score: <b>{{ item.my_attempt.percentage|floatformat:0 }}%</b> {% if item.my_attempt.passed %}✅{% else %}❌{% endif %}</div>
+        {% endif %}
+        {% if item.locked %}
         <a class="sqz-go sqz-go-done" href="{% url 'quiz_result' pk=item.my_attempt.id %}">View Result →</a>
+        {% elif item.my_attempt %}
+        <a class="sqz-go" href="{% url 'quiz_landing' item.quiz.slug %}">Try Again →</a>
         {% else %}
         <a class="sqz-go" href="{% url 'quiz_landing' item.quiz.slug %}">Start Quiz →</a>
         {% endif %}

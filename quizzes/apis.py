@@ -1,7 +1,5 @@
-import datetime
 import json
 import os
-import random
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -150,7 +148,10 @@ def generateCertificate(request):
     if request.method != "POST":
         return HttpResponse("Invalid request", status=400)
 
-    request_data = json.loads(request.body)
+    try:
+        request_data = json.loads(request.body)
+    except (ValueError, TypeError):
+        return HttpResponse("Invalid request body", status=400)
 
     attempt_id = request_data.get("attempt_id")
     quiz_id = request_data.get("quiz_id")

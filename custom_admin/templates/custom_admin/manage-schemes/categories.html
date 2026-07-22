@@ -62,7 +62,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-right">
-                                                    <button type="button" class="btn btn-info btn-sm editButton" data-id="{{category.id}}" data-title="{{category.title}}"  data-status="{{category.status}}" data-type="{{category.category_type}}" ><i class="feather icon-edit"></i>&nbsp;Edit </button>
+                                                    <button type="button" class="btn btn-info btn-sm editButton" data-id="{{category.id}}" data-title="{{category.title}}"  data-status="{{category.status}}" ><i class="feather icon-edit"></i>&nbsp;Edit </button>
                                                     <a href="javascript:void(0)" data-id="{{category.id}}" class="btn btn-danger btn-sm deleteButton"><i class="feather icon-trash-2 "></i>&nbsp;Delete </a>
                                                 </td>
                                             </tr>
@@ -222,30 +222,16 @@
             placeholder: 'Select status'
         });
 
-        $('#newType').select2({
-            dropdownParent: $('#newModel'),
-            placeholder: 'Select status'
-        });
-
-
         $('#editStatus').select2({
             dropdownParent: $('#editModel'),
             placeholder: 'Select status'
         });
 
 
-        $('#editType').select2({
-            dropdownParent: $('#editModel'),
-            placeholder: 'Select status'
-        });
-
-
-
         $(document).on('click', '.editButton', async function(){
             var id = $(this).attr('data-id');
             var title = $(this).attr('data-title');
             var status = $(this).attr('data-status');
-            var type = $(this).attr('data-type');
             var action = $('#editForm').attr('action');
 
             action = action + id;
@@ -256,11 +242,6 @@
                 dropdownParent: $('#editModel'),
                 placeholder: 'Select status'
             }).val(status.toString()).trigger('change');
-
-            $('#editType').select2({
-                dropdownParent: $('#editModel'),
-                placeholder: 'Select category for'
-            }).val(type.toString()).trigger('change');
             $('#editModel').modal('show')
         });
 
