@@ -85,7 +85,8 @@
   }
   .yk-card-thumb{width:100%;height:170px;object-fit:cover;border-radius:9px;margin-bottom:12px;background:var(--sunken);}
   .yk-card h4{font-size:17px;font-weight:700;line-height:1.32;margin:0 0 8px;overflow-wrap:break-word;word-break:break-word;}
-  .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;max-height:57px;overflow:hidden;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card p .yk-more{color:var(--terracotta);font-weight:700;white-space:nowrap;}
   .yk-card-foot{display:flex;align-items:center;justify-content:flex-end;border-top:1px solid var(--border);padding-top:12px;}
   .yk-view-link{display:flex;align-items:center;gap:5px;font-size:15px;font-weight:600;color:var(--terracotta);}
   .yk-empty,.yk-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);border:1px dashed var(--border);border-radius:14px;font-size:16px;}
@@ -235,7 +236,7 @@
         card.innerHTML =
           (d.image ? '<img class="yk-card-thumb" src="'+escapeHtml(d.image)+'" alt="" loading="lazy">' : '') +
           '<h4>'+escapeHtml(d.title)+'</h4>' +
-          '<p>'+escapeHtml(d.short_description || 'No description available yet.')+'</p>' +
+          '<p>'+escapeHtml(d.short_description || 'No description available yet.')+(d.short_description ? ' <span class="yk-more">more</span>' : '')+'</p>' +
           '<div class="yk-card-foot">' +
             '<div class="yk-view-link">View details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>' +
           '</div>';
