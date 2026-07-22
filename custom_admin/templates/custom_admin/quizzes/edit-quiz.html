@@ -358,6 +358,14 @@
 
                             <div class="row px-2 qa-field-row">
                                 <div class="col-12">
+                                    <label>Issue Certificates</label>
+                                    <select class="form-control" name="certificate_enabled" id="certificate_enabled">
+                                        <option value="1" {% if quiz.certificate_enabled %}selected{% endif %}>Enabled — passing participants can generate a certificate</option>
+                                        <option value="0" {% if not quiz.certificate_enabled %}selected{% endif %}>Disabled — no certificate for this quiz</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-12 mt-2">
                                     <label>Certificate Text</label>
                                     <textarea name="certificate_text" id="certificate_text" class="form-control">{{ quiz.certificate_text }}</textarea>
                                     <small class="text-muted">Shown inside quotes on the certificate. Keep the quiz name here consistent with the Quiz Title above.</small>

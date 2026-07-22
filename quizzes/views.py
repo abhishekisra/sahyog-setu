@@ -147,6 +147,7 @@ class QuizView(View):
                                     certificate_background = request.FILES.get("certificate_background"),
                                     name_top_pct = request.POST.get("name_top_pct") or 42.0,
                                     score_top_pct = request.POST.get("score_top_pct") or 64.0,
+                                    certificate_enabled = request.POST.get("certificate_enabled", "1") == "1",
                                     status = request.POST.get("status") == "1" )
                                     
             # ====================== # GET QUESTIONS DATA # ======================
@@ -289,6 +290,7 @@ class EditQuizView(View):
                 quiz.title = request.POST.get("title")
                 quiz.description = request.POST.get("description")
                 quiz.certificate_text = request.POST.get("certificate_text")
+                quiz.certificate_enabled = request.POST.get("certificate_enabled", "1") == "1"
                 quiz.status = request.POST.get("status")
                 quiz.quiz_time = request.POST.get("quiz_time")
                 quiz.name_top_pct = request.POST.get("name_top_pct") or quiz.name_top_pct
