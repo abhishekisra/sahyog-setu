@@ -451,9 +451,13 @@ def scheme_search_light(request):
         schemes = schemes.extra(where=['FIND_IN_SET(%s, religions)' % int(body['religion'])])
     if body.get('gender') not in (None, ''):
         schemes = schemes.extra(where=['FIND_IN_SET(%s, scheme_for)' % int(body['gender'])])
-    if body.get('age'):
+    # `not in (None, '')` rather than truthiness -- age=0 (a real, selectable
+    # slider position, for infant-eligibility schemes) and family_income=0
+    # are valid filter values that a plain `if body.get(...)` would silently
+    # skip, since both are falsy in Python.
+    if body.get('age') not in (None, ''):
         schemes = schemes.filter(age_min__lte=body['age'], age_max__gte=body['age'])
-    if body.get('family_income'):
+    if body.get('family_income') not in (None, ''):
         from django.db.models import Q
         schemes = schemes.filter(income_min__lte=body['family_income']).filter(
             Q(income_max__gte=body['family_income']) | Q(income_max=0))

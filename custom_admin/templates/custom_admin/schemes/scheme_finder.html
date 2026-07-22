@@ -85,11 +85,22 @@
   .yk-field label{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--text);margin-bottom:9px;}
   .yk-field-icon{width:16px;height:16px;color:var(--gold-ink);flex-shrink:0;}
   .yk-page select,.yk-field input[type="text"]{width:100%;max-width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--paper);font-family:inherit;font-size:15px;color:var(--text);appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}
+  /* appearance:none strips the native dropdown arrow with nothing put back
+     in its place -- selects looked like plain text boxes with no hint
+     they're clickable dropdowns at all. */
+  .yk-page select{
+    padding-right:32px;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%236B6A5E' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");
+    background-repeat:no-repeat;
+    background-position:right 10px center;
+    background-size:16px;
+  }
   .yk-page select:focus,.yk-field input:focus{outline:2px solid var(--gold-ink);outline-offset:1px;}
   .yk-field.range input[type=range]{width:100%;accent-color:var(--gold-ink);}
   .yk-range-val{display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-top:5px;font-variant-numeric:tabular-nums;}
   .yk-chip-row{display:flex;flex-wrap:wrap;gap:7px;}
   .yk-chip{padding:6px 12px;border-radius:16px;border:1px solid var(--border);background:var(--paper);font-size:14px;color:var(--text-muted);cursor:pointer;user-select:none;}
+  .yk-chip:focus-visible{outline:2px solid var(--gold-ink);outline-offset:2px;}
   .yk-chip:hover{border-color:var(--gold-ink);}
   .yk-chip.active{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep);}
   .yk-btn-apply{width:100%;background:var(--gold);color:var(--brand-deeper);border:none;padding:11px;border-radius:9px;font-weight:700;font-size:16px;margin-top:4px;cursor:pointer;font-family:inherit;}
@@ -304,7 +315,6 @@
 <script>
 (function(){
   var currentPage = 1;
-  var lastFilters = {};
 
   function csrfToken(){
     var m = document.cookie.match(/csrftoken=([^;]+)/);
@@ -482,10 +492,10 @@
         card.setAttribute('role', 'button');
         card.innerHTML =
           '<div class="yk-card-top">' +
-            '<div><div class="yk-tag">'+(s.state || 'Central Scheme')+'</div><h4>'+s.title+'</h4></div>' +
+            '<div><div class="yk-tag">'+escapeHtml(s.state || 'Central Scheme')+'</div><h4>'+escapeHtml(s.title)+'</h4></div>' +
             ringSVG(pct) +
           '</div>' +
-          '<p>'+(s.short_description || 'No description available yet for this scheme.')+'</p>' +
+          '<p>'+escapeHtml(s.short_description || 'No description available yet for this scheme.')+'</p>' +
           '<div class="yk-card-foot">' +
             '<div class="yk-verified"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg> Verified scheme</div>' +
             '<div class="yk-view-link">View details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>' +
@@ -554,7 +564,6 @@
 
   function runSearch(keepPage){
     var f = currentFilters();
-    lastFilters = f;
     if(!keepPage) currentPage = 1;
     document.getElementById('ykResultsHeading').textContent = 'Searching…';
     document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-loading">Searching live schemes…</div>';
@@ -596,11 +605,22 @@
   document.getElementById('ykAge').addEventListener('input', function(){
     document.getElementById('ykAgeVal').textContent = this.value === '100' ? 'Any age' : this.value + ' yrs';
   });
+  // Chips are plain <div>s (for the "pill row" look, not native <button>/
+  // <input> semantics) -- were mouse-only with no way to reach or select
+  // them from a keyboard at all.
   document.querySelectorAll('#ykCasteChips .yk-chip, #ykDivyangChips .yk-chip').forEach(function(chip){
-    chip.addEventListener('click', function(){
+    chip.setAttribute('tabindex', '0');
+    chip.setAttribute('role', 'button');
+    chip.setAttribute('aria-pressed', chip.classList.contains('active') ? 'true' : 'false');
+    function selectChip(){
       var siblings = chip.parentElement.querySelectorAll('.yk-chip');
-      siblings.forEach(function(c){ c.classList.remove('active'); });
+      siblings.forEach(function(c){ c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
       chip.classList.add('active');
+      chip.setAttribute('aria-pressed', 'true');
+    }
+    chip.addEventListener('click', selectChip);
+    chip.addEventListener('keydown', function(e){
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); selectChip(); }
     });
   });
   document.getElementById('ykApplyBtn').addEventListener('click', runSearch);
@@ -615,9 +635,11 @@
     document.getElementById('ykMarital').value = '';
     document.getElementById('ykReligion').value = '';
     document.getElementById('ykSearch').value = '';
-    document.querySelectorAll('#ykCasteChips .yk-chip, #ykDivyangChips .yk-chip').forEach(function(c){ c.classList.remove('active'); });
+    document.querySelectorAll('#ykCasteChips .yk-chip, #ykDivyangChips .yk-chip').forEach(function(c){ c.classList.remove('active'); c.setAttribute('aria-pressed', 'false'); });
     document.querySelector('#ykCasteChips .yk-chip[data-val=""]').classList.add('active');
+    document.querySelector('#ykCasteChips .yk-chip[data-val=""]').setAttribute('aria-pressed', 'true');
     document.querySelector('#ykDivyangChips .yk-chip[data-val=""]').classList.add('active');
+    document.querySelector('#ykDivyangChips .yk-chip[data-val=""]').setAttribute('aria-pressed', 'true');
     runSearch();
   });
 
