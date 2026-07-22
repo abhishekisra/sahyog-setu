@@ -148,6 +148,14 @@ class QuizView(View):
                                     name_top_pct = request.POST.get("name_top_pct") or 42.0,
                                     score_top_pct = request.POST.get("score_top_pct") or 64.0,
                                     certificate_enabled = request.POST.get("certificate_enabled", "1") == "1",
+                                    certificate_accent_color = request.POST.get("certificate_accent_color") or "#C8A951",
+                                    certificate_name_color = request.POST.get("certificate_name_color") or "#1B4332",
+                                    certificate_paper_color = request.POST.get("certificate_paper_color") or "#FAF8EF",
+                                    certificate_pattern = request.POST.get("certificate_pattern") or "classic",
+                                    logo1_x_pct = request.POST.get("logo1_x_pct") or 14.0,
+                                    logo1_y_pct = request.POST.get("logo1_y_pct") or 11.0,
+                                    logo2_x_pct = request.POST.get("logo2_x_pct") or 86.0,
+                                    logo2_y_pct = request.POST.get("logo2_y_pct") or 11.0,
                                     status = request.POST.get("status") == "1" )
                                     
             # ====================== # GET QUESTIONS DATA # ======================
@@ -295,6 +303,14 @@ class EditQuizView(View):
                 quiz.quiz_time = request.POST.get("quiz_time")
                 quiz.name_top_pct = request.POST.get("name_top_pct") or quiz.name_top_pct
                 quiz.score_top_pct = request.POST.get("score_top_pct") or quiz.score_top_pct
+                quiz.certificate_accent_color = request.POST.get("certificate_accent_color") or quiz.certificate_accent_color
+                quiz.certificate_name_color = request.POST.get("certificate_name_color") or quiz.certificate_name_color
+                quiz.certificate_paper_color = request.POST.get("certificate_paper_color") or quiz.certificate_paper_color
+                quiz.certificate_pattern = request.POST.get("certificate_pattern") or quiz.certificate_pattern
+                quiz.logo1_x_pct = request.POST.get("logo1_x_pct") or quiz.logo1_x_pct
+                quiz.logo1_y_pct = request.POST.get("logo1_y_pct") or quiz.logo1_y_pct
+                quiz.logo2_x_pct = request.POST.get("logo2_x_pct") or quiz.logo2_x_pct
+                quiz.logo2_y_pct = request.POST.get("logo2_y_pct") or quiz.logo2_y_pct
                 if request.FILES.get("image"):
                     quiz.image = request.FILES.get("image")
                 if request.FILES.get("logo_1"):

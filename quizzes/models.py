@@ -46,6 +46,22 @@ class Quizzes(models.Model):
     name_top_pct = models.FloatField(default=42.0)
     score_top_pct = models.FloatField(default=64.0)
 
+    # Certificate design (Part K) -- color/texture/logo-position controls
+    # for the built-in background (ignored when certificate_background is
+    # uploaded, same as name_top_pct/score_top_pct above). Defaults match
+    # the values that were hardcoded in quizzes/cert_image.py and this
+    # page's own SVG before this field existed, so an existing quiz's
+    # certificate doesn't change unless an admin actually edits these.
+    certificate_accent_color = models.CharField(max_length=7, default="#C8A951")
+    certificate_name_color = models.CharField(max_length=7, default="#1B4332")
+    certificate_paper_color = models.CharField(max_length=7, default="#FAF8EF")
+    CERTIFICATE_PATTERN_CHOICES = [("classic", "Classic (guilloche + medallion)"), ("plain", "Plain (solid color, no pattern)")]
+    certificate_pattern = models.CharField(max_length=10, choices=CERTIFICATE_PATTERN_CHOICES, default="classic")
+    logo1_x_pct = models.FloatField(default=14.0)
+    logo1_y_pct = models.FloatField(default=11.0)
+    logo2_x_pct = models.FloatField(default=86.0)
+    logo2_y_pct = models.FloatField(default=11.0)
+
     @property
     def is_live(self):
         if not self.status:

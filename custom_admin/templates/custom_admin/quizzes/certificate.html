@@ -41,55 +41,61 @@
                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <defs>
                             <pattern id="guilloche" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                                <rect width="5" height="5" fill="#faf8ef"/>
-                                <circle cx="2.5" cy="2.5" r="0.9" fill="#c8a951" fill-opacity="0.30"/>
+                                <rect width="5" height="5" fill="{{ quiz.certificate_paper_color }}"/>
+                                <circle cx="2.5" cy="2.5" r="0.9" fill="{{ quiz.certificate_accent_color }}" fill-opacity="0.30"/>
                             </pattern>
                             <g id="quatrefoil">
-                                <circle cx="1.8" cy="0" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
-                                <circle cx="-1.8" cy="0" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
-                                <circle cx="0" cy="1.8" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
-                                <circle cx="0" cy="-1.8" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
-                                <circle cx="0" cy="0" r="0.6" fill="#c8a951"/>
+                                <circle cx="1.8" cy="0" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
+                                <circle cx="-1.8" cy="0" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
+                                <circle cx="0" cy="1.8" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
+                                <circle cx="0" cy="-1.8" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
+                                <circle cx="0" cy="0" r="0.6" fill="{{ quiz.certificate_accent_color }}"/>
                             </g>
                         </defs>
-                        <rect x="0" y="0" width="297" height="210" fill="#faf8ef"/>
+                        <rect x="0" y="0" width="297" height="210" fill="{{ quiz.certificate_paper_color }}"/>
+                        {% if quiz.certificate_pattern == "classic" %}
                         <rect x="0" y="0" width="297" height="210" fill="url(#guilloche)"/>
 
                         <!-- Medallion watermark: same cx/cy/radius ratios as
                              _medallion_watermark() in cert_image.py. -->
-                        <g opacity="0.16" stroke="#c8a951" fill="none">
+                        <g opacity="0.16" stroke="{{ quiz.certificate_accent_color }}" fill="none">
                             <circle cx="148.5" cy="100.8" r="71.4" stroke-width="0.5"/>
                             <circle cx="148.5" cy="100.8" r="58.55" stroke-width="0.35"/>
                             <circle cx="148.5" cy="100.8" r="45.7" stroke-width="0.35"/>
                         </g>
+                        {% endif %}
 
                         <!-- Triple border: outer gold (thick), middle gold (thin),
                              inner ink (thin); was 2 lines, PNG version has 3. -->
-                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="#c8a951" stroke-width="2.5"/>
-                        <rect x="10.06" y="10.06" width="276.88" height="189.88" fill="none" stroke="#c8a951" stroke-width="0.6"/>
+                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="2.5"/>
+                        <rect x="10.06" y="10.06" width="276.88" height="189.88" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.6"/>
                         <rect x="14.13" y="14.13" width="268.74" height="181.74" fill="none" stroke="#222" stroke-width="0.6"/>
 
+                        {% if quiz.certificate_pattern == "classic" %}
                         <!-- Quatrefoil corners at the inner border's 4 corners. -->
                         <use href="#quatrefoil" x="14.13" y="14.13"/>
                         <use href="#quatrefoil" x="282.87" y="14.13"/>
                         <use href="#quatrefoil" x="14.13" y="195.87"/>
                         <use href="#quatrefoil" x="282.87" y="195.87"/>
+                        {% endif %}
                     </svg>
                     {% endif %}
 
                     <div class="sheet-content">
-                        <div class="zone zone-logos" style="top: 6%;">
-                            <div class="logobox">{% if quiz.logo_1 %}<img src="{{ quiz.logo_1.url }}" alt="">{% endif %}</div>
-                            <div class="zone-titles">
-                                <div class="zone-title">CERTIFICATE</div>
-                                <div class="zone-subtitle">OF ACHIEVEMENT</div>
-                            </div>
-                            <div class="logobox">{% if quiz.logo_2 %}<img src="{{ quiz.logo_2.url }}" alt="">{% endif %}</div>
+                        <div class="zone zone-titles-only" style="top: 6%;">
+                            <div class="zone-title">CERTIFICATE</div>
+                            <div class="zone-subtitle">OF ACHIEVEMENT</div>
                         </div>
+                        <!-- Independently positioned (logo{1,2}_x_pct/y_pct, "kahi bhi
+                             laga sake") instead of a shared flex row -- matches
+                             cert_image.py's already-independent per-logo x/y, a flex
+                             row can't place two logos at arbitrary, unrelated spots. -->
+                        <div class="logobox" style="left: {{ quiz.logo1_x_pct }}%; top: {{ quiz.logo1_y_pct }}%;">{% if quiz.logo_1 %}<img src="{{ quiz.logo_1.url }}" alt="">{% endif %}</div>
+                        <div class="logobox" style="left: {{ quiz.logo2_x_pct }}%; top: {{ quiz.logo2_y_pct }}%;">{% if quiz.logo_2 %}<img src="{{ quiz.logo_2.url }}" alt="">{% endif %}</div>
 
                         <div class="zone zone-presented" style="top: 28%;">This Certificate is Proudly Presented To</div>
 
-                        <div class="zone zone-name" style="top: {{ quiz.name_top_pct }}%;">
+                        <div class="zone zone-name" style="top: {{ quiz.name_top_pct }}%; color: {{ quiz.certificate_name_color }};">
                             {{ display_name }}
                         </div>
 
@@ -97,7 +103,7 @@
                             {{ quiz.certificate_text|default:"For successfully completing the assessment with outstanding performance." }}
                         </div>
 
-                        <div class="zone zone-score" style="top: {{ quiz.score_top_pct }}%;">
+                        <div class="zone zone-score" style="top: {{ quiz.score_top_pct }}%; color: {{ quiz.certificate_accent_color }};">
                             {{ quiz.title }} &middot; Score {{ attempt.percentage|floatformat:0 }}%
                         </div>
 
@@ -207,8 +213,15 @@
     @page { size: A4 landscape; margin: 0; }
 
     /* Part H, Layer 2 -- fixed box, the image never dictates layout,
-       regardless of what size/aspect-ratio the admin uploaded. */
+       regardless of what size/aspect-ratio the admin uploaded.
+       position:absolute + translate(-50%,-50%): each logo is centered on
+       its own quiz.logo{1,2}_x_pct/y_pct point (set inline, see the
+       template), matching cert_image.py's _paste_contain (which also
+       centers on a given x/y) -- independent of the other logo and of the
+       title block, "kahi bhi laga sake" instead of a fixed shared row. */
     .logobox {
+        position: absolute;
+        transform: translate(-50%, -50%);
         display: grid;
         place-items: center;
         height: 64px;
@@ -396,7 +409,7 @@
         aspect-ratio: 297 / 210;
         margin: 0 auto;
         overflow: hidden;
-        background: #faf8ef;
+        background: {{ quiz.certificate_paper_color }};
         box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
     }
 
@@ -423,14 +436,10 @@
         text-align: center;
     }
 
-    .zone-logos {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        width: 90%;
-    }
-
-    .zone-titles { flex: 1; }
+    /* .zone-titles-only needs nothing beyond the base .zone rule above
+       (position/width/text-align) -- logos used to share this same zone
+       via a flex row (removed, see .logobox below), the title block on
+       its own doesn't need any extra layout. */
 
     .zone-title {
         font-family: 'Cinzel', serif;

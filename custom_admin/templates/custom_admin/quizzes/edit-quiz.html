@@ -389,6 +389,51 @@
                                     <label>Score Position (top %)</label>
                                     <input type="number" step="0.1" min="0" max="100" name="score_top_pct" class="form-control" value="{{ quiz.score_top_pct }}">
                                 </div>
+
+                                <div class="col-12 mt-2">
+                                    <small class="text-muted">Colors and pattern below apply to the built-in frame only (ignored if a Certificate Background image is uploaded above). Name/score color and logo position always apply.</small>
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <label>Accent Color</label>
+                                    <input type="color" name="certificate_accent_color" class="form-control" value="{{ quiz.certificate_accent_color }}">
+                                    <small class="text-muted">Border, medallion, score text.</small>
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <label>Name Color</label>
+                                    <input type="color" name="certificate_name_color" class="form-control" value="{{ quiz.certificate_name_color }}">
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <label>Paper Color</label>
+                                    <input type="color" name="certificate_paper_color" class="form-control" value="{{ quiz.certificate_paper_color }}">
+                                </div>
+
+                                <div class="col-12 mt-2">
+                                    <label>Background Pattern</label>
+                                    <select class="form-control" name="certificate_pattern" id="certificate_pattern">
+                                        <option value="classic" {% if quiz.certificate_pattern == "classic" %}selected{% endif %}>Classic (guilloche texture + medallion watermark)</option>
+                                        <option value="plain" {% if quiz.certificate_pattern == "plain" %}selected{% endif %}>Plain (solid color, no pattern)</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-3 mt-2">
+                                    <label>Logo 1 Position (left %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="logo1_x_pct" class="form-control" value="{{ quiz.logo1_x_pct }}">
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <label>Logo 1 Position (top %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="logo1_y_pct" class="form-control" value="{{ quiz.logo1_y_pct }}">
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <label>Logo 2 Position (left %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="logo2_x_pct" class="form-control" value="{{ quiz.logo2_x_pct }}">
+                                </div>
+                                <div class="col-md-3 mt-2">
+                                    <label>Logo 2 Position (top %)</label>
+                                    <input type="number" step="0.1" min="0" max="100" name="logo2_y_pct" class="form-control" value="{{ quiz.logo2_y_pct }}">
+                                </div>
                             </div>
 
                             <hr class="qa-divider">

@@ -22,8 +22,21 @@ INK = (17, 17, 17)
 MUTED = (85, 85, 85)
 GOLD = (200, 169, 81)
 NAME_COLOR = (27, 67, 50)
-SCORE_COLOR = (110, 90, 32)
 CREAM = (250, 248, 239)
+
+
+def _hex_to_rgb(hex_str, fallback=(200, 169, 81)):
+    """'#RRGGBB' -> (r,g,b). Falls back on anything malformed rather than
+    raising -- these values come from an admin-editable CharField with no
+    format validator, and a bad certificate render is worse than one that
+    silently falls back to the old default color."""
+    try:
+        h = (hex_str or "").lstrip("#")
+        if len(h) != 6:
+            return fallback
+        return tuple(int(h[i:i + 2], 16) for i in (0, 2, 4))
+    except (ValueError, TypeError):
+        return fallback
 
 
 def _font(name, size):
@@ -144,7 +157,7 @@ def _paper_grain(im, sigma=26, alpha=24):
     im.alpha_composite(tint)
 
 
-def _guilloche_band(im, y_center, band_height, n_waves=5, alpha=34):
+def _guilloche_band(im, y_center, band_height, n_waves=5, alpha=34, accent=GOLD):
     """A band of thin offset sine-wave lines -- the classic engraved
     "security paper" texture real certificates/currency use. Drawn on its
     own transparent layer and alpha-composited on, so it reads as subtle
@@ -161,11 +174,11 @@ def _guilloche_band(im, y_center, band_height, n_waves=5, alpha=34):
         for x in range(0, w + 1, 6):
             yy = y_center + amp * math.sin((x / w) * math.pi * 6 + phase)
             points.append((x, yy))
-        ld.line(points, fill=GOLD + (alpha,), width=2)
+        ld.line(points, fill=accent + (alpha,), width=2)
     im.alpha_composite(layer)
 
 
-def _full_guilloche_wash(im, alpha=20, n_families=3, lines_per_family=14):
+def _full_guilloche_wash(im, alpha=20, n_families=3, lines_per_family=14, accent=GOLD):
     """A faint interference pattern of overlapping sine-wave families
     across the WHOLE canvas -- the engraved-line texture on currency/
     security paper, at low enough alpha to read as texture, not lines.
@@ -186,18 +199,18 @@ def _full_guilloche_wash(im, alpha=20, n_families=3, lines_per_family=14):
             for x in range(0, w + 1, 8):
                 yy = y0 + amp * math.sin((x / base_period) + phase)
                 points.append((x, yy))
-            ld.line(points, fill=GOLD + (alpha,), width=1)
+            ld.line(points, fill=accent + (alpha,), width=1)
     im.alpha_composite(layer)
 
 
-def _medallion_watermark(im, cx, cy, radius, alpha=30):
+def _medallion_watermark(im, cx, cy, radius, alpha=30, accent=GOLD):
     """Large, very faint concentric-ring medallion behind the certificate
     body -- an official-document watermark cue, kept light enough (alpha
     ~20/255) to sit behind every line of text without hurting legibility."""
     layer = Image.new("RGBA", im.size, (0, 0, 0, 0))
     ld = ImageDraw.Draw(layer)
     for r, width in ((radius, 3), (radius * 0.82, 2), (radius * 0.64, 2)):
-        ld.ellipse([cx - r, cy - r, cx + r, cy + r], outline=GOLD + (alpha,), width=width)
+        ld.ellipse([cx - r, cy - r, cx + r, cy + r], outline=accent + (alpha,), width=width)
     # Radiating tick marks around the outer ring -- reads as a rosette/seal
     # rather than a plain bullseye.
     import math
@@ -207,13 +220,16 @@ def _medallion_watermark(im, cx, cy, radius, alpha=30):
         r1, r2 = radius * 0.9, radius * 1.02
         x1, y1 = cx + r1 * math.cos(angle), cy + r1 * math.sin(angle)
         x2, y2 = cx + r2 * math.cos(angle), cy + r2 * math.sin(angle)
-        ld.line([(x1, y1), (x2, y2)], fill=GOLD + (alpha,), width=2)
+        ld.line([(x1, y1), (x2, y2)], fill=accent + (alpha,), width=2)
     im.alpha_composite(layer)
 
 
-def _default_background():
+def _default_background(accent=GOLD, paper=CREAM, pattern="classic"):
     """Guilloche-style frame -- a Pillow equivalent of the SVG fallback
     used in certificate.html when no custom background is uploaded.
+    accent/paper come from the quiz's certificate_accent_color/
+    certificate_paper_color (admin-editable); pattern is
+    certificate_pattern ("classic" or "plain").
 
     Layers, back to front: a soft vertical gradient (the "premium paper"
     cue), a large faint medallion watermark behind the certificate body
@@ -221,40 +237,47 @@ def _default_background():
     text sitting on top of it), fine sine-wave guilloche bands in the top/
     bottom strips where no text sits, the triple-line gold/ink border, and
     ornate quatrefoil corner flourishes (upgraded from a plain diamond
-    outline) at the inner border's four corners."""
-    im = Image.new("RGBA", (CANVAS_W, CANVAS_H), CREAM + (255,))
+    outline) at the inner border's four corners. pattern="plain" skips
+    everything except the flat paper color and the border -- for admins
+    who want a cleaner look instead of the ornate default."""
+    im = Image.new("RGBA", (CANVAS_W, CANVAS_H), paper + (255,))
     d = ImageDraw.Draw(im)
-    # Vertical gradient: a hair lighter at the very top/bottom edges,
-    # a hair deeper through the vertical center -- subtle on purpose,
-    # this is meant to read as "not perfectly flat", not as a visible band.
-    top = (252, 250, 242)
-    bottom = (244, 240, 226)
-    for y in range(CANVAS_H):
-        t = abs(y - CANVAS_H / 2) / (CANVAS_H / 2)  # 0 at center, 1 at edges
-        r = int(bottom[0] + (top[0] - bottom[0]) * t)
-        g = int(bottom[1] + (top[1] - bottom[1]) * t)
-        b = int(bottom[2] + (top[2] - bottom[2]) * t)
-        d.line([(0, y), (CANVAS_W, y)], fill=(r, g, b, 255))
 
-    # Full-page guilloche interference wash + paper grain FIRST, both at
-    # ultra-low alpha -- this is the actual "premium paper" texture across
-    # the whole certificate, not just isolated bands. Everything drawn
-    # after this (medallion, borders, corners) sits on top of it.
-    _full_guilloche_wash(im)
-    _paper_grain(im)
+    if pattern != "plain":
+        # Vertical gradient: a hair lighter at the very top/bottom edges,
+        # a hair deeper through the vertical center -- subtle on purpose,
+        # this is meant to read as "not perfectly flat", not as a visible band.
+        # Computed as an offset from `paper` rather than a fixed pair of
+        # RGB values, so it stays proportionally "a hair lighter/deeper"
+        # whatever paper color the admin picked, not always cream-toned.
+        top = tuple(min(255, c + 2) for c in paper)
+        bottom = tuple(max(0, c - 6) for c in paper)
+        for y in range(CANVAS_H):
+            t = abs(y - CANVAS_H / 2) / (CANVAS_H / 2)  # 0 at center, 1 at edges
+            r = int(bottom[0] + (top[0] - bottom[0]) * t)
+            g = int(bottom[1] + (top[1] - bottom[1]) * t)
+            b = int(bottom[2] + (top[2] - bottom[2]) * t)
+            d.line([(0, y), (CANVAS_W, y)], fill=(r, g, b, 255))
 
-    # Medallion watermark, centered a little above canvas-middle (roughly
-    # behind the name/description block) -- large enough to read as texture
-    # across most of the certificate body without concentrating on any one
-    # line of text.
-    _medallion_watermark(im, CANVAS_W / 2, CANVAS_H * 0.48, radius=CANVAS_H * 0.34)
+        # Full-page guilloche interference wash + paper grain FIRST, both at
+        # ultra-low alpha -- this is the actual "premium paper" texture across
+        # the whole certificate, not just isolated bands. Everything drawn
+        # after this (medallion, borders, corners) sits on top of it.
+        _full_guilloche_wash(im, accent=accent)
+        _paper_grain(im)
 
-    # Guilloche wave BANDS (bolder, denser) in the low-text top/bottom
-    # strips only (logos/title row, and below the signature line) -- on
-    # top of the fainter full-page wash above, for extra texture where
-    # there's no text to interfere with.
-    _guilloche_band(im, CANVAS_H * 0.045, band_height=60, n_waves=6, alpha=30)
-    _guilloche_band(im, CANVAS_H * 0.975, band_height=50, n_waves=6, alpha=30)
+        # Medallion watermark, centered a little above canvas-middle (roughly
+        # behind the name/description block) -- large enough to read as texture
+        # across most of the certificate body without concentrating on any one
+        # line of text.
+        _medallion_watermark(im, CANVAS_W / 2, CANVAS_H * 0.48, radius=CANVAS_H * 0.34, accent=accent)
+
+        # Guilloche wave BANDS (bolder, denser) in the low-text top/bottom
+        # strips only (logos/title row, and below the signature line) -- on
+        # top of the fainter full-page wash above, for extra texture where
+        # there's no text to interfere with.
+        _guilloche_band(im, CANVAS_H * 0.045, band_height=60, n_waves=6, alpha=30, accent=accent)
+        _guilloche_band(im, CANVAS_H * 0.975, band_height=50, n_waves=6, alpha=30, accent=accent)
 
     d = ImageDraw.Draw(im)  # re-bind: alpha_composite() above replaced pixel data
     margin_outer = 50
@@ -262,28 +285,29 @@ def _default_background():
     margin_inner = 118
     d.rectangle(
         [margin_outer, margin_outer, CANVAS_W - margin_outer, CANVAS_H - margin_outer],
-        outline=GOLD, width=8,
+        outline=accent, width=8,
     )
     d.rectangle(
         [margin_mid, margin_mid, CANVAS_W - margin_mid, CANVAS_H - margin_mid],
-        outline=GOLD, width=2,
+        outline=accent, width=2,
     )
     d.rectangle(
         [margin_inner, margin_inner, CANVAS_W - margin_inner, CANVAS_H - margin_inner],
         outline=INK, width=3,
     )
 
-    # Quatrefoil (4-lobed) flourish at each inner-border corner -- upgraded
-    # from a plain diamond outline for a more hand-finished, ornate feel.
-    for cx, cy in (
-        (margin_inner, margin_inner), (CANVAS_W - margin_inner, margin_inner),
-        (margin_inner, CANVAS_H - margin_inner), (CANVAS_W - margin_inner, CANVAS_H - margin_inner),
-    ):
-        lobe_r = 15
-        for dx, dy in ((lobe_r, 0), (-lobe_r, 0), (0, lobe_r), (0, -lobe_r)):
-            d.ellipse([cx + dx - lobe_r, cy + dy - lobe_r, cx + dx + lobe_r, cy + dy + lobe_r],
-                      outline=GOLD, width=2)
-        d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=GOLD)
+    if pattern != "plain":
+        # Quatrefoil (4-lobed) flourish at each inner-border corner -- upgraded
+        # from a plain diamond outline for a more hand-finished, ornate feel.
+        for cx, cy in (
+            (margin_inner, margin_inner), (CANVAS_W - margin_inner, margin_inner),
+            (margin_inner, CANVAS_H - margin_inner), (CANVAS_W - margin_inner, CANVAS_H - margin_inner),
+        ):
+            lobe_r = 15
+            for dx, dy in ((lobe_r, 0), (-lobe_r, 0), (0, lobe_r), (0, -lobe_r)):
+                d.ellipse([cx + dx - lobe_r, cy + dy - lobe_r, cx + dx + lobe_r, cy + dy + lobe_r],
+                          outline=accent, width=2)
+            d.ellipse([cx - 5, cy - 5, cx + 5, cy + 5], fill=accent)
     return im
 
 
@@ -291,12 +315,16 @@ def render_certificate_image(attempt):
     """Returns PNG bytes for the given (already-issued) QuizAttempt."""
     quiz = attempt.quiz
 
+    accent_rgb = _hex_to_rgb(quiz.certificate_accent_color, fallback=GOLD)
+    name_rgb = _hex_to_rgb(quiz.certificate_name_color, fallback=NAME_COLOR)
+    paper_rgb = _hex_to_rgb(quiz.certificate_paper_color, fallback=CREAM)
+
     if quiz.certificate_background and os.path.exists(quiz.certificate_background.path):
         with Image.open(quiz.certificate_background.path) as src:
             bg = ImageOps.exif_transpose(src).convert("RGBA")
         bg = ImageOps.fit(bg, (CANVAS_W, CANVAS_H), Image.LANCZOS)
     else:
-        bg = _default_background()
+        bg = _default_background(accent=accent_rgb, paper=paper_rgb, pattern=quiz.certificate_pattern)
 
     draw = ImageDraw.Draw(bg)
 
@@ -304,9 +332,14 @@ def render_certificate_image(attempt):
     score = round(attempt.percentage)
     cx = CANVAS_W / 2
 
-    # Logos + title row (~top 6-16%)
-    _paste_contain(bg, quiz.logo_1.path if quiz.logo_1 else None, CANVAS_W * 0.14, CANVAS_H * 0.11, 300, 130)
-    _paste_contain(bg, quiz.logo_2.path if quiz.logo_2 else None, CANVAS_W * 0.86, CANVAS_H * 0.11, 300, 130)
+    # Logos -- position is admin-editable (quiz.logo1_x_pct/y_pct etc, "kahi
+    # bhi laga sake") instead of the fixed top-left/top-right spots this used
+    # to hardcode; defaults (14/11 and 86/11) match those old fixed spots
+    # exactly, so an unedited quiz's certificate doesn't move.
+    _paste_contain(bg, quiz.logo_1.path if quiz.logo_1 else None,
+                    CANVAS_W * (quiz.logo1_x_pct / 100.0), CANVAS_H * (quiz.logo1_y_pct / 100.0), 300, 130)
+    _paste_contain(bg, quiz.logo_2.path if quiz.logo_2 else None,
+                    CANVAS_W * (quiz.logo2_x_pct / 100.0), CANVAS_H * (quiz.logo2_y_pct / 100.0), 300, 130)
 
     title_font = _font("Cinzel-Bold.ttf", 130)
     subtitle_font = _font("Cinzel-Bold.ttf", 42)
@@ -325,7 +358,7 @@ def render_certificate_image(attempt):
     name_len = len(name)
     name_size = 150 if name_len <= 15 else 120 if name_len <= 25 else 96 if name_len <= 35 else 76
     name_font = _fit_to_width(draw, name, lambda s: _name_font(name, s), name_size, CANVAS_W * 0.8, min_size=40)
-    _draw_centered(draw, cx, CANVAS_H * (quiz.name_top_pct / 100.0), name, name_font, NAME_COLOR)
+    _draw_centered(draw, cx, CANVAS_H * (quiz.name_top_pct / 100.0), name, name_font, name_rgb)
 
     desc_font = _font("Cormorant-Regular.ttf", 40)
     desc_text = quiz.certificate_text or (
@@ -341,7 +374,7 @@ def render_certificate_image(attempt):
     score_text = f"{quiz.title} · Score {score}%"
     score_font = _fit_to_width(draw, score_text, lambda s: _font("Cormorant-Regular.ttf", s),
                                 38, CANVAS_W * 0.8, min_size=20)
-    _draw_centered(draw, cx, CANVAS_H * (quiz.score_top_pct / 100.0), score_text, score_font, SCORE_COLOR)
+    _draw_centered(draw, cx, CANVAS_H * (quiz.score_top_pct / 100.0), score_text, score_font, accent_rgb)
 
     # Signatures (~84%)
     sign_y = CANVAS_H * 0.84
