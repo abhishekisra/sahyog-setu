@@ -12,6 +12,14 @@
 
 {% block body %}
 <style>
+  /* This page's own scheme-detail overlay is a full-screen modal, not a
+     small floating widget -- the "Sahyog Setu Sahayak" chatbot bubble
+     (public_base.html's #ssq-chatbot-root, present on every page that
+     extends it, this one included) sitting in the same bottom-right
+     corner read as a second, confusing popup on top of it. Hidden only
+     on this page; every other public page keeps the chatbot as-is. */
+  #ssq-chatbot-root{ display:none !important; }
+
   .yk-page{
     --brand-deep:#28352A;
     --brand-deeper:#182019;
