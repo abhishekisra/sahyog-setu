@@ -37,7 +37,25 @@
             <link rel="stylesheet" href="{% static 'custom_admin/css/richtexteditor/rte_theme_default.css' %}" />
 
             <script src="{% static 'custom_admin/js/vendor-all.min.js' %}"></script>
-            <!-- <script src="{% static 'fixcar/js/plugins/bootstrap.min.js' %}"></script> -->
+            <!-- Bootstrap needs to load before pcoded.min.js: pcoded.min.js's
+                 own $(document).ready() calls $(...).tooltip()/.modal() near
+                 the very start of that callback, and an uncaught exception
+                 partway through a jQuery ready-callback stops the REST of
+                 that same callback from running -- including the
+                 $("#pcoded").pcodedmenu(...) call further down, which is
+                 what actually binds the sidebar's Manage Gallery/Manage
+                 Schemes/Entrepreneurship/Quiz Management submenu-toggle
+                 click handlers. This used to be loaded from navbar.html
+                 instead (much later in the document, after the sidebar
+                 itself), which raced against pcoded.min.js's ready-callback
+                 and silently broke every sidebar submenu -- confirmed via a
+                 real headless-browser console log showing "$(...).tooltip
+                 is not a function" thrown from inside pcoded.min.js.
+                 Moved here (and removed from navbar.html) so Bootstrap's
+                 jQuery plugins are registered before pcoded.min.js needs
+                 them. Was previously a dead, commented-out reference to a
+                 nonexistent "fixcar/..." path. -->
+            <script src="{% static 'custom_admin/js/plugins/bootstrap.min.js' %}"></script>
             <script src="{% static 'custom_admin/js/ripple.js' %}"></script>
             <script src="{% static 'custom_admin/js/pcoded.min.js' %}"></script>
             

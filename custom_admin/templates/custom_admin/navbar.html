@@ -154,8 +154,13 @@
 
 </header>
 
-<script src="{% static 'custom_admin/js/plugins/bootstrap.min.js' %}"></script>
-<!-- pcoded.min.js and dashboard-main.js were loaded a second time here --
+<!-- bootstrap.min.js moved to base.html (loads before pcoded.min.js now) --
+     a real, separate console warning ($(...).tooltip is not a function)
+     is fixed by that, but it turned out NOT to be why the sidebar
+     submenu-toggle (Manage Gallery/Manage Schemes/Entrepreneurship/Quiz
+     Management) wasn't working -- see the fix right below for the actual
+     cause.
+     pcoded.min.js and dashboard-main.js were loaded a second time here --
      base.html already loads both in <head>. Same bug as the vendor-all.min.js
      double-load documented there: pcoded.min.js binds its .mob-toggler/
      .mobile-menu click handlers with plain .on('click', ...) (no .off()
@@ -164,5 +169,25 @@
      the header's mobile search/logout reveal (and the hamburger's own
      active-state styling) silently do nothing. -->
 <script src="{% static 'custom_admin/js/plugins/trumbowyg.min.js' %}"></script>
+
+<script>
+    // The actual cause of the sidebar dropdown (Manage Gallery/Manage
+    // Schemes/Entrepreneurship/Quiz Management) never opening: pcoded.min.js
+    // calls $("#pcoded").pcodedmenu({MenuTrigger:"click",...}) as a plain
+    // top-level statement (NOT inside its own $(document).ready(...)),
+    // confirmed via a real headless-browser instrumentation trace showing
+    // that call fires before that file's own ready-callback even starts.
+    // Its own <script> tag sits early in base.html, well before this
+    // navbar's <li> markup exists in the DOM yet -- so
+    // $(".pcoded-inner-navbar > li:not(.pcoded-menu-caption)").on("click",...)
+    // binds to zero elements and every submenu toggle is permanently inert.
+    // Re-running the exact same call here, deferred until the real DOM
+    // (including this navbar) is ready, binds it correctly -- confirmed
+    // safe to call twice: the first, too-early call matched nothing, so
+    // there's nothing already bound to double up on.
+    $(document).ready(function () {
+        jQuery('#pcoded').pcodedmenu({ MenuTrigger: 'click', SubMenuTrigger: 'click' });
+    });
+</script>
 
 {% endblock %}
