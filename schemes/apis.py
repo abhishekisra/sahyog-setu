@@ -1,6 +1,4 @@
-import datetime
 import json
-import random
 from django.conf import settings
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -8,6 +6,20 @@ from rest_framework import status
 from .serializers import SchemeSerializer, CategorySerializer
 from .models import Schemes, Categories
 from django.db.models import Q
+
+
+def _safe_int(value):
+    """int(value) or None -- used before any value reaches a raw
+    FIND_IN_SET(...) SQL fragment. request_data['x'] here was previously
+    string-concatenated straight into .extra(where=[...]) with no cast at
+    all in searchSchemes(): a JSON number (TypeError, unhandled -- 500) or
+    any non-numeric string (reaches raw SQL unescaped) both got through.
+    Only a genuine int's string form (digits, optional leading '-') can
+    ever reach the SQL fragment this way."""
+    try:
+        return int(value)
+    except (TypeError, ValueError):
+        return None
 
 
 def globalSearch(request):
@@ -117,70 +129,98 @@ def centralSchemes(request, id):
 
 @csrf_exempt
 def searchSchemes(request):
-    request_data = json.loads(request.body)
-    schemes = Schemes.objects.filter(status = 1, scheme_type = request_data['scheme_type'])
+    try:
+        request_data = json.loads(request.body)
+        schemes = Schemes.objects.filter(status = 1, scheme_type = request_data.get('scheme_type') or 0)
 
-    if request_data['category']:
-        schemes = schemes.filter(category_id = request_data['category'])
+        # `not in (None, '')` rather than truthiness throughout below --
+        # dbt=0 ('No'), divyang_category/beneficiary/caste/gender/
+        # marital_status/religion=0, age=0, and family_income=0 are all
+        # real, legitimate values (see e.g. schemes/views.py's own code
+        # for the 0-indexed choice lists) that a plain `if request_data['x']`
+        # silently treated as "not provided" and skipped filtering on --
+        # concretely, a citizen with zero household income (a very real,
+        # common case for exactly the people this site serves) got no
+        # income filtering applied at all.
+        if request_data.get('category') not in (None, ''):
+            schemes = schemes.filter(category_id = request_data['category'])
 
-    if request_data['state']:
-        schemes = schemes.filter(state_id = request_data['state'])
+        if request_data.get('state') not in (None, ''):
+            schemes = schemes.filter(state_id = request_data['state'])
 
-    if request_data['dbt']:
-        schemes = schemes.filter(dbt = request_data['dbt'])
+        if request_data.get('dbt') not in (None, ''):
+            schemes = schemes.filter(dbt = request_data['dbt'])
 
+        if request_data.get('divyang_category') not in (None, ''):
+            schemes = schemes.filter(Q(divyang = request_data['divyang_category']) | Q(divyang = 2))
 
-    if request_data['divyang_category']:
-        schemes = schemes.filter(Q(divyang = request_data['divyang_category']) | Q(divyang = 2))
-    
-    if request_data['beneficiary']:
-        schemes = schemes.extra(where=['FIND_IN_SET('+request_data['beneficiary']+', benificiaries)'])
+        # FIND_IN_SET fields -- previously string-concatenated straight into
+        # raw SQL with no cast at all (beneficiary/caste/gender/
+        # marital_status) or just str() (religion), so a JSON number crashed
+        # with an uncaught TypeError (this whole view had no try/except),
+        # and any non-numeric string reached raw SQL unescaped. _safe_int()
+        # both prevents the crash and closes the injection: only a genuine
+        # int's own string form can reach the SQL fragment below.
+        if request_data.get('beneficiary') not in (None, ''):
+            v = _safe_int(request_data['beneficiary'])
+            if v is not None:
+                schemes = schemes.extra(where=['FIND_IN_SET(%d, benificiaries)' % v])
 
-    if request_data['caste']:
-        schemes = schemes.extra(where=['FIND_IN_SET('+request_data['caste']+', castes)'])
+        if request_data.get('caste') not in (None, ''):
+            v = _safe_int(request_data['caste'])
+            if v is not None:
+                schemes = schemes.extra(where=['FIND_IN_SET(%d, castes)' % v])
 
-    if request_data['gender']:
-        schemes = schemes.extra(where=['FIND_IN_SET('+request_data['gender']+', scheme_for)'])
+        if request_data.get('gender') not in (None, ''):
+            v = _safe_int(request_data['gender'])
+            if v is not None:
+                schemes = schemes.extra(where=['FIND_IN_SET(%d, scheme_for)' % v])
 
-    if request_data['marital_status']:
-        schemes = schemes.extra(where=['FIND_IN_SET('+request_data['marital_status']+', marital_status)'])
+        if request_data.get('marital_status') not in (None, ''):
+            v = _safe_int(request_data['marital_status'])
+            if v is not None:
+                schemes = schemes.extra(where=['FIND_IN_SET(%d, marital_status)' % v])
 
-    if request_data['religion']:
-        schemes = schemes.extra(where=['FIND_IN_SET('+str(request_data['religion'])+', religions)'])
-        
-    # A scheme with NO area/employment/occupation tag at all (every
-    # myscheme.gov.in-imported scheme, since that source has no equivalent
-    # taxonomy) means "not tagged", not "excludes everyone" -- same principle
-    # as divyang's Q(divyang=2) "Both" above. A plain .filter() here is an
-    # inner join that would otherwise silently drop every untagged scheme
-    # the moment a user picks ANY value for these three fields.
-    if request_data['area']:
-        schemes = schemes.filter(Q(scheme_areas__area = request_data['area']) | Q(scheme_areas__isnull=True)).distinct()
+        if request_data.get('religion') not in (None, ''):
+            v = _safe_int(request_data['religion'])
+            if v is not None:
+                schemes = schemes.extra(where=['FIND_IN_SET(%d, religions)' % v])
 
-    if request_data['employment']:
-        schemes = schemes.filter(Q(scheme_employment__employment = request_data['employment']) | Q(scheme_employment__isnull=True)).distinct()
+        # A scheme with NO area/employment/occupation tag at all (every
+        # myscheme.gov.in-imported scheme, since that source has no equivalent
+        # taxonomy) means "not tagged", not "excludes everyone" -- same principle
+        # as divyang's Q(divyang=2) "Both" above. A plain .filter() here is an
+        # inner join that would otherwise silently drop every untagged scheme
+        # the moment a user picks ANY value for these three fields.
+        if request_data.get('area') not in (None, ''):
+            schemes = schemes.filter(Q(scheme_areas__area = request_data['area']) | Q(scheme_areas__isnull=True)).distinct()
 
-    if request_data['occupation']:
-        schemes = schemes.filter(Q(scheme_occupations__occupation_id = request_data['occupation']) | Q(scheme_occupations__isnull=True)).distinct()
+        if request_data.get('employment') not in (None, ''):
+            schemes = schemes.filter(Q(scheme_employment__employment = request_data['employment']) | Q(scheme_employment__isnull=True)).distinct()
 
-    if request_data['age']:
-        schemes = schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
+        if request_data.get('occupation') not in (None, ''):
+            schemes = schemes.filter(Q(scheme_occupations__occupation_id = request_data['occupation']) | Q(scheme_occupations__isnull=True)).distinct()
 
-    # income_max=0 is how 3,798 of 4,485 myscheme.gov.in-imported schemes
-    # store "no income cap" (never set on import) -- a plain income_max__gte
-    # comparison treats that literally, so a plain .filter() here would
-    # silently exclude the vast majority of schemes for any citizen with
-    # income > 0, same "untagged means excluded" bug already fixed above
-    # for area/employment/occupation.
-    if request_data['family_income']:
-        schemes = schemes.filter(income_min__lte = request_data['family_income']).filter(
-            Q(income_max__gte = request_data['family_income']) | Q(income_max = 0))
+        if request_data.get('age') not in (None, ''):
+            schemes = schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
 
-    if request_data['searched_text']:
-        schemes = schemes.filter(title__icontains = request_data['searched_text'])
+        # income_max=0 is how 3,798 of 4,485 myscheme.gov.in-imported schemes
+        # store "no income cap" (never set on import) -- a plain income_max__gte
+        # comparison treats that literally, so a plain .filter() here would
+        # silently exclude the vast majority of schemes for any citizen with
+        # income > 0, same "untagged means excluded" bug already fixed above
+        # for area/employment/occupation.
+        if request_data.get('family_income') not in (None, ''):
+            schemes = schemes.filter(income_min__lte = request_data['family_income']).filter(
+                Q(income_max__gte = request_data['family_income']) | Q(income_max = 0))
 
-    serializer = SchemeSerializer(schemes, many=True)
-    return JsonResponse({'schemes' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
+        if request_data.get('searched_text'):
+            schemes = schemes.filter(title__icontains = request_data['searched_text'])
+
+        serializer = SchemeSerializer(schemes, many=True)
+        return JsonResponse({'schemes' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
+    except (ValueError, TypeError, KeyError) as e:
+        return JsonResponse({'message': 'Invalid request', 'status': status.HTTP_400_BAD_REQUEST}, safe=False, status=status.HTTP_400_BAD_REQUEST)
 
 
 def scheme(request, id):
@@ -200,7 +240,10 @@ def checkEligibility(request):
         state_schemes = Schemes.objects.filter(status = 1, scheme_type = 1)
         central_schemes = Schemes.objects.filter(status = 1, scheme_type = 0)
 
-        if request_data['state']:
+        # `not in (None, '')` rather than truthiness throughout below -- see
+        # searchSchemes()'s comment for why (0 is a real value for several
+        # of these fields, not "not provided").
+        if request_data.get('state') not in (None, ''):
             state_schemes = state_schemes.filter(state_id = request_data['state'])
 
         # Age was collected on the form (it's a required question) but never
@@ -208,62 +251,83 @@ def checkEligibility(request):
         # scheme matched regardless of the stated age range, so an 18-40
         # scheme would show up for a 59-year-old and a 60+ scheme for a
         # 40-year-old. Same age_min/age_max range check searchSchemes() uses.
-        if request_data.get('age'):
+        if request_data.get('age') not in (None, ''):
             state_schemes = state_schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
             central_schemes = central_schemes.filter(age_min__lte = request_data['age'], age_max__gte = request_data['age'])
 
         # See searchSchemes() above -- income_max=0 means "no cap" for most
         # imported schemes, so it has to match rather than exclude.
-        if request_data['family_income']:
+        if request_data.get('family_income') not in (None, ''):
             state_schemes = state_schemes.filter(income_min__lte = request_data['family_income']).filter(
                 Q(income_max__gte = request_data['family_income']) | Q(income_max = 0))
             central_schemes = central_schemes.filter(income_min__lte = request_data['family_income']).filter(
                 Q(income_max__gte = request_data['family_income']) | Q(income_max = 0))
 
-        if request_data['divyang_category']:
+        if request_data.get('divyang_category') not in (None, ''):
             state_schemes = state_schemes.filter(Q(divyang = request_data['divyang_category']) | Q(divyang = 2))
             central_schemes = central_schemes.filter(Q(divyang = request_data['divyang_category']) | Q(divyang = 2))
-        
-        if request_data['beneficiary']:
-            state_schemes = state_schemes.extra(where=['FIND_IN_SET(' + str(request_data['beneficiary']) + ', benificiaries)'])
-            central_schemes = central_schemes.extra(where=['FIND_IN_SET(' + str(request_data['beneficiary']) + ', benificiaries)'])
 
-        if request_data['caste']:
-            state_schemes = state_schemes.extra(where=['FIND_IN_SET(' + str(request_data['caste'])+', castes)'])
-            central_schemes = central_schemes.extra(where=['FIND_IN_SET('+str(request_data['caste'])+', castes)'])
+        # FIND_IN_SET fields -- str() alone (the previous cast here) avoids
+        # a TypeError but doesn't sanitize: a non-numeric string still
+        # reaches raw SQL unescaped. _safe_int() both validates and closes
+        # that off -- see searchSchemes() above for the full explanation.
+        if request_data.get('beneficiary') not in (None, ''):
+            v = _safe_int(request_data['beneficiary'])
+            if v is not None:
+                state_schemes = state_schemes.extra(where=['FIND_IN_SET(%d, benificiaries)' % v])
+                central_schemes = central_schemes.extra(where=['FIND_IN_SET(%d, benificiaries)' % v])
 
-        if request_data['gender']:
-            state_schemes = state_schemes.extra(where=['FIND_IN_SET('+str(request_data['gender'])+', scheme_for)'])
-            central_schemes = central_schemes.extra(where=['FIND_IN_SET('+str(request_data['gender'])+', scheme_for)'])
+        if request_data.get('caste') not in (None, ''):
+            v = _safe_int(request_data['caste'])
+            if v is not None:
+                state_schemes = state_schemes.extra(where=['FIND_IN_SET(%d, castes)' % v])
+                central_schemes = central_schemes.extra(where=['FIND_IN_SET(%d, castes)' % v])
 
-        if request_data['marital_status']:
-            state_schemes = state_schemes.extra(where=['FIND_IN_SET('+str(request_data['marital_status'])+', marital_status)'])
-            central_schemes = central_schemes.extra(where=['FIND_IN_SET('+str(request_data['marital_status'])+', marital_status)'])
+        if request_data.get('gender') not in (None, ''):
+            v = _safe_int(request_data['gender'])
+            if v is not None:
+                state_schemes = state_schemes.extra(where=['FIND_IN_SET(%d, scheme_for)' % v])
+                central_schemes = central_schemes.extra(where=['FIND_IN_SET(%d, scheme_for)' % v])
 
-        if request_data['religion']:
-            state_schemes = state_schemes.extra(where=['FIND_IN_SET('+str(request_data['religion'])+', religions)'])
-            central_schemes = central_schemes.extra(where=['FIND_IN_SET('+str(request_data['religion'])+', religions)'])
-            
+        if request_data.get('marital_status') not in (None, ''):
+            v = _safe_int(request_data['marital_status'])
+            if v is not None:
+                state_schemes = state_schemes.extra(where=['FIND_IN_SET(%d, marital_status)' % v])
+                central_schemes = central_schemes.extra(where=['FIND_IN_SET(%d, marital_status)' % v])
+
+        if request_data.get('religion') not in (None, ''):
+            v = _safe_int(request_data['religion'])
+            if v is not None:
+                state_schemes = state_schemes.extra(where=['FIND_IN_SET(%d, religions)' % v])
+                central_schemes = central_schemes.extra(where=['FIND_IN_SET(%d, religions)' % v])
+
         # See searchSchemes() above for why an untagged scheme has to match
         # rather than be excluded -- every myscheme.gov.in import has no
         # area/employment/occupation tags at all (no equivalent taxonomy on
         # that source), so a plain inner-join filter here would make all
         # 4,485 imported schemes invisible on this page forever, the moment
         # a real user picks any value for these three (required) fields.
-        if request_data['area']:
+        if request_data.get('area') not in (None, ''):
             state_schemes = state_schemes.filter(Q(scheme_areas__area = request_data['area']) | Q(scheme_areas__isnull=True)).distinct()
             central_schemes = central_schemes.filter(Q(scheme_areas__area = request_data['area']) | Q(scheme_areas__isnull=True)).distinct()
 
-        if request_data['employment']:
+        if request_data.get('employment') not in (None, ''):
             state_schemes = state_schemes.filter(Q(scheme_employment__employment = request_data['employment']) | Q(scheme_employment__isnull=True)).distinct()
             central_schemes = central_schemes.filter(Q(scheme_employment__employment = request_data['employment']) | Q(scheme_employment__isnull=True)).distinct()
 
-        if request_data['occupation']:
+        if request_data.get('occupation') not in (None, ''):
             state_schemes = state_schemes.filter(Q(scheme_occupations__occupation_id = request_data['occupation']) | Q(scheme_occupations__isnull=True)).distinct()
             central_schemes = central_schemes.filter(Q(scheme_occupations__occupation_id = request_data['occupation']) | Q(scheme_occupations__isnull=True)).distinct()
-        
+
         state_serializer = SchemeSerializer(state_schemes, many=True)
         central_serializer = SchemeSerializer(central_schemes, many=True)
         return JsonResponse({'state_schemes' : state_serializer.data, 'central_schemes' : central_serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
-    except Exception as e:
-        print(e)
+    except (ValueError, TypeError, KeyError) as e:
+        # Previously: `except Exception: print(e)` with no return at all --
+        # any exception here (including the SQL errors this same fix
+        # closes off above) fell through to an implicit `None`, which
+        # Django itself then crashes on ("view didn't return an
+        # HttpResponse") -- a worse, more opaque failure than a normal
+        # error response, and the real error was only ever printed to
+        # stdout, never actually logged.
+        return JsonResponse({'message': 'Invalid request', 'status': status.HTTP_400_BAD_REQUEST}, safe=False, status=status.HTTP_400_BAD_REQUEST)
