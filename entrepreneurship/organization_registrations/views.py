@@ -2,6 +2,13 @@ from sre_parse import State
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.html import strip_tags
+from django.utils.text import Truncator
+import html as html_module
+import json
 from .models import Organization_Registration
 
 
@@ -106,4 +113,53 @@ def deleteOrganizationRegistration(request):
     else:
         messages.error(request, "You have to login first.")
         return redirect('adminLogin')
-        
+
+
+def organization_registration_finder(request):
+    """Public, no login -- Organization Registrations in the Scheme
+    Viewer's own style. This model has no eligibility/required_documents
+    (unlike Legal Registrations), just description + an optional pdf +
+    mode_of_application -- the detail overlay shows Overview + an optional
+    Download PDF button + the usual Apply-link button."""
+    total = Organization_Registration.objects.filter(status=1).count()
+    return render(request, "custom_admin/entrepreneurship/organization_registration_finder.html", {
+        "total_organization_registrations": total,
+    })
+
+
+@csrf_exempt
+def organization_registration_search_light(request):
+    """Paginated search -- same reasoning as sibling *_search_light views."""
+    PAGE_SIZE = 8
+    try:
+        body = json.loads(request.body)
+    except (ValueError, TypeError):
+        body = {}
+
+    items = Organization_Registration.objects.filter(status=1)
+    if body.get("searched_text"):
+        items = items.filter(title__icontains=body["searched_text"])
+    items = items.order_by("-id")
+
+    total = items.count()
+    page = max(1, int(body.get("page") or 1))
+    paginator = Paginator(items, PAGE_SIZE)
+    page_obj = paginator.get_page(page)
+
+    results = []
+    for r in page_obj.object_list:
+        desc = html_module.unescape(strip_tags(r.description or ""))
+        results.append({
+            "id": r.id,
+            "title": r.title,
+            "image": r.image.url if r.image else "",
+            "short_description": Truncator(desc.strip()).chars(130),
+        })
+
+    return JsonResponse({
+        "results": results,
+        "total": total,
+        "page": page,
+        "page_size": PAGE_SIZE,
+        "num_pages": paginator.num_pages,
+    })

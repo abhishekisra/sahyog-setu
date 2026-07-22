@@ -31,5 +31,7 @@ urlpatterns = [
     path('', include('schemes.urls')),
     path('', include('important_portals.urls')),
     path('', include('important_documents.urls')),
+    path('', include('entrepreneurship.legal_registrations.urls')),
+    path('', include('entrepreneurship.organization_registrations.urls')),
 
  ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
