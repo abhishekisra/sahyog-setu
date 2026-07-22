@@ -120,9 +120,15 @@
   .yk-verified svg{color:var(--good);flex-shrink:0;}
   .yk-view-link{display:flex;align-items:center;gap:5px;font-size:15px;font-weight:600;color:var(--terracotta);}
   .yk-empty,.yk-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);border:1px dashed var(--border);border-radius:14px;font-size:16px;}
-  .yk-pagination{display:flex;justify-content:center;gap:8px;margin-top:22px;}
-  .yk-page-btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;}
+  .yk-pagination{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:22px;row-gap:10px;}
+  .yk-page-btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;flex-shrink:0;}
   .yk-page-btn:disabled{opacity:.4;cursor:default;}
+  .yk-page-ellipsis{color:var(--text-muted);font-size:15px;padding:0 2px;flex-shrink:0;}
+  @media (max-width:480px){
+    .yk-pagination{gap:6px;}
+    .yk-page-btn{padding:6px 10px;font-size:13px;}
+    .yk-page-ellipsis{font-size:13px;}
+  }
   .yk-page-btn.active{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep);}
 
   .yk-detail-overlay{position:fixed;inset:0;background:rgba(20,26,19,.5);display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;z-index:9999;}
@@ -491,19 +497,45 @@
     }
   }
 
+  // Unfiltered results can run to 80+ pages (710 schemes / 8 per page) --
+  // rendering one button per page overflowed the row with no way to reach
+  // pages past whatever fit on screen. Compact pattern instead: first,
+  // last, a window around the current page, "…" for the gaps, plus
+  // Prev/Next. .yk-pagination also gets flex-wrap as a backstop.
   function renderPagination(numPages){
     var wrap = document.getElementById('ykPagination');
     wrap.innerHTML = '';
     if(numPages <= 1) return;
-    for(var i=1; i<=numPages; i++){
-      (function(p){
-        var btn = document.createElement('button');
-        btn.className = 'yk-page-btn' + (p === currentPage ? ' active' : '');
-        btn.textContent = p;
-        btn.addEventListener('click', function(){ currentPage = p; runSearch(true); });
-        wrap.appendChild(btn);
-      })(i);
+
+    function addBtn(label, page, disabled, active){
+      var btn = document.createElement('button');
+      btn.className = 'yk-page-btn' + (active ? ' active' : '');
+      btn.textContent = label;
+      if(disabled) btn.disabled = true;
+      else btn.addEventListener('click', function(){ currentPage = page; runSearch(true); });
+      wrap.appendChild(btn);
     }
+    function addEllipsis(){
+      var span = document.createElement('span');
+      span.className = 'yk-page-ellipsis';
+      span.textContent = '…';
+      wrap.appendChild(span);
+    }
+
+    addBtn('‹ Prev', currentPage - 1, currentPage === 1, false);
+
+    var delta = 2;
+    var range = [];
+    for(var i = Math.max(2, currentPage - delta); i <= Math.min(numPages - 1, currentPage + delta); i++){
+      range.push(i);
+    }
+    addBtn(1, 1, false, currentPage === 1);
+    if(range.length && range[0] > 2) addEllipsis();
+    range.forEach(function(p){ addBtn(p, p, false, p === currentPage); });
+    if(range.length && range[range.length - 1] < numPages - 1) addEllipsis();
+    addBtn(numPages, numPages, false, currentPage === numPages);
+
+    addBtn('Next ›', currentPage + 1, currentPage === numPages, false);
   }
 
   function currentFilters(){
