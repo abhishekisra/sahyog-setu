@@ -125,7 +125,8 @@
   .yk-card-top > div{min-width:0;}
   .yk-tag{display:inline-block;background:var(--sunken);color:var(--brand-deep);font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:4px 9px;border-radius:6px;margin-bottom:9px;}
   .yk-card h4{font-size:18px;font-weight:700;line-height:1.32;margin:0 0 8px;overflow-wrap:break-word;word-break:break-word;}
-  .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;max-height:57px;overflow:hidden;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card p .yk-more{color:var(--terracotta);font-weight:700;white-space:nowrap;}
   .yk-card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:12px;}
   .yk-verified{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);}
   .yk-verified svg{color:var(--good);flex-shrink:0;}
@@ -501,7 +502,7 @@
             '<div><div class="yk-tag">'+escapeHtml(s.state || 'Central Scheme')+'</div><h4>'+escapeHtml(s.title)+'</h4></div>' +
             ringSVG(pct) +
           '</div>' +
-          '<p>'+escapeHtml(s.short_description || 'No description available yet for this scheme.')+'</p>' +
+          '<p>'+escapeHtml(s.short_description || 'No description available yet for this scheme.')+(s.short_description ? ' <span class="yk-more">more</span>' : '')+'</p>' +
           '<div class="yk-card-foot">' +
             '<div class="yk-verified"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l2.5 2.5L16 9"/></svg> Verified scheme</div>' +
             '<div class="yk-view-link">View details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>' +
