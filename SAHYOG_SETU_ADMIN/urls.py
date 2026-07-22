@@ -33,5 +33,8 @@ urlpatterns = [
     path('', include('important_documents.urls')),
     path('', include('entrepreneurship.legal_registrations.urls')),
     path('', include('entrepreneurship.organization_registrations.urls')),
+    path('', include('entrepreneurship.business_plans.urls')),
+    path('', include('entrepreneurship.artificial_intelligence.urls')),
+    path('', include('entrepreneurship.marketing.urls')),
 
  ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

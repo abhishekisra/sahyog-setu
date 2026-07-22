@@ -1,0 +1,261 @@
+{% extends 'custom_admin/public_base.html' %}
+{% load static %}
+
+{% block title %}Artificial Intelligence — Sahyog Setu{% endblock %}
+
+{% block head %}
+<meta name="description" content="Browse {{ total_artificial_intelligence }}+ AI tools useful for entrepreneurs — open any one straight from here." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<style>
+  /* Same brand tokens/classes as the other "*_finder.html" public pages --
+     kept in sync deliberately so they read as one consistent design
+     instead of drifting apart. This model (Artificial_Intelligence) has no
+     description at all -- just image + title + a link + its own accent
+     color -- so this page is "direct" mode: no filter sidebar, no detail
+     overlay, a card click opens the link straight in a new tab. Each
+     card's top border/tag is tinted with the row's own color field. */
+  #ssq-chatbot-root{ display:none !important; }
+
+  .yk-page{
+    --brand-deep:#28352A;
+    --brand-deeper:#182019;
+    --gold:#FFD700;
+    --gold-ink:#8A6C09;
+    --paper:#FAF6EC;
+    --card:#FFFFFF;
+    --sunken:#EEF1E5;
+    --terracotta:#B8532F;
+    --text:#26251F;
+    --text-muted:#6B6A5E;
+    --border:#E3DCC7;
+    background:var(--paper); color:var(--text);
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    overflow-x:hidden;
+  }
+  .yk-page h1,.yk-page h2,.yk-page h3,.yk-page h4{
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-weight:800; margin:0;
+  }
+  .yk-page *{box-sizing:border-box;}
+  .yk-wrap{max-width:1180px;margin:0 auto;padding:0 24px 90px;}
+
+  .yk-head{max-width:1180px;margin:0 auto;padding:18px 24px 0;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+  .yk-brand{display:flex;align-items:center;gap:11px;}
+  .yk-brand-mark{width:34px;height:34px;border-radius:50%;background:var(--brand-deep);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:800;font-size:16px;flex-shrink:0;}
+  .yk-brand b{font-weight:800;color:var(--text);}
+  .yk-brand b span{color:var(--terracotta);}
+  .yk-back-link{color:var(--text-muted);font-weight:600;font-size:14px;text-decoration:none;}
+  .yk-back-link:hover{color:var(--terracotta);}
+
+  .yk-nav-search{max-width:480px;margin-top:22px;background:var(--card);border:1px solid var(--border);border-radius:22px;display:flex;align-items:center;gap:9px;padding:11px 16px;}
+  .yk-nav-search svg{flex-shrink:0;color:var(--text-muted);}
+  .yk-nav-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:15px;width:100%;font-family:inherit;}
+  .yk-nav-search input::placeholder{color:var(--text-muted);}
+
+  .yk-hero{padding:24px 0 26px;}
+  .yk-eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--sunken);color:var(--brand-deep);font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 13px;border-radius:20px;margin-bottom:16px;}
+  .yk-hero h1{font-size:36px;line-height:1.24;max-width:660px;}
+  .yk-hero p{color:var(--text-muted);font-size:17px;margin-top:12px;max-width:580px;line-height:1.6;}
+  .yk-hero-stats{display:flex;gap:32px;margin-top:24px;flex-wrap:wrap;}
+  .yk-hero-stat .num{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .yk-hero-stat .lbl{font-size:14px;color:var(--text-muted);margin-top:2px;}
+
+  .yk-results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;margin-top:24px;}
+  .yk-results-head h3{font-size:18px;}
+
+  .yk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:16px;}
+  .yk-card{
+    background:var(--card);border:1px solid var(--border);border-top:4px solid var(--card-accent, var(--gold));border-radius:14px;padding:18px;
+    position:relative;cursor:pointer;min-width:0;
+    box-shadow:0 1px 3px rgba(24,32,25,.08), 0 10px 22px -12px rgba(24,32,25,.16);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .yk-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 2px 6px rgba(24,32,25,.1), 0 22px 40px -14px rgba(40,53,42,.32);
+  }
+  .yk-card-thumb{width:100%;height:120px;object-fit:cover;border-radius:9px;margin-bottom:12px;background:var(--sunken);}
+  .yk-card h4{font-size:16px;font-weight:700;line-height:1.32;margin:0;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card-foot{display:flex;align-items:center;justify-content:flex-end;border-top:1px solid var(--border);padding-top:12px;margin-top:14px;}
+  .yk-view-link{display:flex;align-items:center;gap:5px;font-size:14px;font-weight:600;color:var(--card-accent, var(--terracotta));}
+  .yk-empty,.yk-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);border:1px dashed var(--border);border-radius:14px;font-size:16px;}
+
+  .yk-pagination{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:22px;row-gap:10px;}
+  .yk-page-btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;flex-shrink:0;}
+  .yk-page-btn:disabled{opacity:.4;cursor:default;}
+  .yk-page-ellipsis{color:var(--text-muted);font-size:15px;padding:0 2px;flex-shrink:0;}
+  .yk-page-btn.active{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep);}
+  @media (max-width:480px){
+    .yk-pagination{gap:6px;}
+    .yk-page-btn{padding:6px 10px;font-size:13px;}
+    .yk-page-ellipsis{font-size:13px;}
+  }
+
+  @media (max-width:640px){
+    .yk-head{padding:14px 16px 0;}
+    .yk-hero{padding:20px 0 20px;}
+    .yk-hero h1{font-size:24px;max-width:100%;}
+    .yk-hero p{font-size:15px;}
+    .yk-hero-stats{gap:18px;}
+  }
+</style>
+
+<div class="yk-page">
+  <div class="yk-head">
+    <div class="yk-brand">
+      <div class="yk-brand-mark">स</div>
+      <b>Sahyog <span>Setu</span></b>
+    </div>
+    <a href="/" class="yk-back-link">Back to Home</a>
+  </div>
+
+  <div class="yk-wrap">
+    <div class="yk-hero">
+      <div class="yk-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.1L12 16.3l-6.3 4.4L8 13.6 2 9.2h7.6z"/></svg>
+        Useful AI tools for entrepreneurs
+      </div>
+      <h1>Find a useful AI tool</h1>
+      <p>Browse {{ total_artificial_intelligence }} AI tools — pick one and open it straight from here.</p>
+      <div class="yk-nav-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="ykSearch" placeholder="Search AI tools, e.g. chatbot, content writing, design...">
+      </div>
+      <div class="yk-hero-stats">
+        <div class="yk-hero-stat"><div class="num">{{ total_artificial_intelligence }}</div><div class="lbl">Tools available</div></div>
+        <div class="yk-hero-stat"><div class="num" id="ykStatShown">—</div><div class="lbl">Matching your search</div></div>
+      </div>
+    </div>
+
+    <div class="yk-results-head">
+      <h3 id="ykResultsHeading">Loading AI tools…</h3>
+    </div>
+    <div class="yk-grid" id="ykCardsGrid"><div class="yk-loading">Loading AI tools from the live database…</div></div>
+    <div class="yk-pagination" id="ykPagination"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var currentPage = 1;
+
+  function csrfToken(){
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  }
+
+  function escapeHtml(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function renderCards(list){
+    var grid = document.getElementById('ykCardsGrid');
+    grid.innerHTML = '';
+    if(list.length === 0){
+      grid.innerHTML = '<div class="yk-empty">No AI tools match this search yet — try a different term.</div>';
+    } else {
+      list.forEach(function(p){
+        var card = document.createElement('div');
+        card.className = 'yk-card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        // Only accept a real hex color from the DB field before using it as
+        // a CSS custom property -- anything else falls back to the default
+        // gold/terracotta accent rather than letting an unexpected value
+        // into an inline style.
+        if(/^#[0-9a-fA-F]{3,8}$/.test(p.color || '')){
+          card.style.setProperty('--card-accent', p.color);
+        }
+        card.innerHTML =
+          (p.image ? '<img class="yk-card-thumb" src="'+escapeHtml(p.image)+'" alt="" loading="lazy">' : '') +
+          '<h4>'+escapeHtml(p.title)+'</h4>' +
+          '<div class="yk-card-foot">' +
+            '<div class="yk-view-link">Open tool <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg></div>' +
+          '</div>';
+        var open = function(){ if(p.link) window.open(p.link, '_blank', 'noopener,noreferrer'); };
+        card.addEventListener('click', open);
+        card.addEventListener('keydown', function(e){ if(e.key === 'Enter') open(); });
+        grid.appendChild(card);
+      });
+    }
+  }
+
+  function renderPagination(numPages){
+    var wrap = document.getElementById('ykPagination');
+    wrap.innerHTML = '';
+    if(numPages <= 1) return;
+
+    function addBtn(label, page, disabled, active){
+      var btn = document.createElement('button');
+      btn.className = 'yk-page-btn' + (active ? ' active' : '');
+      btn.textContent = label;
+      if(disabled) btn.disabled = true;
+      else btn.addEventListener('click', function(){ currentPage = page; runSearch(true); });
+      wrap.appendChild(btn);
+    }
+    function addEllipsis(){
+      var span = document.createElement('span');
+      span.className = 'yk-page-ellipsis';
+      span.textContent = '…';
+      wrap.appendChild(span);
+    }
+
+    addBtn('‹ Prev', currentPage - 1, currentPage === 1, false);
+    var delta = 2;
+    var range = [];
+    for(var i = Math.max(2, currentPage - delta); i <= Math.min(numPages - 1, currentPage + delta); i++){
+      range.push(i);
+    }
+    addBtn(1, 1, false, currentPage === 1);
+    if(range.length && range[0] > 2) addEllipsis();
+    range.forEach(function(p){ addBtn(p, p, false, p === currentPage); });
+    if(range.length && range[range.length - 1] < numPages - 1) addEllipsis();
+    addBtn(numPages, numPages, false, currentPage === numPages);
+    addBtn('Next ›', currentPage + 1, currentPage === numPages, false);
+  }
+
+  function runSearch(keepPage){
+    var search = document.getElementById('ykSearch').value.trim();
+    if(!keepPage) currentPage = 1;
+    document.getElementById('ykResultsHeading').textContent = 'Searching…';
+    document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-loading">Searching live AI tools…</div>';
+
+    fetch('{% url "artificial_intelligence_search_light" %}', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken()},
+      body: JSON.stringify({ searched_text: search || null, page: currentPage })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var results = data.results || [];
+        document.getElementById('ykResultsHeading').textContent =
+          'Showing ' + results.length + ' of ' + data.total + ' tool' + (data.total===1?'':'s');
+        document.getElementById('ykStatShown').textContent = data.total;
+        renderCards(results);
+        renderPagination(data.num_pages || 1);
+      })
+      .catch(function(){
+        document.getElementById('ykResultsHeading').textContent = 'Something went wrong';
+        document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-empty">Could not load AI tools right now — please try again in a moment.</div>';
+      });
+  }
+
+  document.getElementById('ykSearch').addEventListener('keydown', function(e){ if(e.key === 'Enter') runSearch(); });
+  var searchDebounce = null;
+  document.getElementById('ykSearch').addEventListener('input', function(){
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(function(){ runSearch(); }, 350);
+  });
+
+  runSearch();
+})();
+</script>
+{% endblock %}

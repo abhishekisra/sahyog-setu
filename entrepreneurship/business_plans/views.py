@@ -2,6 +2,10 @@ from sre_parse import State
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 from .models import Business_Plans
 
@@ -59,9 +63,59 @@ def updateBusinessPlan(request, id):
         business_plan.title = request.POST.get('title')
         business_plan.save()
         messages.success(request, "Business pplan updated successfully.")
-        return redirect('adminBusinessPlans')            
+        return redirect('adminBusinessPlans')
     else:
         messages.error(request, "You have to login first.")
         return redirect('adminLogin')
+
+
+def business_plan_finder(request):
+    """Public, no login -- Business Plans in the Scheme Viewer's own style,
+    but "direct" mode: this model has no description at all (just image +
+    title + pdf), so a card click opens the PDF straight in a new tab --
+    no detail overlay."""
+    total = Business_Plans.objects.filter(status=1).count()
+    return render(request, "custom_admin/entrepreneurship/business_plan_finder.html", {
+        "total_business_plans": total,
+    })
+
+
+@csrf_exempt
+def business_plan_search_light(request):
+    """Paginated search -- same reasoning as sibling *_search_light views,
+    even though this model's dataset is small: keeps the search/pagination
+    behaviour consistent across all "*_finder.html" pages."""
+    PAGE_SIZE = 8
+    try:
+        body = json.loads(request.body)
+    except (ValueError, TypeError):
+        body = {}
+
+    items = Business_Plans.objects.filter(status=1)
+    if body.get("searched_text"):
+        items = items.filter(title__icontains=body["searched_text"])
+    items = items.order_by("-id")
+
+    total = items.count()
+    page = max(1, int(body.get("page") or 1))
+    paginator = Paginator(items, PAGE_SIZE)
+    page_obj = paginator.get_page(page)
+
+    results = []
+    for r in page_obj.object_list:
+        results.append({
+            "id": r.id,
+            "title": r.title,
+            "image": r.image.url if r.image else "",
+            "pdf": r.pdf.url if r.pdf else "",
+        })
+
+    return JsonResponse({
+        "results": results,
+        "total": total,
+        "page": page,
+        "page_size": PAGE_SIZE,
+        "num_pages": paginator.num_pages,
+    })
 
 
