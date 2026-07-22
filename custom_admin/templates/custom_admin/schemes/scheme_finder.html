@@ -37,18 +37,28 @@
   .yk-page *{box-sizing:border-box;}
   .yk-wrap{max-width:1180px;margin:0 auto;padding:0 24px 90px;}
 
-  .yk-nav{background:var(--brand-deep);color:#EDEAE0;}
-  .yk-nav-inner{max-width:1180px;margin:0 auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:22px;flex-wrap:wrap;}
+  /* Simple brand mark + back-link -- matches the header pattern used on
+     quiz_landing.html and other public Django pages (.sq-head/.sq-brand),
+     rather than this page's own heavy dark nav bar, so it reads as part of
+     Sahyog Setu rather than a separate mini-site. */
+  .yk-head{max-width:1180px;margin:0 auto;padding:18px 24px 0;display:flex;align-items:center;justify-content:space-between;gap:14px;}
   .yk-brand{display:flex;align-items:center;gap:11px;}
-  .yk-brand-mark{width:38px;height:38px;border-radius:50%;background:var(--gold);display:flex;align-items:center;justify-content:center;color:var(--brand-deeper);font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-weight:700;font-size:19px;flex-shrink:0;}
-  .yk-brand-text .t1{font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:20px;font-weight:800;line-height:1.15;}
-  .yk-brand-text .t2{font-size:13px;color:#B9C6B4;}
-  .yk-nav-search{flex:1;max-width:400px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);border-radius:22px;display:flex;align-items:center;gap:9px;padding:9px 15px;min-width:200px;}
-  .yk-nav-search svg{flex-shrink:0;opacity:.65;}
-  .yk-nav-search input{background:transparent;border:none;outline:none;color:#fff;font-size:16px;width:100%;font-family:inherit;}
-  .yk-nav-search input::placeholder{color:#9CAB95;}
+  .yk-brand-mark{width:34px;height:34px;border-radius:50%;background:var(--brand-deep);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:800;font-size:16px;flex-shrink:0;}
+  .yk-brand b{font-weight:800;color:var(--text);}
+  .yk-brand b span{color:var(--terracotta);}
+  .yk-back-link{color:var(--text-muted);font-weight:600;font-size:14px;text-decoration:none;}
+  .yk-back-link:hover{color:var(--terracotta);}
 
-  .yk-hero{padding:40px 0 26px;}
+  .yk-nav-search{max-width:480px;margin-top:22px;background:var(--card);border:1px solid var(--border);border-radius:22px;display:flex;align-items:center;gap:9px;padding:11px 16px;}
+  .yk-nav-search svg{flex-shrink:0;color:var(--text-muted);}
+  .yk-nav-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:15px;width:100%;font-family:inherit;}
+  .yk-nav-search input::placeholder{color:var(--text-muted);}
+
+  .yk-state-pill{display:inline-flex;align-items:center;gap:8px;background:var(--sunken);color:var(--brand-deep);font-size:14px;font-weight:700;padding:6px 8px 6px 14px;border-radius:20px;margin-bottom:16px;margin-left:10px;}
+  .yk-state-pill button{background:none;border:none;color:var(--brand-deep);cursor:pointer;width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;line-height:1;}
+  .yk-state-pill button:hover{background:rgba(40,53,42,.12);}
+
+  .yk-hero{padding:24px 0 26px;}
   .yk-eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--sunken);color:var(--brand-deep);font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 13px;border-radius:20px;margin-bottom:16px;}
   .yk-hero h1{font-size:36px;line-height:1.24;max-width:660px;}
   .yk-hero p{color:var(--text-muted);font-size:17px;margin-top:12px;max-width:580px;line-height:1.6;}
@@ -102,9 +112,9 @@
   .yk-detail-sheet{background:var(--paper);border-radius:16px;max-width:880px;width:100%;box-shadow:0 30px 70px -20px rgba(0,0,0,.4);}
   .yk-detail-hero{background:var(--brand-deep);color:#EDEAE0;border-radius:16px 16px 0 0;padding:28px 30px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;}
   @media (max-width:640px){
-    .yk-nav-inner{gap:12px;}
-    .yk-nav-search{min-width:140px;}
-    .yk-hero{padding:26px 0 20px;}
+    .yk-head{padding:14px 16px 0;}
+    .yk-nav-search{margin-top:16px;}
+    .yk-hero{padding:20px 0 20px;}
     .yk-hero h1{font-size:24px;max-width:100%;}
     .yk-hero p{font-size:15px;}
     .yk-hero-stats{gap:18px;}
@@ -119,8 +129,6 @@
   .yk-detail-hero h2{font-size:26px;color:#fff;max-width:520px;line-height:1.32;}
   .yk-close-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
   .yk-detail-body{padding:26px 30px 30px;}
-  .yk-detail-layout{display:grid;grid-template-columns:1fr 260px;gap:22px;}
-  @media (max-width:680px){.yk-detail-layout{grid-template-columns:1fr;}}
   .yk-block{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:19px 20px;margin-bottom:15px;}
   .yk-block h3{font-size:16px;margin-bottom:11px;display:flex;align-items:center;gap:8px;}
   .yk-block h3 svg{color:var(--gold-ink);flex-shrink:0;}
@@ -128,15 +136,10 @@
   .yk-block-list{font-size:15px;color:var(--text-muted);line-height:1.68;margin:0;padding-left:20px;}
   .yk-block-list li{margin-bottom:8px;}
   .yk-block-list li:last-child{margin-bottom:0;}
-  .yk-side-card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:18px;margin-bottom:15px;}
-  .yk-side-card h4{font-size:15px;margin-bottom:12px;font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;}
-  .yk-fact{display:flex;justify-content:space-between;font-size:15px;padding:8px 0;border-bottom:1px solid var(--border);gap:10px;}
-  .yk-fact:last-child{border-bottom:none;}
-  .yk-fact .lbl{color:var(--text-muted);}
-  .yk-fact .val{font-weight:600;text-align:right;}
-  .yk-apply-card{background:linear-gradient(150deg,var(--brand-deep) 0%,var(--brand-deeper) 100%);color:#fff;border-radius:12px;padding:20px;text-align:center;}
-  .yk-apply-card p{font-size:14px;color:#C4D0BE;margin:0 0 13px;line-height:1.5;}
-  .yk-apply-btn{width:100%;background:var(--gold);color:var(--brand-deeper);border:none;padding:11px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;}
+  .yk-apply-card{background:linear-gradient(120deg,var(--brand-deep) 0%,var(--brand-deeper) 100%);color:#fff;border-radius:12px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .yk-apply-card p{font-size:14px;color:#C4D0BE;margin:0;line-height:1.5;}
+  .yk-apply-btn{background:var(--gold);color:var(--brand-deeper);border:none;padding:11px 22px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;flex-shrink:0;white-space:nowrap;}
+  @media (max-width:480px){.yk-apply-card{flex-direction:column;align-items:stretch;text-align:center;} .yk-apply-btn{width:100%;}}
 
   /* Category banner -- shown when a specific category filter is selected,
      matching the old per-category page's own banner+title (fetched from
@@ -150,20 +153,12 @@
 </style>
 
 <div class="yk-page">
-  <div class="yk-nav">
-    <div class="yk-nav-inner">
-      <div class="yk-brand">
-        <div class="yk-brand-mark">स</div>
-        <div class="yk-brand-text">
-          <div class="t1">Scheme Viewer</div>
-          <div class="t2">Sahyog Setu · find schemes you're eligible for</div>
-        </div>
-      </div>
-      <div class="yk-nav-search">
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
-        <input type="text" id="ykSearch" placeholder="Search schemes, e.g. widow pension, student scholarship...">
-      </div>
+  <div class="yk-head">
+    <div class="yk-brand">
+      <div class="yk-brand-mark">स</div>
+      <b>Sahyog <span>Setu</span></b>
     </div>
+    <a href="/" class="yk-back-link">Back to Home</a>
   </div>
 
   <div class="yk-category-banner" id="ykCategoryBanner">
@@ -177,13 +172,18 @@
         <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.1L12 16.3l-6.3 4.4L8 13.6 2 9.2h7.6z"/></svg>
         Live scheme database
       </div>
-      <h1>{{ total_schemes }} schemes, narrowed to the ones <em>you</em> qualify for</h1>
+      <h1 id="ykHeroTitle">{{ total_schemes }} schemes, narrowed to the ones <em>you</em> qualify for</h1>
       <p>Set your age, category and household details — Sahyog Setu ranks every central scheme by how well you match its real eligibility rules, not just its category.</p>
+      <div class="yk-nav-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="ykSearch" placeholder="Search schemes, e.g. widow pension, student scholarship...">
+      </div>
       <div class="yk-hero-stats">
         <div class="yk-hero-stat"><div class="num">{{ total_schemes }}</div><div class="lbl">Schemes tracked</div></div>
         <div class="yk-hero-stat"><div class="num" id="ykStatShown">—</div><div class="lbl">Matching your filters</div></div>
         <div class="yk-hero-stat"><div class="num">{{ total_categories }}</div><div class="lbl">Categories</div></div>
       </div>
+      <span id="ykStatePill" style="display:none;"></span>
     </div>
 
     <div class="yk-layout">
@@ -263,7 +263,7 @@
           <h3 id="ykResultsHeading">Loading schemes…</h3>
           <div class="yk-sort">
             <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h13M3 12h9M3 17h5"/></svg>
-            Central government schemes
+            <span id="ykSchemeTypeLabel">Central government schemes</span>
           </div>
         </div>
         <div class="yk-grid" id="ykCardsGrid"><div class="yk-loading">Loading schemes from the live database…</div></div>
@@ -340,6 +340,16 @@
     return a ? a.getAttribute('href') : null;
   }
 
+  // ?category=<id> / ?state=<id> arrive from the old SPA's category-card
+  // grid (/schemes/central/:category) and state map
+  // (/schemes/map/state/:state/:name) via index.html's redirect -- read
+  // synchronously up front so the very first search (triggered once the
+  // category dropdown below finishes populating) already has them applied,
+  // rather than racing the two fetches this page makes on load.
+  var qp = new URLSearchParams(window.location.search);
+  var initialCategory = qp.get('category') || '';
+  var currentStateId = qp.get('state') || null;
+
   // Populate category dropdown from the real live API. Categories carry
   // their own banner image (same data the old /schemes/central/:category
   // page used for its per-category banner+title) -- kept here so selecting
@@ -355,8 +365,47 @@
         opt.value = c.id; opt.textContent = c.title;
         sel.appendChild(opt);
       });
+      if(initialCategory){
+        sel.value = initialCategory;
+        updateCategoryBanner(initialCategory);
+      }
+      runSearch();
     })
-    .catch(function(){ /* category list is a nice-to-have -- search still works without it */ });
+    .catch(function(){
+      /* category list is a nice-to-have -- search still works without it */
+      runSearch();
+    });
+
+  // State filter -- driven purely by ?state=<id> in the URL, not a visible
+  // dropdown: the map itself is still how people pick a state. Shown here
+  // as a dismissible pill + hero heading update once state names load.
+  var statesById = {};
+  fetch('/api/states')
+    .then(function(r){ return r.json(); })
+    .then(function(data){
+      (data.states || []).forEach(function(s){ statesById[s.value] = s.label; });
+      if(currentStateId) updateStatePill(currentStateId);
+    })
+    .catch(function(){});
+
+  function updateStatePill(stateId){
+    currentStateId = stateId || null;
+    var pill = document.getElementById('ykStatePill');
+    var title = document.getElementById('ykHeroTitle');
+    var typeLabel = document.getElementById('ykSchemeTypeLabel');
+    if(currentStateId && statesById[currentStateId]){
+      pill.style.display = 'inline-flex';
+      pill.className = 'yk-state-pill';
+      pill.innerHTML = 'State: ' + escapeHtml(statesById[currentStateId]) + ' <button type="button" aria-label="Clear state filter">&times;</button>';
+      pill.querySelector('button').addEventListener('click', function(){ updateStatePill(null); runSearch(); });
+      title.innerHTML = 'Schemes in <em>' + escapeHtml(statesById[currentStateId]) + '</em>';
+      typeLabel.textContent = 'State government schemes';
+    } else {
+      pill.style.display = 'none';
+      title.innerHTML = '{{ total_schemes }} schemes, narrowed to the ones <em>you</em> qualify for';
+      typeLabel.textContent = 'Central government schemes';
+    }
+  }
 
   function updateCategoryBanner(categoryId){
     var banner = document.getElementById('ykCategoryBanner');
@@ -461,7 +510,10 @@
     document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-loading">Searching live schemes…</div>';
 
     var body = {
-      scheme_type: 0, category: f.category || null,
+      // scheme_type 0=Central, 1=State -- Central rows never have a state_id
+      // set at all (checked in prod: 0 of them do), so a state filter is
+      // meaningless unless scheme_type also switches to 1.
+      scheme_type: currentStateId ? 1 : 0, category: f.category || null, state: currentStateId || null,
       divyang_category: f.divyang || null, caste: f.caste || null,
       marital_status: f.marital_status || null, religion: f.religion || null,
       age: f.age, family_income: f.income, searched_text: f.search || null,
@@ -508,6 +560,7 @@
     document.getElementById('ykAgeVal').textContent = 'Any age';
     document.getElementById('ykCategory').value = '';
     updateCategoryBanner('');
+    updateStatePill(null);
     document.getElementById('ykIncome').value = '';
     document.getElementById('ykMarital').value = '';
     document.getElementById('ykReligion').value = '';
@@ -539,7 +592,6 @@
 
   function renderDetail(s, pct){
     var sheet = document.getElementById('ykDetailSheet');
-    var howTo = stripTags(s.mode_of_application);
     var applyHref = extractFirstHref(s.web_links);
     var applyBtn = applyHref
       ? '<a class="yk-apply-btn" href="'+escapeHtml(applyHref)+'" target="_blank" rel="noopener noreferrer">' +
@@ -554,23 +606,12 @@
         '<button class="yk-close-btn" id="ykCloseDetail" aria-label="Close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>' +
       '</div>' +
       '<div class="yk-detail-body">' +
-        '<div class="yk-detail-layout">' +
-          '<div>' +
-            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Overview</h3>'+renderRichText(s.description, 'No overview available yet.')+'</div>' +
-            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3>'+renderRichText(s.eligibility, 'Refer to the official scheme page for eligibility details.')+'</div>' +
-            '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3>'+renderRichText(s.required_documents, 'Refer to the official scheme page for the documents list.')+'</div>' +
-          '</div>' +
-          '<div>' +
-            '<div class="yk-side-card"><h4>Quick facts</h4>' +
-              '<div class="yk-fact"><span class="lbl">Age range</span><span class="val">'+s.age_min+'–'+s.age_max+' yrs</span></div>' +
-              '<div class="yk-fact"><span class="lbl">Income cap</span><span class="val">'+(s.income_max == 0 ? 'No cap' : '₹'+Number(s.income_max).toLocaleString('en-IN'))+'</span></div>' +
-              '<div class="yk-fact"><span class="lbl">How to apply</span><span class="val">'+(howTo ? escapeHtml(howTo.slice(0,40)) : 'See details') +'</span></div>' +
-            '</div>' +
-            '<div class="yk-apply-card">' +
-              "<p>Applications go through the scheme's own official portal or office.</p>" +
-              applyBtn +
-            '</div>' +
-          '</div>' +
+        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Overview</h3>'+renderRichText(s.description, 'No overview available yet.')+'</div>' +
+        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3>'+renderRichText(s.eligibility, 'Refer to the official scheme page for eligibility details.')+'</div>' +
+        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3>'+renderRichText(s.required_documents, 'Refer to the official scheme page for the documents list.')+'</div>' +
+        '<div class="yk-apply-card">' +
+          "<p>Applications go through the scheme's own official portal or office.</p>" +
+          applyBtn +
         '</div>' +
       '</div>';
     document.getElementById('ykCloseDetail').addEventListener('click', closeDetail);
@@ -583,8 +624,8 @@
   }
   document.getElementById('ykDetailOverlay').addEventListener('click', function(e){ if(e.target === this) closeDetail(); });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDetail(); });
-
-  runSearch();
+  // Initial search fires once the category dropdown (and any ?category=
+  // pre-fill) is ready -- see the /api/schemes-and-services fetch above.
 })();
 </script>
 {% endblock %}
