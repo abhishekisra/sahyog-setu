@@ -61,7 +61,7 @@
                 <li class="nav-item"><a href="/admin/helplines" class="nav-link "><span class="pcoded-micon"><i class="feather icon-phone-call"></i></span><span class="pcoded-mtext">Helplines</span></a></li>
                 <li class="nav-item"><a href="/admin/pages" class="nav-link "><span class="pcoded-micon"><i class="feather icon-layout"></i></span><span class="pcoded-mtext">Pages</span></a></li>
                 <li class="nav-item"><a href="/admin/settings" class="nav-link "><span class="pcoded-micon"><i class="feather icon-settings"></i></span><span class="pcoded-mtext">Settings</span></a></li>
-                <li class="nav-item pcoded-hasmenu {% if '/admin/quiz' in request.path or '/quiz-analytics' in request.path %}pcoded-trigger active{% endif %}">
+                <li class="nav-item pcoded-hasmenu">
                     <a href="#!" class="nav-link "><span class="pcoded-micon"><i class="feather icon-award"></i></span><span class="pcoded-mtext">Quiz Management</span></a>
                     <ul class="pcoded-submenu">
                         <li class="{% if request.path == '/admin/quizzes' or request.path|slice:':12' == '/admin/quiz/' or request.path == '/admin/quiz' %}active{% endif %}">
