@@ -204,9 +204,19 @@
     if(!html) return '<p>' + escapeHtml(fallback) + '</p>';
     var container = document.createElement('div');
     container.innerHTML = html;
+    // Admin content often mixes intro paragraphs/section headings (<h4>,
+    // <p>) WITH bullet lists (<li>) in the same field (e.g. a description
+    // with an intro paragraph, then an "Objectives" heading, then a
+    // bulleted list) -- picking only <li> OR only <h4>/<p> (whichever
+    // existed first) silently dropped everything of the other kind. Walk
+    // every text-bearing block in document order instead, keeping only the
+    // outermost ones (an <h4> nested inside an <li> is already covered by
+    // that <li>'s own textContent, so skip it to avoid duplicating text).
+    var all = Array.prototype.slice.call(container.querySelectorAll('li, h4, p'));
+    var blocks = all.filter(function(el){
+      return !all.some(function(other){ return other !== el && other.contains(el); });
+    });
     var items = [];
-    var blocks = container.querySelectorAll('li');
-    if(!blocks.length) blocks = container.querySelectorAll('h4, p');
     blocks.forEach(function(b){
       var t = b.textContent.replace(/\s+/g, ' ').trim();
       if(t) items.push(t);
