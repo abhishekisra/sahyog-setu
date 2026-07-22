@@ -561,6 +561,16 @@
         justify-content: center;
         font-size: 1rem;
         padding: 16px 24px;
+        /* .btn-outline-ss's base color/border (var(--ss-primary), the same
+           #FFD700 the surrounding .gold-card's own background gradient is
+           made from -- see tokens.css's own comment: "NEVER text-on-white")
+           reads fine on the dark header this class is also used on, but
+           against this card's gold background it was gold-on-gold --
+           border and icon/text barely visible. var(--ss-ink) is the same
+           dark token (tokens.css: "TEXT on gold backgrounds -- 7.9:1 AAA")
+           this card's own heading/body text already uses. */
+        color: var(--ss-ink);
+        border-color: var(--ss-ink);
     }
 
     .btn-primary-ss {
