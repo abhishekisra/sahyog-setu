@@ -85,7 +85,7 @@ def business_plan_search_light(request):
     """Paginated search -- same reasoning as sibling *_search_light views,
     even though this model's dataset is small: keeps the search/pagination
     behaviour consistent across all "*_finder.html" pages."""
-    PAGE_SIZE = 8
+    PAGE_SIZE = 9
     try:
         body = json.loads(request.body)
     except (ValueError, TypeError):

@@ -129,7 +129,7 @@ def portal_search_light(request):
     ships every active row's full description/mode_of_application in one
     unfiltered, unpaginated response. This ships only card-sized fields,
     paginated, matching a search box's actual page-at-a-time need."""
-    PAGE_SIZE = 8
+    PAGE_SIZE = 9
     try:
         body = json.loads(request.body)
     except (ValueError, TypeError):

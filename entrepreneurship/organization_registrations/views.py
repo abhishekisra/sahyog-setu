@@ -130,7 +130,7 @@ def organization_registration_finder(request):
 @csrf_exempt
 def organization_registration_search_light(request):
     """Paginated search -- same reasoning as sibling *_search_light views."""
-    PAGE_SIZE = 8
+    PAGE_SIZE = 9
     try:
         body = json.loads(request.body)
     except (ValueError, TypeError):

@@ -137,7 +137,7 @@ def legal_registration_finder(request):
 @csrf_exempt
 def legal_registration_search_light(request):
     """Paginated search -- same reasoning as important_documents.views.document_search_light."""
-    PAGE_SIZE = 8
+    PAGE_SIZE = 9
     try:
         body = json.loads(request.body)
     except (ValueError, TypeError):

@@ -142,7 +142,7 @@ def document_search_light(request):
     as important_portals.views.portal_search_light: the existing
     /api/important-documents ships every active row's full description/
     eligibility/required_documents in one unfiltered, unpaginated response."""
-    PAGE_SIZE = 8
+    PAGE_SIZE = 9
     try:
         body = json.loads(request.body)
     except (ValueError, TypeError):
