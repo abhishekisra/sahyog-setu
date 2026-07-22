@@ -27,13 +27,61 @@ CREAM = (250, 248, 239)
 
 
 def _font(name, size):
-    return ImageFont.truetype(os.path.join(FONTS_DIR, name), size)
+    try:
+        return ImageFont.truetype(os.path.join(FONTS_DIR, name), size)
+    except OSError:
+        # A missing/renamed/case-mismatched font file previously 500'd the
+        # whole certificate/story download with no fallback at all. Pillow's
+        # own bitmap default font can't be resized, but a broken certificate
+        # (wrong font, still legible) beats no certificate at all.
+        return ImageFont.load_default()
+
+
+_DEVANAGARI_RANGE = (0x0900, 0x097F)
+
+
+def _has_devanagari(text):
+    return any(_DEVANAGARI_RANGE[0] <= ord(ch) <= _DEVANAGARI_RANGE[1] for ch in text)
+
+
+def _name_font(text, size):
+    """GreatVibes (the site's cursive "signature" look for the name field)
+    is Latin-only -- verified with PIL that a Devanagari codepoint and a
+    genuinely unassigned one produce the identical glyph in this font, i.e.
+    every Devanagari character silently falls back to a blank/tofu box.
+    Any participant registered with a Hindi name got a certificate with
+    their name rendered as a row of identical placeholder boxes instead of
+    text. Falls back to Noto Sans Devanagari (bundled, real glyph coverage
+    verified) whenever the name isn't representable in GreatVibes -- not as
+    elegant, but actually legible. Sized a little smaller than the cursive
+    font would be at the same character count -- Noto Sans Devanagari's
+    default glyphs run visually heavier/wider than GreatVibes at an equal
+    point size."""
+    if _has_devanagari(text):
+        return _font("NotoSansDevanagari-Bold.ttf", int(size * 0.72))
+    return _font("GreatVibes-Regular.ttf", size)
 
 
 def _draw_centered(draw, cx, y, text, font, fill):
     bbox = draw.textbbox((0, 0), text, font=font)
     w = bbox[2] - bbox[0]
     draw.text((cx - w / 2, y), text, font=font, fill=fill)
+
+
+def _fit_to_width(draw, text, font_loader, start_size, max_width, min_size=22, step=2):
+    """font_loader(size) -> ImageFont.FreeTypeFont. Starts at start_size and
+    shrinks until `text` fits max_width on one line, or min_size is reached.
+    Both the participant name (GreatVibes at a fixed size per length
+    bracket, no upper bound on the real name field's length) and the quiz
+    title + score line (drawn with _draw_centered, no wrap/width check at
+    all) could render past the inner border or canvas edge for a long
+    enough real value -- this is the safety net under both."""
+    size = start_size
+    font = font_loader(size)
+    while size > min_size and draw.textbbox((0, 0), text, font=font)[2] > max_width:
+        size -= step
+        font = font_loader(size)
+    return font
 
 
 def _wrap_and_draw_centered(draw, cx, y, text, font, fill, max_width, line_height):
@@ -59,8 +107,8 @@ def _paste_contain(base, img_path, box_center_x, box_center_y, box_w, box_h):
     aspect ratio, never upscaling beyond its own native size."""
     if not img_path or not os.path.exists(img_path):
         return
-    im = Image.open(img_path)
-    im = ImageOps.exif_transpose(im).convert("RGBA")
+    with Image.open(img_path) as src:
+        im = ImageOps.exif_transpose(src).convert("RGBA")
     im.thumbnail((box_w, box_h), Image.LANCZOS)
     x = int(box_center_x - im.width / 2)
     y = int(box_center_y - im.height / 2)
@@ -244,8 +292,8 @@ def render_certificate_image(attempt):
     quiz = attempt.quiz
 
     if quiz.certificate_background and os.path.exists(quiz.certificate_background.path):
-        bg = Image.open(quiz.certificate_background.path)
-        bg = ImageOps.exif_transpose(bg).convert("RGBA")
+        with Image.open(quiz.certificate_background.path) as src:
+            bg = ImageOps.exif_transpose(src).convert("RGBA")
         bg = ImageOps.fit(bg, (CANVAS_W, CANVAS_H), Image.LANCZOS)
     else:
         bg = _default_background()
@@ -268,10 +316,15 @@ def render_certificate_image(attempt):
     presented_font = _font("Cormorant-Regular.ttf", 46)
     _draw_centered(draw, cx, CANVAS_H * 0.28, "This Certificate is Proudly Presented To", presented_font, MUTED)
 
-    # Name -- admin-adjustable vertical position, same field the print view uses.
+    # Name -- admin-adjustable vertical position, same field the print view
+    # uses. The per-length-bracket size below assumed Latin/GreatVibes-width
+    # characters; _fit_to_width is the safety net for a name long enough (a
+    # multi-part name near Django's 150-char first_name+last_name cap
+    # measured wider than the canvas at the old floor size) to still
+    # overflow past the inner border even at the smallest bracket.
     name_len = len(name)
     name_size = 150 if name_len <= 15 else 120 if name_len <= 25 else 96 if name_len <= 35 else 76
-    name_font = _font("GreatVibes-Regular.ttf", name_size)
+    name_font = _fit_to_width(draw, name, lambda s: _name_font(name, s), name_size, CANVAS_W * 0.8, min_size=40)
     _draw_centered(draw, cx, CANVAS_H * (quiz.name_top_pct / 100.0), name, name_font, NAME_COLOR)
 
     desc_font = _font("Cormorant-Regular.ttf", 40)
@@ -281,9 +334,14 @@ def render_certificate_image(attempt):
     _wrap_and_draw_centered(draw, cx, CANVAS_H * 0.52, desc_text, desc_font, (51, 51, 51),
                              max_width=CANVAS_W * 0.58, line_height=54)
 
-    score_font = _font("Cormorant-Regular.ttf", 38)
-    _draw_centered(draw, cx, CANVAS_H * (quiz.score_top_pct / 100.0),
-                    f"{quiz.title} · Score {score}%", score_font, SCORE_COLOR)
+    # quiz.title has no length cap that matters here (CharField(max_length=255))
+    # and this line was drawn with _draw_centered -- no wrap, no width check --
+    # while the description right above it correctly wraps. A long enough
+    # real title rendered past the canvas edge.
+    score_text = f"{quiz.title} · Score {score}%"
+    score_font = _fit_to_width(draw, score_text, lambda s: _font("Cormorant-Regular.ttf", s),
+                                38, CANVAS_W * 0.8, min_size=20)
+    _draw_centered(draw, cx, CANVAS_H * (quiz.score_top_pct / 100.0), score_text, score_font, SCORE_COLOR)
 
     # Signatures (~84%)
     sign_y = CANVAS_H * 0.84
