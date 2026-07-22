@@ -198,10 +198,6 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
-  // Same renderRichText as scheme_finder.html -- admin-entered content is
-  // usually already structured as separate <li>/<h4>/<p> blocks (one per
-  // point); flattening straight to .textContent drops every inter-block
-  // boundary and dumps everything as one run-on paragraph.
   // A short, punctuation-free line (e.g. "Objectives of SHG", "Eligibility
   // Criteria") is almost always a sub-heading the admin used to break up a
   // long field into sections; a real sentence is body text. There's no
@@ -211,22 +207,31 @@
     return words.length <= 6 && !/[.!?]$/.test(t);
   }
 
+  // Content pasted from Word/Docs sometimes wraps a <ul><li> list INSIDE an
+  // <h4>/<p> (malformed but real -- confirmed on a live "Required Documents"
+  // field), so treating the h4 as one flat text block via .textContent
+  // swallowed every <li> into one run-on, unpunctuated line ("PAN Card of
+  // the owner Aadhaar Card Passport-size photograph..."). This returns just
+  // the element's OWN direct text with any nested list removed first, so
+  // the caller can emit that as its own heading/paragraph line and then
+  // separately walk into the nested list for its real bullets.
+  function ownTextExcludingLists(el){
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll('ul, ol').forEach(function(l){ l.remove(); });
+    return clone.textContent.replace(/\s+/g, ' ').trim();
+  }
+
   function renderRichText(html, fallback){
     if(!html) return '<p>' + escapeHtml(fallback) + '</p>';
     var container = document.createElement('div');
     container.innerHTML = html;
-    // Admin content often mixes intro paragraphs/section headings (<h4>,
-    // <p>) WITH bullet lists (<li>) in the same field (e.g. a description
-    // with an intro paragraph, then an "Objectives" heading, then a
-    // bulleted list) -- picking only <li> OR only <h4>/<p> (whichever
-    // existed first) silently dropped everything of the other kind. Walk
-    // every text-bearing block in document order instead, keeping only the
-    // outermost ones (an <h4> nested inside an <li> is already covered by
-    // that <li>'s own textContent, so skip it to avoid duplicating text).
-    var all = Array.prototype.slice.call(container.querySelectorAll('li, h4, p'));
-    var blocks = all.filter(function(el){
-      return !all.some(function(other){ return other !== el && other.contains(el); });
-    });
+    // Word/Docs paste artifacts sometimes carry a literal <style> block
+    // (mso-* CSS rules) in the field itself -- .textContent does NOT skip
+    // <style>/<script> content by default, so those raw CSS rules were
+    // leaking through as visible "code-looking" text on the rare field
+    // with no other li/h4/p to match (falling through to the plain-text
+    // fallback below). Strip them before reading any text from this field.
+    container.querySelectorAll('style, script').forEach(function(el){ el.remove(); });
 
     var out = '';
     var pending = [];
@@ -237,24 +242,46 @@
         pending = [];
       }
     }
-    blocks.forEach(function(b){
-      var t = b.textContent.replace(/\s+/g, ' ').trim();
+    function addHeadingOrText(t){
       if(!t) return;
       any = true;
-      if(b.tagName === 'LI'){
-        pending.push(t);
-      } else if(isHeadingText(t)){
+      if(isHeadingText(t)){
         flushList();
         out += '<h5 class="yk-subheading">' + escapeHtml(t) + '</h5>';
       } else {
         flushList();
         out += '<p>' + escapeHtml(t) + '</p>';
       }
-    });
+    }
+    // Walk the DOM in document order (instead of a flat querySelectorAll +
+    // "keep only outermost" filter) so a heading that legitimately CONTAINS
+    // a nested list can contribute its own text AND still let that list's
+    // real <li> items come through as separate bullets, in order.
+    function walk(node){
+      Array.prototype.forEach.call(node.children, function(child){
+        var tag = child.tagName;
+        if(tag === 'LI'){
+          var t = child.textContent.replace(/\s+/g, ' ').trim();
+          if(t){ any = true; pending.push(t); }
+          return;
+        }
+        if(tag === 'H4' || tag === 'P'){
+          if(child.querySelector('li')){
+            addHeadingOrText(ownTextExcludingLists(child));
+            walk(child);
+          } else {
+            addHeadingOrText(child.textContent.replace(/\s+/g, ' ').trim());
+          }
+          return;
+        }
+        walk(child);
+      });
+    }
+    walk(container);
     flushList();
 
     if(any) return out;
-    var flat = stripTags(html);
+    var flat = container.textContent.replace(/\s+/g, ' ').trim();
     return flat ? '<p>' + escapeHtml(flat) + '</p>' : '<p>' + escapeHtml(fallback) + '</p>';
   }
 

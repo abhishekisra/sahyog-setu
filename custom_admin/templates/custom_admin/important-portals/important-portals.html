@@ -146,14 +146,28 @@
             var words = t.split(/\s+/).filter(Boolean);
             return words.length <= 6 && !/[.!?]$/.test(t);
         }
+        // Content pasted from Word/Docs sometimes wraps a <ul><li> list
+        // INSIDE an <h4>/<p> (malformed but real -- confirmed on a live
+        // "Required Documents" field), so treating the h4 as one flat text
+        // block via .textContent swallowed every <li> into one run-on,
+        // unpunctuated line. This returns just the element's OWN direct
+        // text with any nested list removed first.
+        function ssqOwnTextExcludingLists(el){
+            var clone = el.cloneNode(true);
+            clone.querySelectorAll('ul, ol').forEach(function(l){ l.remove(); });
+            return clone.textContent.replace(/\s+/g, ' ').trim();
+        }
         function ssqRenderRichText(html, fallback){
             if(!html) return '<p class="text-muted">' + ssqEscapeHtml(fallback) + '</p>';
             var container = document.createElement('div');
             container.innerHTML = html;
-            var all = Array.prototype.slice.call(container.querySelectorAll('li, h4, p'));
-            var blocks = all.filter(function(el){
-                return !all.some(function(other){ return other !== el && other.contains(el); });
-            });
+            // Word/Docs paste artifacts sometimes carry a literal <style>
+            // block (mso-* CSS rules) in the field itself -- .textContent
+            // does NOT skip <style>/<script> content by default, so those
+            // raw CSS rules were leaking through as visible "code-looking"
+            // text. Strip them before reading any text from this field.
+            container.querySelectorAll('style, script').forEach(function(el){ el.remove(); });
+
             var out = '';
             var pending = [];
             var any = false;
@@ -163,23 +177,46 @@
                     pending = [];
                 }
             }
-            blocks.forEach(function(b){
-                var t = b.textContent.replace(/\s+/g, ' ').trim();
+            function addHeadingOrText(t){
                 if(!t) return;
                 any = true;
-                if(b.tagName === 'LI'){
-                    pending.push(t);
-                } else if(ssqIsHeadingText(t)){
+                if(ssqIsHeadingText(t)){
                     flushList();
                     out += '<h6 class="font-weight-bold mt-3 mb-2">' + ssqEscapeHtml(t) + '</h6>';
                 } else {
                     flushList();
                     out += '<p>' + ssqEscapeHtml(t) + '</p>';
                 }
-            });
+            }
+            // Walk the DOM in document order (instead of a flat
+            // querySelectorAll + "keep only outermost" filter) so a heading
+            // that legitimately CONTAINS a nested list can contribute its
+            // own text AND still let that list's real <li> items come
+            // through as separate bullets, in order.
+            function walk(node){
+                Array.prototype.forEach.call(node.children, function(child){
+                    var tag = child.tagName;
+                    if(tag === 'LI'){
+                        var t = child.textContent.replace(/\s+/g, ' ').trim();
+                        if(t){ any = true; pending.push(t); }
+                        return;
+                    }
+                    if(tag === 'H4' || tag === 'P'){
+                        if(child.querySelector('li')){
+                            addHeadingOrText(ssqOwnTextExcludingLists(child));
+                            walk(child);
+                        } else {
+                            addHeadingOrText(child.textContent.replace(/\s+/g, ' ').trim());
+                        }
+                        return;
+                    }
+                    walk(child);
+                });
+            }
+            walk(container);
             flushList();
             if(any) return out;
-            var flat = ssqStripTags(html);
+            var flat = container.textContent.replace(/\s+/g, ' ').trim();
             return flat ? '<p>' + ssqEscapeHtml(flat) + '</p>' : '<p class="text-muted">' + ssqEscapeHtml(fallback) + '</p>';
         }
 
