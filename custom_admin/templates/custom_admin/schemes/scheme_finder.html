@@ -172,6 +172,8 @@
   .yk-block-list{font-size:15px;color:var(--text-muted);line-height:1.68;margin:0;padding-left:20px;}
   .yk-block-list li{margin-bottom:8px;}
   .yk-block-list li:last-child{margin-bottom:0;}
+  .yk-subheading{font-size:15px;font-weight:700;color:var(--text);margin:16px 0 6px;}
+  .yk-subheading:first-of-type{margin-top:0;}
   .yk-apply-card{background:linear-gradient(120deg,var(--brand-deep) 0%,var(--brand-deeper) 100%);color:#fff;border-radius:12px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
   .yk-apply-card p{font-size:14px;color:#C4D0BE;margin:0;line-height:1.5;}
   .yk-apply-btn{background:var(--gold);color:var(--brand-deeper);border:none;padding:11px 22px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;flex-shrink:0;white-space:nowrap;}
@@ -342,6 +344,15 @@
   // original structure: each list item (or, failing that, each heading/
   // paragraph block) becomes its own bullet; only genuinely unstructured
   // content falls back to a single paragraph.
+  // A short, punctuation-free line (e.g. "Objectives of SHG", "Eligibility
+  // Criteria") is almost always a sub-heading the admin used to break up a
+  // long field into sections; a real sentence is body text. There's no
+  // tag-based way to tell them apart -- both arrive as the same <h4>/<p>.
+  function isHeadingText(t){
+    var words = t.split(/\s+/).filter(Boolean);
+    return words.length <= 6 && !/[.!?]$/.test(t);
+  }
+
   function renderRichText(html, fallback){
     if(!html) return '<p>' + escapeHtml(fallback) + '</p>';
     var container = document.createElement('div');
@@ -358,15 +369,34 @@
     var blocks = all.filter(function(el){
       return !all.some(function(other){ return other !== el && other.contains(el); });
     });
-    var items = [];
+
+    var out = '';
+    var pending = [];
+    var any = false;
+    function flushList(){
+      if(pending.length){
+        out += '<ul class="yk-block-list">' + pending.map(function(t){ return '<li>' + escapeHtml(t) + '</li>'; }).join('') + '</ul>';
+        pending = [];
+      }
+    }
     blocks.forEach(function(b){
       var t = b.textContent.replace(/\s+/g, ' ').trim();
-      if(t) items.push(t);
+      if(!t) return;
+      any = true;
+      if(b.tagName === 'LI'){
+        pending.push(t);
+      } else if(isHeadingText(t)){
+        flushList();
+        out += '<h5 class="yk-subheading">' + escapeHtml(t) + '</h5>';
+      } else {
+        flushList();
+        out += '<p>' + escapeHtml(t) + '</p>';
+      }
     });
-    if(items.length > 1){
-      return '<ul class="yk-block-list">' + items.map(function(t){ return '<li>' + escapeHtml(t) + '</li>'; }).join('') + '</ul>';
-    }
-    var flat = items[0] || stripTags(html);
+    flushList();
+
+    if(any) return out;
+    var flat = stripTags(html);
     return flat ? '<p>' + escapeHtml(flat) + '</p>' : '<p>' + escapeHtml(fallback) + '</p>';
   }
 
