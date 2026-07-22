@@ -383,6 +383,12 @@
   var qp = new URLSearchParams(window.location.search);
   var initialCategory = qp.get('category') || '';
   var currentStateId = qp.get('state') || null;
+  var initialSchemeId = qp.get('scheme') || null;
+  // ?scheme=<id> -- e.g. from the Check Eligibility widget's "View full
+  // details" link -- opens straight into this scheme's own detail overlay
+  // instead of landing on the flat card grid first. Independent of the
+  // category/state search below, so it can open immediately.
+  if(initialSchemeId) openDetail(initialSchemeId, null);
 
   // Populate category dropdown from the real live API. Categories carry
   // their own banner image (same data the old /schemes/central/:category
@@ -669,10 +675,14 @@
       ? '<a class="yk-apply-btn" href="'+escapeHtml(applyHref)+'" target="_blank" rel="noopener noreferrer">' +
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>Go to official portal</a>'
       : '<span class="yk-apply-btn" style="opacity:.6;cursor:default;">Official link not available</span>';
+    // pct is only known when opened from a search result's own match
+    // calculation -- a direct ?scheme=<id> link (e.g. from the Check
+    // Eligibility widget's "View full details") has no match score to show.
+    var matchTag = (pct == null) ? '' : '<span>'+pct+'% match</span>';
     sheet.innerHTML =
       '<div class="yk-detail-hero">' +
         '<div>' +
-          '<div class="yk-tags"><span>'+escapeHtml(s.state || 'Central Scheme')+'</span><span>'+pct+'% match</span></div>' +
+          '<div class="yk-tags"><span>'+escapeHtml(s.state || 'Central Scheme')+'</span>'+matchTag+'</div>' +
           '<h2>'+escapeHtml(s.title)+'</h2>' +
         '</div>' +
         '<button class="yk-close-btn" id="ykCloseDetail" aria-label="Close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>' +
