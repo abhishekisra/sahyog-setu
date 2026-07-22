@@ -2,6 +2,26 @@
 {% load static %}
 {% block navbar %}
 
+<style>
+    /* pcoded.min.js wraps .navbar-content in PerfectScrollbar
+       (new PerfectScrollbar(".navbar-content", {...})) without keeping a
+       reference to the created instance anywhere -- so there's no way to
+       call its .update() after the DOM changes. PerfectScrollbar's own
+       .ps{overflow:hidden!important} sizes the scrollable area once, at
+       page load; expanding a sidebar dropdown (Manage Gallery/Manage
+       Schemes/Entrepreneurship/Quiz Management -- .pcoded-hasmenu +
+       .pcoded-submenu slideDown) adds height afterwards, which then gets
+       silently clipped by that stale overflow:hidden box -- the submenu's
+       classes/inline styles are toggled correctly, it's just invisible.
+       Forcing native overflow here (scoped to just this sidebar container,
+       not the general .ps class other widgets like the notification
+       dropdown also use) always recalculates on any DOM change, unlike
+       PerfectScrollbar's cached height. */
+    .pcoded-navbar .navbar-content.ps {
+        overflow-y: auto !important;
+    }
+</style>
+
 <nav class="pcoded-navbar menu-light ">
     <div class="navbar-wrapper  ">
         <div class="navbar-content scroll-div " >
