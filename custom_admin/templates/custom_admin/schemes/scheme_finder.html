@@ -37,6 +37,7 @@
     background:var(--paper); color:var(--text);
     font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
     font-size:16px;
+    overflow-x:hidden;
   }
   .yk-page h1,.yk-page h2,.yk-page h3,.yk-page h4{
     font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
@@ -74,8 +75,8 @@
   .yk-hero-stat .num{font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;}
   .yk-hero-stat .lbl{font-size:14px;color:var(--text-muted);margin-top:2px;}
 
-  .yk-layout{display:grid;grid-template-columns:272px 1fr;gap:24px;margin-top:24px;align-items:start;}
-  @media (max-width:860px){.yk-layout{grid-template-columns:1fr;}}
+  .yk-layout{display:grid;grid-template-columns:272px minmax(0,1fr);gap:24px;margin-top:24px;align-items:start;}
+  @media (max-width:860px){.yk-layout{grid-template-columns:minmax(0,1fr);}}
   .yk-panel{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:20px;position:sticky;top:20px;}
   @media (max-width:860px){.yk-panel{position:static;}}
   .yk-panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;}
@@ -84,7 +85,7 @@
   .yk-field{margin-bottom:20px;}
   .yk-field label{display:flex;align-items:center;gap:8px;font-size:15px;font-weight:700;color:var(--text);margin-bottom:9px;}
   .yk-field-icon{width:16px;height:16px;color:var(--gold-ink);flex-shrink:0;}
-  .yk-page select,.yk-field input[type="text"]{width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--paper);font-family:inherit;font-size:15px;color:var(--text);appearance:none;}
+  .yk-page select,.yk-field input[type="text"]{width:100%;max-width:100%;padding:9px 11px;border-radius:8px;border:1px solid var(--border);background:var(--paper);font-family:inherit;font-size:15px;color:var(--text);appearance:none;text-overflow:ellipsis;white-space:nowrap;overflow:hidden;}
   .yk-page select:focus,.yk-field input:focus{outline:2px solid var(--gold-ink);outline-offset:1px;}
   .yk-field.range input[type=range]{width:100%;accent-color:var(--gold-ink);}
   .yk-range-val{display:flex;justify-content:space-between;font-size:13px;color:var(--text-muted);margin-top:5px;font-variant-numeric:tabular-nums;}
@@ -97,14 +98,15 @@
   .yk-results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;}
   .yk-results-head h3{font-size:18px;}
   .yk-sort{font-size:15px;color:var(--text-muted);display:flex;align-items:center;gap:6px;}
-  .yk-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
-  @media (max-width:640px){.yk-grid{grid-template-columns:1fr;}}
-  .yk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;cursor:pointer;}
+  .yk-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;}
+  @media (max-width:640px){.yk-grid{grid-template-columns:minmax(0,1fr);}}
+  .yk-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px;position:relative;cursor:pointer;min-width:0;}
   .yk-card:hover{box-shadow:var(--shadow);}
-  .yk-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .yk-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;min-width:0;}
+  .yk-card-top > div{min-width:0;}
   .yk-tag{display:inline-block;background:var(--sunken);color:var(--brand-deep);font-size:13px;font-weight:700;letter-spacing:.03em;text-transform:uppercase;padding:4px 9px;border-radius:6px;margin-bottom:9px;}
-  .yk-card h4{font-size:18px;font-weight:700;line-height:1.32;margin:0 0 8px;}
-  .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;max-height:57px;overflow:hidden;}
+  .yk-card h4{font-size:18px;font-weight:700;line-height:1.32;margin:0 0 8px;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;max-height:57px;overflow:hidden;overflow-wrap:break-word;word-break:break-word;}
   .yk-card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:12px;}
   .yk-verified{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--text-muted);}
   .yk-verified svg{color:var(--good);flex-shrink:0;}
