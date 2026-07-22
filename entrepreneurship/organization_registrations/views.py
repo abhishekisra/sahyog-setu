@@ -115,6 +115,24 @@ def deleteOrganizationRegistration(request):
         return redirect('adminLogin')
 
 
+def admin_organization_registration_detail(request, id):
+    """Admin-only (login required) preview JSON for the "View" button on
+    the Organization Registrations list -- NOT the public
+    /api/entrepreneurship-developement/organization-registration/<id>,
+    which filters status=1 and so 400s on an inactive/draft registration
+    an admin is specifically trying to check before activating it."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Login required"}, status=403)
+    try:
+        obj = Organization_Registration.objects.get(id=id)
+    except Organization_Registration.DoesNotExist:
+        return JsonResponse({"message": "Invalid id"}, status=404)
+    return JsonResponse({"organization_registration": {
+        "title": obj.title,
+        "description": obj.description,
+    }})
+
+
 def organization_registration_finder(request):
     """Public, no login -- Organization Registrations in the Scheme
     Viewer's own style. This model has no eligibility/required_documents

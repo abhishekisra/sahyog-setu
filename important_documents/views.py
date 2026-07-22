@@ -125,6 +125,25 @@ def deleteImportantDocument(request):
         return redirect('adminLogin')
 
 
+def admin_document_detail(request, id):
+    """Admin-only (login required) preview JSON for the "View" button on
+    the Important Documents list -- NOT the public /api/important-document/
+    <id>, which filters status=1 and so 400s on an inactive/draft document
+    an admin is specifically trying to check before activating it."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Login required"}, status=403)
+    try:
+        document = Important_Documents.objects.get(id=id)
+    except Important_Documents.DoesNotExist:
+        return JsonResponse({"message": "Invalid id"}, status=404)
+    return JsonResponse({"important_document": {
+        "title": document.title,
+        "description": document.description,
+        "eligibility": document.eligibility,
+        "required_documents": document.required_documents,
+    }})
+
+
 def document_finder(request):
     """Public, no login -- Important Documents in the Scheme Viewer's own
     style (filter-less: this model has no category/type field, so it's a

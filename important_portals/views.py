@@ -109,6 +109,23 @@ def deleteImportantPortal(request):
         return redirect('adminLogin')
         
 
+def admin_portal_detail(request, id):
+    """Admin-only (login required) preview JSON for the "View" button on
+    the Important Portals list -- NOT the public /api/important-portal/
+    <id>, which filters status=1 and so 400s on an inactive/draft portal
+    an admin is specifically trying to check before activating it."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Login required"}, status=403)
+    try:
+        portal = Important_Portals.objects.get(id=id)
+    except Important_Portals.DoesNotExist:
+        return JsonResponse({"message": "Invalid id"}, status=404)
+    return JsonResponse({"important_portal": {
+        "title": portal.title,
+        "description": portal.description,
+    }})
+
+
 def portal_finder(request):
     """Public, no login -- Important Portals in the Scheme Viewer's own
     style (filter-less: this model has no category/type field, so it's a

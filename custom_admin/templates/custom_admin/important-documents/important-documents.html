@@ -53,6 +53,7 @@
                                                     {% endif %}
                                                 </td>
                                                 <td class="text-right">
+                                                    <a href="javascript:void(0)" class="btn btn-info btn-sm viewDescButton" data-id="{{document.id}}" data-type="document"><i class="feather icon-eye"></i>&nbsp;View </a>
                                                     <a href="/admin/important-document/{{document.id}}" class="btn btn-success btn-sm"><i class="feather icon-edit"></i>&nbsp;Edit </a>
                                                     <a href="javascript:void(0)" class="btn btn-danger btn-sm deleteButton" data-id="{{document.id}}"><i class="feather icon-trash-2"></i>&nbsp;Delete </a>
                                                 </td>
@@ -94,6 +95,20 @@
         </div>
     </div>
 
+    <!-- See custom_admin/manage-schemes/schemes/schemes.html for why this
+         reuses the same subheading-aware renderer + admin-only preview
+         endpoint pattern. -->
+    <div id="viewDescModal" class="modal fade" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header justify-content-between d-flex align-items-center flex-row">
+                    <h5 class="modal-title" id="viewDescTitle" style="color: #000000;"></h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                </div>
+                <div class="modal-body" id="viewDescBody" style="max-height:65vh;overflow-y:auto;"></div>
+            </div>
+        </div>
+    </div>
 
 
     <script>
@@ -106,6 +121,95 @@
             var id = $(this).attr('data-id');
             $('#deleteSchemeId').val(id);
             $('#deleteModel').modal('show');
+        });
+
+        var SSQ_VIEW_CONFIGS = {
+            document: {
+                api: '/admin/important-document/',
+                apiSuffix: '/preview',
+                key: 'important_document',
+                fields: [
+                    {label: 'Overview', field: 'description'},
+                    {label: 'Eligibility', field: 'eligibility'},
+                    {label: 'Required Documents', field: 'required_documents'}
+                ]
+            }
+        };
+
+        function ssqEscapeHtml(str){
+            return String(str == null ? '' : str)
+                .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+        }
+        function ssqStripTags(html){
+            var d = document.createElement('div');
+            d.innerHTML = html || '';
+            return (d.textContent || '').trim();
+        }
+        function ssqIsHeadingText(t){
+            var words = t.split(/\s+/).filter(Boolean);
+            return words.length <= 6 && !/[.!?]$/.test(t);
+        }
+        function ssqRenderRichText(html, fallback){
+            if(!html) return '<p class="text-muted">' + ssqEscapeHtml(fallback) + '</p>';
+            var container = document.createElement('div');
+            container.innerHTML = html;
+            var all = Array.prototype.slice.call(container.querySelectorAll('li, h4, p'));
+            var blocks = all.filter(function(el){
+                return !all.some(function(other){ return other !== el && other.contains(el); });
+            });
+            var out = '';
+            var pending = [];
+            var any = false;
+            function flushList(){
+                if(pending.length){
+                    out += '<ul>' + pending.map(function(t){ return '<li>' + ssqEscapeHtml(t) + '</li>'; }).join('') + '</ul>';
+                    pending = [];
+                }
+            }
+            blocks.forEach(function(b){
+                var t = b.textContent.replace(/\s+/g, ' ').trim();
+                if(!t) return;
+                any = true;
+                if(b.tagName === 'LI'){
+                    pending.push(t);
+                } else if(ssqIsHeadingText(t)){
+                    flushList();
+                    out += '<h6 class="font-weight-bold mt-3 mb-2">' + ssqEscapeHtml(t) + '</h6>';
+                } else {
+                    flushList();
+                    out += '<p>' + ssqEscapeHtml(t) + '</p>';
+                }
+            });
+            flushList();
+            if(any) return out;
+            var flat = ssqStripTags(html);
+            return flat ? '<p>' + ssqEscapeHtml(flat) + '</p>' : '<p class="text-muted">' + ssqEscapeHtml(fallback) + '</p>';
+        }
+
+        $(document).on('click', '.viewDescButton', function(){
+            var id = $(this).attr('data-id');
+            var type = $(this).attr('data-type');
+            var cfg = SSQ_VIEW_CONFIGS[type];
+            if(!cfg) return;
+            $('#viewDescTitle').text('');
+            $('#viewDescBody').html('<div class="text-center py-4">Loading...</div>');
+            $('#viewDescModal').modal('show');
+            fetch(cfg.api + id + (cfg.apiSuffix || ''))
+                .then(function(r){ return r.json(); })
+                .then(function(data){
+                    var obj = data[cfg.key];
+                    if(!obj){ $('#viewDescBody').html('<p class="text-danger">Could not load details.</p>'); return; }
+                    $('#viewDescTitle').text(obj.title || '');
+                    var html = '';
+                    cfg.fields.forEach(function(f){
+                        html += '<h5>' + ssqEscapeHtml(f.label) + '</h5>' + ssqRenderRichText(obj[f.field], 'Not provided.') + '<hr>';
+                    });
+                    $('#viewDescBody').html(html);
+                })
+                .catch(function(){
+                    $('#viewDescBody').html('<p class="text-danger">Could not load details -- please try again.</p>');
+                });
         });
 
 

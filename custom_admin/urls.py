@@ -54,11 +54,13 @@ urlpatterns = [
     path('important-document', ImportantDocuments.ImportantDocumentView.as_view(),name="adminNewImportantDocument"),
     path('important-document/<int:id>', ImportantDocuments.EditImportantDocumentView.as_view(),name="adminEditImportantDocument"),
     path('important-document/delete', ImportantDocuments.deleteImportantDocument, name="adminDeleteImportantDocument"),
+    path('important-document/<int:id>/preview', ImportantDocuments.admin_document_detail, name="adminDocumentDetail"),
 
     path('important-portals', ImportantPortals.ImportantPortalsView.as_view(),name="adminImportantPotals"),
     path('important-portal', ImportantPortals.ImportantPortalView.as_view(),name="adminNewImportantPortal"),
     path('important-portal/<int:id>', ImportantPortals.EditImportantPortalView.as_view(),name="adminEditImportantPortal"),
     path('important-portal/delete', ImportantPortals.deleteImportantPortal, name="adminDeleteImportantPortal"),
+    path('important-portal/<int:id>/preview', ImportantPortals.admin_portal_detail, name="adminPortalDetail"),
 
     path('testimonials', Testimonials.TestimonialsView.as_view(), name="adminTestimonials"),
     path('testimonial/delete', Testimonials.deleteTestimonial, name="adminDeleteTestimonial"),
@@ -102,11 +104,13 @@ urlpatterns = [
     path('entrepreneurship/organization-registration', OrganizationRegistrations.OrganizationRegistrationView.as_view(), name="adminOrganizationRegistration"),
     path('entrepreneurship/organization-registration/delete', OrganizationRegistrations.deleteOrganizationRegistration, name="adminDeleteOrganizationRegistration"),
     path('entrepreneurship/organization-registration/<int:id>', OrganizationRegistrations.EditOrganizationRegistrationView.as_view(), name="adminUpdateOrganizationRegistrations"),
+    path('entrepreneurship/organization-registration/<int:id>/preview', OrganizationRegistrations.admin_organization_registration_detail, name="adminOrganizationRegistrationDetail"),
 
     path('entrepreneurship/legal-registrations', LegalRegistrations.LegalRegistrationsView.as_view(), name="adminLegalRegistrations"),
     path('entrepreneurship/legal-registration', LegalRegistrations.LegalRegistrationView.as_view(), name="adminLegalRegistration"),
     path('entrepreneurship/legal-registration/delete', LegalRegistrations.deleteLegalRegistration, name="adminDeleteLegalRegistration"),
     path('entrepreneurship/legal-registration/<int:id>', LegalRegistrations.EditLegalRegistrationView.as_view(), name="adminUpdateLegalRegistrations"),
+    path('entrepreneurship/legal-registration/<int:id>/preview', LegalRegistrations.admin_legal_registration_detail, name="adminLegalRegistrationDetail"),
 
     path('entrepreneurship/artificial-intelligence', ArtificialIntelligence.ArtificialIntelligenceView.as_view(), name="adminArtificialIntelligence"),
     path('entrepreneurship/artificial-intelligence/delete', ArtificialIntelligence.deleteArtificialIntelligence, name="adminDeleteArtificialIntelligence"),

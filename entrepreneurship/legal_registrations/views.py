@@ -125,6 +125,26 @@ def deleteLegalRegistration(request):
         return redirect('adminLogin')
 
 
+def admin_legal_registration_detail(request, id):
+    """Admin-only (login required) preview JSON for the "View" button on
+    the Legal Registrations list -- NOT the public
+    /api/entrepreneurship-developement/legal-registration/<id>, which
+    filters status=1 and so 400s on an inactive/draft registration an
+    admin is specifically trying to check before activating it."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Login required"}, status=403)
+    try:
+        obj = Legal_Registrations.objects.get(id=id)
+    except Legal_Registrations.DoesNotExist:
+        return JsonResponse({"message": "Invalid id"}, status=404)
+    return JsonResponse({"legal_registration": {
+        "title": obj.title,
+        "description": obj.description,
+        "eligibility": obj.eligibility,
+        "required_documents": obj.required_documents,
+    }})
+
+
 def legal_registration_finder(request):
     """Public, no login -- Legal Registrations in the Scheme Viewer's own
     style (filter-less, same data shape as Important Documents/Schemes)."""
