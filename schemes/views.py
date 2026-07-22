@@ -393,6 +393,25 @@ def deleteScheme(request):
         return redirect('adminLogin')
 
 
+def admin_scheme_detail(request, id):
+    """Admin-only (login required) preview JSON for the "View" button on
+    the Manage Schemes list -- NOT the public /api/scheme/<id>, which
+    filters status=1 and so 400s on an inactive/draft scheme an admin is
+    specifically trying to check before activating it."""
+    if not request.user.is_authenticated:
+        return JsonResponse({"message": "Login required"}, status=403)
+    try:
+        scheme = Schemes.objects.get(id=id)
+    except Schemes.DoesNotExist:
+        return JsonResponse({"message": "Invalid scheme id"}, status=404)
+    return JsonResponse({"scheme": {
+        "title": scheme.title,
+        "description": scheme.description,
+        "eligibility": scheme.eligibility,
+        "required_documents": scheme.required_documents,
+    }})
+
+
 def scheme_finder(request):
     """Public, no login -- the "Scheme Viewer" finder. Filtering hits
     scheme_search_light below (NOT the existing /api/schemes -- see there

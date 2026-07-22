@@ -48,6 +48,7 @@ urlpatterns = [
     path('manage-schemes/scheme/<int:id>', Schemes.EditSchemeView.as_view(),name="adminEditScheme"),
     path('manage-schemes/scheme/delete', Schemes.deleteScheme, name="adminDeleteScheme"),
     path('manage-schemes/schemes/bulk-activate', Schemes.BulkActivateSchemesView.as_view(), name="adminBulkActivateSchemes"),
+    path('manage-schemes/scheme/<int:id>/preview', Schemes.admin_scheme_detail, name="adminSchemeDetail"),
 
     path('important-documents', ImportantDocuments.ImportantDocumentsView.as_view(),name="adminImportantDocuments"),
     path('important-document', ImportantDocuments.ImportantDocumentView.as_view(),name="adminNewImportantDocument"),
