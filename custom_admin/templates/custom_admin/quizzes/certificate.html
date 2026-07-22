@@ -25,7 +25,18 @@
                     <img src="{{ quiz.certificate_background.url }}" class="sheet-bg" alt="">
                     {% else %}
                     <!-- No custom background -> built-in vector guilloche frame. Pure SVG,
-                         no image dependency, scales with the container via viewBox. -->
+                         no image dependency, scales with the container via viewBox.
+                         Mirrors quizzes/cert_image.py's _default_background() (the
+                         downloadable-PNG certificate's own default background) --
+                         same medallion watermark position/radius, same 3-line
+                         gold/gold/ink border, same quatrefoil corner flourishes --
+                         those two were built independently and had drifted into two
+                         visibly different designs (a plain dot pattern here vs. an
+                         ornate medallion+corners there); this brings them back in
+                         sync. Paper-grain noise and the sine-wave guilloche bands
+                         from the PNG version aren't replicated here (PNG-only
+                         texture, not worth the SVG markup for a subtle effect) --
+                         the dot pattern below stands in for that texture. -->
                     <svg class="sheet-bg" viewBox="0 0 297 210" preserveAspectRatio="none"
                          xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
                         <defs>
@@ -33,10 +44,36 @@
                                 <rect width="5" height="5" fill="#faf8ef"/>
                                 <circle cx="2.5" cy="2.5" r="0.9" fill="#c8a951" fill-opacity="0.30"/>
                             </pattern>
+                            <g id="quatrefoil">
+                                <circle cx="1.8" cy="0" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
+                                <circle cx="-1.8" cy="0" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
+                                <circle cx="0" cy="1.8" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
+                                <circle cx="0" cy="-1.8" r="1.8" fill="none" stroke="#c8a951" stroke-width="0.3"/>
+                                <circle cx="0" cy="0" r="0.6" fill="#c8a951"/>
+                            </g>
                         </defs>
                         <rect x="0" y="0" width="297" height="210" fill="#faf8ef"/>
-                        <rect x="6" y="6" width="285" height="198" fill="url(#guilloche)" stroke="#c8a951" stroke-width="2.5"/>
-                        <rect x="14" y="14" width="269" height="182" fill="none" stroke="#222" stroke-width="0.6"/>
+                        <rect x="0" y="0" width="297" height="210" fill="url(#guilloche)"/>
+
+                        <!-- Medallion watermark: same cx/cy/radius ratios as
+                             _medallion_watermark() in cert_image.py. -->
+                        <g opacity="0.16" stroke="#c8a951" fill="none">
+                            <circle cx="148.5" cy="100.8" r="71.4" stroke-width="0.5"/>
+                            <circle cx="148.5" cy="100.8" r="58.55" stroke-width="0.35"/>
+                            <circle cx="148.5" cy="100.8" r="45.7" stroke-width="0.35"/>
+                        </g>
+
+                        <!-- Triple border: outer gold (thick), middle gold (thin),
+                             inner ink (thin); was 2 lines, PNG version has 3. -->
+                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="#c8a951" stroke-width="2.5"/>
+                        <rect x="10.06" y="10.06" width="276.88" height="189.88" fill="none" stroke="#c8a951" stroke-width="0.6"/>
+                        <rect x="14.13" y="14.13" width="268.74" height="181.74" fill="none" stroke="#222" stroke-width="0.6"/>
+
+                        <!-- Quatrefoil corners at the inner border's 4 corners. -->
+                        <use href="#quatrefoil" x="14.13" y="14.13"/>
+                        <use href="#quatrefoil" x="282.87" y="14.13"/>
+                        <use href="#quatrefoil" x="14.13" y="195.87"/>
+                        <use href="#quatrefoil" x="282.87" y="195.87"/>
                     </svg>
                     {% endif %}
 
