@@ -65,14 +65,23 @@
                         </g>
                         {% endif %}
 
-                        <!-- Triple border: outer gold (thick), middle gold (thin),
-                             inner ink (thin); was 2 lines, PNG version has 3. -->
+                        <!-- Border: 1/2/3 lines per certificate_border_style, mirrors
+                             the border_style branches in cert_image.py's
+                             _default_background(). -->
+                        {% if quiz.certificate_border_style == "single" %}
+                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="1.6"/>
+                        {% elif quiz.certificate_border_style == "double" %}
+                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="2"/>
+                        <rect x="14.13" y="14.13" width="268.74" height="181.74" fill="none" stroke="#222" stroke-width="0.6"/>
+                        {% else %}
                         <rect x="6" y="6" width="285" height="198" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="2.5"/>
                         <rect x="10.06" y="10.06" width="276.88" height="189.88" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.6"/>
                         <rect x="14.13" y="14.13" width="268.74" height="181.74" fill="none" stroke="#222" stroke-width="0.6"/>
+                        {% endif %}
 
-                        {% if quiz.certificate_pattern == "classic" %}
-                        <!-- Quatrefoil corners at the inner border's 4 corners. -->
+                        {% if quiz.certificate_corners_enabled %}
+                        <!-- Quatrefoil corners at the inner border's 4 corners --
+                             independent of certificate_pattern (see cert_image.py). -->
                         <use href="#quatrefoil" x="14.13" y="14.13"/>
                         <use href="#quatrefoil" x="282.87" y="14.13"/>
                         <use href="#quatrefoil" x="14.13" y="195.87"/>
@@ -83,8 +92,8 @@
 
                     <div class="sheet-content">
                         <div class="zone zone-titles-only" style="top: 6%;">
-                            <div class="zone-title">CERTIFICATE</div>
-                            <div class="zone-subtitle">OF ACHIEVEMENT</div>
+                            <div class="zone-title" style="color: {{ quiz.certificate_title_color }};">CERTIFICATE</div>
+                            <div class="zone-subtitle" style="color: {{ quiz.certificate_title_color }}; opacity: 0.75;">OF ACHIEVEMENT</div>
                         </div>
                         <!-- Independently positioned (logo{1,2}_x_pct/y_pct, "kahi bhi
                              laga sake") instead of a shared flex row -- matches
@@ -95,7 +104,7 @@
 
                         <div class="zone zone-presented" style="top: 28%;">This Certificate is Proudly Presented To</div>
 
-                        <div class="zone zone-name" style="top: {{ quiz.name_top_pct }}%; color: {{ quiz.certificate_name_color }};">
+                        <div class="zone zone-name" style="top: {{ quiz.name_top_pct }}%; color: {{ quiz.certificate_name_color }}; font-family: {% if quiz.certificate_name_font == 'serif' %}'Cormorant', serif{% elif quiz.certificate_name_font == 'bold' %}'Cinzel', serif{% else %}'Great Vibes', cursive{% endif %};">
                             {{ display_name }}
                         </div>
 

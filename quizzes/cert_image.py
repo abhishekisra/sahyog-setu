@@ -57,22 +57,31 @@ def _has_devanagari(text):
     return any(_DEVANAGARI_RANGE[0] <= ord(ch) <= _DEVANAGARI_RANGE[1] for ch in text)
 
 
-def _name_font(text, size):
-    """GreatVibes (the site's cursive "signature" look for the name field)
-    is Latin-only -- verified with PIL that a Devanagari codepoint and a
-    genuinely unassigned one produce the identical glyph in this font, i.e.
+_NAME_FONT_FILES = {
+    "script": "GreatVibes-Regular.ttf",
+    "serif": "Cormorant-Regular.ttf",
+    "bold": "Cinzel-Bold.ttf",
+}
+
+
+def _name_font(text, size, font_choice="script"):
+    """GreatVibes/Cormorant (the site's cursive/serif "signature" looks for
+    the name field, admin-editable via quiz.certificate_name_font) are
+    Latin-only -- verified with PIL that a Devanagari codepoint and a
+    genuinely unassigned one produce the identical glyph in GreatVibes, i.e.
     every Devanagari character silently falls back to a blank/tofu box.
     Any participant registered with a Hindi name got a certificate with
     their name rendered as a row of identical placeholder boxes instead of
     text. Falls back to Noto Sans Devanagari (bundled, real glyph coverage
-    verified) whenever the name isn't representable in GreatVibes -- not as
-    elegant, but actually legible. Sized a little smaller than the cursive
-    font would be at the same character count -- Noto Sans Devanagari's
-    default glyphs run visually heavier/wider than GreatVibes at an equal
-    point size."""
+    verified) whenever the name isn't representable -- not as elegant, but
+    actually legible; this fallback applies regardless of font_choice, since
+    none of the three Latin options cover Devanagari. Sized a little
+    smaller than the Latin fonts would be at the same character count --
+    Noto Sans Devanagari's default glyphs run visually heavier/wider at an
+    equal point size."""
     if _has_devanagari(text):
         return _font("NotoSansDevanagari-Bold.ttf", int(size * 0.72))
-    return _font("GreatVibes-Regular.ttf", size)
+    return _font(_NAME_FONT_FILES.get(font_choice, _NAME_FONT_FILES["script"]), size)
 
 
 def _draw_centered(draw, cx, y, text, font, fill):
@@ -224,22 +233,25 @@ def _medallion_watermark(im, cx, cy, radius, alpha=30, accent=GOLD):
     im.alpha_composite(layer)
 
 
-def _default_background(accent=GOLD, paper=CREAM, pattern="classic"):
+def _default_background(accent=GOLD, paper=CREAM, pattern="classic", border_style="triple", corners_enabled=True):
     """Guilloche-style frame -- a Pillow equivalent of the SVG fallback
     used in certificate.html when no custom background is uploaded.
     accent/paper come from the quiz's certificate_accent_color/
     certificate_paper_color (admin-editable); pattern is
-    certificate_pattern ("classic" or "plain").
+    certificate_pattern ("classic" or "plain"); border_style is
+    certificate_border_style ("triple"/"double"/"single");
+    corners_enabled is certificate_corners_enabled -- previously the
+    quatrefoil corners were tied to pattern=="classic", now independent.
 
     Layers, back to front: a soft vertical gradient (the "premium paper"
     cue), a large faint medallion watermark behind the certificate body
     (official-document cue, alpha-composited so it never fights with the
     text sitting on top of it), fine sine-wave guilloche bands in the top/
-    bottom strips where no text sits, the triple-line gold/ink border, and
-    ornate quatrefoil corner flourishes (upgraded from a plain diamond
-    outline) at the inner border's four corners. pattern="plain" skips
-    everything except the flat paper color and the border -- for admins
-    who want a cleaner look instead of the ornate default."""
+    bottom strips where no text sits, the gold/ink border (1-3 lines per
+    border_style), and optional ornate quatrefoil corner flourishes at the
+    inner border's four corners. pattern="plain" skips everything except
+    the flat paper color and the border -- for admins who want a cleaner
+    look instead of the ornate default."""
     im = Image.new("RGBA", (CANVAS_W, CANVAS_H), paper + (255,))
     d = ImageDraw.Draw(im)
 
@@ -283,20 +295,35 @@ def _default_background(accent=GOLD, paper=CREAM, pattern="classic"):
     margin_outer = 50
     margin_mid = 84
     margin_inner = 118
-    d.rectangle(
-        [margin_outer, margin_outer, CANVAS_W - margin_outer, CANVAS_H - margin_outer],
-        outline=accent, width=8,
-    )
-    d.rectangle(
-        [margin_mid, margin_mid, CANVAS_W - margin_mid, CANVAS_H - margin_mid],
-        outline=accent, width=2,
-    )
-    d.rectangle(
-        [margin_inner, margin_inner, CANVAS_W - margin_inner, CANVAS_H - margin_inner],
-        outline=INK, width=3,
-    )
+    if border_style == "single":
+        d.rectangle(
+            [margin_outer, margin_outer, CANVAS_W - margin_outer, CANVAS_H - margin_outer],
+            outline=accent, width=5,
+        )
+    elif border_style == "double":
+        d.rectangle(
+            [margin_outer, margin_outer, CANVAS_W - margin_outer, CANVAS_H - margin_outer],
+            outline=accent, width=6,
+        )
+        d.rectangle(
+            [margin_inner, margin_inner, CANVAS_W - margin_inner, CANVAS_H - margin_inner],
+            outline=INK, width=3,
+        )
+    else:  # "triple" (default/classic)
+        d.rectangle(
+            [margin_outer, margin_outer, CANVAS_W - margin_outer, CANVAS_H - margin_outer],
+            outline=accent, width=8,
+        )
+        d.rectangle(
+            [margin_mid, margin_mid, CANVAS_W - margin_mid, CANVAS_H - margin_mid],
+            outline=accent, width=2,
+        )
+        d.rectangle(
+            [margin_inner, margin_inner, CANVAS_W - margin_inner, CANVAS_H - margin_inner],
+            outline=INK, width=3,
+        )
 
-    if pattern != "plain":
+    if corners_enabled:
         # Quatrefoil (4-lobed) flourish at each inner-border corner -- upgraded
         # from a plain diamond outline for a more hand-finished, ornate feel.
         for cx, cy in (
@@ -318,13 +345,17 @@ def render_certificate_image(attempt):
     accent_rgb = _hex_to_rgb(quiz.certificate_accent_color, fallback=GOLD)
     name_rgb = _hex_to_rgb(quiz.certificate_name_color, fallback=NAME_COLOR)
     paper_rgb = _hex_to_rgb(quiz.certificate_paper_color, fallback=CREAM)
+    title_rgb = _hex_to_rgb(quiz.certificate_title_color, fallback=INK)
 
     if quiz.certificate_background and os.path.exists(quiz.certificate_background.path):
         with Image.open(quiz.certificate_background.path) as src:
             bg = ImageOps.exif_transpose(src).convert("RGBA")
         bg = ImageOps.fit(bg, (CANVAS_W, CANVAS_H), Image.LANCZOS)
     else:
-        bg = _default_background(accent=accent_rgb, paper=paper_rgb, pattern=quiz.certificate_pattern)
+        bg = _default_background(
+            accent=accent_rgb, paper=paper_rgb, pattern=quiz.certificate_pattern,
+            border_style=quiz.certificate_border_style, corners_enabled=quiz.certificate_corners_enabled,
+        )
 
     draw = ImageDraw.Draw(bg)
 
@@ -341,10 +372,14 @@ def render_certificate_image(attempt):
     _paste_contain(bg, quiz.logo_2.path if quiz.logo_2 else None,
                     CANVAS_W * (quiz.logo2_x_pct / 100.0), CANVAS_H * (quiz.logo2_y_pct / 100.0), 300, 130)
 
+    # Subtitle uses a lightened tint of the same title color (0.143 chosen so
+    # the previous hardcoded default INK (17,17,17) -> (51,51,51) pair is
+    # reproduced exactly when title color is left at its own default).
+    subtitle_rgb = tuple(min(255, int(c + (255 - c) * 0.143)) for c in title_rgb)
     title_font = _font("Cinzel-Bold.ttf", 130)
     subtitle_font = _font("Cinzel-Bold.ttf", 42)
-    _draw_centered(draw, cx, CANVAS_H * 0.075, "CERTIFICATE", title_font, INK)
-    _draw_centered(draw, cx, CANVAS_H * 0.155, "OF ACHIEVEMENT", subtitle_font, (51, 51, 51))
+    _draw_centered(draw, cx, CANVAS_H * 0.075, "CERTIFICATE", title_font, title_rgb)
+    _draw_centered(draw, cx, CANVAS_H * 0.155, "OF ACHIEVEMENT", subtitle_font, subtitle_rgb)
 
     presented_font = _font("Cormorant-Regular.ttf", 46)
     _draw_centered(draw, cx, CANVAS_H * 0.28, "This Certificate is Proudly Presented To", presented_font, MUTED)
@@ -357,7 +392,7 @@ def render_certificate_image(attempt):
     # overflow past the inner border even at the smallest bracket.
     name_len = len(name)
     name_size = 150 if name_len <= 15 else 120 if name_len <= 25 else 96 if name_len <= 35 else 76
-    name_font = _fit_to_width(draw, name, lambda s: _name_font(name, s), name_size, CANVAS_W * 0.8, min_size=40)
+    name_font = _fit_to_width(draw, name, lambda s: _name_font(name, s, quiz.certificate_name_font), name_size, CANVAS_W * 0.8, min_size=40)
     _draw_centered(draw, cx, CANVAS_H * (quiz.name_top_pct / 100.0), name, name_font, name_rgb)
 
     desc_font = _font("Cormorant-Regular.ttf", 40)

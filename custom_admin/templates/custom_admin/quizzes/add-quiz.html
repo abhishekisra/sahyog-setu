@@ -4,6 +4,13 @@
 
 {% block body %}
 
+<!-- Certificate live preview (further down this page) needs these three --
+     base.html doesn't load them since it's the shared admin theme, not a
+     certificate-specific page. -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@700;900&family=Cormorant&family=Great+Vibes&display=swap" rel="stylesheet">
+
 <div class="pcoded-main-container">
     <div class="pcoded-content">
         <div class="page-header">
@@ -141,29 +148,118 @@
                                     <input type="color" name="certificate_paper_color" class="form-control" value="#FAF8EF">
                                 </div>
 
-                                <div class="col-12 mt-2">
+                                <div class="col-md-6 mt-2">
                                     <label>Background Pattern</label>
-                                    <select class="form-control" name="certificate_pattern" id="certificate_pattern">
+                                    <select class="form-control qa-cert-live" name="certificate_pattern" id="certificate_pattern">
                                         <option value="classic" selected>Classic (guilloche texture + medallion watermark)</option>
                                         <option value="plain">Plain (solid color, no pattern)</option>
                                     </select>
                                 </div>
 
+                                <div class="col-md-6 mt-2">
+                                    <label>Border Style</label>
+                                    <select class="form-control qa-cert-live" name="certificate_border_style" id="certificate_border_style">
+                                        <option value="triple" selected>Triple line (classic)</option>
+                                        <option value="double">Double line</option>
+                                        <option value="single">Single line</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <label>Title Color</label>
+                                    <input type="color" class="form-control qa-cert-live" name="certificate_title_color" id="certificate_title_color" value="#111111">
+                                    <small class="text-muted">"CERTIFICATE OF ACHIEVEMENT" heading.</small>
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <label>Corner Decoration</label>
+                                    <select class="form-control qa-cert-live" name="certificate_corners_enabled" id="certificate_corners_enabled">
+                                        <option value="1" selected>On (quatrefoil flourish)</option>
+                                        <option value="0">Off</option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4 mt-2">
+                                    <label>Name Font</label>
+                                    <select class="form-control qa-cert-live" name="certificate_name_font" id="certificate_name_font">
+                                        <option value="script" selected>Script (cursive)</option>
+                                        <option value="serif">Elegant serif</option>
+                                        <option value="bold">Bold serif</option>
+                                    </select>
+                                </div>
+
                                 <div class="col-md-3 mt-2">
                                     <label>Logo 1 Position (left %)</label>
-                                    <input type="number" step="0.1" min="0" max="100" name="logo1_x_pct" class="form-control" value="14.0">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control qa-cert-live" name="logo1_x_pct" id="logo1_x_pct" value="14.0">
                                 </div>
                                 <div class="col-md-3 mt-2">
                                     <label>Logo 1 Position (top %)</label>
-                                    <input type="number" step="0.1" min="0" max="100" name="logo1_y_pct" class="form-control" value="11.0">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control qa-cert-live" name="logo1_y_pct" id="logo1_y_pct" value="11.0">
                                 </div>
                                 <div class="col-md-3 mt-2">
                                     <label>Logo 2 Position (left %)</label>
-                                    <input type="number" step="0.1" min="0" max="100" name="logo2_x_pct" class="form-control" value="86.0">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control qa-cert-live" name="logo2_x_pct" id="logo2_x_pct" value="86.0">
                                 </div>
                                 <div class="col-md-3 mt-2">
                                     <label>Logo 2 Position (top %)</label>
-                                    <input type="number" step="0.1" min="0" max="100" name="logo2_y_pct" class="form-control" value="11.0">
+                                    <input type="number" step="0.1" min="0" max="100" class="form-control qa-cert-live" name="logo2_y_pct" id="logo2_y_pct" value="11.0">
+                                </div>
+                            </div>
+
+                            <hr class="qa-divider">
+
+                            <!-- Live preview -- see edit-quiz.html for the full explanation;
+                                 identical markup/JS, just with this form's own hardcoded
+                                 defaults instead of {{ quiz.field }} since there's no quiz yet. -->
+                            <div class="row px-2 qa-field-row">
+                                <div class="col-12">
+                                    <label>Live Preview</label>
+                                    <div id="qaCertPreviewWrap" style="max-width:640px;">
+                                        <div id="qaCertPreview" style="position:relative;width:100%;aspect-ratio:297/210;border-radius:4px;overflow:hidden;box-shadow:0 2px 10px rgba(0,0,0,.15);">
+                                            <svg id="qaCertSvg" viewBox="0 0 297 210" style="position:absolute;inset:0;width:100%;height:100%;" xmlns="http://www.w3.org/2000/svg">
+                                                <defs>
+                                                    <pattern id="qaGuilloche" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+                                                        <rect width="5" height="5" fill="#FAF8EF" id="qaGuillochePaper"/>
+                                                        <circle cx="2.5" cy="2.5" r="0.9" fill="#C8A951" fill-opacity="0.30" id="qaGuillocheDot"/>
+                                                    </pattern>
+                                                    <g id="qaQuatrefoil">
+                                                        <circle cx="1.8" cy="0" r="1.8" fill="none" stroke="#C8A951" stroke-width="0.3" class="qa-corner-stroke"/>
+                                                        <circle cx="-1.8" cy="0" r="1.8" fill="none" stroke="#C8A951" stroke-width="0.3" class="qa-corner-stroke"/>
+                                                        <circle cx="0" cy="1.8" r="1.8" fill="none" stroke="#C8A951" stroke-width="0.3" class="qa-corner-stroke"/>
+                                                        <circle cx="0" cy="-1.8" r="1.8" fill="none" stroke="#C8A951" stroke-width="0.3" class="qa-corner-stroke"/>
+                                                        <circle cx="0" cy="0" r="0.6" fill="#C8A951" class="qa-corner-fill"/>
+                                                    </g>
+                                                </defs>
+                                                <rect x="0" y="0" width="297" height="210" id="qaCertPaperBg" fill="#FAF8EF"/>
+                                                <rect x="0" y="0" width="297" height="210" fill="url(#qaGuilloche)" id="qaCertTexture"/>
+                                                <g opacity="0.16" stroke="#C8A951" fill="none" id="qaCertMedallion">
+                                                    <circle cx="148.5" cy="100.8" r="71.4" stroke-width="0.5"/>
+                                                    <circle cx="148.5" cy="100.8" r="58.55" stroke-width="0.35"/>
+                                                    <circle cx="148.5" cy="100.8" r="45.7" stroke-width="0.35"/>
+                                                </g>
+                                                <g id="qaCertBorders">
+                                                    <rect x="6" y="6" width="285" height="198" fill="none" stroke="#C8A951" stroke-width="2.5" class="qa-border-outer"/>
+                                                    <rect x="10.06" y="10.06" width="276.88" height="189.88" fill="none" stroke="#C8A951" stroke-width="0.6" class="qa-border-mid"/>
+                                                    <rect x="14.13" y="14.13" width="268.74" height="181.74" fill="none" stroke="#222" stroke-width="0.6" class="qa-border-inner"/>
+                                                </g>
+                                                <g id="qaCertCorners">
+                                                    <use href="#qaQuatrefoil" x="14.13" y="14.13"/>
+                                                    <use href="#qaQuatrefoil" x="282.87" y="14.13"/>
+                                                    <use href="#qaQuatrefoil" x="14.13" y="195.87"/>
+                                                    <use href="#qaQuatrefoil" x="282.87" y="195.87"/>
+                                                </g>
+                                            </svg>
+                                            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;text-align:center;padding:4% 8%;">
+                                                <div id="qaCertTitle" style="font-family:'Cinzel',serif;font-weight:700;font-size:clamp(14px,4.2cqw,26px);letter-spacing:.05em;margin-top:6%;color:#111111;">CERTIFICATE</div>
+                                                <div id="qaCertSubtitle" style="font-family:'Cinzel',serif;font-weight:700;font-size:clamp(7px,1.6cqw,11px);letter-spacing:.1em;color:#111111;opacity:.75;">OF ACHIEVEMENT</div>
+                                                <div id="qaCertName" style="font-family:'Great Vibes',cursive;font-size:clamp(18px,6.5cqw,40px);margin-top:8%;color:#1B4332;">Your Name</div>
+                                                <div id="qaCertScoreLine" style="font-size:clamp(6px,1.3cqw,10px);margin-top:6%;color:#C8A951;">Sample Quiz &middot; Score 95%</div>
+                                            </div>
+                                            <div id="qaCertLogo1" style="position:absolute;width:9%;aspect-ratio:1;border-radius:4px;background:#8A6C09;opacity:.35;left:14.0%;top:11.0%;transform:translate(-50%,-50%);"></div>
+                                            <div id="qaCertLogo2" style="position:absolute;width:9%;aspect-ratio:1;border-radius:4px;background:#8A6C09;opacity:.35;left:86.0%;top:11.0%;transform:translate(-50%,-50%);"></div>
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Updates live as you change the settings above -- "Your Name" and the logo boxes are placeholders, not real data.</small>
                                 </div>
                             </div>
 
@@ -559,6 +655,82 @@
             alert("Minimum 1 question required");
         }
     }
+
+    // Certificate live preview -- same as edit-quiz.html, see there for the
+    // fuller explanation; duplicated since these two pages don't share a
+    // script include.
+    (function () {
+        var NAME_FONT_CSS = {
+            script: "'Great Vibes', cursive",
+            serif: "'Cormorant', serif",
+            bold: "'Cinzel', serif"
+        };
+
+        function val(id) {
+            var el = document.getElementById(id);
+            if (!el) return null;
+            return el.value;
+        }
+
+        function updateCertPreview() {
+            var accent = val('certificate_accent_color') || '#C8A951';
+            var nameColor = val('certificate_name_color') || '#1B4332';
+            var paper = val('certificate_paper_color') || '#FAF8EF';
+            var titleColor = val('certificate_title_color') || '#111111';
+            var pattern = val('certificate_pattern') || 'classic';
+            var borderStyle = val('certificate_border_style') || 'triple';
+            var cornersEnabled = val('certificate_corners_enabled') === '1';
+            var nameFont = val('certificate_name_font') || 'script';
+            var logo1x = val('logo1_x_pct'), logo1y = val('logo1_y_pct');
+            var logo2x = val('logo2_x_pct'), logo2y = val('logo2_y_pct');
+
+            document.getElementById('qaCertPaperBg').setAttribute('fill', paper);
+            document.getElementById('qaGuillochePaper').setAttribute('fill', paper);
+            document.getElementById('qaGuillocheDot').setAttribute('fill', accent);
+            document.getElementById('qaCertMedallion').setAttribute('stroke', accent);
+            document.querySelectorAll('.qa-corner-stroke').forEach(function (el) { el.setAttribute('stroke', accent); });
+            document.querySelectorAll('.qa-corner-fill').forEach(function (el) { el.setAttribute('fill', accent); });
+            document.querySelector('.qa-border-outer').setAttribute('stroke', accent);
+            document.querySelector('.qa-border-mid').setAttribute('stroke', accent);
+
+            var isPlain = pattern === 'plain';
+            document.getElementById('qaCertTexture').style.display = isPlain ? 'none' : '';
+            document.getElementById('qaCertMedallion').style.display = isPlain ? 'none' : '';
+
+            var outer = document.querySelector('.qa-border-outer');
+            var mid = document.querySelector('.qa-border-mid');
+            var inner = document.querySelector('.qa-border-inner');
+            if (borderStyle === 'single') {
+                outer.style.display = ''; mid.style.display = 'none'; inner.style.display = 'none';
+                outer.setAttribute('stroke-width', '1.6');
+            } else if (borderStyle === 'double') {
+                outer.style.display = ''; mid.style.display = 'none'; inner.style.display = '';
+                outer.setAttribute('stroke-width', '2');
+            } else {
+                outer.style.display = ''; mid.style.display = ''; inner.style.display = '';
+                outer.setAttribute('stroke-width', '2.5');
+            }
+
+            document.getElementById('qaCertCorners').style.display = cornersEnabled ? '' : 'none';
+
+            document.getElementById('qaCertTitle').style.color = titleColor;
+            document.getElementById('qaCertSubtitle').style.color = titleColor;
+            document.getElementById('qaCertName').style.color = nameColor;
+            document.getElementById('qaCertName').style.fontFamily = NAME_FONT_CSS[nameFont] || NAME_FONT_CSS.script;
+            document.getElementById('qaCertScoreLine').style.color = accent;
+
+            if (logo1x !== null) document.getElementById('qaCertLogo1').style.left = logo1x + '%';
+            if (logo1y !== null) document.getElementById('qaCertLogo1').style.top = logo1y + '%';
+            if (logo2x !== null) document.getElementById('qaCertLogo2').style.left = logo2x + '%';
+            if (logo2y !== null) document.getElementById('qaCertLogo2').style.top = logo2y + '%';
+        }
+
+        document.querySelectorAll('.qa-cert-live').forEach(function (el) {
+            el.addEventListener('input', updateCertPreview);
+            el.addEventListener('change', updateCertPreview);
+        });
+        if (document.getElementById('qaCertPreview')) updateCertPreview();
+    })();
 </script>
 
 {% for message in messages %}

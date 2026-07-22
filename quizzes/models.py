@@ -62,6 +62,26 @@ class Quizzes(models.Model):
     logo2_x_pct = models.FloatField(default=86.0)
     logo2_y_pct = models.FloatField(default=11.0)
 
+    # Certificate design (Part L) -- border style, title color, corner
+    # decoration on/off (previously tied to certificate_pattern, now its
+    # own independent toggle), and a name-font choice. certificate_pattern
+    # still controls the guilloche texture/medallion wash; corners no
+    # longer ride along with it.
+    CERTIFICATE_BORDER_CHOICES = [
+        ("triple", "Triple line (classic)"),
+        ("double", "Double line"),
+        ("single", "Single line"),
+    ]
+    certificate_border_style = models.CharField(max_length=10, choices=CERTIFICATE_BORDER_CHOICES, default="triple")
+    certificate_title_color = models.CharField(max_length=7, default="#111111")
+    certificate_corners_enabled = models.BooleanField(default=True)
+    CERTIFICATE_NAME_FONT_CHOICES = [
+        ("script", "Script (cursive)"),
+        ("serif", "Elegant serif"),
+        ("bold", "Bold serif"),
+    ]
+    certificate_name_font = models.CharField(max_length=10, choices=CERTIFICATE_NAME_FONT_CHOICES, default="script")
+
     @property
     def is_live(self):
         if not self.status:
