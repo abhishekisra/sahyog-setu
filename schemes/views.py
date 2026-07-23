@@ -1,6 +1,8 @@
 import html as html_module
 import json
+import os
 
+from django.conf import settings
 from django.shortcuts import render, redirect
 from django.views import View
 from django.views.decorators.csrf import csrf_exempt
@@ -430,6 +432,43 @@ def central_category_finder(request):
         c.scheme_count = counts.get(c.id, 0)
     return render(request, "custom_admin/schemes/central_category_finder.html", {
         "categories": categories,
+    })
+
+
+def state_category_finder(request):
+    """Public, no login -- new card-grid landing page for "State Govt
+    Scheme" (state-schemes-viewer/), same treatment as
+    central_category_finder above but for States instead of Categories.
+    Each card links straight to scheme_finder's own ?state=<id> deep link
+    (already supported there -- state pill, scheme_type auto-switches to
+    1). Deliberately does NOT touch /schemes/map (the old SPA's real
+    interactive India map) -- that stays exactly as it is, just no longer
+    the nav's own destination; this is a flat, scannable alternative to it,
+    not a replacement of it."""
+    states = list(States.objects.all().order_by('state'))
+    counts = {
+        row['state_id']: row['count']
+        for row in Schemes.objects.filter(status=1, scheme_type=1, state_id__in=[s.id for s in states])
+            .values('state_id').annotate(count=Count('id'))
+    }
+    for s in states:
+        s.scheme_count = counts.get(s.id, 0)
+    return render(request, "custom_admin/schemes/state_category_finder.html", {
+        "states": states,
+    })
+
+
+def state_photo_credits(request):
+    """Attribution page for the real, CC-licensed state photos used on
+    state_category_finder.html -- sourced from Wikimedia Commons, several
+    under CC BY-SA which requires visible attribution. Linked as a small
+    "Photo credits" line under the state grid rather than a per-card
+    caption, to keep the grid itself clean."""
+    path = os.path.join(settings.BASE_DIR, "schemes", "data", "state_photo_credits.json")
+    with open(path, encoding="utf-8") as f:
+        credits = json.load(f)
+    return render(request, "custom_admin/schemes/state_photo_credits.html", {
+        "credits": sorted(credits.items()),
     })
 
 

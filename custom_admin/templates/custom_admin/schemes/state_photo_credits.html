@@ -1,0 +1,49 @@
+{% extends 'custom_admin/public_base.html' %}
+{% load static %}
+
+{% block title %}Photo Credits — Sahyog Setu{% endblock %}
+
+{% block head %}
+<meta name="description" content="Attribution for the state photos used on the State Govt Schemes page, sourced from Wikimedia Commons." />
+{% endblock %}
+
+{% block body %}
+<style>
+  #ssq-chatbot-root{ display:none !important; }
+  .yk-page{
+    --brand-deep:#28352A; --gold:#FFD700; --paper:#FAF6EC; --card:#FFFFFF;
+    --terracotta:#B8532F; --text:#26251F; --text-muted:#6B6A5E; --border:#E3DCC7;
+    background:var(--paper); color:var(--text);
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:16px; overflow-x:hidden;
+  }
+  .yk-page *{box-sizing:border-box;}
+  .yk-wrap{max-width:800px;margin:0 auto;padding:28px 24px 80px;}
+  .yk-back-link{color:var(--text-muted);font-weight:600;font-size:14px;text-decoration:none;}
+  .yk-back-link:hover{color:var(--terracotta);}
+  h1{font-size:26px;font-weight:800;margin:20px 0 8px;}
+  .yk-intro{color:var(--text-muted);font-size:15px;line-height:1.6;margin-bottom:24px;}
+  table{width:100%;border-collapse:collapse;font-size:14px;}
+  th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--border);}
+  th{color:var(--text-muted);font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:.03em;}
+  td a{color:var(--terracotta);}
+</style>
+<div class="yk-page">
+  <div class="yk-wrap">
+    <a href="/state-schemes-viewer/" class="yk-back-link">&larr; Back to State Govt Schemes</a>
+    <h1>Photo credits</h1>
+    <p class="yk-intro">State photos on the State Govt Schemes page are real photographs from Wikimedia Commons, used under their original Creative Commons licenses.</p>
+    <table>
+      <tr><th>State</th><th>Photographer</th><th>License</th><th>Source</th></tr>
+      {% for state, info in credits %}
+      <tr>
+        <td>{{ state }}</td>
+        <td>{{ info.artist }}</td>
+        <td>{{ info.license }}</td>
+        <td><a href="{{ info.source }}" target="_blank" rel="noopener">View on Commons</a></td>
+      </tr>
+      {% endfor %}
+    </table>
+  </div>
+</div>
+{% endblock %}

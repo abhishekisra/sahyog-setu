@@ -1,10 +1,16 @@
 from django.db import models
+from django_resized import ResizedImageField
 
 # Create your models here.
 
 class States(models.Model):
     id : models.AutoField(primary_key=True)
     state = models.CharField(max_length=255, blank=False, null=False)
+    # Culturally-representative photo used on the State Govt Scheme card
+    # grid (state_category_finder.html) -- blank/null since existing rows
+    # predate this field; the card grid falls back to a plain accent block
+    # for any state without one.
+    image = ResizedImageField(upload_to="states", blank=True, null=True, quality=90, force_format='WEBP')
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now_add= True)
 
