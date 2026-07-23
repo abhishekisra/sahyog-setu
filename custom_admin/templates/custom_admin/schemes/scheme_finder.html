@@ -179,15 +179,7 @@
   .yk-apply-btn{background:var(--gold);color:var(--brand-deeper);border:none;padding:11px 22px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;flex-shrink:0;white-space:nowrap;}
   @media (max-width:480px){.yk-apply-card{flex-direction:column;align-items:stretch;text-align:center;} .yk-apply-btn{width:100%;}}
 
-  /* Category banner -- shown when a specific category filter is selected,
-     matching the old per-category page's own banner+title (fetched from
-     the same /api/schemes-and-services categories, which already carry a
-     banner image per category). Hidden otherwise. */
-  .yk-category-banner{position:relative;display:none;overflow:hidden;}
-  .yk-category-banner.show{display:block;}
-  .yk-category-banner img{width:100%;height:220px;object-fit:cover;display:block;}
-  .yk-category-banner h2{position:absolute;left:24px;bottom:20px;margin:0;color:#fff;font-size:28px;text-shadow:0 2px 10px rgba(0,0,0,.55);max-width:80%;text-transform:uppercase;letter-spacing:.02em;}
-  @media (max-width:640px){.yk-category-banner img{height:140px;} .yk-category-banner h2{font-size:20px;left:16px;bottom:14px;}}
+
 </style>
 
 <div class="yk-page">
@@ -197,11 +189,6 @@
       <b>Sahyog <span>Setu</span></b>
     </div>
     <a href="/" class="yk-back-link">Back to Home</a>
-  </div>
-
-  <div class="yk-category-banner" id="ykCategoryBanner">
-    <img id="ykCategoryBannerImg" src="" alt="">
-    <h2 id="ykCategoryBannerTitle"></h2>
   </div>
 
   <div class="yk-wrap">
@@ -461,10 +448,8 @@
   // category/state search below, so it can open immediately.
   if(initialSchemeId) openDetail(initialSchemeId, null);
 
-  // Populate category dropdown from the real live API. Categories carry
-  // their own banner image (same data the old /schemes/central/:category
-  // page used for its per-category banner+title) -- kept here so selecting
-  // a category can show that banner again (see updateCategoryBanner).
+  // Populate category dropdown from the real live API -- also used to
+  // show which sector the results below belong to (see refreshHeroTitle).
   var categoriesById = {};
   fetch('/api/schemes-and-services')
     .then(function(r){ return r.json(); })
@@ -478,7 +463,7 @@
       });
       if(initialCategory){
         sel.value = initialCategory;
-        updateCategoryBanner(initialCategory);
+        refreshHeroTitle();
       }
       runSearch();
     })
@@ -502,36 +487,42 @@
   function updateStatePill(stateId){
     currentStateId = stateId || null;
     var pill = document.getElementById('ykStatePill');
-    var title = document.getElementById('ykHeroTitle');
     var typeLabel = document.getElementById('ykSchemeTypeLabel');
     if(currentStateId && statesById[currentStateId]){
       pill.style.display = 'inline-flex';
       pill.className = 'yk-state-pill';
       pill.innerHTML = 'State: ' + escapeHtml(statesById[currentStateId]) + ' <button type="button" aria-label="Clear state filter">&times;</button>';
       pill.querySelector('button').addEventListener('click', function(){ updateStatePill(null); runSearch(); });
-      title.innerHTML = 'Schemes in <em>' + escapeHtml(statesById[currentStateId]) + '</em>';
       typeLabel.textContent = 'State government schemes';
     } else {
       pill.style.display = 'none';
-      title.innerHTML = '{{ total_schemes }} schemes, narrowed to the ones <em>you</em> qualify for';
       typeLabel.textContent = 'Central government schemes';
     }
+    refreshHeroTitle();
   }
 
-  function updateCategoryBanner(categoryId){
-    var banner = document.getElementById('ykCategoryBanner');
-    var cat = categoryId ? categoriesById[categoryId] : null;
-    if(cat && cat.banner){
-      document.getElementById('ykCategoryBannerImg').src = cat.banner;
-      document.getElementById('ykCategoryBannerImg').alt = cat.title;
-      document.getElementById('ykCategoryBannerTitle').textContent = cat.title;
-      banner.classList.add('show');
-    } else {
-      banner.classList.remove('show');
+  // Heading shows which sector/state the results below belong to -- state
+  // takes priority (a state filter always means scheme_type=1, category
+  // is a central-only concept), falling back to the plain total-count
+  // message when neither is set. Replaces the old per-category banner
+  // (which showed the category's real photo) -- no separate image needed,
+  // the heading text alone says which sector this is.
+  function refreshHeroTitle(){
+    var title = document.getElementById('ykHeroTitle');
+    if(currentStateId && statesById[currentStateId]){
+      title.innerHTML = 'Schemes in <em>' + escapeHtml(statesById[currentStateId]) + '</em>';
+      return;
     }
+    var catId = document.getElementById('ykCategory').value;
+    var cat = catId ? categoriesById[catId] : null;
+    if(cat){
+      title.innerHTML = 'Schemes in the <em>' + escapeHtml(cat.title) + '</em> sector';
+      return;
+    }
+    title.innerHTML = '{{ total_schemes }} schemes, narrowed to the ones <em>you</em> qualify for';
   }
   document.getElementById('ykCategory').addEventListener('change', function(){
-    updateCategoryBanner(this.value);
+    refreshHeroTitle();
   });
 
   function ringSVG(pct){
@@ -706,7 +697,6 @@
     document.getElementById('ykAge').value = 100;
     document.getElementById('ykAgeVal').textContent = 'Any age';
     document.getElementById('ykCategory').value = '';
-    updateCategoryBanner('');
     updateStatePill(null);
     document.getElementById('ykIncome').value = '';
     document.getElementById('ykMarital').value = '';
