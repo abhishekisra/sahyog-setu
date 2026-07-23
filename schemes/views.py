@@ -507,7 +507,7 @@ def scheme_search_light(request):
     when a visitor actually opens a card -- that response is already small
     since it's a single scheme, not a whole result set.
     """
-    PAGE_SIZE = 9
+    PAGE_SIZE = 10
     try:
         body = json.loads(request.body)
     except (ValueError, TypeError):
