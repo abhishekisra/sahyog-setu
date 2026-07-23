@@ -6,6 +6,7 @@ from django.views import View
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib import messages
 from django.core.paginator import Paginator
+from django.db.models import Count
 from django.http import JsonResponse
 from django.utils.html import strip_tags
 from django.utils.text import Truncator
@@ -410,6 +411,26 @@ def admin_scheme_detail(request, id):
         "eligibility": scheme.eligibility,
         "required_documents": scheme.required_documents,
     }})
+
+
+def central_category_finder(request):
+    """Public, no login -- replaces the old SPA's Central Govt Schemes
+    category-grid landing page (/schemes-and-services/central), which used
+    plain image+title+"Click Here" cards in the old design. Each card here
+    links straight to scheme_finder's own ?category=<id> deep link (already
+    fully supported there: banner, dropdown pre-selection, filtered count)
+    instead of the old /schemes/central/<id> intermediate route."""
+    categories = list(Categories.objects.filter(status=1).order_by('title'))
+    counts = {
+        row['category_id']: row['count']
+        for row in Schemes.objects.filter(status=1, scheme_type=0, category_id__in=[c.id for c in categories])
+            .values('category_id').annotate(count=Count('id'))
+    }
+    for c in categories:
+        c.scheme_count = counts.get(c.id, 0)
+    return render(request, "custom_admin/schemes/central_category_finder.html", {
+        "categories": categories,
+    })
 
 
 def scheme_finder(request):

@@ -2,6 +2,7 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+    path('central-schemes-viewer/', views.central_category_finder, name='central_category_finder'),
     path('scheme-viewer/', views.scheme_finder, name='scheme_finder'),
     path('scheme-viewer/search/', views.scheme_search_light, name='scheme_search_light'),
     path('entrepreneurship/business-related-schemes-viewer/', views.business_related_scheme_finder, name='business_related_scheme_finder'),
