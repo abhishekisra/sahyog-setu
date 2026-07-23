@@ -182,6 +182,13 @@
 (function(){
   var currentPage = 1;
 
+  // ?scheme=<id> -- lets the old SPA's per-scheme detail bookmarks
+  // (/entrepreneurship-developement/business-related-scheme/<id>, nginx
+  // redirects here) open straight into that scheme's own overlay, same
+  // deep-link support scheme_finder.html already has.
+  var initialSchemeId = new URLSearchParams(window.location.search).get('scheme');
+  if(initialSchemeId) openDetail(initialSchemeId);
+
   function csrfToken(){
     var m = document.cookie.match(/csrftoken=([^;]+)/);
     return m ? m[1] : '';
