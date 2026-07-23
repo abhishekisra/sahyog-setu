@@ -65,7 +65,7 @@
 
   .yk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:18px;}
   .yk-card{
-    background:var(--card);border:1px solid var(--border);border-top:4px solid var(--card-accent, var(--gold));border-radius:14px;padding:24px;
+    background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;
     position:relative;min-width:0;text-decoration:none;color:inherit;display:block;
     box-shadow:0 1px 3px rgba(24,32,25,.08), 0 10px 22px -12px rgba(24,32,25,.16);
     transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
@@ -75,8 +75,27 @@
     box-shadow:0 2px 6px rgba(24,32,25,.1), 0 22px 40px -14px rgba(40,53,42,.32);
     color:inherit;
   }
-  .yk-card-icon{width:52px;height:52px;border-radius:12px;background:var(--sunken);display:flex;align-items:center;justify-content:center;color:var(--brand-deep);margin-bottom:16px;}
-  .yk-card h4{font-size:19px;font-weight:700;line-height:1.32;margin:0 0 8px;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card-texture{
+    width:100%;aspect-ratio:16/7;position:relative;overflow:hidden;
+    background-color:var(--sunken);
+    background-image:radial-gradient(circle at 10px 10px, rgba(138,108,9,.16) 2px, transparent 2.5px);
+    background-size:22px 22px;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;
+    border-top:4px solid var(--card-accent, var(--gold));
+  }
+  .yk-card-texture::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg, rgba(0,0,0,.05), transparent 65%);
+  }
+  .yk-card-texture-name{
+    position:relative;z-index:1;
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-weight:800;font-size:20px;line-height:1.25;
+    color:var(--card-accent, var(--brand-deep));
+    text-transform:uppercase;letter-spacing:.01em;
+    text-shadow:0 1px 0 rgba(255,255,255,.5);
+  }
+  .yk-card-body{padding:20px 24px 24px;}
   .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 16px;}
   .yk-card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:14px;}
   .yk-card-count{font-size:14px;font-weight:700;color:var(--brand-deep);}
@@ -112,45 +131,51 @@
     <div class="yk-results-head"><h3>Choose a section</h3></div>
     <div class="yk-grid">
       <a class="yk-card" href="/entrepreneurship/business-plans-viewer/" style="--card-accent:#B8532F;">
-        <div class="yk-card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
-        <h4>Business Plans</h4>
-        <p>Ready-made business plan formats — pick one close to your idea and download the PDF.</p>
-        <div class="yk-card-foot"><span class="yk-card-count">{{ total_business_plans }} plans</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="yk-card-texture"><span class="yk-card-texture-name">Business Plans</span></div>
+        <div class="yk-card-body">
+          <p>Ready-made business plan formats — pick one close to your idea and download the PDF.</p>
+          <div class="yk-card-foot"><span class="yk-card-count">{{ total_business_plans }} plans</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        </div>
       </a>
 
       <a class="yk-card" href="/entrepreneurship/legal-registrations-viewer/" style="--card-accent:#28352A;">
-        <div class="yk-card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></div>
-        <h4>Legal Compliances</h4>
-        <p>Legal registrations for starting and running a business — eligibility, documents and how to apply.</p>
-        <div class="yk-card-foot"><span class="yk-card-count">{{ total_legal_registrations }} registrations</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="yk-card-texture"><span class="yk-card-texture-name">Legal Compliances</span></div>
+        <div class="yk-card-body">
+          <p>Legal registrations for starting and running a business — eligibility, documents and how to apply.</p>
+          <div class="yk-card-foot"><span class="yk-card-count">{{ total_legal_registrations }} registrations</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        </div>
       </a>
 
       <a class="yk-card" href="/entrepreneurship/organization-registrations-viewer/" style="--card-accent:#8A6C09;">
-        <div class="yk-card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18M5 21V7l7-4 7 4v14M9 9h1m4 0h1m-6 4h1m4 0h1m-6 4h1m4 0h1"/></svg></div>
-        <h4>Entity Registrations</h4>
-        <p>Register your organization — SHG, FPO, LLP and other business entity formats.</p>
-        <div class="yk-card-foot"><span class="yk-card-count">{{ total_organization_registrations }} registrations</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="yk-card-texture"><span class="yk-card-texture-name">Entity Registrations</span></div>
+        <div class="yk-card-body">
+          <p>Register your organization — SHG, FPO, LLP and other business entity formats.</p>
+          <div class="yk-card-foot"><span class="yk-card-count">{{ total_organization_registrations }} registrations</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        </div>
       </a>
 
       <a class="yk-card" href="/entrepreneurship/artificial-intelligence-viewer/" style="--card-accent:#FF5733;">
-        <div class="yk-card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3m0 14v3M4.2 4.2l2.1 2.1m11.4 11.4l2.1 2.1M2 12h3m14 0h3M4.2 19.8l2.1-2.1m11.4-11.4l2.1-2.1"/></svg></div>
-        <h4>AI Business Tools</h4>
-        <p>Useful AI tools for entrepreneurs — content, design, invoicing and more.</p>
-        <div class="yk-card-foot"><span class="yk-card-count">{{ total_artificial_intelligence }} tools</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="yk-card-texture"><span class="yk-card-texture-name">AI Business Tools</span></div>
+        <div class="yk-card-body">
+          <p>Useful AI tools for entrepreneurs — content, design, invoicing and more.</p>
+          <div class="yk-card-foot"><span class="yk-card-count">{{ total_artificial_intelligence }} tools</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        </div>
       </a>
 
       <a class="yk-card" href="/entrepreneurship/marketing-viewer/" style="--card-accent:#2F7A4D;">
-        <div class="yk-card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11l18-7-7 18-2-8-8-2z"/></svg></div>
-        <h4>Online Marketing Platforms</h4>
-        <p>Marketing resources to sell and promote your business online.</p>
-        <div class="yk-card-foot"><span class="yk-card-count">{{ total_marketing }} resources</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="yk-card-texture"><span class="yk-card-texture-name">Online Marketing Platforms</span></div>
+        <div class="yk-card-body">
+          <p>Marketing resources to sell and promote your business online.</p>
+          <div class="yk-card-foot"><span class="yk-card-count">{{ total_marketing }} resources</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        </div>
       </a>
 
-      <a class="yk-card" href="/entrepreneurship/business-related-schemes-viewer/" style="--card-accent:#B8532F;">
-        <div class="yk-card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></div>
-        <h4>Business Development Schemes</h4>
-        <p>Government schemes specifically for entrepreneurs and small businesses.</p>
-        <div class="yk-card-foot"><span class="yk-card-count">{{ total_business_schemes }} schemes</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+      <a class="yk-card" href="/entrepreneurship/business-related-schemes-viewer/" style="--card-accent:#5E7A86;">
+        <div class="yk-card-texture"><span class="yk-card-texture-name">Business Development Schemes</span></div>
+        <div class="yk-card-body">
+          <p>Government schemes specifically for entrepreneurs and small businesses.</p>
+          <div class="yk-card-foot"><span class="yk-card-count">{{ total_business_schemes }} schemes</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        </div>
       </a>
     </div>
   </div>
