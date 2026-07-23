@@ -148,10 +148,28 @@ def document_finder(request):
     """Public, no login -- Important Documents in the Scheme Viewer's own
     style (filter-less: this model has no category/type field, so it's a
     search box + card grid + detail overlay). Mirrors
-    important_portals.views.portal_finder."""
+    important_portals.views.portal_finder.
+
+    ?document=<id> renders real per-document Open Graph/Twitter tags
+    server-side (see schemes.views.scheme_finder for why)."""
     total_documents = Important_Documents.objects.filter(status=1).count()
+    share_document = None
+    document_id = request.GET.get('document')
+    if document_id:
+        share_document = Important_Documents.objects.filter(status=1, id=document_id).first()
+    og_title = f"{share_document.title} — Sahyog Setu" if share_document else "Important Documents — Sahyog Setu"
+    og_description = (
+        Truncator(strip_tags(share_document.description)).chars(160)
+        if share_document else
+        f"Search {total_documents}+ important Indian government documents and how to get them."
+    )
+    og_image = request.build_absolute_uri(share_document.image.url) if share_document and share_document.image else None
     return render(request, "custom_admin/important_documents/document_finder.html", {
         "total_documents": total_documents,
+        "og_title": og_title,
+        "og_description": og_description,
+        "og_image": og_image,
+        "share_url": request.build_absolute_uri(request.path) + (f"?document={document_id}" if document_id else ""),
     })
 
 

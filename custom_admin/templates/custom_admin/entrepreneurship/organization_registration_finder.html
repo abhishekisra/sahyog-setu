@@ -1,10 +1,25 @@
 {% extends 'custom_admin/public_base.html' %}
 {% load static %}
 
-{% block title %}Organization Registrations — Sahyog Setu{% endblock %}
+{% block title %}{{ og_title }}{% endblock %}
 
 {% block head %}
-<meta name="description" content="Search {{ total_organization_registrations }}+ business organization registrations — what they're for and how to register." />
+<meta name="description" content="{{ og_description }}" />
+<link rel="canonical" href="{{ share_url }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:url" content="{{ share_url }}">
+{% if og_image %}
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="750">
+<meta name="twitter:card" content="summary_large_image">
+{% else %}
+<meta name="twitter:card" content="summary">
+{% endif %}
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_description }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -421,6 +436,20 @@
         '<a class="yk-apply-btn" href="'+escapeHtml(p.pdf)+'" target="_blank" rel="noopener noreferrer" style="display:inline-flex;">' +
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 20h16"/></svg>Download PDF</a></div>'
       : '';
+    var shareUrl = window.location.origin + '/entrepreneurship/organization-registrations-viewer/?registration=' + p.id;
+    var shareText = 'Check out this registration on Sahyog Setu: "' + p.title + '" — ' + shareUrl;
+    var nativeDisplay = (typeof navigator !== 'undefined' && navigator.share) ? 'inline-flex' : 'none';
+    var shareSection =
+      '<div class="ss-share-section" style="margin-top:20px;">' +
+        '<span class="ss-share-title">Share this</span>' +
+        '<div class="ss-share-grid">' +
+          '<a href="https://api.whatsapp.com/send?text='+encodeURIComponent(shareText)+'" target="_blank" class="ss-share-link wa"><span>WhatsApp</span></a>' +
+          '<a href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl)+'" target="_blank" class="ss-share-link fb"><span>Facebook</span></a>' +
+          '<a href="https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(shareUrl)+'" target="_blank" class="ss-share-link li"><span>LinkedIn</span></a>' +
+          '<button type="button" class="ss-share-link copy" onclick="ssCopyShareLink(this)" data-url="'+escapeHtml(shareUrl)+'"><span>Copy Link</span></button>' +
+          '<button type="button" class="ss-share-link native" style="display:'+nativeDisplay+';" onclick="ssNativeShare(this)" data-url="'+escapeHtml(shareUrl)+'" data-title="'+escapeHtml(p.title)+'" data-text="'+escapeHtml(shareText)+'"><span>Share</span></button>' +
+        '</div>' +
+      '</div>';
     sheet.innerHTML =
       '<div class="yk-detail-hero">' +
         '<h2>'+escapeHtml(p.title)+'</h2>' +
@@ -433,6 +462,7 @@
           "<p>This will open the registration's own official process in a new tab.</p>" +
           applyBtn +
         '</div>' +
+        shareSection +
       '</div>';
     document.getElementById('ykCloseDetail').addEventListener('click', closeDetail);
   }
@@ -442,6 +472,11 @@
   }
   document.getElementById('ykDetailOverlay').addEventListener('click', function(e){ if(e.target === this) closeDetail(); });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDetail(); });
+
+  // ?registration=<id> -- e.g. from a shared link -- opens straight into
+  // that item's own detail overlay instead of landing on the plain card grid.
+  var initialRegId = new URLSearchParams(window.location.search).get('registration');
+  if(initialRegId) openDetail(initialRegId);
 
   runSearch();
 })();

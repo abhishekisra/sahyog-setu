@@ -605,8 +605,23 @@ def business_related_scheme_finder(request):
     scheme_finder.html uses (these ARE real Schemes rows, with the same
     description/eligibility/required_documents/web_links content)."""
     total = Schemes.objects.filter(status=1, business_related=1).count()
+    share_scheme = None
+    scheme_id = request.GET.get('scheme')
+    if scheme_id:
+        share_scheme = Schemes.objects.filter(status=1, business_related=1, id=scheme_id).first()
+    og_title = f"{share_scheme.title} — Sahyog Setu" if share_scheme else "Business Development Schemes — Sahyog Setu"
+    og_description = (
+        Truncator(strip_tags(share_scheme.description)).chars(160)
+        if share_scheme else
+        f"Search {total}+ government schemes specifically for entrepreneurs and small businesses."
+    )
+    og_image = request.build_absolute_uri(share_scheme.banner.url) if share_scheme and share_scheme.banner else None
     return render(request, "custom_admin/schemes/business_related_scheme_finder.html", {
         "total_business_schemes": total,
+        "og_title": og_title,
+        "og_description": og_description,
+        "og_image": og_image,
+        "share_url": request.build_absolute_uri(request.path) + (f"?scheme={scheme_id}" if scheme_id else ""),
     })
 
 

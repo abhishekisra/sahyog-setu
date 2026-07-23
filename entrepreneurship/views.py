@@ -24,4 +24,6 @@ def entrepreneurship_finder(request):
         "total_artificial_intelligence": Artificial_Intelligence.objects.filter(status=1).count(),
         "total_marketing": Marketing.objects.filter(status=1).count(),
         "total_business_schemes": Schemes.objects.filter(status=1, business_related=1).count(),
+        "share_url": request.build_absolute_uri(request.path),
+        "share_text": "Business plans, legal & entity registrations, AI tools and marketing resources for entrepreneurs on Sahyog Setu: " + request.build_absolute_uri(request.path),
     })

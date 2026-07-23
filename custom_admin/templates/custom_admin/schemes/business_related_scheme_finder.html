@@ -1,10 +1,25 @@
 {% extends 'custom_admin/public_base.html' %}
 {% load static %}
 
-{% block title %}Business Development Schemes — Sahyog Setu{% endblock %}
+{% block title %}{{ og_title }}{% endblock %}
 
 {% block head %}
-<meta name="description" content="Search {{ total_business_schemes }}+ government schemes for entrepreneurs and small businesses — what they're for, who's eligible, and how to apply." />
+<meta name="description" content="{{ og_description }}" />
+<link rel="canonical" href="{{ share_url }}">
+<meta property="og:type" content="website">
+<meta property="og:title" content="{{ og_title }}">
+<meta property="og:description" content="{{ og_description }}">
+<meta property="og:url" content="{{ share_url }}">
+{% if og_image %}
+<meta property="og:image" content="{{ og_image }}">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="750">
+<meta name="twitter:card" content="summary_large_image">
+{% else %}
+<meta name="twitter:card" content="summary">
+{% endif %}
+<meta name="twitter:title" content="{{ og_title }}">
+<meta name="twitter:description" content="{{ og_description }}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -419,6 +434,20 @@
       ? '<a class="yk-apply-btn" href="'+escapeHtml(applyHref)+'" target="_blank" rel="noopener noreferrer">' +
         '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>Go to official portal</a>'
       : '<span class="yk-apply-btn" style="opacity:.6;cursor:default;">Official link not available</span>';
+    var shareUrl = window.location.origin + '/entrepreneurship/business-related-schemes-viewer/?scheme=' + d.id;
+    var shareText = 'Check out this scheme on Sahyog Setu: "' + d.title + '" — ' + shareUrl;
+    var nativeDisplay = (typeof navigator !== 'undefined' && navigator.share) ? 'inline-flex' : 'none';
+    var shareSection =
+      '<div class="ss-share-section" style="margin-top:20px;">' +
+        '<span class="ss-share-title">Share this scheme</span>' +
+        '<div class="ss-share-grid">' +
+          '<a href="https://api.whatsapp.com/send?text='+encodeURIComponent(shareText)+'" target="_blank" class="ss-share-link wa"><span>WhatsApp</span></a>' +
+          '<a href="https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(shareUrl)+'" target="_blank" class="ss-share-link fb"><span>Facebook</span></a>' +
+          '<a href="https://www.linkedin.com/sharing/share-offsite/?url='+encodeURIComponent(shareUrl)+'" target="_blank" class="ss-share-link li"><span>LinkedIn</span></a>' +
+          '<button type="button" class="ss-share-link copy" onclick="ssCopyShareLink(this)" data-url="'+escapeHtml(shareUrl)+'"><span>Copy Link</span></button>' +
+          '<button type="button" class="ss-share-link native" style="display:'+nativeDisplay+';" onclick="ssNativeShare(this)" data-url="'+escapeHtml(shareUrl)+'" data-title="'+escapeHtml(d.title)+'" data-text="'+escapeHtml(shareText)+'"><span>Share</span></button>' +
+        '</div>' +
+      '</div>';
     sheet.innerHTML =
       '<div class="yk-detail-hero">' +
         '<h2>'+escapeHtml(d.title)+'</h2>' +
@@ -432,6 +461,7 @@
           "<p>Applications go through this scheme's own official portal or office.</p>" +
           applyBtn +
         '</div>' +
+        shareSection +
       '</div>';
     document.getElementById('ykCloseDetail').addEventListener('click', closeDetail);
   }

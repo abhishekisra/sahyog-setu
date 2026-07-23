@@ -140,8 +140,23 @@ def organization_registration_finder(request):
     mode_of_application -- the detail overlay shows Overview + an optional
     Download PDF button + the usual Apply-link button."""
     total = Organization_Registration.objects.filter(status=1).count()
+    share_item = None
+    item_id = request.GET.get('registration')
+    if item_id:
+        share_item = Organization_Registration.objects.filter(status=1, id=item_id).first()
+    og_title = f"{share_item.title} — Sahyog Setu" if share_item else "Entity Registrations — Sahyog Setu"
+    og_description = (
+        Truncator(strip_tags(share_item.description)).chars(160)
+        if share_item else
+        f"Search {total}+ business entity registration formats -- SHG, FPO, LLP and more."
+    )
+    og_image = request.build_absolute_uri(share_item.image.url) if share_item and share_item.image else None
     return render(request, "custom_admin/entrepreneurship/organization_registration_finder.html", {
         "total_organization_registrations": total,
+        "og_title": og_title,
+        "og_description": og_description,
+        "og_image": og_image,
+        "share_url": request.build_absolute_uri(request.path) + (f"?registration={item_id}" if item_id else ""),
     })
 
 

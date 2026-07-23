@@ -147,10 +147,28 @@ def admin_legal_registration_detail(request, id):
 
 def legal_registration_finder(request):
     """Public, no login -- Legal Registrations in the Scheme Viewer's own
-    style (filter-less, same data shape as Important Documents/Schemes)."""
+    style (filter-less, same data shape as Important Documents/Schemes).
+
+    ?registration=<id> renders real per-item Open Graph/Twitter tags
+    server-side (see schemes.views.scheme_finder for why)."""
     total = Legal_Registrations.objects.filter(status=1).count()
+    share_item = None
+    item_id = request.GET.get('registration')
+    if item_id:
+        share_item = Legal_Registrations.objects.filter(status=1, id=item_id).first()
+    og_title = f"{share_item.title} — Sahyog Setu" if share_item else "Legal Compliances — Sahyog Setu"
+    og_description = (
+        Truncator(strip_tags(share_item.description)).chars(160)
+        if share_item else
+        f"Search {total}+ legal registrations for starting and running a business in India."
+    )
+    og_image = request.build_absolute_uri(share_item.image.url) if share_item and share_item.image else None
     return render(request, "custom_admin/entrepreneurship/legal_registration_finder.html", {
         "total_legal_registrations": total,
+        "og_title": og_title,
+        "og_description": og_description,
+        "og_image": og_image,
+        "share_url": request.build_absolute_uri(request.path) + (f"?registration={item_id}" if item_id else ""),
     })
 
 

@@ -178,6 +178,17 @@
         </div>
       </a>
     </div>
+
+    <div class="ss-share-section" style="margin-top:32px;">
+      <span class="ss-share-title">Share this page</span>
+      <div class="ss-share-grid">
+        <a href="https://api.whatsapp.com/send?text={{ share_text|urlencode }}" target="_blank" class="ss-share-link wa"><span>WhatsApp</span></a>
+        <a href="https://www.facebook.com/sharer/sharer.php?u={{ share_url|urlencode }}" target="_blank" class="ss-share-link fb"><span>Facebook</span></a>
+        <a href="https://www.linkedin.com/sharing/share-offsite/?url={{ share_url|urlencode }}" target="_blank" class="ss-share-link li"><span>LinkedIn</span></a>
+        <button type="button" class="ss-share-link copy" onclick="ssCopyShareLink(this)" data-url="{{ share_url }}"><span>Copy Link</span></button>
+        <button type="button" class="ss-share-link native" style="display:none;" onclick="ssNativeShare(this)" data-url="{{ share_url }}" data-title="Entrepreneurship Development — Sahyog Setu" data-text="{{ share_text }}"><span>Share</span></button>
+      </div>
+    </div>
   </div>
 </div>
 {% endblock %}

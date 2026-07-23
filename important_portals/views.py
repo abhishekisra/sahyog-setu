@@ -132,10 +132,29 @@ def portal_finder(request):
     search box + card grid + detail overlay, no sidebar). Mirrors
     schemes.views.scheme_finder -- this view just renders the shell and a
     real count for the hero stat; portal_search_light below does the
-    actual paginated data fetch."""
+    actual paginated data fetch.
+
+    ?portal=<id> renders real per-portal Open Graph/Twitter tags server-
+    side (see schemes.views.scheme_finder for why this has to happen here
+    rather than client-side)."""
     total_portals = Important_Portals.objects.filter(status=1).count()
+    share_portal = None
+    portal_id = request.GET.get('portal')
+    if portal_id:
+        share_portal = Important_Portals.objects.filter(status=1, id=portal_id).first()
+    og_title = f"{share_portal.title} — Sahyog Setu" if share_portal else "Important Portals — Sahyog Setu"
+    og_description = (
+        Truncator(strip_tags(share_portal.description)).chars(160)
+        if share_portal else
+        f"Search {total_portals}+ important Indian government portals and go straight to the official site you need."
+    )
+    og_image = request.build_absolute_uri(share_portal.image.url) if share_portal and share_portal.image else None
     return render(request, "custom_admin/important_portals/portal_finder.html", {
         "total_portals": total_portals,
+        "og_title": og_title,
+        "og_description": og_description,
+        "og_image": og_image,
+        "share_url": request.build_absolute_uri(request.path) + (f"?portal={portal_id}" if portal_id else ""),
     })
 
 
