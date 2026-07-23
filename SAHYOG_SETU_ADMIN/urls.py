@@ -38,5 +38,6 @@ urlpatterns = [
     path('', include('entrepreneurship.marketing.urls')),
     path('', include('scheme_announcements.urls')),
     path('', include('entrepreneurship.urls')),
+    path('', include('helplines.urls')),
 
  ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

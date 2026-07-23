@@ -6,4 +6,5 @@ class HelplinesSerializer(serializers.Serializer):
     link = serializers.CharField()
     title = serializers.CharField()
     color = serializers.CharField()
+    number = serializers.CharField(allow_blank=True, allow_null=True, required=False)
     

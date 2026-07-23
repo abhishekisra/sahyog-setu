@@ -62,7 +62,7 @@
                                                 
                                                 
                                                 <td class="text-right">
-                                                    <button type="button" class="btn btn-info btn-sm editButton" data-id="{{helpline.id}}" data-title="{{helpline.title}}" data-color="{{helpline.color}}" data-link="{{helpline.link}}"  data-status="{{helpline.status}}"><i class="feather icon-edit"></i>&nbsp;Edit </button>
+                                                    <button type="button" class="btn btn-info btn-sm editButton" data-id="{{helpline.id}}" data-title="{{helpline.title}}" data-color="{{helpline.color}}" data-link="{{helpline.link}}" data-number="{{helpline.number}}" data-status="{{helpline.status}}"><i class="feather icon-edit"></i>&nbsp;Edit </button>
                                                     <a href="javascript:void(0)" data-id="{{helpline.id}}" class="btn btn-danger btn-sm deleteButton"><i class="feather icon-trash-2 "></i>&nbsp;Delete </a>
                                                 </td>
                                             </tr>
@@ -105,7 +105,13 @@
                                     <input type="text" class="form-control" id="newLink" name="link" placeholder="" required>
                                 </div>
                             </div>
-                            
+
+                            <div class="col-sm-6 mt-3">
+                                <div class="form-group">
+                                    <label>Toll-free Number</label>
+                                    <input type="text" class="form-control" id="newNumber" name="number" placeholder="e.g. 1091">
+                                </div>
+                            </div>
                             <div class="col-sm-6 mt-3">
                                 <div class="form-group">
                                     <label>Status</label>
@@ -166,7 +172,13 @@
                                     <input type="text" class="form-control" id="editLink" name="link" placeholder="" required>
                                 </div>
                             </div>
-                            
+
+                            <div class="col-sm-6 mt-3">
+                                <div class="form-group">
+                                    <label>Toll-free Number</label>
+                                    <input type="text" class="form-control" id="editNumber" name="number" placeholder="e.g. 1091">
+                                </div>
+                            </div>
                             <div class="col-sm-6 mt-3">
                                 <div class="form-group">
                                     <label>Status</label>
@@ -251,6 +263,7 @@
             var status = $(this).attr('data-status');
             var title = $(this).attr('data-title');
             var color = $(this).attr('data-color');
+            var number = $(this).attr('data-number');
             var action = $('#editForm').attr('action');
 
             action = action + id;
@@ -263,6 +276,7 @@
             }).val(status.toString()).trigger('change');
             $('#editHelplineTitle').val(title);
             $('#editColor').val(color);
+            $('#editNumber').val(number);
             $('#editModel').modal('show')
         });
 

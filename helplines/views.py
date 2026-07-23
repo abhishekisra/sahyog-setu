@@ -1,3 +1,4 @@
+import re
 from sre_parse import State
 from django.shortcuts import render, redirect
 from django.views import View
@@ -7,6 +8,23 @@ from .models import Helplines
 
 
 # Create your views here.
+
+def helpline_finder(request):
+    """Public, no login -- replaces the old SPA's /helplines page (plain
+    blue gradient cards with the toll-free number baked into a design
+    graphic, no separate text). Same *_finder.html card look as Important
+    Portals -- number now real text (Helplines.number, backfilled from the
+    16 existing graphics), with a tel: Call Now action plus a secondary
+    "More Info" link when `link` is a real URL rather than a bare number."""
+    helplines = list(Helplines.objects.filter(status=1).order_by('title'))
+    for h in helplines:
+        # tel: only wants digits -- "100/112" etc. use the first number.
+        digits = re.split(r'[^0-9]+', h.number or '')
+        h.tel_number = next((d for d in digits if d), '')
+        h.is_url = (h.link or '').startswith('http')
+    return render(request, "custom_admin/helplines/helpline_finder.html", {
+        "helplines": helplines,
+    })
 
 class HelplinesView(View):
 
@@ -26,6 +44,7 @@ class HelplinesView(View):
             helpline.status = int(request.POST.get('status'))
             helpline.title = request.POST.get('title')
             helpline.color = request.POST.get('color')
+            helpline.number = request.POST.get('number', '')
             if request.FILES:
                 helpline.image = request.FILES['image']
                 helpline.save()
@@ -62,6 +81,7 @@ def updateHelpline(request, id):
         helpline.status = int(request.POST.get('status'))
         helpline.title = request.POST.get('title')
         helpline.color = request.POST.get('color')
+        helpline.number = request.POST.get('number', '')
         helpline.save()
         messages.success(request, "Helpline updated successfully.")
         return redirect('adminHelplines')            
