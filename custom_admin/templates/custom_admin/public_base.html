@@ -264,11 +264,61 @@
             background: var(--ss-primary);
             color: var(--ss-ink);
         }
+
+        /* Site-wide nav bar -- same bar/links/style as /var/www/html/index.html
+           (the React SPA shell) so every Django-rendered public page (Scheme
+           Viewer, Important Portals/Documents, Entrepreneurship, quizzes,
+           etc.) reads as part of one consistent site instead of each page
+           only offering its own "Back to Home" link. Kept in sync with the
+           SPA copy manually since the two live in separate deploy pipelines
+           (this one has no SPA re-render to fight, so no polling/JS
+           injection needed -- just plain markup, right at the top of body). */
+        #ssq-main-nav {
+            background: #14301f;
+            display: flex; align-items: center; gap: 4px;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            padding: 0 16px; scrollbar-width: none;
+        }
+        #ssq-main-nav::-webkit-scrollbar { display: none; }
+        #ssq-main-nav a {
+            color: rgba(244,239,225,.82); text-decoration: none; white-space: nowrap;
+            font-size: 14px; font-weight: 600; padding: 12px 14px;
+            border-bottom: 2px solid transparent; transition: color .15s ease, border-color .15s ease;
+            flex-shrink: 0;
+        }
+        #ssq-main-nav a:hover { color: #fff; }
+        #ssq-main-nav a.ssq-nav-active { color: #ffd75e; border-bottom-color: #ffd75e; }
+        @media (max-width: 640px) {
+            #ssq-main-nav { padding: 0 10px; }
+            #ssq-main-nav a { font-size: 13px; padding: 10px 11px; }
+        }
     </style>
     {% block head %}{% endblock %}
 </head>
 
 <body>
+    <nav id="ssq-main-nav">
+        <a href="/">Home</a>
+        <a href="/scheme-viewer/">Schemes</a>
+        <a href="/important-portals-viewer/">Important Portals</a>
+        <a href="/important-documents-viewer/">Important Documents</a>
+        <a href="/entrepreneurship-viewer/">Entrepreneurship</a>
+        <a href="/quizzes/">Quizzes</a>
+        <a href="/scheme-announcements-viewer/">Announcements</a>
+    </nav>
+    <script>
+        // "/" only matches exactly (otherwise it'd always show active, since
+        // every path starts with "/"); the rest match on prefix so e.g.
+        // /scheme-viewer/?category=5 still highlights "Schemes".
+        (function () {
+            var path = window.location.pathname;
+            document.querySelectorAll('#ssq-main-nav a').forEach(function (a) {
+                var href = a.getAttribute('href');
+                var isActive = href === '/' ? path === '/' : path.indexOf(href) === 0;
+                if (isActive) a.classList.add('ssq-nav-active');
+            });
+        })();
+    </script>
     <div class="ss-page">
         {% if messages %}
         <div class="container mt-3">
