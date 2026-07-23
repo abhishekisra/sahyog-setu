@@ -233,8 +233,16 @@
         transform: translate(-50%, -50%);
         display: grid;
         place-items: center;
-        height: 64px;
-        width: 168px;
+        /* Fixed px (was height:64px;width:168px) didn't scale with .sheet at
+           all -- .sheet is a cqw container rendered at very different actual
+           widths (this page's own max-width:1000px on screen vs 100% of a
+           real A4 sheet when printed/saved as PDF vs however wide it ends up
+           embedded elsewhere), so the SAME 168px logo box read as correctly
+           sized in one context and comically oversized or tiny in another.
+           cqw scales with the container's actual width like every other
+           sized element on this sheet (fonts, zone positions) already does. */
+        height: 6.4cqw;
+        width: 16.8cqw;
     }
     .logobox img {
         max-height: 100%;
@@ -305,6 +313,16 @@
     }
 
     @media print {
+        /* Browsers strip background colors/images by default when
+           printing/saving as PDF (an ink-saving default), which is exactly
+           why the certificate's paper color, guilloche texture, and
+           medallion watermark (all real elements, not decorative browser
+           chrome) were showing on screen but vanishing -- plain white --
+           in the actual downloaded/printed PDF. print-color-adjust:exact
+           (standard) + the -webkit- prefix (Chrome/Safari, which still
+           needs it) tells the browser these ARE real content, not
+           something to skip. */
+        * { print-color-adjust: exact !important; -webkit-print-color-adjust: exact !important; }
         /* max-width:1000px (screen-only sizing, further down) was never
            reset here -- true A4 landscape is ~1122px wide at 96dpi, so the
            certificate printed/exported at a smaller-than-page size instead
