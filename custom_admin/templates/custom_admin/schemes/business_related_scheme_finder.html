@@ -1,0 +1,441 @@
+{% extends 'custom_admin/public_base.html' %}
+{% load static %}
+
+{% block title %}Business Development Schemes — Sahyog Setu{% endblock %}
+
+{% block head %}
+<meta name="description" content="Search {{ total_business_schemes }}+ government schemes for entrepreneurs and small businesses — what they're for, who's eligible, and how to apply." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<style>
+  /* Same brand tokens/classes as the other "*_finder.html" public pages --
+     kept in sync deliberately so they read as one consistent design
+     instead of drifting apart. These are real Schemes rows
+     (business_related=1) -- same detail shape (description/eligibility/
+     required_documents/web_links) as the main Scheme Viewer, so the
+     detail overlay reuses the existing /api/scheme/<id>. Schemes has no
+     image field at all (unlike Important_Portals etc.), so cards use an
+     icon + colored top border instead of a thumbnail -- replacing the old
+     SPA page, which showed every single card as just a bare title +
+     "Click Here" button with no visual treatment whatsoever. */
+  #ssq-chatbot-root{ display:none !important; }
+
+  .yk-page{
+    --brand-deep:#28352A;
+    --brand-deeper:#182019;
+    --gold:#FFD700;
+    --gold-ink:#8A6C09;
+    --paper:#FAF6EC;
+    --card:#FFFFFF;
+    --sunken:#EEF1E5;
+    --terracotta:#B8532F;
+    --text:#26251F;
+    --text-muted:#6B6A5E;
+    --border:#E3DCC7;
+    --good:#2F7A4D;
+    background:var(--paper); color:var(--text);
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-size:16px;
+    overflow-x:hidden;
+  }
+  .yk-page h1,.yk-page h2,.yk-page h3,.yk-page h4{
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-weight:800; margin:0;
+  }
+  .yk-page *{box-sizing:border-box;}
+  .yk-wrap{max-width:1180px;margin:0 auto;padding:0 24px 90px;}
+
+  .yk-head{max-width:1180px;margin:0 auto;padding:18px 24px 0;display:flex;align-items:center;justify-content:space-between;gap:14px;}
+  .yk-brand{display:flex;align-items:center;gap:11px;}
+  .yk-brand-mark{width:34px;height:34px;border-radius:50%;background:var(--brand-deep);display:flex;align-items:center;justify-content:center;color:var(--gold);font-weight:800;font-size:16px;flex-shrink:0;}
+  .yk-brand b{font-weight:800;color:var(--text);}
+  .yk-brand b span{color:var(--terracotta);}
+  .yk-back-link{color:var(--text-muted);font-weight:600;font-size:14px;text-decoration:none;}
+  .yk-back-link:hover{color:var(--terracotta);}
+
+  .yk-nav-search{max-width:480px;margin-top:22px;background:var(--card);border:1px solid var(--border);border-radius:22px;display:flex;align-items:center;gap:9px;padding:11px 16px;}
+  .yk-nav-search svg{flex-shrink:0;color:var(--text-muted);}
+  .yk-nav-search input{background:transparent;border:none;outline:none;color:var(--text);font-size:15px;width:100%;font-family:inherit;}
+  .yk-nav-search input::placeholder{color:var(--text-muted);}
+
+  .yk-hero{padding:24px 0 26px;}
+  .yk-eyebrow{display:inline-flex;align-items:center;gap:7px;background:var(--sunken);color:var(--brand-deep);font-size:14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;padding:6px 13px;border-radius:20px;margin-bottom:16px;}
+  .yk-hero h1{font-size:36px;line-height:1.24;max-width:660px;}
+  .yk-hero p{color:var(--text-muted);font-size:17px;margin-top:12px;max-width:580px;line-height:1.6;}
+  .yk-hero-stats{display:flex;gap:32px;margin-top:24px;flex-wrap:wrap;}
+  .yk-hero-stat .num{font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;}
+  .yk-hero-stat .lbl{font-size:14px;color:var(--text-muted);margin-top:2px;}
+
+  .yk-results-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px;margin-top:24px;}
+  .yk-results-head h3{font-size:18px;}
+
+  .yk-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
+  .yk-card{
+    background:var(--card);border:1px solid var(--border);border-top:4px solid var(--gold);border-radius:14px;padding:18px;
+    position:relative;cursor:pointer;min-width:0;
+    box-shadow:0 1px 3px rgba(24,32,25,.08), 0 10px 22px -12px rgba(24,32,25,.16);
+    transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+  }
+  .yk-card:hover{
+    transform:translateY(-4px);
+    box-shadow:0 2px 6px rgba(24,32,25,.1), 0 22px 40px -14px rgba(40,53,42,.32);
+  }
+  .yk-card-icon{width:44px;height:44px;border-radius:10px;background:var(--sunken);display:flex;align-items:center;justify-content:center;color:var(--brand-deep);margin-bottom:12px;}
+  .yk-card h4{font-size:17px;font-weight:700;line-height:1.32;margin:0 0 8px;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card p{font-size:15px;color:var(--text-muted);line-height:1.55;margin:0 0 14px;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:break-word;word-break:break-word;}
+  .yk-card p .yk-more{color:var(--terracotta);font-weight:700;white-space:nowrap;}
+  .yk-card-foot{display:flex;align-items:center;justify-content:flex-end;border-top:1px solid var(--border);padding-top:12px;}
+  .yk-view-link{display:flex;align-items:center;gap:5px;font-size:15px;font-weight:600;color:var(--terracotta);}
+  .yk-empty,.yk-loading{grid-column:1/-1;text-align:center;padding:60px 20px;color:var(--text-muted);border:1px dashed var(--border);border-radius:14px;font-size:16px;}
+
+  .yk-pagination{display:flex;flex-wrap:wrap;justify-content:center;align-items:center;gap:8px;margin-top:22px;row-gap:10px;}
+  .yk-page-btn{border:1px solid var(--border);background:var(--card);color:var(--text);padding:8px 14px;border-radius:8px;font-size:15px;cursor:pointer;font-family:inherit;flex-shrink:0;}
+  .yk-page-btn:disabled{opacity:.4;cursor:default;}
+  .yk-page-ellipsis{color:var(--text-muted);font-size:15px;padding:0 2px;flex-shrink:0;}
+  .yk-page-btn.active{background:var(--brand-deep);color:#fff;border-color:var(--brand-deep);}
+  @media (max-width:480px){
+    .yk-pagination{gap:6px;}
+    .yk-page-btn{padding:6px 10px;font-size:13px;}
+    .yk-page-ellipsis{font-size:13px;}
+  }
+
+  .yk-detail-overlay{position:fixed;inset:0;background:rgba(20,26,19,.5);display:none;align-items:flex-start;justify-content:center;padding:40px 20px;overflow-y:auto;z-index:9999;}
+  .yk-detail-overlay.open{display:flex;}
+  .yk-detail-sheet{background:var(--paper);border-radius:16px;max-width:720px;width:100%;box-shadow:0 4px 12px rgba(24,32,25,.15), 0 30px 70px -20px rgba(24,32,25,.45);}
+  .yk-detail-hero{background:var(--brand-deep);color:#EDEAE0;border-radius:16px 16px 0 0;padding:28px 30px;display:flex;justify-content:space-between;align-items:flex-start;gap:20px;}
+  .yk-detail-hero h2{font-size:26px;color:#fff;max-width:520px;line-height:1.32;}
+  .yk-close-btn{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);color:#fff;width:32px;height:32px;border-radius:50%;flex-shrink:0;cursor:pointer;display:flex;align-items:center;justify-content:center;}
+  .yk-detail-body{padding:26px 30px 30px;}
+  .yk-block{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:19px 20px;margin-bottom:15px;}
+  .yk-block h3{font-size:16px;margin-bottom:11px;display:flex;align-items:center;gap:8px;}
+  .yk-block h3 svg{color:var(--gold-ink);flex-shrink:0;}
+  .yk-block p, .yk-block div{font-size:15px;color:var(--text-muted);line-height:1.68;margin:0;}
+  .yk-block-list{font-size:15px;color:var(--text-muted);line-height:1.68;margin:0;padding-left:20px;}
+  .yk-block-list li{margin-bottom:8px;}
+  .yk-block-list li:last-child{margin-bottom:0;}
+  .yk-subheading{font-size:15px;font-weight:700;color:var(--text);margin:16px 0 6px;}
+  .yk-subheading:first-of-type{margin-top:0;}
+  .yk-apply-card{background:linear-gradient(120deg,var(--brand-deep) 0%,var(--brand-deeper) 100%);color:#fff;border-radius:12px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .yk-apply-card p{font-size:14px;color:#C4D0BE;margin:0;line-height:1.5;}
+  .yk-apply-btn{background:var(--gold);color:var(--brand-deeper);border:none;padding:11px 22px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;flex-shrink:0;white-space:nowrap;}
+
+  @media (max-width:640px){
+    .yk-head{padding:14px 16px 0;}
+    .yk-hero{padding:20px 0 20px;}
+    .yk-hero h1{font-size:24px;max-width:100%;}
+    .yk-hero p{font-size:15px;}
+    .yk-hero-stats{gap:18px;}
+    .yk-detail-overlay{padding:0;}
+    .yk-detail-sheet{border-radius:0;min-height:100%;}
+    .yk-detail-hero{padding:20px;border-radius:0;}
+    .yk-detail-hero h2{font-size:19px;}
+    .yk-detail-body{padding:18px 16px 24px;}
+    .yk-apply-card{flex-direction:column;align-items:stretch;text-align:center;}
+    .yk-apply-btn{width:100%;}
+  }
+</style>
+
+<div class="yk-page">
+  <div class="yk-head">
+    <div class="yk-brand">
+      <div class="yk-brand-mark">स</div>
+      <b>Sahyog <span>Setu</span></b>
+    </div>
+    <a href="/" class="yk-back-link">Back to Home</a>
+  </div>
+
+  <div class="yk-wrap">
+    <div class="yk-hero">
+      <div class="yk-eyebrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.4 7.2H22l-6 4.4 2.3 7.1L12 16.3l-6.3 4.4L8 13.6 2 9.2h7.6z"/></svg>
+        Live business scheme database
+      </div>
+      <h1>Find the business scheme you need</h1>
+      <p>Search {{ total_business_schemes }} business schemes — what they're for, who's eligible, and the exact steps to apply.</p>
+      <div class="yk-nav-search">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg>
+        <input type="text" id="ykSearch" placeholder="Search schemes, e.g. startup, MSME, women entrepreneurs, subsidy...">
+      </div>
+      <div class="yk-hero-stats">
+        <div class="yk-hero-stat"><div class="num">{{ total_business_schemes }}</div><div class="lbl">Schemes tracked</div></div>
+        <div class="yk-hero-stat"><div class="num" id="ykStatShown">—</div><div class="lbl">Matching your search</div></div>
+      </div>
+    </div>
+
+    <div class="yk-results-head">
+      <h3 id="ykResultsHeading">Loading business schemes…</h3>
+    </div>
+    <div class="yk-grid" id="ykCardsGrid"><div class="yk-loading">Loading business schemes from the live database…</div></div>
+    <div class="yk-pagination" id="ykPagination"></div>
+  </div>
+
+  <div class="yk-detail-overlay" id="ykDetailOverlay">
+    <div class="yk-detail-sheet" id="ykDetailSheet"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var currentPage = 1;
+
+  function csrfToken(){
+    var m = document.cookie.match(/csrftoken=([^;]+)/);
+    return m ? m[1] : '';
+  }
+
+  function stripTags(html){
+    var d = document.createElement('div');
+    d.innerHTML = html || '';
+    return (d.textContent || '').trim();
+  }
+
+  function escapeHtml(str){
+    return String(str == null ? '' : str)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  // A short, punctuation-free line (e.g. "Objectives of SHG", "Eligibility
+  // Criteria") is almost always a sub-heading the admin used to break up a
+  // long field into sections; a real sentence is body text. There's no
+  // tag-based way to tell them apart -- both arrive as the same <h4>/<p>.
+  function isHeadingText(t){
+    var words = t.split(/\s+/).filter(Boolean);
+    return words.length <= 6 && !/[.!?]$/.test(t);
+  }
+
+  // Content pasted from Word/Docs sometimes wraps a <ul><li> list INSIDE an
+  // <h4>/<p> (malformed but real -- confirmed on a live "Required Documents"
+  // field), so treating the h4 as one flat text block via .textContent
+  // swallowed every <li> into one run-on, unpunctuated line ("PAN Card of
+  // the owner Aadhaar Card Passport-size photograph..."). This returns just
+  // the element's OWN direct text with any nested list removed first, so
+  // the caller can emit that as its own heading/paragraph line and then
+  // separately walk into the nested list for its real bullets.
+  function ownTextExcludingLists(el){
+    var clone = el.cloneNode(true);
+    clone.querySelectorAll('ul, ol').forEach(function(l){ l.remove(); });
+    return clone.textContent.replace(/\s+/g, ' ').trim();
+  }
+
+  function renderRichText(html, fallback){
+    if(!html) return '<p>' + escapeHtml(fallback) + '</p>';
+    var container = document.createElement('div');
+    container.innerHTML = html;
+    // Word/Docs paste artifacts sometimes carry a literal <style> block
+    // (mso-* CSS rules) in the field itself -- .textContent does NOT skip
+    // <style>/<script> content by default, so those raw CSS rules were
+    // leaking through as visible "code-looking" text on the rare field
+    // with no other li/h4/p to match (falling through to the plain-text
+    // fallback below). Strip them before reading any text from this field.
+    container.querySelectorAll('style, script').forEach(function(el){ el.remove(); });
+
+    var out = '';
+    var pending = [];
+    var any = false;
+    function flushList(){
+      if(pending.length){
+        out += '<ul class="yk-block-list">' + pending.map(function(t){ return '<li>' + escapeHtml(t) + '</li>'; }).join('') + '</ul>';
+        pending = [];
+      }
+    }
+    function addHeadingOrText(t){
+      if(!t) return;
+      any = true;
+      if(isHeadingText(t)){
+        flushList();
+        out += '<h5 class="yk-subheading">' + escapeHtml(t) + '</h5>';
+      } else {
+        flushList();
+        out += '<p>' + escapeHtml(t) + '</p>';
+      }
+    }
+    // Walk the DOM in document order (instead of a flat querySelectorAll +
+    // "keep only outermost" filter) so a heading that legitimately CONTAINS
+    // a nested list can contribute its own text AND still let that list's
+    // real <li> items come through as separate bullets, in order.
+    function walk(node){
+      Array.prototype.forEach.call(node.children, function(child){
+        var tag = child.tagName;
+        if(tag === 'LI'){
+          var t = child.textContent.replace(/\s+/g, ' ').trim();
+          if(t){ any = true; pending.push(t); }
+          return;
+        }
+        if(tag === 'H4' || tag === 'P'){
+          if(child.querySelector('li')){
+            addHeadingOrText(ownTextExcludingLists(child));
+            walk(child);
+          } else {
+            addHeadingOrText(child.textContent.replace(/\s+/g, ' ').trim());
+          }
+          return;
+        }
+        walk(child);
+      });
+    }
+    walk(container);
+    flushList();
+
+    if(any) return out;
+    var flat = container.textContent.replace(/\s+/g, ' ').trim();
+    return flat ? '<p>' + escapeHtml(flat) + '</p>' : '<p>' + escapeHtml(fallback) + '</p>';  }
+
+  function extractFirstHref(html){
+    if(!html) return null;
+    var d = document.createElement('div');
+    d.innerHTML = html;
+    var a = d.querySelector('a[href]');
+    return a ? a.getAttribute('href') : null;
+  }
+
+  function renderCards(list){
+    var grid = document.getElementById('ykCardsGrid');
+    grid.innerHTML = '';
+    if(list.length === 0){
+      grid.innerHTML = '<div class="yk-empty">No business schemes match this search yet — try a different term.</div>';
+    } else {
+      list.forEach(function(d){
+        var card = document.createElement('div');
+        card.className = 'yk-card';
+        card.tabIndex = 0;
+        card.setAttribute('role', 'button');
+        card.innerHTML =
+          '<div class="yk-card-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></div>' +
+          '<h4>'+escapeHtml(d.title)+'</h4>' +
+          '<p>'+escapeHtml(d.short_description || 'No description available yet.')+(d.short_description ? ' <span class="yk-more">more</span>' : '')+'</p>' +
+          '<div class="yk-card-foot">' +
+            '<div class="yk-view-link">View details <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>' +
+          '</div>';
+        card.addEventListener('click', function(){ openDetail(d.id); });
+        card.addEventListener('keydown', function(e){ if(e.key === 'Enter') openDetail(d.id); });
+        grid.appendChild(card);
+      });
+    }
+  }
+
+  function renderPagination(numPages){
+    var wrap = document.getElementById('ykPagination');
+    wrap.innerHTML = '';
+    if(numPages <= 1) return;
+
+    function addBtn(label, page, disabled, active){
+      var btn = document.createElement('button');
+      btn.className = 'yk-page-btn' + (active ? ' active' : '');
+      btn.textContent = label;
+      if(disabled) btn.disabled = true;
+      else btn.addEventListener('click', function(){ currentPage = page; runSearch(true); });
+      wrap.appendChild(btn);
+    }
+    function addEllipsis(){
+      var span = document.createElement('span');
+      span.className = 'yk-page-ellipsis';
+      span.textContent = '…';
+      wrap.appendChild(span);
+    }
+
+    addBtn('‹ Prev', currentPage - 1, currentPage === 1, false);
+    var delta = 2;
+    var range = [];
+    for(var i = Math.max(2, currentPage - delta); i <= Math.min(numPages - 1, currentPage + delta); i++){
+      range.push(i);
+    }
+    addBtn(1, 1, false, currentPage === 1);
+    if(range.length && range[0] > 2) addEllipsis();
+    range.forEach(function(p){ addBtn(p, p, false, p === currentPage); });
+    if(range.length && range[range.length - 1] < numPages - 1) addEllipsis();
+    addBtn(numPages, numPages, false, currentPage === numPages);
+    addBtn('Next ›', currentPage + 1, currentPage === numPages, false);
+  }
+
+  function runSearch(keepPage){
+    var search = document.getElementById('ykSearch').value.trim();
+    if(!keepPage) currentPage = 1;
+    document.getElementById('ykResultsHeading').textContent = 'Searching…';
+    document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-loading">Searching live business schemes…</div>';
+
+    fetch('{% url "business_related_scheme_search_light" %}', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken()},
+      body: JSON.stringify({ searched_text: search || null, page: currentPage })
+    })
+      .then(function(r){ return r.json(); })
+      .then(function(data){
+        var results = data.results || [];
+        document.getElementById('ykResultsHeading').textContent =
+          'Showing ' + results.length + ' of ' + data.total + ' scheme' + (data.total===1?'':'s');
+        document.getElementById('ykStatShown').textContent = data.total;
+        renderCards(results);
+        renderPagination(data.num_pages || 1);
+      })
+      .catch(function(){
+        document.getElementById('ykResultsHeading').textContent = 'Something went wrong';
+        document.getElementById('ykCardsGrid').innerHTML = '<div class="yk-empty">Could not load business schemes right now — please try again in a moment.</div>';
+      });
+  }
+
+  document.getElementById('ykSearch').addEventListener('keydown', function(e){ if(e.key === 'Enter') runSearch(); });
+  var searchDebounce = null;
+  document.getElementById('ykSearch').addEventListener('input', function(){
+    clearTimeout(searchDebounce);
+    searchDebounce = setTimeout(function(){ runSearch(); }, 350);
+  });
+
+  // Detail is fetched on demand from the existing /api/scheme/<id> -- the
+  // SAME endpoint the main Scheme Viewer uses, since these are real
+  // Schemes rows (business_related=1), already small (a single row, not
+  // the whole list), so kept as-is rather than duplicated into
+  // business_related_scheme_search_light.
+  function openDetail(id){
+    var overlay = document.getElementById('ykDetailOverlay');
+    var sheet = document.getElementById('ykDetailSheet');
+    sheet.innerHTML = '<div class="yk-loading" style="border:none;padding:60px 30px;">Loading scheme details…</div>';
+    overlay.classList.add('open');
+    document.body.style.overflow = 'hidden';
+
+    fetch('/api/scheme/' + id)
+      .then(function(r){ return r.json(); })
+      .then(function(data){ renderDetail(data.scheme); })
+      .catch(function(){
+        sheet.innerHTML = '<div class="yk-loading" style="border:none;padding:60px 30px;">Could not load this scheme\'s details — please try again.</div>';
+      });
+  }
+
+  function renderDetail(d){
+    var sheet = document.getElementById('ykDetailSheet');
+    var applyHref = extractFirstHref(d.web_links);
+    var applyBtn = applyHref
+      ? '<a class="yk-apply-btn" href="'+escapeHtml(applyHref)+'" target="_blank" rel="noopener noreferrer">' +
+        '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>Go to official portal</a>'
+      : '<span class="yk-apply-btn" style="opacity:.6;cursor:default;">Official link not available</span>';
+    sheet.innerHTML =
+      '<div class="yk-detail-hero">' +
+        '<h2>'+escapeHtml(d.title)+'</h2>' +
+        '<button class="yk-close-btn" id="ykCloseDetail" aria-label="Close"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M6 6l12 12M6 18L18 6"/></svg></button>' +
+      '</div>' +
+      '<div class="yk-detail-body">' +
+        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Overview</h3>'+renderRichText(d.description, 'No overview available yet.')+'</div>' +
+        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3>'+renderRichText(d.eligibility, 'Refer to the official page for eligibility details.')+'</div>' +
+        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3>'+renderRichText(d.required_documents, 'Refer to the official page for the documents list.')+'</div>' +
+        '<div class="yk-apply-card">' +
+          "<p>Applications go through this scheme's own official portal or office.</p>" +
+          applyBtn +
+        '</div>' +
+      '</div>';
+    document.getElementById('ykCloseDetail').addEventListener('click', closeDetail);
+  }
+  function closeDetail(){
+    document.getElementById('ykDetailOverlay').classList.remove('open');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('ykDetailOverlay').addEventListener('click', function(e){ if(e.target === this) closeDetail(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closeDetail(); });
+
+  runSearch();
+})();
+</script>
+{% endblock %}

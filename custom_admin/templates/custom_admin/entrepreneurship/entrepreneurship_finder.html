@@ -18,8 +18,9 @@
      model of its own, no search) -- each card is a plain link to one of
      the 5 already-rebuilt Entrepreneurship Development sub-section pages,
      plus Business Development Schemes (backed by the Schemes model's own
-     business_related=1 filter, out of this rebuild's scope) which still
-     links to its existing, unchanged page. */
+     business_related=1 filter -- also rebuilt, its own *_finder.html page
+     since it shares real Schemes rows/detail shape with the main Scheme
+     Viewer, not one of the 5 dedicated entrepreneurship sub-apps). */
   #ssq-chatbot-root{ display:none !important; }
 
   .yk-page{
@@ -145,11 +146,11 @@
         <div class="yk-card-foot"><span class="yk-card-count">{{ total_marketing }} resources</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
       </a>
 
-      <a class="yk-card" href="/entrepreneurship-developement/business-related-schemes" style="--card-accent:#B8532F;">
+      <a class="yk-card" href="/entrepreneurship/business-related-schemes-viewer/" style="--card-accent:#B8532F;">
         <div class="yk-card-icon"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg></div>
         <h4>Business Development Schemes</h4>
         <p>Government schemes specifically for entrepreneurs and small businesses.</p>
-        <div class="yk-card-foot"><span></span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
+        <div class="yk-card-foot"><span class="yk-card-count">{{ total_business_schemes }} schemes</span><span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
       </a>
     </div>
   </div>

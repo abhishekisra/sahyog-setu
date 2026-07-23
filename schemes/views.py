@@ -509,6 +509,61 @@ def scheme_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
-        
+
+
+def business_related_scheme_finder(request):
+    """Public, no login -- Business Development Schemes (Schemes rows with
+    business_related=1) in the Scheme Viewer's own style, replacing the old
+    SPA page that showed a title + bare "Click Here" button with no image
+    at all for every single card (Schemes has no image field to begin
+    with -- unlike Important_Portals etc., this was never a missing-data
+    problem, just a page with no visual treatment). No filter sidebar --
+    search box + icon-accented card grid + the same detail overlay
+    scheme_finder.html uses (these ARE real Schemes rows, with the same
+    description/eligibility/required_documents/web_links content)."""
+    total = Schemes.objects.filter(status=1, business_related=1).count()
+    return render(request, "custom_admin/schemes/business_related_scheme_finder.html", {
+        "total_business_schemes": total,
+    })
+
+
+@csrf_exempt
+def business_related_scheme_search_light(request):
+    """Paginated search for Business Development Schemes -- same reasoning
+    as scheme_search_light above, filtered to business_related=1. Detail
+    is fetched on demand from the existing /api/scheme/<id>, same as the
+    main Scheme Viewer."""
+    PAGE_SIZE = 9
+    try:
+        body = json.loads(request.body)
+    except (ValueError, TypeError):
+        body = {}
+
+    schemes = Schemes.objects.filter(status=1, business_related=1)
+    if body.get('searched_text'):
+        schemes = schemes.filter(title__icontains=body['searched_text'])
+    schemes = schemes.order_by('-id')
+
+    total = schemes.count()
+    page = max(1, int(body.get('page') or 1))
+    paginator = Paginator(schemes, PAGE_SIZE)
+    page_obj = paginator.get_page(page)
+
+    results = []
+    for s in page_obj.object_list:
+        desc = html_module.unescape(strip_tags(s.description or ""))
+        results.append({
+            "id": s.id,
+            "title": s.title,
+            "short_description": Truncator(desc.strip()).chars(130),
+        })
+
+    return JsonResponse({
+        "results": results,
+        "total": total,
+        "page": page,
+        "page_size": PAGE_SIZE,
+        "num_pages": paginator.num_pages,
+    })
 
 
