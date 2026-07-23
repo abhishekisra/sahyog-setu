@@ -50,7 +50,7 @@
     --focus-ring-gold: 3px solid var(--g-700);
 
     /* Third-party brand colors (share buttons). These are NOT part of this
-       app's palette and must never be swapped for a --y-*/--g-* token —
+       app's palette and must never be swapped for a y- or g- scale token —
        they're fixed so the button is recognizable as WhatsApp/Facebook/
        LinkedIn's own brand, not this app's. Tokenized only so no template
        needs a literal hex, per the "one source of truth" rule. */

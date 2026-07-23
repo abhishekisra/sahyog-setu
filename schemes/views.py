@@ -477,12 +477,35 @@ def scheme_finder(request):
     scheme_search_light below (NOT the existing /api/schemes -- see there
     for why), and opening a card's detail view hits the existing, already-
     small /api/scheme/<id>. This view just renders the page shell and a
-    couple of real counts for the hero stats."""
+    couple of real counts for the hero stats.
+
+    ?scheme=<id> (the same param that auto-opens the detail overlay
+    client-side) also renders real per-scheme Open Graph/Twitter meta tags
+    server-side here -- WhatsApp/LinkedIn/Facebook link-preview scrapers
+    never run the page's JS, so without this every shared scheme link
+    showed the same generic "Scheme Viewer" preview card regardless of
+    which scheme was actually being shared."""
     total_schemes = Schemes.objects.filter(status=1).count()
     total_categories = Categories.objects.filter(status=1).count()
+    share_scheme = None
+    scheme_id = request.GET.get('scheme')
+    if scheme_id:
+        share_scheme = Schemes.objects.filter(status=1, id=scheme_id).first()
+    og_title = f"{share_scheme.title} — Sahyog Setu" if share_scheme else "Scheme Viewer — Sahyog Setu"
+    og_description = (
+        Truncator(strip_tags(share_scheme.description)).chars(160)
+        if share_scheme else
+        f"Search {total_schemes}+ Indian government welfare schemes and find the ones you actually qualify for."
+    )
+    og_image = request.build_absolute_uri(share_scheme.banner.url) if share_scheme and share_scheme.banner else None
     return render(request, "custom_admin/schemes/scheme_finder.html", {
         "total_schemes": total_schemes,
         "total_categories": total_categories,
+        "share_scheme": share_scheme,
+        "og_title": og_title,
+        "og_description": og_description,
+        "og_image": og_image,
+        "share_url": request.build_absolute_uri(request.path) + (f"?scheme={scheme_id}" if scheme_id else ""),
     })
 
 
