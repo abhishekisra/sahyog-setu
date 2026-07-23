@@ -312,12 +312,33 @@
     <script>
         // "/" only matches exactly (otherwise it'd always show active, since
         // every path starts with "/"); the rest match on prefix so e.g.
-        // /scheme-viewer/?category=5 still highlights "Schemes".
+        // /important-portals-viewer/?x=1 still highlights "Important
+        // Portals". Special cases (kept in sync with index.html's own copy
+        // of this logic): scheme-viewer/ is the shared filtered-results
+        // page for both "Central Govt Scheme" and "State Govt Scheme"
+        // (?state= says which), the 5 Entrepreneurship sub-pages live
+        // under /entrepreneurship/... while the hub link is
+        // /entrepreneurship-viewer/, and "Check Eligibility" opens a
+        // widget rather than being a real destination.
         (function () {
             var path = window.location.pathname;
+            var search = window.location.search;
             document.querySelectorAll('#ssq-main-nav a').forEach(function (a) {
                 var href = a.getAttribute('href');
-                var isActive = href === '/' ? path === '/' : path.indexOf(href) === 0;
+                var isActive;
+                if (href === '/') {
+                    isActive = path === '/';
+                } else if (href.indexOf('openEligibility') !== -1) {
+                    isActive = false;
+                } else if (href === '/central-schemes-viewer/') {
+                    isActive = path.indexOf('/central-schemes-viewer/') === 0 || (path === '/scheme-viewer/' && search.indexOf('state=') === -1);
+                } else if (href === '/state-schemes-viewer/') {
+                    isActive = path.indexOf('/state-schemes-viewer/') === 0 || (path === '/scheme-viewer/' && search.indexOf('state=') !== -1);
+                } else if (href === '/entrepreneurship-viewer/') {
+                    isActive = path.indexOf('/entrepreneurship') === 0;
+                } else {
+                    isActive = path.indexOf(href) === 0;
+                }
                 if (isActive) a.classList.add('ssq-nav-active');
             });
         })();
