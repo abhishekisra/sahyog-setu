@@ -4,7 +4,7 @@
 {% block title %}State Govt Schemes — Sahyog Setu{% endblock %}
 
 {% block head %}
-<meta name="description" content="Browse State Government schemes state by state, with a real photo of each state's culture and festivals." />
+<meta name="description" content="Browse State Government schemes state by state." />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -20,13 +20,8 @@
      interactive India map) -- untouched, just no longer the nav's own
      destination.
 
-     Unlike Categories.image (all 2000x2000 square), these are real
-     photographs sourced from Wikimedia Commons with mixed native
-     orientations (portrait and landscape) -- a fixed aspect-ratio crop
-     (4:3) is used here instead of following each photo's own ratio, since
-     36 differently-shaped cards would make the grid unreadable. See
-     state_photo_credits.html for full attribution (several are CC BY-SA,
-     which requires it). */
+     Cards use a textured pattern block (state name as text) instead of a
+     photo -- no per-state photo attribution/licensing to manage this way. */
   #ssq-chatbot-root{ display:none !important; }
 
   .yk-page{
@@ -81,7 +76,26 @@
     box-shadow:0 2px 6px rgba(24,32,25,.1), 0 22px 40px -14px rgba(40,53,42,.32);
     color:inherit;
   }
-  .yk-card-img{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;background:var(--sunken);}
+  .yk-card-texture{
+    width:100%;aspect-ratio:4/3;position:relative;overflow:hidden;
+    background-color:var(--sunken);
+    background-image:radial-gradient(circle at 10px 10px, rgba(138,108,9,.16) 2px, transparent 2.5px);
+    background-size:22px 22px;
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:14px;
+    border-top:4px solid var(--card-accent, var(--gold));
+  }
+  .yk-card-texture::before{
+    content:'';position:absolute;inset:0;
+    background:linear-gradient(135deg, rgba(0,0,0,.05), transparent 65%);
+  }
+  .yk-card-texture-name{
+    position:relative;z-index:1;
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+    font-weight:800;font-size:21px;line-height:1.25;
+    color:var(--card-accent, var(--brand-deep));
+    text-transform:uppercase;letter-spacing:.01em;
+    text-shadow:0 1px 0 rgba(255,255,255,.5);
+  }
   .yk-card-body{padding:14px 16px 16px;}
   .yk-card h4{font-size:16px;font-weight:700;line-height:1.32;margin:0 0 10px;overflow-wrap:break-word;word-break:break-word;min-height:2.5em;}
   .yk-card-foot{display:flex;align-items:center;justify-content:space-between;border-top:1px solid var(--border);padding-top:10px;}
@@ -122,10 +136,10 @@
     <div class="yk-results-head"><h3>Choose a state</h3></div>
     <div class="yk-grid">
       {% for s in states %}
-      <a class="yk-card" href="/scheme-viewer/?state={{ s.id }}">
-        {% if s.image %}<img class="yk-card-img" src="{{ s.image.url }}" alt="{{ s.state }}" loading="lazy">{% endif %}
+      {% cycle '#B8532F' '#28352A' '#8A6C09' '#2F7A4D' '#5E7A86' '#7A4F9E' as card_accent silent %}
+      <a class="yk-card" href="/scheme-viewer/?state={{ s.id }}" style="--card-accent:{{ card_accent }};">
+        <div class="yk-card-texture"><span class="yk-card-texture-name">{{ s.state }}</span></div>
         <div class="yk-card-body">
-          <h4>{{ s.state }}</h4>
           <div class="yk-card-foot">
             <span class="yk-card-count">{{ s.scheme_count }} scheme{{ s.scheme_count|pluralize }}</span>
             <span class="yk-view-link">Explore <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>
@@ -134,7 +148,6 @@
       </a>
       {% endfor %}
     </div>
-    <div class="yk-credits-link"><a href="/state-schemes-viewer/photo-credits/">Photo credits</a></div>
   </div>
 </div>
 {% endblock %}
