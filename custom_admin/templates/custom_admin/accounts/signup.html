@@ -25,7 +25,7 @@
         <div class="sq-eyebrow" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
           <span>Get Started</span>
           {% if languages|length > 1 %}
-          <select id="langSelect" onchange="ssqChangeLang(this.value)" style="border:1px solid var(--border,#ddd);border-radius:8px;padding:4px 8px;font-family:inherit;font-size:12px;background:#fff;color:inherit">
+          <select id="langSelect" class="sq-lang-select" onchange="ssChangeLang(this.value)">
             {% for l in languages %}
             <option value="{{ l.code }}"{% if l.code == lang %} selected{% endif %}>{{ l.native_name }}</option>
             {% endfor %}
@@ -167,7 +167,7 @@
 </div>
 
 <script>
-function ssqChangeLang(code){
+function ssChangeLang(code){
   var url = new URL(window.location.href);
   if (code === "en") { url.searchParams.delete("lang"); } else { url.searchParams.set("lang", code); }
   window.location.href = url.toString();
@@ -280,6 +280,13 @@ function ssqChangeLang(code){
     padding:clamp(10px,2.5vw,34px);
   }
   .sq-page *{box-sizing:border-box}
+
+  .sq-lang-select{
+    font-family:'Mukta',system-ui,sans-serif; font-weight:600; font-size:14px; color:var(--ink);
+    background:rgba(20,48,31,.05); border:1px solid var(--line); border-radius:10px;
+    padding:6px 10px; cursor:pointer;
+  }
+  .sq-lang-select:focus{ outline:2px solid var(--gold-hi); outline-offset:1px; }
 
   .sq-head{ max-width:480px; margin:0 auto 14px; display:flex; }
   .sq-head-inner{ display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px; }

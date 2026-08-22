@@ -1476,8 +1476,15 @@ class QuizResultView(View):
         # is private and guessable by id; sharing it would leak this user's
         # score to whoever clicks the link.
         share_url = request.build_absolute_uri(reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug}))
+
+        available_languages, translated_codes = available_languages_for(attempt.quiz)
+        lang = clean_language(request.GET.get("lang", "en"))
+        if lang != "en" and lang not in translated_codes:
+            lang = "en"
+        quiz_title = attempt.quiz.title_for(lang)
+
         whatsapp_text = (
-            f"I completed the \"{attempt.quiz.title}\" quiz on Sahyog Setu "
+            f"I completed the \"{quiz_title}\" quiz on Sahyog Setu "
             f"with {round(attempt.percentage)}% 🎓\n"
             f"You try it too: {share_url}?src=whatsapp"
         )
@@ -1497,6 +1504,9 @@ class QuizResultView(View):
             "certificate_min_percentage": CERTIFICATE_MIN_PERCENTAGE,
             "share_url": share_url,
             "whatsapp_text": whatsapp_text,
+            "lang": lang,
+            "available_languages": available_languages,
+            "quiz_title": quiz_title,
         })
 
 
@@ -1518,9 +1528,17 @@ class QuizLeaderboardView(View):
             total_marks=F("total_questions") * MARKS_PER_QUESTION,
         ).order_by("-score", "time_taken_seconds")[:100]
 
+        available_languages, translated_codes = available_languages_for(quiz)
+        lang = clean_language(request.GET.get("lang", "en"))
+        if lang != "en" and lang not in translated_codes:
+            lang = "en"
+
         return render(request, "custom_admin/quizzes/quiz_leaderboard.html", {
             "quiz": quiz,
             "attempts": attempts,
+            "lang": lang,
+            "available_languages": available_languages,
+            "quiz_title": quiz.title_for(lang),
         })
 
 
@@ -1656,14 +1674,20 @@ def verify_certificate(request, cert_id):
     # no field to accidentally leak later.
     attempt = QuizAttempt.objects.filter(certificate_id=cert_id).select_related("quiz", "user").first()
 
-    context = {"cert_id": cert_id, "attempt": None}
+    context = {"cert_id": cert_id, "attempt": None, "lang": "en", "available_languages": []}
     if attempt:
+        available_languages, translated_codes = available_languages_for(attempt.quiz)
+        lang = clean_language(request.GET.get("lang", "en"))
+        if lang != "en" and lang not in translated_codes:
+            lang = "en"
         context["attempt"] = {
             "name": attempt.user.get_full_name().strip() or "Participant",
-            "quiz_title": attempt.quiz.title,
+            "quiz_title": attempt.quiz.title_for(lang),
             "percentage": attempt.percentage,
             "issued_at": attempt.certificate_issued_at,
         }
+        context["lang"] = lang
+        context["available_languages"] = available_languages
 
     return render(request, "custom_admin/quizzes/verify_certificate.html", context)
 

@@ -15,13 +15,13 @@
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
       <div class="sq-head-actions">
         {% if available_languages|length > 1 %}
-        <select id="sqLangSelect" class="sq-lang-select" aria-label="Language" onchange="ssqChangeLang(this.value)">
+        <select id="sqLangSelect" class="sq-lang-select" aria-label="Language" onchange="ssChangeLang(this.value)">
           {% for l in available_languages %}
           <option value="{{ l.code }}" {% if l.code == lang %}selected{% endif %}>{{ l.name }}{% if l.native_name != l.name %} · {{ l.native_name }}{% endif %}</option>
           {% endfor %}
         </select>
         <script>
-          function ssqChangeLang(code){
+          function ssChangeLang(code){
             var params = new URLSearchParams(window.location.search);
             params.set('lang', code);
             window.location.search = params.toString();
