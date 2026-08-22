@@ -14,23 +14,7 @@
   <header class="sq-head">
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-      <div style="display:flex;align-items:center;gap:14px;">
-        {% if available_languages|length > 1 %}
-        <select id="langSelect" class="sq-lang-select" onchange="ssChangeLang(this.value)">
-          {% for l in available_languages %}
-          <option value="{{ l.code }}" {% if l.code == lang %}selected{% endif %}>{{ l.name }}{% if l.native_name != l.name %} · {{ l.native_name }}{% endif %}</option>
-          {% endfor %}
-        </select>
-        <script>
-          function ssChangeLang(code){
-            var params = new URLSearchParams(window.location.search);
-            params.set('lang', code);
-            window.location.search = params.toString();
-          }
-        </script>
-        {% endif %}
-        <a href="/" class="sq-back-link">Back to Home</a>
-      </div>
+      <a href="/" class="sq-back-link">Back to Home</a>
     </div>
   </header>
 
@@ -91,12 +75,6 @@
   }
   .sq-brand b{ font-family:'Fraunces'; font-weight:600; letter-spacing:.3px; font-size:17px; color:var(--ink); }
   .sq-brand span{ color:var(--gold-hi); }
-  .sq-lang-select{
-    font-family:'Mukta',system-ui,sans-serif; font-weight:600; font-size:14px; color:var(--ink);
-    background:rgba(20,48,31,.05); border:1px solid var(--line); border-radius:10px;
-    padding:6px 10px; cursor:pointer;
-  }
-  .sq-lang-select:focus{ outline:2px solid var(--gold-hi); outline-offset:1px; }
   .sq-back-link{ color:var(--ink-soft); font-weight:600; font-size:15px; text-decoration:none; }
   .sq-back-link:hover{ color:var(--gold-hi); }
 

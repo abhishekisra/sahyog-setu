@@ -14,20 +14,6 @@
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
       <div class="sq-head-actions">
-        {% if available_languages|length > 1 %}
-        <select id="sqLangSelect" class="sq-lang-select" aria-label="Language" onchange="ssChangeLang(this.value)">
-          {% for l in available_languages %}
-          <option value="{{ l.code }}" {% if l.code == lang %}selected{% endif %}>{{ l.name }}{% if l.native_name != l.name %} · {{ l.native_name }}{% endif %}</option>
-          {% endfor %}
-        </select>
-        <script>
-          function ssChangeLang(code){
-            var params = new URLSearchParams(window.location.search);
-            params.set('lang', code);
-            window.location.search = params.toString();
-          }
-        </script>
-        {% endif %}
         <div class="sq-font-controls" role="group" aria-label="Font Size">
           <button type="button" class="sq-font-btn" data-scale="down" aria-label="Decrease font size">A−</button>
           <button type="button" class="sq-font-btn" data-scale="reset" aria-label="Reset font size">A</button>
@@ -155,13 +141,6 @@
     border:1px solid var(--line); box-shadow:var(--shadow-sm);
   }
 
-  .sq-lang-select{
-    cursor:pointer; height:38px; border-radius:10px; font-size:14px; font-family:'Mukta';
-    background:linear-gradient(180deg,#fffffe,#fdf6e3); color:var(--ink);
-    border:1px solid var(--line); box-shadow:var(--shadow-sm);
-    padding:0 6px; max-width:92px;
-  }
-
   /* .sq-head-inner has no flex-wrap by default (space-between relies on
      both sides staying on one line) -- brand + up-to-4 header controls
      (language select, 3 font-size buttons, mute button) can exceed
@@ -180,7 +159,6 @@
     .sq-font-controls{ gap:4px; }
     .sq-font-btn{ min-width:28px;min-height:28px;font-size:14px; }
     .sq-mute-btn{ width:32px;height:32px;font-size:15px; }
-    .sq-lang-select{ height:32px; font-size:13px; max-width:72px; }
   }
 
   .sq-stage{ width:100%; max-width:560px; margin:0 auto; }

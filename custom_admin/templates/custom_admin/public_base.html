@@ -276,10 +276,13 @@
         #ssq-main-nav {
             background: #14301f;
             display: flex; align-items: center; gap: 4px;
-            overflow-x: auto; -webkit-overflow-scrolling: touch;
-            padding: 0 16px; scrollbar-width: none;
+            padding: 0 16px;
         }
-        #ssq-main-nav::-webkit-scrollbar { display: none; }
+        #ssq-nav-links {
+            display: flex; align-items: center; gap: 4px; flex: 1;
+            overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
+        }
+        #ssq-nav-links::-webkit-scrollbar { display: none; }
         #ssq-main-nav a {
             color: rgba(244,239,225,.82); text-decoration: none; white-space: nowrap;
             font-size: 14px; font-weight: 600; padding: 12px 14px;
@@ -288,9 +291,20 @@
         }
         #ssq-main-nav a:hover { color: #fff; }
         #ssq-main-nav a.ssq-nav-active { color: #ffd75e; border-bottom-color: #ffd75e; }
+        /* Single shared language switcher (see body markup below) -- every
+           public page gets it from here, in this exact spot, styled the
+           same way, instead of each page carrying its own copy. */
+        #ssq-nav-lang { flex-shrink: 0; padding-left: 10px; margin-left: 6px; border-left: 1px solid rgba(244,239,225,.18); }
+        #ssq-nav-lang select {
+            font-family: inherit; font-weight: 600; font-size: 13px; color: #f4efe1;
+            background: rgba(244,239,225,.08); border: 1px solid rgba(244,239,225,.25); border-radius: 8px;
+            padding: 6px 8px; cursor: pointer; max-width: 120px;
+        }
+        #ssq-nav-lang select:focus { outline: 2px solid #ffd75e; outline-offset: 1px; }
         @media (max-width: 640px) {
             #ssq-main-nav { padding: 0 10px; }
             #ssq-main-nav a { font-size: 13px; padding: 10px 11px; }
+            #ssq-nav-lang select { max-width: 92px; font-size: 12px; }
         }
     </style>
     {% block head %}{% endblock %}
@@ -298,18 +312,39 @@
 
 <body>
     <nav id="ssq-main-nav">
-        <a href="/">Home</a>
-        <a href="/central-schemes-viewer/">Central Govt Scheme</a>
-        <a href="/state-schemes-viewer/">State Govt Scheme</a>
-        <a href="/?openEligibility=1">Check Eligibility</a>
-        <a href="/important-portals-viewer/">Important Portals</a>
-        <a href="/important-documents-viewer/">Important Documents</a>
-        <a href="/entrepreneurship-viewer/">Entrepreneurship</a>
-        <a href="/quizzes/">Quizzes</a>
-        <a href="/scheme-announcements-viewer/">Announcements</a>
-        <a href="/helplines-viewer/">Helpline</a>
+        <div id="ssq-nav-links">
+            <a href="/">Home</a>
+            <a href="/central-schemes-viewer/">Central Govt Scheme</a>
+            <a href="/state-schemes-viewer/">State Govt Scheme</a>
+            <a href="/?openEligibility=1">Check Eligibility</a>
+            <a href="/important-portals-viewer/">Important Portals</a>
+            <a href="/important-documents-viewer/">Important Documents</a>
+            <a href="/entrepreneurship-viewer/">Entrepreneurship</a>
+            <a href="/quizzes/">Quizzes</a>
+            <a href="/scheme-announcements-viewer/">Announcements</a>
+            <a href="/helplines-viewer/">Helpline</a>
+        </div>
+        {% if languages|length > 1 %}
+        <div id="ssq-nav-lang">
+            <select id="langSelect" onchange="ssChangeLang(this.value)" aria-label="Language">
+                {% for l in languages %}
+                <option value="{{ l.code }}"{% if l.code == lang %} selected{% endif %}>{{ l.native_name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
     </nav>
     <script>
+        // Single shared switcher (see #ssq-nav-lang above) -- every public
+        // page that passes a "languages" (finder pages/signup) or
+        // "available_languages" (quiz pages) context var + "lang" gets the
+        // same dropdown in the same spot; pages that pass neither just
+        // don't render the block, no per-page opt-in needed.
+        function ssChangeLang(code){
+            var url = new URL(window.location.href);
+            if (code === "en") { url.searchParams.delete("lang"); } else { url.searchParams.set("lang", code); }
+            window.location.href = url.toString();
+        }
         // "/" only matches exactly (otherwise it'd always show active, since
         // every path starts with "/"); the rest match on prefix so e.g.
         // /important-portals-viewer/?x=1 still highlights "Important
@@ -323,7 +358,7 @@
         (function () {
             var path = window.location.pathname;
             var search = window.location.search;
-            document.querySelectorAll('#ssq-main-nav a').forEach(function (a) {
+            document.querySelectorAll('#ssq-nav-links a').forEach(function (a) {
                 var href = a.getAttribute('href');
                 var isActive;
                 if (href === '/') {

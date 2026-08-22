@@ -1024,7 +1024,7 @@ class QuizLandingView(View):
             "take_url": take_url,
             "login_url": login_url,
             "lang": lang,
-            "available_languages": available_languages,
+            "languages": available_languages,
             "quiz_title": quiz.title_for(lang),
             "quiz_description": quiz.description_for(lang),
         })
@@ -1166,7 +1166,7 @@ class QuizTakeView(View):
             "avg_percentage": round(avg_percentage, 1),
             "quiz_data": quiz_data,
             "lang": attempt.language,
-            "available_languages": available_languages,
+            "languages": available_languages,
         })
 
     def _get_or_create_attempt(self, request, quiz, lang="en"):
@@ -1505,7 +1505,7 @@ class QuizResultView(View):
             "share_url": share_url,
             "whatsapp_text": whatsapp_text,
             "lang": lang,
-            "available_languages": available_languages,
+            "languages": available_languages,
             "quiz_title": quiz_title,
         })
 
@@ -1537,7 +1537,7 @@ class QuizLeaderboardView(View):
             "quiz": quiz,
             "attempts": attempts,
             "lang": lang,
-            "available_languages": available_languages,
+            "languages": available_languages,
             "quiz_title": quiz.title_for(lang),
         })
 
@@ -1674,7 +1674,7 @@ def verify_certificate(request, cert_id):
     # no field to accidentally leak later.
     attempt = QuizAttempt.objects.filter(certificate_id=cert_id).select_related("quiz", "user").first()
 
-    context = {"cert_id": cert_id, "attempt": None, "lang": "en", "available_languages": []}
+    context = {"cert_id": cert_id, "attempt": None, "lang": "en", "languages": []}
     if attempt:
         available_languages, translated_codes = available_languages_for(attempt.quiz)
         lang = clean_language(request.GET.get("lang", "en"))
@@ -1687,7 +1687,7 @@ def verify_certificate(request, cert_id):
             "issued_at": attempt.certificate_issued_at,
         }
         context["lang"] = lang
-        context["available_languages"] = available_languages
+        context["languages"] = available_languages
 
     return render(request, "custom_admin/quizzes/verify_certificate.html", context)
 

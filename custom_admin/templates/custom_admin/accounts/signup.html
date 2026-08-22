@@ -22,16 +22,7 @@
     <section class="sq-panel sq-auth-panel">
       <div class="sq-gold-line"></div>
       <div class="sq-auth-body">
-        <div class="sq-eyebrow" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
-          <span>Get Started</span>
-          {% if languages|length > 1 %}
-          <select id="langSelect" class="sq-lang-select" onchange="ssChangeLang(this.value)">
-            {% for l in languages %}
-            <option value="{{ l.code }}"{% if l.code == lang %} selected{% endif %}>{{ l.native_name }}</option>
-            {% endfor %}
-          </select>
-          {% endif %}
-        </div>
+        <div class="sq-eyebrow">Get Started</div>
         <h1 class="sq-auth-title">Create Your Account</h1>
 
         {% for error in form.non_field_errors %}
@@ -167,11 +158,6 @@
 </div>
 
 <script>
-function ssChangeLang(code){
-  var url = new URL(window.location.href);
-  if (code === "en") { url.searchParams.delete("lang"); } else { url.searchParams.set("lang", code); }
-  window.location.href = url.toString();
-}
 (function(){
   var initialDistrict = "{{ form.district.value|default:'' }}";
   var LANG = "{{ lang }}";
@@ -280,13 +266,6 @@ function ssChangeLang(code){
     padding:clamp(10px,2.5vw,34px);
   }
   .sq-page *{box-sizing:border-box}
-
-  .sq-lang-select{
-    font-family:'Mukta',system-ui,sans-serif; font-weight:600; font-size:14px; color:var(--ink);
-    background:rgba(20,48,31,.05); border:1px solid var(--line); border-radius:10px;
-    padding:6px 10px; cursor:pointer;
-  }
-  .sq-lang-select:focus{ outline:2px solid var(--gold-hi); outline-offset:1px; }
 
   .sq-head{ max-width:480px; margin:0 auto 14px; display:flex; }
   .sq-head-inner{ display:flex; align-items:center; justify-content:space-between; width:100%; gap:10px; }
