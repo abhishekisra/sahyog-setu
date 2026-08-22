@@ -56,6 +56,7 @@
                                                 <td class="text-right">
                                                     <a href="javascript:void(0)" class="btn btn-info btn-sm viewDescButton" data-id="{{registration.id}}" data-type="legal"><i class="feather icon-eye"></i>&nbsp;View </a>
                                                     <a href="/admin/entrepreneurship/legal-registration/{{registration.id}}" class="btn btn-success btn-sm"><i class="feather icon-edit"></i>&nbsp;Edit </a>
+                                                    <a href="{% url 'adminLegalRegistrationTranslations' registration.id %}" class="btn btn-secondary btn-sm"><i class="feather icon-globe"></i>&nbsp;Translations</a>
                                                     <a href="javascript:void(0)" class="btn btn-danger btn-sm deleteButton" data-id="{{registration.id}}"><i class="feather icon-trash-2"></i>&nbsp;Delete </a>
                                                 </td>
                                             </tr>

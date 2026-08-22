@@ -1,8 +1,10 @@
 from django.db import models
 from django_resized import ResizedImageField
+from languages.mixins import TranslatableMixin
+from languages.models import Language
 # Create your models here.
 
-class Helplines(models.Model):
+class Helplines(TranslatableMixin, models.Model):
      id : models.AutoField(primary_key=True)
      image = ResizedImageField(upload_to="helplines", blank=False, null=False, quality=100, force_format='WEBP')
      link = models.CharField(max_length=255, blank=False, null=False)
@@ -18,3 +20,12 @@ class Helplines(models.Model):
      number = models.CharField(default="", max_length=50, blank=True, null=True)
      created_at = models.DateTimeField(auto_now_add= True)
      updated_at = models.DateTimeField(auto_now_add= True)
+
+
+class HelplineTranslation(models.Model):
+    helpline = models.ForeignKey(Helplines, on_delete=models.CASCADE, related_name="translations")
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name="helpline_translations")
+    title = models.CharField(max_length=255, blank=True, default="")
+
+    class Meta:
+        unique_together = [("helpline", "language")]

@@ -21,8 +21,10 @@ from django.core.mail import EmailMessage
 from django.urls import reverse
 from .models import User
 from .forms import SignupForm, ForgotPasswordForm, SetNewPasswordForm
-from states.models import States, District
-from occupations.models import Occupations
+from states.models import States, District, StateTranslation
+from states.apis import _state_label
+from occupations.models import Occupations, OccupationTranslation
+from languages.utils import clean_language, available_languages_for
 
 
 @staff_member_required(login_url="adminLogin")
@@ -41,23 +43,46 @@ LOGIN_ATTEMPT_WINDOW = 15 * 60  # seconds
 
 class SignupView(View):
 
-    def _context(self, form):
+    def _context(self, form, lang='en'):
+        occ_languages, _ = available_languages_for(OccupationTranslation.objects.all(), field="title")
+        state_languages, _ = available_languages_for(StateTranslation.objects.all(), field="state_name")
+        languages = list(occ_languages)
+        seen_codes = {l["code"] for l in languages}
+        for l in state_languages:
+            if l["code"] not in seen_codes:
+                languages.append(l)
+                seen_codes.add(l["code"])
+
+        states = list(States.objects.all())
+        for s in states:
+            s.display_label = _state_label(s, lang)
+        states.sort(key=lambda s: s.display_label)
+
+        occupations = list(Occupations.objects.filter(status=1))
+        for o in occupations:
+            o.display_title = o.field_for('title', lang)
+        occupations.sort(key=lambda o: o.display_title)
+
         return {
             'form': form,
-            'states': States.objects.all().order_by('state'),
-            'occupations': Occupations.objects.filter(status=1).order_by('title'),
+            'states': states,
+            'occupations': occupations,
+            'languages': languages,
+            'lang': lang,
         }
 
     def get(self, request):
-        return render(request, 'custom_admin/accounts/signup.html', self._context(SignupForm()))
+        lang = clean_language(request.GET.get('lang', 'en'))
+        return render(request, 'custom_admin/accounts/signup.html', self._context(SignupForm(), lang))
 
     def post(self, request):
+        lang = clean_language(request.POST.get('lang') or request.GET.get('lang', 'en'))
         form = SignupForm(request.POST)
         if form.is_valid():
             user = form.save()
             login(request, user)
             return redirect(settings.LOGIN_REDIRECT_URL)
-        return render(request, 'custom_admin/accounts/signup.html', self._context(form))
+        return render(request, 'custom_admin/accounts/signup.html', self._context(form, lang))
 
 
 class LoginView(View):
@@ -211,7 +236,13 @@ class LogoutView(View):
 
     def get(self, request):
         logout(request)
-        return redirect('login')
+        # Home, not the login form -- the homepage's own injected header
+        # script (index.html) already swaps back to Login/Register links the
+        # moment it re-checks /accounts/status/ and sees no session, so
+        # sending someone straight to a login form right after they asked to
+        # log out was a jarring, inconsistent extra step rather than the
+        # neutral "you're logged out now" landing LOGIN_REDIRECT_URL implies.
+        return redirect('/')
 
 
 class ForgotPasswordView(View):
@@ -340,10 +371,16 @@ def districts_for_state(request):
     """GET ?state_id=<id> -- read-only lookup backing the signup form's
     State->District cascade. Returns [] (not an error) for a missing or
     non-numeric state_id so the frontend can treat every response the
-    same way regardless of dropdown state."""
+    same way regardless of dropdown state. Optional ?lang= translates each
+    district's name (District.name has no field-name collision with
+    DistrictTranslation.name, so field_for works directly -- unlike States,
+    see states.apis._state_label)."""
     state_id = request.GET.get('state_id', '')
     if not state_id.isdigit():
         return JsonResponse({"districts": []})
-    rows = District.objects.filter(state_id=int(state_id)).order_by('name').values('id', 'name')
-    return JsonResponse({"districts": list(rows)})
+    lang = clean_language(request.GET.get('lang', 'en'))
+    districts = District.objects.filter(state_id=int(state_id)).order_by('name')
+    rows = [{'id': d.id, 'name': d.field_for('name', lang)} for d in districts]
+    rows.sort(key=lambda r: r['name'])
+    return JsonResponse({"districts": rows})
 

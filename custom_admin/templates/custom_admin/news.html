@@ -57,6 +57,7 @@
                                             </td>                                       
                                             <td class="text-right">
                                                 <button type="button" class="btn btn-info btn-sm editButton" data-id="{{news.id}}" data-news="{{news.news}}" data-link="{{news.link}}"  data-status="{{news.status}}" ><i class="feather icon-edit"></i>&nbsp;Edit </button>
+                                                <a href="{% url 'adminNewsTranslations' news.id %}" class="btn btn-secondary btn-sm"><i class="feather icon-globe"></i>&nbsp;Translations</a>
                                                 <a href="javascript:void(0)" data-id="{{news.id}}" class="btn btn-danger btn-sm deleteButton"><i class="feather icon-trash-2 "></i>&nbsp;Delete </a>
                                             </td>
                                         </tr>

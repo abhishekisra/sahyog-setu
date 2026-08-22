@@ -54,6 +54,7 @@
                                                 </td>
                                                 <td class="text-right">
                                                     <button type="button" class="btn btn-info btn-sm editButton" data-id="{{scheme.id}}" data-title="{{scheme.title}}" data-link="{{scheme.link}}" data-status="{{scheme.status}}"><i class="feather icon-edit"></i>&nbsp;Edit </button>
+                                                    <a href="{% url 'adminSchemeAnnouncementTranslations' scheme.id %}" class="btn btn-secondary btn-sm"><i class="feather icon-globe"></i>&nbsp;Translations</a>
                                                     <a href="javascript:void(0)" class="btn btn-danger btn-sm deleteButton" data-id="{{scheme.id}}"><i class="feather icon-trash-2"></i>&nbsp;Delete </a>
                                                 </td>
                                             </tr>

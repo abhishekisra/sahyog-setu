@@ -1,0 +1,110 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5>{{ language.name }} ({{ language.native_name }}) — {{ object_label }}</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/admin/dashboard"><i class="feather icon-home"></i></a>
+                            </li>
+                            <li class="breadcrumb-item"><a href="{% url picker_url_name obj.id %}">Translations</a></li>
+                            <li class="breadcrumb-item"><a href="#!">{{ language.name }}</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <a href="{% url picker_url_name obj.id %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="feather icon-arrow-left"></i>&nbsp;All Languages
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="qt-hint">
+            <i class="feather icon-info"></i>
+            Fields on the left are the original English text (read-only, for reference). Type the {{ language.name }} translation on the right. Leave blank to skip a field — it will simply show in English for {{ language.name }} readers.
+        </div>
+
+        <form method="POST" id="translationForm">
+            {% csrf_token %}
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <div class="card qt-card qt-section">
+                        <div class="card-body">
+                            {% for name, label, widget, en_value, tr_value in rows %}
+                            <div class="qt-pair mt-2">
+                                <div class="qt-col-en">
+                                    <label>{{ label }} (English)</label>
+                                    {% if widget == "textarea" %}
+                                    <textarea class="form-control" rows="3" readonly>{{ en_value }}</textarea>
+                                    {% else %}
+                                    <input type="text" class="form-control" value="{{ en_value }}" readonly>
+                                    {% endif %}
+                                </div>
+                                <div class="qt-col-tr">
+                                    <label>{{ label }} ({{ language.name }})</label>
+                                    {% if widget == "textarea" %}
+                                    <textarea name="{{ name }}" class="form-control" rows="3">{{ tr_value }}</textarea>
+                                    {% else %}
+                                    <input type="text" name="{{ name }}" class="form-control" value="{{ tr_value }}">
+                                    {% endif %}
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+
+                    <div class="qt-submit-bar">
+                        <button type="submit" class="btn btn-primary btn-lg qt-submit-btn">
+                            <i class="feather icon-check-circle"></i> Save {{ language.name }} Translation
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+
+    </div>
+</div>
+
+<style>
+    label { font-weight: 700 !important; color: #3a3f47; font-size: 13.5px; }
+
+    .qt-hint {
+        background: rgba(70,128,255,.08); border: 1px solid rgba(70,128,255,.2); color: #2f5cc9;
+        padding: 12px 16px; border-radius: 10px; margin-bottom: 18px; font-size: 13px; line-height: 1.5;
+    }
+    .qt-hint i { margin-right: 6px; vertical-align: -2px; }
+
+    .qt-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .qt-section { margin-bottom: 22px; }
+
+    .qt-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+    @media (max-width: 767px) { .qt-pair { grid-template-columns: 1fr; } }
+    .qt-col-en .form-control { background: #f5f6f8; color: #6b7280; border-color: #e3e6ec; }
+    .qt-col-tr .form-control { border-radius: 8px; border-color: #e3e6ec; }
+    .qt-col-tr .form-control:focus { border-color: #4680ff; box-shadow: 0 0 0 3px rgba(70,128,255,.12); }
+
+    .qt-submit-bar { text-align: center; margin: 8px 0 40px; }
+    .qt-submit-btn { padding: 13px 42px; border-radius: 10px; font-weight: 700; box-shadow: 0 8px 20px rgba(70,128,255,.28); }
+</style>
+
+{% for message in messages %}
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+{% endfor %}
+
+{% endblock %}

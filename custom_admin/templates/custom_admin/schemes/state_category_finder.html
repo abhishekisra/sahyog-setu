@@ -133,12 +133,21 @@
       <p>Pick your state below to see every State Government scheme for it. Prefer the map view? The interactive state map is still available separately.</p>
     </div>
 
-    <div class="yk-results-head"><h3>Choose a state</h3></div>
+    <div class="yk-results-head">
+      <h3>Choose a state</h3>
+      {% if languages|length > 1 %}
+      <select id="langSelect" onchange="ssChangeLang(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;background:#fff;color:var(--text)">
+        {% for l in languages %}
+        <option value="{{ l.code }}"{% if l.code == lang %} selected{% endif %}>{{ l.native_name }}</option>
+        {% endfor %}
+      </select>
+      {% endif %}
+    </div>
     <div class="yk-grid">
       {% for s in states %}
       {% cycle '#B8532F' '#28352A' '#8A6C09' '#2F7A4D' '#5E7A86' '#7A4F9E' as card_accent silent %}
-      <a class="yk-card" href="/scheme-viewer/?state={{ s.id }}" style="--card-accent:{{ card_accent }};">
-        <div class="yk-card-texture"><span class="yk-card-texture-name">{{ s.state }}</span></div>
+      <a class="yk-card" href="/scheme-viewer/?state={{ s.id }}{% if lang != 'en' %}&lang={{ lang }}{% endif %}" style="--card-accent:{{ card_accent }};">
+        <div class="yk-card-texture"><span class="yk-card-texture-name">{{ s.display_state }}</span></div>
         <div class="yk-card-body">
           <div class="yk-card-foot">
             <span class="yk-card-count">{{ s.scheme_count }} scheme{{ s.scheme_count|pluralize }}</span>
@@ -150,4 +159,11 @@
     </div>
   </div>
 </div>
+<script>
+function ssChangeLang(code){
+  var url = new URL(window.location.href);
+  if (code === "en") { url.searchParams.delete("lang"); } else { url.searchParams.set("lang", code); }
+  window.location.href = url.toString();
+}
+</script>
 {% endblock %}

@@ -15,7 +15,9 @@ from django.utils.text import Truncator
 
 from occupations.models import Occupations
 from states.models import States
-from .models import Categories, Scheme_Occupations, Schemes, Scheme_Areas, Scheme_Employements
+from .models import Categories, Scheme_Occupations, Schemes, Scheme_Areas, Scheme_Employements, SchemeTranslation, CategoryTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 # Every valid code for each CSV-stored eligibility field (see edit-scheme.html
 # select options) -- a scheme "open to everyone" on that dimension has ALL of
@@ -422,6 +424,8 @@ def central_category_finder(request):
     links straight to scheme_finder's own ?category=<id> deep link (already
     fully supported there: banner, dropdown pre-selection, filtered count)
     instead of the old /schemes/central/<id> intermediate route."""
+    lang = clean_language(request.GET.get("lang", "en"))
+    languages, _ = available_languages_for(CategoryTranslation.objects.all(), field="title")
     categories = list(Categories.objects.filter(status=1).order_by('title'))
     counts = {
         row['category_id']: row['count']
@@ -430,8 +434,11 @@ def central_category_finder(request):
     }
     for c in categories:
         c.scheme_count = counts.get(c.id, 0)
+        c.display_title = c.field_for('title', lang)
     return render(request, "custom_admin/schemes/central_category_finder.html", {
         "categories": categories,
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -445,6 +452,9 @@ def state_category_finder(request):
     interactive India map) -- that stays exactly as it is, just no longer
     the nav's own destination; this is a flat, scannable alternative to it,
     not a replacement of it."""
+    from states.models import StateTranslation
+    lang = clean_language(request.GET.get("lang", "en"))
+    languages, _ = available_languages_for(StateTranslation.objects.all(), field="state_name")
     states = list(States.objects.all().order_by('state'))
     counts = {
         row['state_id']: row['count']
@@ -453,8 +463,16 @@ def state_category_finder(request):
     }
     for s in states:
         s.scheme_count = counts.get(s.id, 0)
+        # States.state (content field) vs StateTranslation.state_name
+        # (translation field) are deliberately different names -- see
+        # states/apis.py:_state_label() for why field_for() can't be used
+        # directly here.
+        t = None if lang == "en" else s._translation(lang)
+        s.display_state = (t.state_name if t and t.state_name else s.state)
     return render(request, "custom_admin/schemes/state_category_finder.html", {
         "states": states,
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -485,15 +503,17 @@ def scheme_finder(request):
     never run the page's JS, so without this every shared scheme link
     showed the same generic "Scheme Viewer" preview card regardless of
     which scheme was actually being shared."""
+    lang = clean_language(request.GET.get("lang", "en"))
+    languages, _ = available_languages_for(SchemeTranslation.objects.all(), field="title")
     total_schemes = Schemes.objects.filter(status=1).count()
     total_categories = Categories.objects.filter(status=1).count()
     share_scheme = None
     scheme_id = request.GET.get('scheme')
     if scheme_id:
         share_scheme = Schemes.objects.filter(status=1, id=scheme_id).first()
-    og_title = f"{share_scheme.title} — Sahyog Setu" if share_scheme else "Scheme Viewer — Sahyog Setu"
+    og_title = f"{share_scheme.field_for('title', lang)} — Sahyog Setu" if share_scheme else "Scheme Viewer — Sahyog Setu"
     og_description = (
-        Truncator(strip_tags(share_scheme.description)).chars(160)
+        Truncator(strip_tags(share_scheme.field_for('description', lang))).chars(160)
         if share_scheme else
         f"Search {total_schemes}+ Indian government welfare schemes and find the ones you actually qualify for."
     )
@@ -506,6 +526,8 @@ def scheme_finder(request):
         "og_description": og_description,
         "og_image": og_image,
         "share_url": request.build_absolute_uri(request.path) + (f"?scheme={scheme_id}" if scheme_id else ""),
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -536,6 +558,7 @@ def scheme_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     schemes = Schemes.objects.filter(status=1, scheme_type=int(body.get('scheme_type') or 0))
 
     if body.get('category'):
@@ -574,10 +597,10 @@ def scheme_search_light(request):
 
     results = []
     for s in page_obj.object_list:
-        desc = html_module.unescape(strip_tags(s.description or ""))
+        desc = html_module.unescape(strip_tags(s.field_for("description", lang) or ""))
         results.append({
             "id": s.id,
-            "title": s.title,
+            "title": s.field_for("title", lang),
             "state": s.state.state if s.state_id else "",
             "short_description": Truncator(desc.strip()).chars(130),
             "age_min": s.age_min,
@@ -604,14 +627,16 @@ def business_related_scheme_finder(request):
     search box + icon-accented card grid + the same detail overlay
     scheme_finder.html uses (these ARE real Schemes rows, with the same
     description/eligibility/required_documents/web_links content)."""
+    lang = clean_language(request.GET.get("lang", "en"))
+    languages, _ = available_languages_for(SchemeTranslation.objects.all(), field="title")
     total = Schemes.objects.filter(status=1, business_related=1).count()
     share_scheme = None
     scheme_id = request.GET.get('scheme')
     if scheme_id:
         share_scheme = Schemes.objects.filter(status=1, business_related=1, id=scheme_id).first()
-    og_title = f"{share_scheme.title} — Sahyog Setu" if share_scheme else "Business Development Schemes — Sahyog Setu"
+    og_title = f"{share_scheme.field_for('title', lang)} — Sahyog Setu" if share_scheme else "Business Development Schemes — Sahyog Setu"
     og_description = (
-        Truncator(strip_tags(share_scheme.description)).chars(160)
+        Truncator(strip_tags(share_scheme.field_for('description', lang))).chars(160)
         if share_scheme else
         f"Search {total}+ government schemes specifically for entrepreneurs and small businesses."
     )
@@ -622,6 +647,8 @@ def business_related_scheme_finder(request):
         "og_description": og_description,
         "og_image": og_image,
         "share_url": request.build_absolute_uri(request.path) + (f"?scheme={scheme_id}" if scheme_id else ""),
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -637,6 +664,7 @@ def business_related_scheme_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     schemes = Schemes.objects.filter(status=1, business_related=1)
     if body.get('searched_text'):
         schemes = schemes.filter(title__icontains=body['searched_text'])
@@ -649,10 +677,10 @@ def business_related_scheme_search_light(request):
 
     results = []
     for s in page_obj.object_list:
-        desc = html_module.unescape(strip_tags(s.description or ""))
+        desc = html_module.unescape(strip_tags(s.field_for("description", lang) or ""))
         results.append({
             "id": s.id,
-            "title": s.title,
+            "title": s.field_for("title", lang),
             "short_description": Truncator(desc.strip()).chars(130),
         })
 
@@ -663,5 +691,54 @@ def business_related_scheme_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
+
+
+class SchemeTranslationsView(TranslationsPickerView):
+    model = Schemes
+    translation_model = SchemeTranslation
+    fk_name = "scheme"
+    fields = ["title", "description", "eligibility", "required_documents", "mode_of_application",
+              "occupations", "scheme_for", "marital_status", "benificiaries", "religions", "castes"]
+    list_url_name = "adminSchemes"
+    list_label = "Schemes"
+    edit_url_name = "adminSchemeEditTranslation"
+
+
+class SchemeEditTranslationView(EditTranslationView):
+    model = Schemes
+    translation_model = SchemeTranslation
+    fk_name = "scheme"
+    fields = [
+        ("title", "Title", "text"),
+        ("description", "Description", "textarea"),
+        ("eligibility", "Eligibility", "textarea"),
+        ("required_documents", "Required Documents", "textarea"),
+        ("mode_of_application", "Mode of Application", "textarea"),
+        ("occupations", "Occupations", "text"),
+        ("scheme_for", "Scheme For", "text"),
+        ("marital_status", "Marital Status", "text"),
+        ("benificiaries", "Beneficiaries", "text"),
+        ("religions", "Religions", "text"),
+        ("castes", "Castes", "text"),
+    ]
+    picker_url_name = "adminSchemeTranslations"
+
+
+class CategoryTranslationsView(TranslationsPickerView):
+    model = Categories
+    translation_model = CategoryTranslation
+    fk_name = "category"
+    fields = ["title"]
+    list_url_name = "adminSchemeCategories"
+    list_label = "Scheme Categories"
+    edit_url_name = "adminCategoryEditTranslation"
+
+
+class CategoryEditTranslationView(EditTranslationView):
+    model = Categories
+    translation_model = CategoryTranslation
+    fk_name = "category"
+    fields = [("title", "Title", "text")]
+    picker_url_name = "adminCategoryTranslations"
 
 

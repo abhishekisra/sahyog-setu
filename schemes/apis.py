@@ -6,6 +6,8 @@ from rest_framework import status
 from .serializers import SchemeSerializer, CategorySerializer
 from .models import Schemes, Categories
 from django.db.models import Q
+from languages.utils import clean_language
+from .faq import build_scheme_faq
 
 
 def _safe_int(value):
@@ -99,9 +101,15 @@ def schemeCounts(request):
 
 
 def schemesServices(request):
-    categories = Categories.objects.filter(status = 1)
+    # Optional ?lang= -- absent (the untouched legacy SPA never sends it)
+    # gives byte-identical output to before.
+    categories = list(Categories.objects.filter(status = 1))
     serializer = CategorySerializer(categories, many=True)
-    return JsonResponse({'categories' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
+    data = serializer.data
+    lang = clean_language(request.GET.get('lang', 'en'))
+    if lang != 'en':
+        data = [dict(d, title=c.field_for('title', lang)) for d, c in zip(data, categories)]
+    return JsonResponse({'categories' : data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
 
 def category(request, id):
     category = Categories.objects.get(status = 1, id = id)
@@ -224,10 +232,24 @@ def searchSchemes(request):
 
 
 def scheme(request, id):
+    # Optional ?lang= -- absent (the untouched legacy SPA never sends it)
+    # gives byte-identical output to before.
     try:
         scheme = Schemes.objects.get(status = 1, id = id)
         serializer = SchemeSerializer(scheme, many=False)
-        return JsonResponse({'scheme' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
+        data = dict(serializer.data)
+        lang = clean_language(request.GET.get('lang', 'en'))
+        if lang != 'en':
+            for field in ('title', 'description', 'eligibility', 'required_documents', 'mode_of_application',
+                          'occupations', 'scheme_for', 'marital_status', 'benificiaries', 'religions', 'castes'):
+                data[field] = scheme.field_for(field, lang)
+        # Deterministic, template-based FAQ -- built from this same
+        # (already-translated) data dict, so it reflects whatever language
+        # the eligibility/documents/application text above is in. Additive
+        # key only -- the legacy SPA and any other existing consumer that
+        # doesn't know about 'faq' is unaffected.
+        data['faq'] = build_scheme_faq(data, lang)
+        return JsonResponse({'scheme' : data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
     except Exception as e:
         return JsonResponse({'message' : "Invalid scheme id", 'status':status.HTTP_400_BAD_REQUEST}, safe=False, status=status.HTTP_400_BAD_REQUEST)
 

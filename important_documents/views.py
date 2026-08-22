@@ -9,7 +9,9 @@ from django.utils.text import Truncator
 import html as html_module
 import json
 
-from .models import Important_Documents
+from .models import Important_Documents, ImportantDocumentTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 
 
@@ -152,6 +154,7 @@ def document_finder(request):
 
     ?document=<id> renders real per-document Open Graph/Twitter tags
     server-side (see schemes.views.scheme_finder for why)."""
+    lang = clean_language(request.GET.get("lang", "en"))
     total_documents = Important_Documents.objects.filter(status=1).count()
     share_document = None
     document_id = request.GET.get('document')
@@ -164,12 +167,15 @@ def document_finder(request):
         f"Search {total_documents}+ important Indian government documents and how to get them."
     )
     og_image = request.build_absolute_uri(share_document.image.url) if share_document and share_document.image else None
+    languages, _ = available_languages_for(ImportantDocumentTranslation.objects.all(), field="title")
     return render(request, "custom_admin/important_documents/document_finder.html", {
         "total_documents": total_documents,
         "og_title": og_title,
         "og_description": og_description,
         "og_image": og_image,
         "share_url": request.build_absolute_uri(request.path) + (f"?document={document_id}" if document_id else ""),
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -185,6 +191,7 @@ def document_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     documents = Important_Documents.objects.filter(status=1)
     if body.get("searched_text"):
         documents = documents.filter(title__icontains=body["searched_text"])
@@ -197,10 +204,10 @@ def document_search_light(request):
 
     results = []
     for d in page_obj.object_list:
-        desc = html_module.unescape(strip_tags(d.description or ""))
+        desc = html_module.unescape(strip_tags(d.field_for("description", lang) or ""))
         results.append({
             "id": d.id,
-            "title": d.title,
+            "title": d.field_for("title", lang),
             "image": d.image.url if d.image else "",
             "short_description": Truncator(desc.strip()).chars(130),
         })
@@ -212,3 +219,23 @@ def document_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
+
+
+class ImportantDocumentTranslationsView(TranslationsPickerView):
+    model = Important_Documents
+    translation_model = ImportantDocumentTranslation
+    fk_name = "important_document"
+    fields = ["title", "description", "eligibility", "required_documents", "mode_of_application"]
+    list_url_name = "adminImportantDocuments"
+    list_label = "Important Documents"
+    edit_url_name = "adminImportantDocumentEditTranslation"
+
+
+class ImportantDocumentEditTranslationView(EditTranslationView):
+    model = Important_Documents
+    translation_model = ImportantDocumentTranslation
+    fk_name = "important_document"
+    fields = [("title", "Title", "text"), ("description", "Description", "textarea"),
+              ("eligibility", "Eligibility", "textarea"), ("required_documents", "Required Documents", "textarea"),
+              ("mode_of_application", "Mode of Application", "textarea")]
+    picker_url_name = "adminImportantDocumentTranslations"

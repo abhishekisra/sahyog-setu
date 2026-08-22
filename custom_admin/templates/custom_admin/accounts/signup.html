@@ -22,7 +22,16 @@
     <section class="sq-panel sq-auth-panel">
       <div class="sq-gold-line"></div>
       <div class="sq-auth-body">
-        <div class="sq-eyebrow">Get Started</div>
+        <div class="sq-eyebrow" style="display:flex;align-items:center;justify-content:space-between;gap:10px">
+          <span>Get Started</span>
+          {% if languages|length > 1 %}
+          <select id="langSelect" onchange="ssqChangeLang(this.value)" style="border:1px solid var(--border,#ddd);border-radius:8px;padding:4px 8px;font-family:inherit;font-size:12px;background:#fff;color:inherit">
+            {% for l in languages %}
+            <option value="{{ l.code }}"{% if l.code == lang %} selected{% endif %}>{{ l.native_name }}</option>
+            {% endfor %}
+          </select>
+          {% endif %}
+        </div>
         <h1 class="sq-auth-title">Create Your Account</h1>
 
         {% for error in form.non_field_errors %}
@@ -31,6 +40,7 @@
 
         <form method="post" novalidate class="sq-form">
           {% csrf_token %}
+          <input type="hidden" name="lang" value="{{ lang }}">
 
           <div class="sq-field">
             <label for="id_full_name">Full Name</label>
@@ -96,7 +106,7 @@
             <select name="state" id="id_state" class="sq-input" required onchange="ssqLoadDistricts(this.value, '')">
               <option value="" disabled {% if not form.state.value %}selected{% endif %}>Select state</option>
               {% for state in states %}
-              <option value="{{ state.id }}" {% if form.state.value|stringformat:"s" == state.id|stringformat:"s" %}selected{% endif %}>{{ state.state }}</option>
+              <option value="{{ state.id }}" {% if form.state.value|stringformat:"s" == state.id|stringformat:"s" %}selected{% endif %}>{{ state.display_label }}</option>
               {% endfor %}
             </select>
             {% for error in form.state.errors %}
@@ -119,7 +129,7 @@
             <select name="occupation" id="id_occupation" class="sq-input" required>
               <option value="" disabled {% if not form.occupation.value %}selected{% endif %}>Select occupation</option>
               {% for occ in occupations %}
-              <option value="{{ occ.id }}" {% if form.occupation.value|stringformat:"s" == occ.id|stringformat:"s" %}selected{% endif %}>{{ occ.title }}</option>
+              <option value="{{ occ.id }}" {% if form.occupation.value|stringformat:"s" == occ.id|stringformat:"s" %}selected{% endif %}>{{ occ.display_title }}</option>
               {% endfor %}
             </select>
             {% for error in form.occupation.errors %}
@@ -157,8 +167,14 @@
 </div>
 
 <script>
+function ssqChangeLang(code){
+  var url = new URL(window.location.href);
+  if (code === "en") { url.searchParams.delete("lang"); } else { url.searchParams.set("lang", code); }
+  window.location.href = url.toString();
+}
 (function(){
   var initialDistrict = "{{ form.district.value|default:'' }}";
+  var LANG = "{{ lang }}";
 
   window.ssqLoadDistricts = function(stateId, selectDistrictId){
     var sel = document.getElementById('id_district');
@@ -169,7 +185,7 @@
     }
     sel.disabled = true;
     sel.innerHTML = '<option value="">Loading districts…</option>';
-    fetch("{% url 'districts_for_state' %}?state_id=" + encodeURIComponent(stateId), { credentials: 'same-origin' })
+    fetch("{% url 'districts_for_state' %}?state_id=" + encodeURIComponent(stateId) + (LANG !== 'en' ? '&lang=' + LANG : ''), { credentials: 'same-origin' })
       .then(function(r){ return r.json(); })
       .then(function(data){
         var districts = data.districts || [];

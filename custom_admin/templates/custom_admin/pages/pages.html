@@ -54,6 +54,7 @@
                                                 </td>
                                                 <td class="text-right">
                                                     <a href="/admin/page/{{page.id}}" class="btn btn-success btn-sm"><i class="feather icon-edit"></i>&nbsp;Edit </a>
+                                                    <a href="{% url 'adminPageTranslations' page.id %}" class="btn btn-secondary btn-sm"><i class="feather icon-globe"></i>&nbsp;Translations</a>
                                                     <a href="javascript:void(0)" class="btn btn-danger btn-sm deleteButton" data-id="{{page.id}}"><i class="feather icon-trash-2"></i>&nbsp;Delete </a>
                                                 </td>
                                             </tr>

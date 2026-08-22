@@ -4,10 +4,12 @@ from django.db.models.deletion import CASCADE
 from occupations.models import Occupations
 from states.models import States
 from django_resized import ResizedImageField
+from languages.mixins import TranslatableMixin
+from languages.models import Language
 
 # Create your models here.
 
-class Categories(models.Model):
+class Categories(TranslatableMixin, models.Model):
     id : models.AutoField(primary_key=True)
     title = models.CharField(max_length=255, blank=False, null=False)
     image = ResizedImageField(upload_to="categories", blank=False, null=False, quality=100, force_format='WEBP')
@@ -19,7 +21,7 @@ class Categories(models.Model):
 
 
 
-class Schemes(models.Model):
+class Schemes(TranslatableMixin, models.Model):
     id : models.AutoField(primary_key=True)
     title = models.CharField(max_length=255, blank=False, null=False)
     # Set only for schemes imported from myscheme.gov.in -- lets the import
@@ -56,6 +58,34 @@ class Schemes(models.Model):
     updated_at = models.DateTimeField(auto_now_add= True)
 
 
+
+
+class SchemeTranslation(models.Model):
+    scheme = models.ForeignKey(Schemes, on_delete=models.CASCADE, related_name="translations")
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name="scheme_translations")
+    title = models.CharField(max_length=255, blank=True, default="")
+    description = models.TextField(blank=True, default="")
+    eligibility = models.TextField(blank=True, default="")
+    required_documents = models.TextField(blank=True, default="")
+    mode_of_application = models.TextField(blank=True, default="")
+    occupations = models.CharField(max_length=255, blank=True, default="")
+    scheme_for = models.CharField(max_length=255, blank=True, default="")
+    marital_status = models.CharField(max_length=255, blank=True, default="")
+    benificiaries = models.CharField(max_length=255, blank=True, default="")
+    religions = models.CharField(max_length=255, blank=True, default="")
+    castes = models.CharField(max_length=255, blank=True, default="")
+
+    class Meta:
+        unique_together = [("scheme", "language")]
+
+
+class CategoryTranslation(models.Model):
+    category = models.ForeignKey(Categories, on_delete=models.CASCADE, related_name="translations")
+    language = models.ForeignKey(Language, on_delete=models.CASCADE, related_name="category_translations")
+    title = models.CharField(max_length=255, blank=True, default="")
+
+    class Meta:
+        unique_together = [("category", "language")]
 
 
 class Scheme_Occupations(models.Model):

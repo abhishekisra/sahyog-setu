@@ -7,7 +7,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from .models import Marketing
+from .models import Marketing, MarketingTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 
 # Create your views here.
@@ -79,9 +81,13 @@ def marketing_finder(request):
     style, "direct" mode: no description field at all, just image + title
     + link + the row's own accent color -- a card click opens the link
     straight in a new tab, no detail overlay."""
+    lang = clean_language(request.GET.get("lang", "en"))
     total = Marketing.objects.filter(status=1).count()
+    languages, _ = available_languages_for(MarketingTranslation.objects.all(), field="title")
     return render(request, "custom_admin/entrepreneurship/marketing_finder.html", {
         "total_marketing": total,
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -94,6 +100,7 @@ def marketing_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     items = Marketing.objects.filter(status=1)
     if body.get("searched_text"):
         items = items.filter(title__icontains=body["searched_text"])
@@ -108,7 +115,7 @@ def marketing_search_light(request):
     for r in page_obj.object_list:
         results.append({
             "id": r.id,
-            "title": r.title,
+            "title": r.field_for("title", lang),
             "image": r.image.url if r.image else "",
             "link": r.link,
             "color": r.color,
@@ -121,5 +128,23 @@ def marketing_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
+
+
+class MarketingTranslationsView(TranslationsPickerView):
+    model = Marketing
+    translation_model = MarketingTranslation
+    fk_name = "marketing"
+    fields = ["title"]
+    list_url_name = "adminMarketing"
+    list_label = "Marketing"
+    edit_url_name = "adminMarketingEditTranslation"
+
+
+class MarketingEditTranslationView(EditTranslationView):
+    model = Marketing
+    translation_model = MarketingTranslation
+    fk_name = "marketing"
+    fields = [("title", "Title", "text")]
+    picker_url_name = "adminMarketingTranslations"
 
 

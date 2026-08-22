@@ -92,6 +92,7 @@ INSTALLED_APPS = [
     'accounts',
     'rest_framework',
     'apis',
+    'languages',
     'news',
     'custom_admin',
     'occupations',

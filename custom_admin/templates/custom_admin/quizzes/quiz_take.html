@@ -81,7 +81,7 @@
         <button type="button" class="sq-btn sq-skip" id="sqSkipBtn">Skip ⏭</button>
         <button type="button" class="sq-btn" id="sqNextBtn" style="display:none">Next →</button>
       </div>
-      <p class="sq-forward-note">20 seconds per question, 10 marks for every correct answer — once you move ahead you cannot go back.</p>
+      <p class="sq-forward-note">35 seconds per question, 10 marks for every correct answer — once you move ahead you cannot go back.</p>
     </section>
 
     <form method="post" action="{% url 'quiz_submit' attempt.id %}" id="sqSubmitForm" style="display:none">
@@ -369,7 +369,7 @@
   "use strict";
   var data = JSON.parse(document.getElementById("sq-quiz-data").textContent);
   var QUESTIONS = data.questions;
-  var T = data.perQuestionSeconds || 20;
+  var T = data.perQuestionSeconds || 35;
   var RING_LEN = 138.2;
 
   var idx = data.resumeIndex || 0;

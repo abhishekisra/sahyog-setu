@@ -7,7 +7,9 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from .models import Business_Plans
+from .models import Business_Plans, BusinessPlanTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 
 # Create your views here.
@@ -74,9 +76,13 @@ def business_plan_finder(request):
     but "direct" mode: this model has no description at all (just image +
     title + pdf), so a card click opens the PDF straight in a new tab --
     no detail overlay."""
+    lang = clean_language(request.GET.get("lang", "en"))
     total = Business_Plans.objects.filter(status=1).count()
+    languages, _ = available_languages_for(BusinessPlanTranslation.objects.all(), field="title")
     return render(request, "custom_admin/entrepreneurship/business_plan_finder.html", {
         "total_business_plans": total,
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -91,6 +97,7 @@ def business_plan_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     items = Business_Plans.objects.filter(status=1)
     if body.get("searched_text"):
         items = items.filter(title__icontains=body["searched_text"])
@@ -105,7 +112,7 @@ def business_plan_search_light(request):
     for r in page_obj.object_list:
         results.append({
             "id": r.id,
-            "title": r.title,
+            "title": r.field_for("title", lang),
             "image": r.image.url if r.image else "",
             "pdf": r.pdf.url if r.pdf else "",
         })
@@ -117,5 +124,23 @@ def business_plan_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
+
+
+class BusinessPlanTranslationsView(TranslationsPickerView):
+    model = Business_Plans
+    translation_model = BusinessPlanTranslation
+    fk_name = "business_plan"
+    fields = ["title"]
+    list_url_name = "adminBusinessPlans"
+    list_label = "Business Plans"
+    edit_url_name = "adminBusinessPlanEditTranslation"
+
+
+class BusinessPlanEditTranslationView(EditTranslationView):
+    model = Business_Plans
+    translation_model = BusinessPlanTranslation
+    fk_name = "business_plan"
+    fields = [("title", "Title", "text")]
+    picker_url_name = "adminBusinessPlanTranslations"
 
 

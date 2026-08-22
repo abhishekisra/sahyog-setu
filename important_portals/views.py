@@ -9,7 +9,9 @@ from django.utils.html import strip_tags
 from django.utils.text import Truncator
 import html as html_module
 import json
-from .models import Important_Portals
+from .models import Important_Portals, ImportantPortalTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 
 
@@ -137,6 +139,7 @@ def portal_finder(request):
     ?portal=<id> renders real per-portal Open Graph/Twitter tags server-
     side (see schemes.views.scheme_finder for why this has to happen here
     rather than client-side)."""
+    lang = clean_language(request.GET.get("lang", "en"))
     total_portals = Important_Portals.objects.filter(status=1).count()
     share_portal = None
     portal_id = request.GET.get('portal')
@@ -149,12 +152,15 @@ def portal_finder(request):
         f"Search {total_portals}+ important Indian government portals and go straight to the official site you need."
     )
     og_image = request.build_absolute_uri(share_portal.image.url) if share_portal and share_portal.image else None
+    languages, _ = available_languages_for(ImportantPortalTranslation.objects.all(), field="title")
     return render(request, "custom_admin/important_portals/portal_finder.html", {
         "total_portals": total_portals,
         "og_title": og_title,
         "og_description": og_description,
         "og_image": og_image,
         "share_url": request.build_absolute_uri(request.path) + (f"?portal={portal_id}" if portal_id else ""),
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -171,6 +177,7 @@ def portal_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     portals = Important_Portals.objects.filter(status=1)
     if body.get("searched_text"):
         portals = portals.filter(title__icontains=body["searched_text"])
@@ -183,10 +190,10 @@ def portal_search_light(request):
 
     results = []
     for p in page_obj.object_list:
-        desc = html_module.unescape(strip_tags(p.description or ""))
+        desc = html_module.unescape(strip_tags(p.field_for("description", lang) or ""))
         results.append({
             "id": p.id,
-            "title": p.title,
+            "title": p.field_for("title", lang),
             "image": p.image.url if p.image else "",
             "short_description": Truncator(desc.strip()).chars(130),
         })
@@ -198,3 +205,21 @@ def portal_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
+
+
+class ImportantPortalTranslationsView(TranslationsPickerView):
+    model = Important_Portals
+    translation_model = ImportantPortalTranslation
+    fk_name = "important_portal"
+    fields = ["title", "description", "mode_of_application"]
+    list_url_name = "adminImportantPotals"
+    list_label = "Important Portals"
+    edit_url_name = "adminImportantPortalEditTranslation"
+
+
+class ImportantPortalEditTranslationView(EditTranslationView):
+    model = Important_Portals
+    translation_model = ImportantPortalTranslation
+    fk_name = "important_portal"
+    fields = [("title", "Title", "text"), ("description", "Description", "textarea"), ("mode_of_application", "Mode of Application", "textarea")]
+    picker_url_name = "adminImportantPortalTranslations"

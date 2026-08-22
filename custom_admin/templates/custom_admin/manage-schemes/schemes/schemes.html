@@ -165,6 +165,7 @@
                                                 <td class="text-right">
                                                     <a href="javascript:void(0)" class="btn btn-info btn-sm viewDescButton" data-id="{{scheme.id}}" data-type="scheme"><i class="feather icon-eye"></i>&nbsp;View </a>
                                                     <a href="/admin/manage-schemes/scheme/{{scheme.id}}" class="btn btn-success btn-sm"><i class="feather icon-edit"></i>&nbsp;Edit </a>
+                                                    <a href="{% url 'adminSchemeTranslations' scheme.id %}" class="btn btn-secondary btn-sm"><i class="feather icon-globe"></i>&nbsp;Translations</a>
                                                     <a href="javascript:void(0)" class="btn btn-danger btn-sm deleteButton" data-id="{{scheme.id}}"><i class="feather icon-trash-2"></i>&nbsp;Delete </a>
                                                 </td>
                                             </tr>

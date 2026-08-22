@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
-from .models import Occupations
+from .models import Occupations, OccupationTranslation
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 # Create your views here.
 
@@ -46,13 +47,31 @@ def deleteOccupation(request):
 
 def updateOccupation(request, id):
     if request.user.is_authenticated:
-        occupation = Occupations.objects.get(id = id) 
+        occupation = Occupations.objects.get(id = id)
         occupation.title = request.POST.get('title')
         occupation.status = int(request.POST.get('status'))
         occupation.save()
         messages.success(request, "Occupation updated successfully.")
-        return redirect('adminOccupations')            
+        return redirect('adminOccupations')
     else:
         messages.error(request, "You have to login first.")
         return redirect('adminLogin')
+
+
+class OccupationTranslationsView(TranslationsPickerView):
+    model = Occupations
+    translation_model = OccupationTranslation
+    fk_name = "occupation"
+    fields = ["title"]
+    list_url_name = "adminOccupations"
+    list_label = "Occupations"
+    edit_url_name = "adminOccupationEditTranslation"
+
+
+class OccupationEditTranslationView(EditTranslationView):
+    model = Occupations
+    translation_model = OccupationTranslation
+    fk_name = "occupation"
+    fields = [("title", "Title", "text")]
+    picker_url_name = "adminOccupationTranslations"
 

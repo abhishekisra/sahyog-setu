@@ -32,14 +32,14 @@ from .ai_generate import AIGenerationError, MAX_QUESTIONS_PER_BATCH, generate_qu
 
 logger = logging.getLogger("django.request")
 
-# Every quiz now runs a fixed 20s-per-question timer (forward-only, no
+# Every quiz now runs a fixed 35s-per-question timer (forward-only, no
 # going back) instead of quiz.quiz_time as an overall countdown -- that
 # field was a longstanding source of bad data (admins had no unit hint on
 # the entry field, so values like 1500 ended up meaning 1500 *minutes*).
 # +5s/question is network/render slack for the server-side safety check
-# below; the client-side 20s countdown is what actually paces the user.
-PER_QUESTION_SECONDS = 20
-PER_QUESTION_SERVER_BUDGET = 25
+# below; the client-side 35s countdown is what actually paces the user.
+PER_QUESTION_SECONDS = 35
+PER_QUESTION_SERVER_BUDGET = 40
 
 # Each question is worth a flat 10 marks -- attempt.score/total_questions
 # stay as raw correct-answer COUNTS everywhere internally (percentage,

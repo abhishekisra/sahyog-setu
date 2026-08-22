@@ -9,7 +9,9 @@ from django.utils.html import strip_tags
 from django.utils.text import Truncator
 import html as html_module
 import json
-from .models import Organization_Registration
+from .models import Organization_Registration, OrganizationRegistrationTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 
 
@@ -139,6 +141,7 @@ def organization_registration_finder(request):
     (unlike Legal Registrations), just description + an optional pdf +
     mode_of_application -- the detail overlay shows Overview + an optional
     Download PDF button + the usual Apply-link button."""
+    lang = clean_language(request.GET.get("lang", "en"))
     total = Organization_Registration.objects.filter(status=1).count()
     share_item = None
     item_id = request.GET.get('registration')
@@ -151,12 +154,15 @@ def organization_registration_finder(request):
         f"Search {total}+ business entity registration formats -- SHG, FPO, LLP and more."
     )
     og_image = request.build_absolute_uri(share_item.image.url) if share_item and share_item.image else None
+    languages, _ = available_languages_for(OrganizationRegistrationTranslation.objects.all(), field="title")
     return render(request, "custom_admin/entrepreneurship/organization_registration_finder.html", {
         "total_organization_registrations": total,
         "og_title": og_title,
         "og_description": og_description,
         "og_image": og_image,
         "share_url": request.build_absolute_uri(request.path) + (f"?registration={item_id}" if item_id else ""),
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -169,6 +175,7 @@ def organization_registration_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     items = Organization_Registration.objects.filter(status=1)
     if body.get("searched_text"):
         items = items.filter(title__icontains=body["searched_text"])
@@ -181,10 +188,10 @@ def organization_registration_search_light(request):
 
     results = []
     for r in page_obj.object_list:
-        desc = html_module.unescape(strip_tags(r.description or ""))
+        desc = html_module.unescape(strip_tags(r.field_for("description", lang) or ""))
         results.append({
             "id": r.id,
-            "title": r.title,
+            "title": r.field_for("title", lang),
             "image": r.image.url if r.image else "",
             "short_description": Truncator(desc.strip()).chars(130),
         })
@@ -196,3 +203,22 @@ def organization_registration_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
+
+
+class OrganizationRegistrationTranslationsView(TranslationsPickerView):
+    model = Organization_Registration
+    translation_model = OrganizationRegistrationTranslation
+    fk_name = "organization_registration"
+    fields = ["title", "description", "mode_of_application"]
+    list_url_name = "adminOrganizationRegistrations"
+    list_label = "Organization Registrations"
+    edit_url_name = "adminOrganizationRegistrationEditTranslation"
+
+
+class OrganizationRegistrationEditTranslationView(EditTranslationView):
+    model = Organization_Registration
+    translation_model = OrganizationRegistrationTranslation
+    fk_name = "organization_registration"
+    fields = [("title", "Title", "text"), ("description", "Description", "textarea"),
+              ("mode_of_application", "Mode of Application", "textarea")]
+    picker_url_name = "adminOrganizationRegistrationTranslations"

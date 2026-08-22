@@ -135,6 +135,15 @@
   .yk-subheading{font-size:15px;font-weight:700;color:var(--text);margin:16px 0 6px;}
   .yk-subheading:first-of-type{margin-top:0;}
   .yk-apply-card{background:linear-gradient(120deg,var(--brand-deep) 0%,var(--brand-deeper) 100%);color:#fff;border-radius:12px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap;}
+  .yk-faq-item{border-bottom:1px solid var(--border);padding:12px 0;}
+  .yk-faq-item:last-child{border-bottom:none;padding-bottom:0;}
+  .yk-faq-item:first-child{padding-top:0;}
+  .yk-faq-item summary{font-size:14.5px;font-weight:700;color:var(--text);cursor:pointer;list-style:none;display:flex;align-items:center;gap:8px;}
+  .yk-faq-item summary::-webkit-details-marker{display:none;}
+  .yk-faq-item summary::before{content:'+';color:var(--gold-ink);font-weight:800;width:16px;flex-shrink:0;}
+  .yk-faq-item[open] summary::before{content:'−';}
+  .yk-faq-item .yk-faq-answer{font-size:14px;color:var(--text-muted);line-height:1.65;margin:8px 0 0 24px;text-align:justify;}
+  .yk-disclaimer{background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.28);border-radius:12px;padding:14px 18px;font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-top:15px;}
   .yk-apply-card p{font-size:14px;color:#C4D0BE;margin:0;line-height:1.5;}
   .yk-apply-btn{background:var(--gold);color:var(--brand-deeper);border:none;padding:11px 22px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;flex-shrink:0;white-space:nowrap;}
 
@@ -183,6 +192,13 @@
 
     <div class="yk-results-head">
       <h3 id="ykResultsHeading">Loading business schemes…</h3>
+      {% if languages|length > 1 %}
+      <select id="langSelect" onchange="ssChangeLang(this.value)" style="border:1px solid var(--border);border-radius:8px;padding:6px 10px;font-family:inherit;font-size:13px;background:#fff;color:var(--text)">
+        {% for l in languages %}
+        <option value="{{ l.code }}"{% if l.code == lang %} selected{% endif %}>{{ l.native_name }}</option>
+        {% endfor %}
+      </select>
+      {% endif %}
     </div>
     <div class="yk-grid" id="ykCardsGrid"><div class="yk-loading">Loading business schemes from the live database…</div></div>
     <div class="yk-pagination" id="ykPagination"></div>
@@ -194,8 +210,14 @@
 </div>
 
 <script>
+function ssChangeLang(code){
+  var url = new URL(window.location.href);
+  if (code === "en") { url.searchParams.delete("lang"); } else { url.searchParams.set("lang", code); }
+  window.location.href = url.toString();
+}
 (function(){
   var currentPage = 1;
+  var LANG = "{{ lang }}";
 
   // ?scheme=<id> -- lets the old SPA's per-scheme detail bookmarks
   // (/entrepreneurship-developement/business-related-scheme/<id>, nginx
@@ -383,7 +405,7 @@
     fetch('{% url "business_related_scheme_search_light" %}', {
       method: 'POST',
       headers: {'Content-Type': 'application/json', 'X-CSRFToken': csrfToken()},
-      body: JSON.stringify({ searched_text: search || null, page: currentPage })
+      body: JSON.stringify({ searched_text: search || null, page: currentPage, lang: LANG })
     })
       .then(function(r){ return r.json(); })
       .then(function(data){
@@ -419,13 +441,33 @@
     overlay.classList.add('open');
     document.body.style.overflow = 'hidden';
 
-    fetch('/api/scheme/' + id)
+    fetch('/api/scheme/' + id + (LANG !== 'en' ? '?lang=' + LANG : ''))
       .then(function(r){ return r.json(); })
       .then(function(data){ renderDetail(data.scheme); })
       .catch(function(){
         sheet.innerHTML = '<div class="yk-loading" style="border:none;padding:60px 30px;">Could not load this scheme\'s details — please try again.</div>';
       });
   }
+
+  // FAQ items come pre-built from the server (schemes/faq.py:build_scheme_faq)
+  // -- deterministic, derived straight from this scheme's own fields, not AI,
+  // so answers here can never say something the admin didn't actually enter.
+  function renderFaqBlock(faq){
+    if(!faq || !faq.length) return '';
+    var items = faq.map(function(item){
+      return '<details class="yk-faq-item"><summary>'+escapeHtml(item.q)+'</summary>'+
+        '<div class="yk-faq-answer">'+renderRichText(item.a, '')+'</div></details>';
+    }).join('');
+    return '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>Frequently Asked Questions</h3>'+items+'</div>';
+  }
+  // English by default; only switches when the page's own ?lang= actually
+  // changes (same fallback-to-English convention as every translated
+  // content field on this page) -- not a fixed, always-Hindi string.
+  var SCHEME_DISCLAIMER_TEXT = {
+    en: 'We strive to provide you with complete and accurate information here; however, errors are possible on our part as well. Please also verify the details on the scheme’s official website before applying.',
+    hi: 'हमारा प्रयास है कि आपको यहां सही और पूरी जानकारी उपलब्ध कराई जा सके, किंतु हमसे भी त्रुटि हो सकती है। कृपया आवेदन करने से पहले इस योजना की आधिकारिक वेबसाइट पर भी जानकारी अवश्य जांच लें।'
+  };
+  var SCHEME_DISCLAIMER = SCHEME_DISCLAIMER_TEXT[LANG] || SCHEME_DISCLAIMER_TEXT.en;
 
   function renderDetail(d){
     var sheet = document.getElementById('ykDetailSheet');
@@ -461,7 +503,9 @@
           "<p>Applications go through this scheme's own official portal or office.</p>" +
           applyBtn +
         '</div>' +
+        renderFaqBlock(d.faq) +
         shareSection +
+        '<div class="yk-disclaimer">'+escapeHtml(SCHEME_DISCLAIMER)+'</div>' +
       '</div>';
     document.getElementById('ykCloseDetail').addEventListener('click', closeDetail);
   }

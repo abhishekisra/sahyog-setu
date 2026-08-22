@@ -4,7 +4,9 @@ from django.shortcuts import render, redirect
 from django.views import View
 from django.contrib import messages
 
-from .models import Helplines
+from .models import Helplines, HelplineTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 
 # Create your views here.
@@ -16,15 +18,38 @@ def helpline_finder(request):
     Portals -- number now real text (Helplines.number, backfilled from the
     16 existing graphics), with a tel: Call Now action plus a secondary
     "More Info" link when `link` is a real URL rather than a bare number."""
+    lang = clean_language(request.GET.get("lang", "en"))
     helplines = list(Helplines.objects.filter(status=1).order_by('title'))
     for h in helplines:
         # tel: only wants digits -- "100/112" etc. use the first number.
         digits = re.split(r'[^0-9]+', h.number or '')
         h.tel_number = next((d for d in digits if d), '')
         h.is_url = (h.link or '').startswith('http')
+        h.display_title = h.field_for("title", lang)
+    languages, _ = available_languages_for(HelplineTranslation.objects.all(), field="title")
     return render(request, "custom_admin/helplines/helpline_finder.html", {
         "helplines": helplines,
+        "languages": languages,
+        "lang": lang,
     })
+
+
+class HelplineTranslationsView(TranslationsPickerView):
+    model = Helplines
+    translation_model = HelplineTranslation
+    fk_name = "helpline"
+    fields = ["title"]
+    list_url_name = "adminHelplines"
+    list_label = "Helplines"
+    edit_url_name = "adminHelplineEditTranslation"
+
+
+class HelplineEditTranslationView(EditTranslationView):
+    model = Helplines
+    translation_model = HelplineTranslation
+    fk_name = "helpline"
+    fields = [("title", "Title", "text")]
+    picker_url_name = "adminHelplineTranslations"
 
 class HelplinesView(View):
 

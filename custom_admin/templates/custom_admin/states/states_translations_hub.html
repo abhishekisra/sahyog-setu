@@ -1,0 +1,86 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% load static %}
+
+{% block body %}
+
+<div class="pcoded-main-container">
+    <div class="pcoded-content">
+        <div class="page-header">
+            <div class="page-block">
+                <div class="row align-items-center">
+                    <div class="col-md-6">
+                        <div class="page-header-title">
+                            <h5>States — Translations</h5>
+                        </div>
+                        <ul class="breadcrumb">
+                            <li class="breadcrumb-item">
+                                <a href="/admin/dashboard"><i class="feather icon-home"></i></a>
+                            </li>
+                            <li class="breadcrumb-item"><a href="#!">States</a></li>
+                        </ul>
+                    </div>
+                    <div class="col-md-6 text-right">
+                        <a href="{% url 'adminDistrictsTranslationsHub' %}" class="btn btn-outline-secondary btn-sm">
+                            <i class="feather icon-map-pin"></i>&nbsp;Districts — Translations
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <div class="col-md-12">
+                <div class="card qt-card">
+                    <div class="card-body">
+                        <div class="qt-head">
+                            <span class="qt-head-icon"><i class="feather icon-map"></i></span>
+                            <div>
+                                <h5 class="qt-head-title">All States</h5>
+                                <p class="qt-head-sub">Click a state to add/edit its name translation. State name feeds the signup form and the scheme finder's state filter.</p>
+                            </div>
+                        </div>
+
+                        <div class="table-responsive">
+                            <table class="table table-hover">
+                                <thead><tr><th>#</th><th>State</th><th></th></tr></thead>
+                                <tbody>
+                                    {% for s in states %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ s.state }}</td>
+                                        <td class="text-right">
+                                            <a href="{% url 'adminStateTranslations' s.id %}" class="btn btn-secondary btn-sm"><i class="feather icon-globe"></i>&nbsp;Translations</a>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<style>
+    .qt-card { border: none; border-radius: 14px; box-shadow: 0 2px 12px rgba(0,0,0,.06); }
+    .qt-head { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 20px; }
+    .qt-head-icon {
+        width: 44px; height: 44px; border-radius: 12px; flex-shrink: 0;
+        display: flex; align-items: center; justify-content: center; font-size: 19px;
+        background: rgba(70,128,255,.12); color: #4680ff;
+    }
+    .qt-head-title { margin: 0; font-size: 17px; font-weight: 800; color: #24272b; }
+    .qt-head-sub { margin: 2px 0 0; font-size: 12.5px; color: #8a8f98; max-width: 640px; }
+</style>
+
+{% for message in messages %}
+<script>
+    showNotification('{{message}}', '{{message.tags}}')
+</script>
+{% endfor %}
+
+{% endblock %}

@@ -9,7 +9,9 @@ from django.utils.text import Truncator
 import html as html_module
 import json
 
-from .models import Legal_Registrations
+from .models import Legal_Registrations, LegalRegistrationTranslation
+from languages.utils import clean_language, available_languages_for
+from custom_admin.translation_views import TranslationsPickerView, EditTranslationView
 
 
 
@@ -151,6 +153,7 @@ def legal_registration_finder(request):
 
     ?registration=<id> renders real per-item Open Graph/Twitter tags
     server-side (see schemes.views.scheme_finder for why)."""
+    lang = clean_language(request.GET.get("lang", "en"))
     total = Legal_Registrations.objects.filter(status=1).count()
     share_item = None
     item_id = request.GET.get('registration')
@@ -163,12 +166,15 @@ def legal_registration_finder(request):
         f"Search {total}+ legal registrations for starting and running a business in India."
     )
     og_image = request.build_absolute_uri(share_item.image.url) if share_item and share_item.image else None
+    languages, _ = available_languages_for(LegalRegistrationTranslation.objects.all(), field="title")
     return render(request, "custom_admin/entrepreneurship/legal_registration_finder.html", {
         "total_legal_registrations": total,
         "og_title": og_title,
         "og_description": og_description,
         "og_image": og_image,
         "share_url": request.build_absolute_uri(request.path) + (f"?registration={item_id}" if item_id else ""),
+        "languages": languages,
+        "lang": lang,
     })
 
 
@@ -181,6 +187,7 @@ def legal_registration_search_light(request):
     except (ValueError, TypeError):
         body = {}
 
+    lang = clean_language(body.get("lang") or "en")
     items = Legal_Registrations.objects.filter(status=1)
     if body.get("searched_text"):
         items = items.filter(title__icontains=body["searched_text"])
@@ -193,10 +200,10 @@ def legal_registration_search_light(request):
 
     results = []
     for r in page_obj.object_list:
-        desc = html_module.unescape(strip_tags(r.description or ""))
+        desc = html_module.unescape(strip_tags(r.field_for("description", lang) or ""))
         results.append({
             "id": r.id,
-            "title": r.title,
+            "title": r.field_for("title", lang),
             "image": r.image.url if r.image else "",
             "short_description": Truncator(desc.strip()).chars(130),
         })
@@ -208,3 +215,23 @@ def legal_registration_search_light(request):
         "page_size": PAGE_SIZE,
         "num_pages": paginator.num_pages,
     })
+
+
+class LegalRegistrationTranslationsView(TranslationsPickerView):
+    model = Legal_Registrations
+    translation_model = LegalRegistrationTranslation
+    fk_name = "legal_registration"
+    fields = ["title", "description", "eligibility", "required_documents", "mode_of_application"]
+    list_url_name = "adminLegalRegistrations"
+    list_label = "Legal Registrations"
+    edit_url_name = "adminLegalRegistrationEditTranslation"
+
+
+class LegalRegistrationEditTranslationView(EditTranslationView):
+    model = Legal_Registrations
+    translation_model = LegalRegistrationTranslation
+    fk_name = "legal_registration"
+    fields = [("title", "Title", "text"), ("description", "Description", "textarea"),
+              ("eligibility", "Eligibility", "textarea"), ("required_documents", "Required Documents", "textarea"),
+              ("mode_of_application", "Mode of Application", "textarea")]
+    picker_url_name = "adminLegalRegistrationTranslations"
