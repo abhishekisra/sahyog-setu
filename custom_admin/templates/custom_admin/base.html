@@ -60,8 +60,20 @@
             <script src="{% static 'custom_admin/js/pcoded.min.js' %}"></script>
             
             <script src="{% static 'custom_admin/js/plugins/apexcharts.min.js' %}"></script>
-            <script src="{% static 'custom_admin/js/pages/dashboard-analytics.js' %}"></script>
-            <script src="{% static 'custom_admin/js/pages/dashboard-main.js' %}"></script>
+            <!-- 2026-09-16 (found via live JS-error audit): dashboard-analytics.js
+                 and dashboard-main.js are unused demo-theme boilerplate -- both
+                 declare a global function floatchart() (the second load silently
+                 overwrites the first, so dashboard-analytics.js's 9 charts were
+                 always dead code), and both files' own $(document).ready queued
+                 a setTimeout(floatchart,100), so dashboard-main.js's version ran
+                 TWICE on every admin page load. None of either file's chart
+                 target ids (#support-chart, #amount-processed, #seo-chart1, etc)
+                 exist in any real template -- confirmed via grep across
+                 custom_admin/templates/ -- so on every single admin page,
+                 including the public /admin/login screen, this threw 14
+                 "Element not found" console errors for nothing. Removed; the
+                 apexcharts.min.js library itself is kept loaded in case a real
+                 chart is ever added. -->
             <!-- vendor-all.min.js (bundles jQuery + friends) was loaded a
                  second time here -- reloading jQuery mid-page wipes its
                  internal event-data store, orphaning any click handlers
@@ -71,7 +83,15 @@
                  register -- removed, keeping only the one load at the top. -->
             <script src="{% static 'custom_admin/js/plugins/jquery.dataTables.min.js' %}"></script>
             <script src="{% static 'custom_admin/js/plugins/dataTables.bootstrap4.min.js' %}"></script>
-            <script src="{% static 'custom_admin/js/pages/form-advance-custom.js' %}"></script>
+            <!-- 2026-09-16 (found via the same JS-error audit as above):
+                 form-advance-custom.js is unused demo-theme boilerplate for a
+                 tags-input/typeahead widget -- its entire body is one
+                 $(document).ready() that calls `new Bloodhound(...)`, but the
+                 Bloodhound library was never actually loaded anywhere in this
+                 app (no template uses .typeahead()/.tagsinput() either,
+                 confirmed via grep), so this threw "Bloodhound is not
+                 defined" on every single admin page load, including
+                 /admin/login. Removed. -->
             <script src="{% static 'custom_admin/js/plugins/select2.full.min.js' %}"></script>
             <script src="{% static 'custom_admin/js/plugins/bootstrap-tagsinput.min.js' %}"></script>
             <script src="{% static 'custom_admin/js/plugins/ckeditor.js' %}"></script>
