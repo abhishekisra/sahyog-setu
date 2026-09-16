@@ -1,5 +1,6 @@
 import difflib
 import json
+import os
 import re
 import time
 import urllib.error
@@ -11,7 +12,10 @@ from django.core.management.base import BaseCommand
 from schemes.models import Categories, Schemes
 from states.models import States
 
-API_KEY = "tYTy5eEhlu9rFjyxuCr7ra7ACp4dv1RH8gWuHTDc"
+# 2026-09-16: was hardcoded here and committed to the public GitHub repo --
+# moved to /etc/sahyogsetu-secrets.env, same pattern as settings.py's
+# DJANGO_SECRET_KEY/DB_PASSWORD.
+API_KEY = os.environ['MYSCHEME_API_KEY']
 HEADERS = {
     "x-api-key": API_KEY,
     "Accept": "application/json",
