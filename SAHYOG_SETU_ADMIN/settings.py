@@ -20,7 +20,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '97ny&l)^z^6mxpt@%)qubngaexjiulj@628m*(5ng@cq9-#(j8'
+# 2026-08-29: was hardcoded here and committed to the public GitHub repo --
+# rotated and moved to /etc/sahyogsetu-secrets.env (same file/pattern SMTP_*
+# and ANTHROPIC_API_KEY below already use), loaded into the environment via
+# gunicorn.service's EnvironmentFile=. The old, now-retired key is gone.
+SECRET_KEY = os.environ['DJANGO_SECRET_KEY']
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
@@ -158,7 +162,11 @@ DATABASES = {
         'HOST'   : '127.0.0.1',
         'PORT'   : '3306',
         'USER'   : 'sahyog_setu_app',
-        'PASSWORD' : '4pGFumUEox5H5p4HaIyr8DQaNp2F'
+        # 2026-08-29: was hardcoded here and committed to the public GitHub
+        # repo -- moved to /etc/sahyogsetu-secrets.env, same as SECRET_KEY
+        # above. Value there is still the un-rotated password for now; the
+        # actual MySQL user password should be rotated separately.
+        'PASSWORD' : os.environ['DB_PASSWORD']
     }
 }
 

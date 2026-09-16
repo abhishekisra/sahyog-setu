@@ -53,6 +53,14 @@ class LoginView(View):
 
 
 def dashboard(request):
+    # 2026-08-29 (full audit): every other admin view in this codebase checks
+    # request.user.is_authenticated before rendering -- this one, the actual
+    # /admin/dashboard landing page, never did. Anyone who knew or guessed
+    # the URL could see the admin's aggregate content counts (schemes,
+    # documents, testimonials, visitor count, etc.) with no login at all.
+    if not request.user.is_authenticated:
+        messages.error(request, "You have to login first.")
+        return redirect('adminLogin')
     occupations = len(Occupations.objects.all())
     categories = len(Categories.objects.all())
     state_schemes = len(Schemes.objects.filter(scheme_type = 1))
