@@ -360,6 +360,19 @@
             background: rgba(0,0,0,.55);
         }
         #ssq-bn-more-sheet.ssq-open { display: block; }
+        /* "share this document cut raha hai" (2026-09-20): .yk-detail-overlay
+           (the document/scheme/portal detail modal, identical CSS repeated
+           in 6 child templates -- scheme_finder, document_finder,
+           portal_finder, business_related_scheme_finder, and both
+           registration finders) sits at z-index:9999, LOWER than the new
+           #ssq-bottom-nav's 99990 -- the bottom nav bar was drawing on top
+           of it, clipping whatever content (the Share section, in this
+           report) landed near the bottom of the modal on mobile. One
+           override here covers all 6 templates instead of editing each;
+           !important since the child template's own <style> block (same
+           #yk-detail-overlay rule) loads after this one in the final page
+           and would otherwise win the cascade at equal specificity. */
+        .yk-detail-overlay { z-index: 9999999 !important; }
         #ssq-bn-more-panel {
             position: absolute; left: 0; right: 0; bottom: 0;
             background: #14301f; border-radius: 18px 18px 0 0;
@@ -759,7 +772,7 @@
     <nav id="ssq-bottom-nav">
         <a href="/" data-href="/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg><span>Home</span></a>
         <a href="/central-schemes-viewer/" data-href="/central-schemes-viewer/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v3h3"/><path d="M9 12h6"/><path d="M9 16h6"/></svg><span>Schemes</span></a>
-        <a href="/?openEligibility=1" data-href="__eligibility__"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>Eligibility</span></a>
+        <a href="/quizzes/" data-href="/quizzes/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a3 3 0 0 0 3 5"/><path d="M17 5h3a3 3 0 0 1-3 5"/></svg><span>Quizzes</span></a>
         <a href="/helplines-viewer/" data-href="/helplines-viewer/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg><span>Helpline</span></a>
         <button type="button" id="ssq-bn-more-btn"><svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg><span>More</span></button>
     </nav>
@@ -770,7 +783,7 @@
             <a href="/important-portals-viewer/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18"/><path d="M12 3a13 13 0 0 0 0 18"/></svg><span>Important Portals</span></a>
             <a href="/important-documents-viewer/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg><span>Important Documents</span></a>
             <a href="/entrepreneurship-viewer/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><span>Entrepreneurship</span></a>
-            <a href="/quizzes/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.5 9a2.5 2.5 0 0 1 5 0c0 1.5-2 1.8-2 3.5"/><circle cx="12" cy="17" r=".6" fill="currentColor" stroke="none"/></svg><span>Quizzes</span></a>
+            <a href="/?openEligibility=1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg><span>Eligibility</span></a>
             <a href="/scheme-announcements-viewer/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V5L6 9H5a2 2 0 0 0-2 2z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg><span>Announcements</span></a>
             <a href="/accounts/login/"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg><span>Login / Register</span></a>
         </div>
