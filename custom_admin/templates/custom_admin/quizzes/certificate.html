@@ -335,6 +335,16 @@
            that (combined with the min-height fix below) was enough to
            spill onto a second, near-empty page. */
         .ss-quiz-header { display: none !important; }
+        /* 2026-10-14 (user-reported: certificate PDF came out as 3 pages
+           instead of 1): public_base.html's own site chrome -- the top
+           nav (#ssq-main-nav) and the mobile bottom nav (#ssq-bottom-nav)
+           -- sits outside this page's own body content, so neither was
+           ever covered by any print rule anywhere (public_base.html
+           itself has none). Both printed on every page of the PDF, same
+           root cause as .ss-quiz-header above -- extra chrome height
+           pushing the single A4 certificate sheet across multiple
+           physical pages. */
+        #ssq-main-nav, #ssq-bottom-nav { display: none !important; }
         /* .ss-certificate-page's min-height:100vh + padding-bottom:80px
            (further down, unconditional) is fine on screen but was NEVER
            reset here -- the wrapper kept claiming a full viewport's worth

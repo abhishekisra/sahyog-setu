@@ -253,6 +253,35 @@ class QuestionTranslation(models.Model):
         unique_together = [("question", "language")]
 
 
+class Training(models.Model):
+    """A specific, named training/workshop session tied to one quiz and
+    one trainer -- e.g. two different batches of the same Bio-Enzyme quiz
+    can each have their own Training row with a different trainer, so the
+    same quiz content serves multiple real-world sessions without forcing
+    one trainer identity onto all of them (user-reported: "har bio enzyme
+    ki trainer Rinku Thakur nhi hogi" -- confirmed not everyone running
+    this quiz's training is the same person).
+
+    A participant picks one of a quiz's Training rows (or types a free-
+    text name if theirs isn't listed yet -- see QuizAttempt.
+    training_other_text) right before starting; see
+    QuizLandingView/QuizTakeView._get_or_create_attempt. trainer is a User
+    row with user_type=3 ("Trainer" -- see accounts.models.User), who logs
+    in separately (TrainerLoginView) to see only attempts tied to their
+    OWN Training rows (TrainerDashboardView), never the full admin
+    analytics panel."""
+    quiz = models.ForeignKey(Quizzes, on_delete=models.CASCADE, related_name="trainings")
+    trainer = models.ForeignKey(
+        settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="trainings_conducted",
+        limit_choices_to={"user_type": 3},
+    )
+    name = models.CharField(max_length=255)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.name} ({self.quiz.title} \u2014 {self.trainer})"
+
+
 class QuizAttempt(models.Model):
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quiz_attempts")
     quiz = models.ForeignKey(Quizzes, on_delete=models.CASCADE, related_name="attempts")
@@ -317,6 +346,23 @@ class QuizAttempt(models.Model):
     # in a unique-constrained column, so completed attempts simply drop out
     # of the uniqueness check instead of needing a real partial index.
     live_lock = models.CharField(max_length=64, unique=True, null=True, blank=True)
+
+    # Which training (if any) this participant attended before taking the
+    # quiz -- asked once, right before Start Quiz, same point language is
+    # picked (see QuizLandingView/QuizTakeView._get_or_create_attempt).
+    # training is set when they picked one of the quiz's own named Training
+    # rows from the dropdown (a real FK, so a trainer's dashboard can group
+    # on it exactly, no typos possible). training_other_text is the
+    # free-text fallback when they typed their own instead (their training
+    # isn't listed yet, or they picked "Other") -- user-reported: many
+    # people will misspell/mistype this, so TrainerDashboardView fuzzy-
+    # matches these against each trainer's OWN known Training names
+    # (difflib, stdlib, no new dependency) to show "same training, just
+    # spelled differently" grouped together rather than fragmented rows.
+    # SET_NULL (not CASCADE): deleting a Training definition later must
+    # never delete the real attempt history recorded against it.
+    training = models.ForeignKey(Training, on_delete=models.SET_NULL, null=True, blank=True, related_name="attempts")
+    training_other_text = models.CharField(max_length=255, blank=True, default="", db_default="")
 
     def __str__(self):
         return f"{self.user} - {self.quiz} ({self.score}/{self.total_questions})"

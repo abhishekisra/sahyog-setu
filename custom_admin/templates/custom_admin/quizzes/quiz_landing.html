@@ -25,7 +25,7 @@
   <header class="sq-head">
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-      <a href="/" class="sq-back-link">Back to Home</a>
+      <a href="/" class="sq-back-link">{% if lang == 'hi' %}होम पर वापस जाएं{% else %}Back to Home{% endif %}</a>
     </div>
   </header>
 
@@ -35,7 +35,15 @@
       <div class="sq-land-body">
         <div class="sq-brand-inline"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
 
-        <div class="sq-eyebrow">Government Scheme · Knowledge Test</div>
+        <div class="sq-eyebrow">{% if lang == 'hi' %}सरकारी योजना · ज्ञान परीक्षण{% else %}Government Scheme · Knowledge Test{% endif %}</div>
+
+        {% if languages|length > 1 %}
+        <div class="sq-lang-select" role="group" aria-label="Choose quiz language">
+          {% for l in languages %}
+          <a href="?lang={{ l.code }}" class="sq-lang-pill{% if l.code == lang %} active{% endif %}">{{ l.native_name }}</a>
+          {% endfor %}
+        </div>
+        {% endif %}
 
         <h1 class="sq-land-title">{{ quiz_title }}</h1>
         {% if quiz_description %}
@@ -43,40 +51,85 @@
         {% endif %}
 
         <div class="sq-meta">
-          <div class="sq-chip"><div class="n">{{ question_count }}</div><div class="l">Questions</div></div>
-          <div class="sq-chip"><div class="n">20s</div><div class="l">per Question</div></div>
-          <div class="sq-chip"><div class="n">{{ total_marks }}</div><div class="l">Total Marks</div></div>
-          <div class="sq-chip"><div class="n">{{ quiz.pass_threshold }}%</div><div class="l">to Pass</div></div>
+          <div class="sq-chip"><div class="n">{{ question_count }}</div><div class="l">{% if lang == 'hi' %}प्रश्न{% else %}Questions{% endif %}</div></div>
+          <div class="sq-chip"><div class="n">20s</div><div class="l">{% if lang == 'hi' %}प्रति प्रश्न{% else %}per Question{% endif %}</div></div>
+          <div class="sq-chip"><div class="n">{{ total_marks }}</div><div class="l">{% if lang == 'hi' %}कुल अंक{% else %}Total Marks{% endif %}</div></div>
+          <div class="sq-chip"><div class="n">{{ quiz.pass_threshold }}%</div><div class="l">{% if lang == 'hi' %}पास होने के लिए{% else %}to Pass{% endif %}</div></div>
         </div>
 
         {% if not quiz.is_live %}
-        <div class="sq-land-warning">This quiz is not available right now.</div>
+        <div class="sq-land-warning">{% if lang == 'hi' %}यह क्विज़ अभी उपलब्ध नहीं है।{% else %}This quiz is not available right now.{% endif %}</div>
+        {% else %}
+        {% if request.user.is_authenticated %}
+        <!-- Training question -- user-requested: ask once, right before
+             Start Quiz, whether this attempt follows a training, and if so
+             which one. A real Training pick (sqTrainingSelect) threads
+             through as ?training=<id> -- exact, no typo risk. Picking
+             "Other" reveals a free-text box instead, threaded as
+             ?training_other=... (see QuizTakeView.get, which resolves
+             both into the new attempt). Plain vanilla JS on click, same
+             pattern as every other control on this page (font-size
+             buttons etc. in quiz_take.html) -- no framework, this page has
+             none. -->
+        <div class="sq-training-ask">
+          <label class="sq-training-label" for="sqTrainingSelect">{% if lang == 'hi' %}Kya aap kisi training ke baad ye quiz de rahe hain?{% else %}Are you taking this quiz after attending a training?{% endif %}</label>
+          <select id="sqTrainingSelect" class="sq-training-select">
+            <option value="">{% if lang == 'hi' %}— Nahi, seedhe de raha/rahi hoon —{% else %}— No, taking it directly —{% endif %}</option>
+            {% for t in trainings %}
+            <option value="{{ t.id }}">{{ t.name }}</option>
+            {% endfor %}
+            <option value="__other__">{% if lang == 'hi' %}Mere training ka naam list mein nahi hai{% else %}My training isn't listed{% endif %}</option>
+          </select>
+          <input type="text" id="sqTrainingOther" class="sq-training-other" style="display:none"
+                 placeholder="{% if lang == 'hi' %}Training ka naam likhein{% else %}Type the training's name{% endif %}">
+        </div>
+        <div class="sq-land-cta">
+          <a href="{{ take_url }}" id="sqStartBtn" data-base-href="{{ take_url }}" class="sq-btn">{% if lang == 'hi' %}क्विज़ शुरू करें →{% else %}Start Quiz →{% endif %}</a>
+        </div>
+        <script>
+        (function(){
+          var sel = document.getElementById('sqTrainingSelect');
+          var other = document.getElementById('sqTrainingOther');
+          var btn = document.getElementById('sqStartBtn');
+          if(!sel || !btn) return;
+          sel.addEventListener('change', function(){
+            other.style.display = sel.value === '__other__' ? 'block' : 'none';
+          });
+          btn.addEventListener('click', function(e){
+            e.preventDefault();
+            var url = btn.getAttribute('data-base-href');
+            if(sel.value === '__other__' && other.value.trim()){
+              url += '&training_other=' + encodeURIComponent(other.value.trim().slice(0, 255));
+            } else if(sel.value){
+              url += '&training=' + encodeURIComponent(sel.value);
+            }
+            window.location.href = url;
+          });
+        })();
+        </script>
         {% else %}
         <div class="sq-land-cta">
-          {% if request.user.is_authenticated %}
-          <a href="{{ take_url }}" class="sq-btn">Start Quiz →</a>
-          {% else %}
-          <a href="{{ login_url }}" class="sq-btn">Login to Start Quiz →</a>
-          {% endif %}
+          <a href="{{ login_url }}" class="sq-btn">{% if lang == 'hi' %}लॉगिन करके क्विज़ शुरू करें →{% else %}Login to Start Quiz →{% endif %}</a>
         </div>
+        {% endif %}
         {% endif %}
 
         {% if quiz.leaderboard_public %}
-        <p class="sq-land-leaderboard"><a href="{% url 'quiz_leaderboard' quiz.id %}">View Leaderboard</a></p>
+        <p class="sq-land-leaderboard"><a href="{% url 'quiz_leaderboard' quiz.id %}">{% if lang == 'hi' %}लीडरबोर्ड देखें{% else %}View Leaderboard{% endif %}</a></p>
         {% endif %}
 
         <div class="sq-share-section">
-          <span class="sq-share-title">Share Quiz</span>
+          <span class="sq-share-title">{% if lang == 'hi' %}क्विज़ साझा करें{% else %}Share Quiz{% endif %}</span>
           <div class="sq-share-grid">
             <a href="https://api.whatsapp.com/send?text={{ whatsapp_text|urlencode }}" target="_blank" class="sq-share-link sq-wa">
               <span>WhatsApp</span>
             </a>
             <button type="button" class="sq-share-link sq-copy" onclick="ssCopyShareLink(this)" data-url="{{ share_url }}?src=direct">
-              <span>Copy Link</span>
+              <span>{% if lang == 'hi' %}लिंक कॉपी करें{% else %}Copy Link{% endif %}</span>
             </button>
             <button type="button" class="sq-share-link sq-native" style="display:none;" onclick="ssNativeShare(this)"
               data-url="{{ share_url }}?src=direct" data-title="{{ quiz.title }}" data-text="{{ quiz.title }} — Sahyog Setu">
-              <span>Share</span>
+              <span>{% if lang == 'hi' %}साझा करें{% else %}Share{% endif %}</span>
             </button>
           </div>
         </div>
@@ -156,11 +209,33 @@
   .sq-meta{ display:flex; gap:12px; justify-content:center; margin-bottom:26px; flex-wrap:wrap; }
   .sq-chip{ flex:1; min-width:100px; max-width:130px; padding:14px 8px; border-radius:16px;
     background:rgba(20,48,31,.05); border:1px solid var(--line); box-shadow:var(--shadow-sm); }
+
+  .sq-lang-select{ display:flex; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .sq-lang-pill{
+    font-family:'Mukta'; font-weight:600; font-size:14px; text-decoration:none; color:var(--ink);
+    padding:8px 16px; border-radius:99px; border:1px solid var(--line);
+    background:rgba(20,48,31,.05); transition:filter .15s, transform .1s;
+  }
+  .sq-lang-pill:hover{ filter:brightness(0.97); }
+  .sq-lang-pill.active{
+    color:#10231a; font-weight:700; border-color:#8a6d16;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    box-shadow:0 4px 12px rgba(201,162,39,.3);
+  }
   .sq-chip .n{ font-family:'Fraunces'; font-size:25px; color:var(--yellow); line-height:1; }
   .sq-chip .l{ font-size:12px; color:var(--ink-faint); margin-top:4px; }
 
   .sq-land-warning{ background:rgba(247,201,72,.14); border:1px solid rgba(247,201,72,.4); color:var(--yellow);
     padding:14px 18px; border-radius:14px; margin-bottom:10px; font-weight:600; }
+
+  .sq-training-ask{ margin:4px 0 18px; text-align:left; }
+  .sq-training-label{ display:block; font-size:13px; font-weight:600; color:var(--ink-soft); margin-bottom:7px; }
+  .sq-training-select, .sq-training-other{
+    width:100%; padding:11px 13px; border-radius:10px; border:1px solid var(--line);
+    font-size:14px; font-family:inherit; color:var(--ink); background:#fff;
+  }
+  .sq-training-other{ margin-top:8px; }
+  .sq-training-select:focus, .sq-training-other:focus{ outline:2px solid var(--gold-hi); outline-offset:1px; border-color:var(--gold); }
 
   .sq-land-cta{ margin:8px 0 20px; }
   .sq-btn{

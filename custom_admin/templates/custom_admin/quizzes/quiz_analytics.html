@@ -54,7 +54,7 @@
                         <a href="{% url 'quiz_participants' %}" class="btn btn-outline-primary btn-sm">
                             <i class="feather icon-users"></i> Participants
                         </a>
-                        <a href="{% url 'quiz_analytics_export' %}?demo={{ include_demo|yesno:'1,0' }}" class="btn btn-outline-primary btn-sm">
+                        <a href="{% url 'quiz_analytics_export' %}?demo={{ include_demo|yesno:'1,0' }}{% if date_from %}&from={{ date_from }}{% endif %}{% if date_to %}&to={{ date_to }}{% endif %}" class="btn btn-outline-primary btn-sm">
                             <i class="feather icon-download"></i> Export CSV
                         </a>
                     </div>
@@ -63,17 +63,36 @@
         </div>
 
         {% if include_demo %}
-        <div class="qa-demo-banner">This includes demo data — <a href="?days={{ days }}">click here to see real data</a></div>
+        <div class="qa-demo-banner">This includes demo data — <a href="?days={{ days }}{% if date_from %}&from={{ date_from }}{% endif %}{% if date_to %}&to={{ date_to }}{% endif %}">click here to see real data</a></div>
         {% endif %}
 
         <div class="qa-toolbar">
             <div class="qa-days">
-                <a href="?days=7{% if include_demo %}&demo=1{% endif %}" class="{% if days == 7 %}active{% endif %}">7 days</a>
-                <a href="?days=30{% if include_demo %}&demo=1{% endif %}" class="{% if days == 30 %}active{% endif %}">30 days</a>
-                <a href="?days=90{% if include_demo %}&demo=1{% endif %}" class="{% if days == 90 %}active{% endif %}">90 days</a>
+                <a href="?days=7{% if include_demo %}&demo=1{% endif %}" class="{% if days == 7 and not custom_range %}active{% endif %}">7 days</a>
+                <a href="?days=30{% if include_demo %}&demo=1{% endif %}" class="{% if days == 30 and not custom_range %}active{% endif %}">30 days</a>
+                <a href="?days=90{% if include_demo %}&demo=1{% endif %}" class="{% if days == 90 and not custom_range %}active{% endif %}">90 days</a>
             </div>
+            <!-- Custom date range -- the 7/30/90 presets above never let an
+                 admin see e.g. "just the Bio-Enzyme workshop week" or any
+                 specific past period; every KPI/chart/export on this page
+                 silently stayed all-time regardless of which preset was
+                 clicked (only the trend chart ever actually used `days`).
+                 This form submits ?from=&to=, which _analytics_base_qs now
+                 applies everywhere (see views.py), and takes over from the
+                 presets the moment either date is set. -->
+            <form method="get" class="qa-range-form" style="display:flex; gap:8px; align-items:center;">
+                {% if include_demo %}<input type="hidden" name="demo" value="1">{% endif %}
+                <label style="font-size:12.5px; color:#8a8f98; font-weight:600;">From
+                    <input type="date" name="from" value="{{ date_from }}" style="padding:5px 8px; border-radius:6px; border:1px solid #e3e6ec; font-size:13px;">
+                </label>
+                <label style="font-size:12.5px; color:#8a8f98; font-weight:600;">To
+                    <input type="date" name="to" value="{{ date_to }}" style="padding:5px 8px; border-radius:6px; border:1px solid #e3e6ec; font-size:13px;">
+                </label>
+                <button type="submit" class="btn btn-primary btn-sm" style="padding:6px 16px;">Apply</button>
+                {% if custom_range %}<a href="?days={{ days }}{% if include_demo %}&demo=1{% endif %}" class="text-muted" style="font-size:12.5px;">Clear</a>{% endif %}
+            </form>
             {% if not include_demo %}
-            <a href="?days={{ days }}&demo=1" class="text-muted" style="font-size:12px;">Show demo data too</a>
+            <a href="?days={{ days }}{% if date_from %}&from={{ date_from }}{% endif %}{% if date_to %}&to={{ date_to }}{% endif %}&demo=1" class="text-muted" style="font-size:12px;">Show demo data too</a>
             {% endif %}
         </div>
 

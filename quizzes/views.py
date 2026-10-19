@@ -3,7 +3,8 @@ import html
 import logging
 import random
 import urllib.parse
-from datetime import timedelta
+from datetime import date, timedelta
+import difflib
 from io import BytesIO
 
 from django.db import transaction, IntegrityError
@@ -13,6 +14,7 @@ from django.urls import reverse
 from django.views import View
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate, login as auth_login, logout
 from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
@@ -26,7 +28,7 @@ from accounts.models import User
 from .certificates import generate_certificate_id
 from .cert_image import render_certificate_image, render_certificate_story_image
 from .imaging import validate_image_upload, validate_certificate_background, validate_banner_image
-from .models import Questions, Quizzes, QuizAttempt, QuestionResponse, Language, QuizTranslation, QuestionTranslation
+from .models import Questions, Quizzes, QuizAttempt, QuestionResponse, Language, QuizTranslation, QuestionTranslation, Training
 from .question_import import SAMPLE_ROWS, normalize_correct_option, parse_upload, validate_rows
 from .ai_generate import AIGenerationError, MAX_QUESTIONS_PER_BATCH, generate_questions, generate_explanation
 
@@ -800,6 +802,51 @@ def _source_session_key(quiz_id):
     return f"quiz_{quiz_id}_src"
 
 
+# Quiz question text/options/explanation are already fully language-aware
+# (Questions.text_for/options_for/explanation_for, backed by
+# QuestionTranslation rows) -- but every surrounding UI label/button in
+# quiz_take.html's gamified single-card experience was still hardcoded
+# English (confirmed by reading the template: "Question", "Score",
+# "Streak", "Correct", "Submitting your answer...", "Skip", "Next",
+# verdict text like "Wrong answer"/"Correct answer! ", etc.), so a
+# participant taking the quiz in Hindi still saw an all-English interface
+# around their Hindi questions. This is the one small, flat lookup table
+# needed to fix that -- deliberately NOT Django's full i18n/gettext
+# framework (locale files, {% trans %}, LocaleMiddleware) since this app's
+# only two "locales" are the quiz content's own per-question
+# Language/Translation rows and a single plain `lang` context string
+# already threaded through every quiz view; adding a second, heavier i18n
+# system alongside that one would be two parallel translation mechanisms
+# for the same feature. QuizTakeView resolves this down to one flat
+# {key: text} dict for the attempt's actual language and ships it inside
+# quiz_data (so the single-card JS UI can read it, e.g. data.strings.next)
+# -- quiz_take.html's server-rendered static labels use the same `lang`
+# context var directly via {% if lang == 'hi' %}, matching how the
+# language-pill selector in quiz_landing.html already branches on `lang`.
+QUIZ_UI_STRINGS = {
+    "submitting": {"en": "Submitting your answer…", "hi": "आपका उत्तर सबमिट हो रहा है…"},
+    "still_trying": {"en": "Still trying — checking your connection…", "hi": "फिर से कोशिश कर रहे हैं — आपका कनेक्शन जांच रहे हैं…"},
+    "network_error": {"en": "Answer could not be saved — check your network.", "hi": "उत्तर सेव नहीं हो सका — अपना नेटवर्क जांचें।"},
+    "skipped": {"en": "Skipped", "hi": "छोड़ दिया"},
+    "time_up": {"en": "Time up ⏳", "hi": "समय समाप्त ⏳"},
+    "correct_answer_exclaim": {"en": "Correct answer! 🎉", "hi": "सही उत्तर! 🎉"},
+    "wrong_answer": {"en": "Wrong answer", "hi": "गलत उत्तर"},
+    "correct_answer_prefix": {"en": "Correct answer: ", "hi": "सही उत्तर: "},
+    "next": {"en": "Next →", "hi": "अगला →"},
+    "view_results": {"en": "View Results 🏆", "hi": "परिणाम देखें 🏆"},
+    "seconds_left": {"en": " seconds left", "hi": " सेकंड शेष"},
+    "streak_pop": {"en": "🔥 Streak ×", "hi": "🔥 स्ट्रीक ×"},
+    "mute_sound": {"en": "Mute sound", "hi": "ध्वनि म्यूट करें"},
+    "unmute_sound": {"en": "Unmute sound", "hi": "ध्वनि चालू करें"},
+}
+
+
+def quiz_ui_strings(lang):
+    """Flat {key: text} for this one language, falling back to English for
+    any key that (shouldn't, but) lacks an entry for it."""
+    return {k: v.get(lang, v["en"]) for k, v in QUIZ_UI_STRINGS.items()}
+
+
 def clean_language(raw):
     """Whitelist ?lang= against active Language rows, same reasoning as
     clean_source above -- 'en' is always valid without a DB row (it's the
@@ -1014,6 +1061,14 @@ class QuizLandingView(View):
         take_url = reverse("quiz_take", kwargs={"quiz_id": quiz.id}) + f"?lang={lang}"
         login_url = f"{reverse('login')}?next={urllib.parse.quote(take_url)}"
 
+        # Trainer/Training (user-requested: let a participant say which
+        # training they attended before this quiz, and let each trainer
+        # later see only outcomes tied to THEIR OWN sessions -- see
+        # Training's own docstring and TrainerDashboardView). Listed here,
+        # newest first, so a trainer who just set up today's batch sees it
+        # offered to participants right away.
+        trainings = list(Training.objects.filter(quiz=quiz).order_by("-created_at").values("id", "name"))
+
         return render(request, "custom_admin/quizzes/quiz_landing.html", {
             "quiz": quiz,
             "share_url": share_url,
@@ -1027,6 +1082,7 @@ class QuizLandingView(View):
             "languages": available_languages,
             "quiz_title": quiz.title_for(lang),
             "quiz_description": quiz.description_for(lang),
+            "trainings": trainings,
         })
 
 
@@ -1096,7 +1152,26 @@ class QuizTakeView(View):
                 return redirect("quiz_result", pk=existing.id)
 
         lang = clean_language(request.GET.get("lang", "en"))
-        attempt = self._get_or_create_attempt(request, quiz, lang)
+
+        # Which training (if any) the participant said they attended --
+        # ?training=<Training id> from the landing page's dropdown (a real
+        # FK match, scoped to THIS quiz so one quiz's training id can't be
+        # misapplied to another), or free-text ?training_other= when they
+        # picked "Other"/typed their own instead of picking from the list.
+        # Resolved here (not inside _get_or_create_attempt) so an invalid/
+        # stale id just silently falls through to "no training" rather
+        # than ever raising -- same tolerance clean_language already
+        # applies to a bad ?lang=.
+        training_obj = None
+        raw_training_id = request.GET.get("training")
+        if raw_training_id:
+            try:
+                training_obj = Training.objects.filter(id=int(raw_training_id), quiz=quiz).first()
+            except (TypeError, ValueError):
+                training_obj = None
+        training_other = "" if training_obj else request.GET.get("training_other", "").strip()[:255]
+
+        attempt = self._get_or_create_attempt(request, quiz, lang, training_obj, training_other)
 
         # Resolve against attempt.question_ids -- NEVER request.session.
         # gunicorn restarts, session expiry, and a second browser tab all
@@ -1143,6 +1218,7 @@ class QuizTakeView(View):
             "answerUrl": reverse("quiz_answer", kwargs={"quiz_id": quiz.id}),
             "perQuestionSeconds": PER_QUESTION_SECONDS,
             "resumeIndex": resume_index,
+            "strings": quiz_ui_strings(attempt.language),
             "questions": [
                 {
                     "id": q.id,
@@ -1169,7 +1245,7 @@ class QuizTakeView(View):
             "languages": available_languages,
         })
 
-    def _get_or_create_attempt(self, request, quiz, lang="en"):
+    def _get_or_create_attempt(self, request, quiz, lang="en", training=None, training_other=""):
         # Reusing an in-progress attempt (rather than always creating a new
         # one) is what makes the timer un-resettable by just reloading the
         # page, AND is what makes a resubmit idempotent later in
@@ -1237,6 +1313,16 @@ class QuizTakeView(View):
                         live_lock=f"{request.user.id}_{quiz.id}",
                         source=clean_source(request.session.get(_source_session_key(quiz.id), "direct")),
                         language=lang,
+                        # Set once, at creation, same as source above -- a
+                        # resumed attempt keeps whatever training it was
+                        # first created with regardless of what the
+                        # landing page shows on a later reload (unlike
+                        # language just above, which a participant can
+                        # deliberately switch mid-resume -- there's no
+                        # equivalent "switch training" UI, so there's
+                        # nothing for a later value here to mean).
+                        training=training,
+                        training_other_text=training_other,
                         # Staff/admin accounts taking a quiz (testing a fix,
                         # spot-checking a new question set, etc.) is real
                         # activity but not a real PARTICIPANT -- several
@@ -1454,7 +1540,10 @@ class QuizResultView(View):
             if not option_num:
                 return None
             if question:
-                return getattr(question, f"option_{option_num}", None) or f"Option {option_num}"
+                for i, text in question.options_for(attempt.language):
+                    if i == option_num:
+                        return text or f"Option {option_num}"
+                return f"Option {option_num}"
             return f"Option {option_num}"
 
         review_items = []
@@ -1477,10 +1566,15 @@ class QuizResultView(View):
         # score to whoever clicks the link.
         share_url = request.build_absolute_uri(reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug}))
 
-        available_languages, translated_codes = available_languages_for(attempt.quiz)
-        lang = clean_language(request.GET.get("lang", "en"))
-        if lang != "en" and lang not in translated_codes:
-            lang = "en"
+        # The attempt's own language is permanently fixed once the attempt
+        # was created (see _get_or_create_attempt) -- re-reading ?lang= here
+        # was never actually carried through quiz_submit's redirect anyway
+        # (redirect("quiz_result", pk=attempt.pk) has no lang param), so this
+        # silently defaulted to English on every result page regardless of
+        # what language the quiz was taken in. attempt.language is simpler
+        # AND correct: a finished attempt's language can't change.
+        available_languages, _ = available_languages_for(attempt.quiz)
+        lang = attempt.language
         quiz_title = attempt.quiz.title_for(lang)
 
         whatsapp_text = (
@@ -1704,11 +1798,137 @@ def verify_certificate(request, cert_id):
 ALLOWED_ANALYTICS_DAYS = {7, 30, 90}
 
 
-def _analytics_base_qs(include_demo):
+def _analytics_base_qs(include_demo, date_from=None, date_to=None):
     qs = QuizAttempt.objects.filter(completed_at__isnull=False)
     if not include_demo:
         qs = qs.filter(is_demo=False)
+    # 2026-10-14 (user-reported: admin had no way to see analysis for a
+    # specific date/period -- every KPI/chart/export on this page was
+    # silently all-time regardless of the "7/30/90 days" links; those only
+    # ever scoped the daily trend chart below, never this base queryset).
+    if date_from:
+        qs = qs.filter(completed_at__date__gte=date_from)
+    if date_to:
+        qs = qs.filter(completed_at__date__lte=date_to)
     return qs
+
+
+def _parse_analytics_date(raw):
+    """?from=/?to= are plain YYYY-MM-DD (native <input type=date> format).
+    Invalid/missing -> None, same "just ignore it" tolerance clean_language
+    uses elsewhere on this page, rather than a 500 for a malformed query
+    string."""
+    if not raw:
+        return None
+    try:
+        return date.fromisoformat(raw)
+    except ValueError:
+        return None
+
+
+class TrainerLoginView(View):
+    """Separate login for Training.trainer accounts (user_type=3) --
+    deliberately NOT staff_member_required/adminLogin: a trainer must
+    never land on the full staff admin panel (Quizzes CRUD, Quiz
+    Analytics across every trainer's attempts, etc.), only their own
+    training's outcomes below. Mirrors custom_admin.views.LoginView's
+    exact pattern (same EmailBackEnd, same user_type-gate-after-auth
+    shape), just gated on 3 instead of 1."""
+
+    def get(self, request):
+        if request.user.is_authenticated and request.user.user_type == 3:
+            return redirect("trainer_dashboard")
+        return render(request, "custom_admin/quizzes/trainer_login.html")
+
+    def post(self, request):
+        username = request.POST.get("username", "").strip()
+        password = request.POST.get("password", "")
+        user = authenticate(request, username=username, password=password)
+        if user is not None and user.user_type == 3:
+            auth_login(request, user)
+            return redirect("trainer_dashboard")
+        return render(request, "custom_admin/quizzes/trainer_login.html", {
+            "error": "Invalid mobile number or password.",
+        })
+
+
+def trainer_logout(request):
+    logout(request)
+    return redirect("trainer_login")
+
+
+@login_required(login_url="trainer_login")
+def trainer_dashboard(request):
+    if request.user.user_type != 3:
+        messages.error(request, "You have to login as a trainer first.")
+        return redirect("trainer_login")
+
+    trainings = list(Training.objects.filter(trainer=request.user).select_related("quiz").order_by("-created_at"))
+
+    FUZZY_CUTOFF = 0.55  # tuned loose on purpose -- a trainer deciding
+    # "yes that's mine, just misspelled" is a cheap, low-stakes human
+    # judgment call (nothing is merged/written on their behalf, this is
+    # read-only grouping for display), so it's far better to show a
+    # borderline near-match for them to glance at and dismiss than to
+    # silently drop a real misspelled entry into "nobody's".
+
+    rows = []
+    for training in trainings:
+        base_qs = QuizAttempt.objects.filter(
+            training=training, completed_at__isnull=False, is_demo=False,
+        )
+        agg = base_qs.aggregate(
+            total=Count("id"), avg_pct=Avg("percentage"), passed=Count("id", filter=Q(passed=True)),
+        )
+        total = agg["total"] or 0
+        exact = {
+            "total": total,
+            "avg_pct": round(agg["avg_pct"] or 0, 1),
+            "pass_rate": round((agg["passed"] / total * 100), 1) if total else 0,
+        }
+
+        # Free-typed names for the SAME quiz, not yet tied to any Training
+        # row, that look like a misspelling of THIS training's own name --
+        # scoped per-quiz so one trainer's two differently-named sessions
+        # on two different quizzes can never bleed into each other.
+        other_qs = QuizAttempt.objects.filter(
+            quiz=training.quiz, training__isnull=True, completed_at__isnull=False, is_demo=False,
+        ).exclude(training_other_text="")
+        name_l = training.name.strip().lower()
+        fuzzy_variants = {}
+        fuzzy_attempt_ids = []
+        for a in other_qs.only("id", "training_other_text", "percentage", "passed"):
+            typed = a.training_other_text.strip()
+            if not typed:
+                continue
+            ratio = difflib.SequenceMatcher(None, typed.lower(), name_l).ratio()
+            if ratio >= FUZZY_CUTOFF:
+                fuzzy_variants.setdefault(typed, 0)
+                fuzzy_variants[typed] += 1
+                fuzzy_attempt_ids.append(a.id)
+        if fuzzy_attempt_ids:
+            f_qs = QuizAttempt.objects.filter(id__in=fuzzy_attempt_ids)
+            f_agg = f_qs.aggregate(avg_pct=Avg("percentage"), passed=Count("id", filter=Q(passed=True)))
+            fuzzy = {
+                "total": len(fuzzy_attempt_ids),
+                "avg_pct": round(f_agg["avg_pct"] or 0, 1),
+                "pass_rate": round((f_agg["passed"] / len(fuzzy_attempt_ids) * 100), 1),
+                "variants": sorted(fuzzy_variants.items(), key=lambda kv: -kv[1]),
+            }
+        else:
+            fuzzy = None
+
+        rows.append({
+            "training": training,
+            "exact": exact,
+            "fuzzy": fuzzy,
+            "combined_total": exact["total"] + (fuzzy["total"] if fuzzy else 0),
+        })
+
+    return render(request, "custom_admin/quizzes/trainer_dashboard.html", {
+        "trainer_name": request.user.name or request.user.mobile,
+        "rows": rows,
+    })
 
 
 @method_decorator(staff_member_required(login_url="adminLogin"), name="dispatch")
@@ -1724,7 +1944,18 @@ class QuizAnalyticsView(View):
         if days not in ALLOWED_ANALYTICS_DAYS:
             days = 30
 
-        base = _analytics_base_qs(include_demo)
+        # Custom date range (?from=&to=) takes over from the 7/30/90-day
+        # presets the moment either is given -- an admin picking an exact
+        # period (e.g. "just the Bio-Enzyme workshop week") wants that
+        # range respected everywhere on this page, not just the trend
+        # chart the old days-only filter secretly only ever touched.
+        date_from = _parse_analytics_date(request.GET.get("from"))
+        date_to = _parse_analytics_date(request.GET.get("to"))
+        if date_from and date_to and date_from > date_to:
+            date_from, date_to = date_to, date_from
+        custom_range = bool(date_from or date_to)
+
+        base = _analytics_base_qs(include_demo, date_from, date_to)
 
         # KPIs -- one aggregate call.
         kpi = base.aggregate(
@@ -1749,6 +1980,10 @@ class QuizAnalyticsView(View):
         response_qs = QuestionResponse.objects.filter(attempt__completed_at__isnull=False)
         if not include_demo:
             response_qs = response_qs.filter(attempt__is_demo=False)
+        if date_from:
+            response_qs = response_qs.filter(attempt__completed_at__date__gte=date_from)
+        if date_to:
+            response_qs = response_qs.filter(attempt__completed_at__date__lte=date_to)
 
         most_failed = list(
             response_qs.values("question_text_snapshot")
@@ -1774,10 +2009,23 @@ class QuizAnalyticsView(View):
         )
 
         # Daily attempts -- fill missing days with 0 so the line doesn't
-        # jump across gaps and lie about the trend.
-        since = timezone.localdate() - timedelta(days=days - 1)
+        # jump across gaps and lie about the trend. A custom date range
+        # (date_from/date_to) defines its own span directly; the preset
+        # "days" dropdown keeps its old today-minus-N-days window when no
+        # custom range is active. `base` is already scoped to date_from/
+        # date_to above, so re-filtering by completed_at__date__gte=since
+        # here would otherwise silently widen a custom range back out --
+        # only apply that extra bound in preset mode.
+        if custom_range:
+            since = date_from or (date_to - timedelta(days=days - 1))
+            until = date_to or timezone.localdate()
+            span = (until - since).days + 1
+        else:
+            since = timezone.localdate() - timedelta(days=days - 1)
+            until = timezone.localdate()
+            span = days
         daily_rows = (
-            base.filter(completed_at__date__gte=since)
+            (base if custom_range else base.filter(completed_at__date__gte=since))
             .annotate(day=TruncDate("completed_at"))
             .values("day")
             .annotate(n=Count("id"))
@@ -1785,7 +2033,7 @@ class QuizAnalyticsView(View):
         daily_by_date = {row["day"]: row["n"] for row in daily_rows}
         daily_series = [
             {"date": (since + timedelta(days=i)).isoformat(), "count": daily_by_date.get(since + timedelta(days=i), 0)}
-            for i in range(days)
+            for i in range(span)
         ]
 
         # Source breakdown -- "Traffic Sources" panel.
@@ -1814,6 +2062,9 @@ class QuizAnalyticsView(View):
             "registered_users": User.objects.filter(user_type=2).count(),
             "include_demo": include_demo,
             "days": days,
+            "date_from": date_from.isoformat() if date_from else "",
+            "date_to": date_to.isoformat() if date_to else "",
+            "custom_range": custom_range,
             "chart_data": chart_data,
         })
 
@@ -1830,7 +2081,9 @@ class _Echo:
 @staff_member_required(login_url="adminLogin")
 def quiz_analytics_export(request):
     include_demo = request.GET.get("demo") == "1"
-    qs = _analytics_base_qs(include_demo).select_related("user", "quiz").order_by("id").iterator()
+    date_from = _parse_analytics_date(request.GET.get("from"))
+    date_to = _parse_analytics_date(request.GET.get("to"))
+    qs = _analytics_base_qs(include_demo, date_from, date_to).select_related("user", "quiz").order_by("id").iterator()
 
     def rows():
         writer = csv.writer(_Echo())

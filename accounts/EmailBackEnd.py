@@ -13,7 +13,7 @@ class EmailBackEnd(ModelBackend):
             # case mismatch here would otherwise fail a login that should
             # succeed. mobile itself is untouched (digits only, case is
             # never in play).
-            user = UserModel.objects.get(Q(Q(mobile=username) | Q(email__iexact=username))  & Q(Q(user_type = 2) | Q(user_type = 1)))
+            user = UserModel.objects.get(Q(Q(mobile=username) | Q(email__iexact=username))  & Q(Q(user_type = 2) | Q(user_type = 1) | Q(user_type = 3)))
             # Hundreds of user_type=2 rows exist with password=None -- old
             # lightweight identity records the React SPA's separate
             # client_id-based user-sync endpoint (apis.user()) created for

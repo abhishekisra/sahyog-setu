@@ -12,7 +12,7 @@
   <header class="sq-head">
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-      <a href="/" class="sq-back-link">Back to Home</a>
+      <a href="/" class="sq-back-link">{% if lang == 'hi' %}होम पर वापस जाएं{% else %}Back to Home{% endif %}</a>
     </div>
   </header>
 
@@ -21,50 +21,50 @@
       <div class="sq-gold-line"></div>
       <div class="sq-result-body">
         <div class="sq-rseal">
-          <div><div class="sq-pct">{{ percentage|floatformat:0 }}%</div><div class="sq-pl">Score</div></div>
+          <div><div class="sq-pct">{{ percentage|floatformat:0 }}%</div><div class="sq-pl">{% if lang == 'hi' %}स्कोर{% else %}Score{% endif %}</div></div>
         </div>
-        <h1 class="sq-rtitle">{% if attempt.passed %}Congratulations!{% else %}Keep Practicing!{% endif %}</h1>
-        <p class="sq-rmsg">You scored <strong>{{ marks }}/{{ total_marks }}</strong> marks in <strong>{{ quiz_title }}</strong>.</p>
+        <h1 class="sq-rtitle">{% if attempt.passed %}{% if lang == 'hi' %}बधाई हो!{% else %}Congratulations!{% endif %}{% else %}{% if lang == 'hi' %}अभ्यास जारी रखें!{% else %}Keep Practicing!{% endif %}{% endif %}</h1>
+        <p class="sq-rmsg">{% if lang == 'hi' %}आपने <strong>{{ quiz_title }}</strong> में <strong>{{ marks }}/{{ total_marks }}</strong> अंक प्राप्त किए।{% else %}You scored <strong>{{ marks }}/{{ total_marks }}</strong> marks in <strong>{{ quiz_title }}</strong>.{% endif %}</p>
 
         <div class="sq-breakdown">
-          <div class="sq-bd sq-g"><div class="bn">{{ correct }}</div><div class="bl">Correct</div></div>
-          <div class="sq-bd sq-r"><div class="bn">{{ wrong }}</div><div class="bl">Wrong</div></div>
-          <div class="sq-bd sq-y"><div class="bn">{{ missed }}</div><div class="bl">Missed</div></div>
+          <div class="sq-bd sq-g"><div class="bn">{{ correct }}</div><div class="bl">{% if lang == 'hi' %}सही{% else %}Correct{% endif %}</div></div>
+          <div class="sq-bd sq-r"><div class="bn">{{ wrong }}</div><div class="bl">{% if lang == 'hi' %}गलत{% else %}Wrong{% endif %}</div></div>
+          <div class="sq-bd sq-y"><div class="bn">{{ missed }}</div><div class="bl">{% if lang == 'hi' %}छूटे{% else %}Missed{% endif %}</div></div>
         </div>
 
         {% if attempt.passed %}
         <div class="sq-notice sq-notice-pass">
-          <p>You passed this quiz with <strong>{{ percentage|floatformat:1 }}%</strong> (pass mark was {{ pass_threshold }}%).</p>
+          <p>{% if lang == 'hi' %}आप यह क्विज़ <strong>{{ percentage|floatformat:1 }}%</strong> अंकों के साथ उत्तीर्ण हुए (पास होने के लिए {{ pass_threshold }}% आवश्यक था)।{% else %}You passed this quiz with <strong>{{ percentage|floatformat:1 }}%</strong> (pass mark was {{ pass_threshold }}%).{% endif %}</p>
           {% if attempt.quiz.certificate_enabled and percentage >= certificate_min_percentage %}
-          <a href="{% url 'quiz_certificate' attempt.id %}" class="sq-btn-outline">🏆 View Certificate</a>
+          <a href="{% url 'quiz_certificate' attempt.id %}" class="sq-btn-outline">{% if lang == 'hi' %}🏆 प्रमाणपत्र देखें{% else %}🏆 View Certificate{% endif %}</a>
           {% endif %}
         </div>
         {% else %}
         <div class="sq-notice">
-          <p>You need at least <strong>{{ pass_threshold }}%</strong> to pass. Keep practicing!</p>
-          <a href="{% url 'quiz_take' attempt.quiz.id %}" class="sq-btn-outline">Try Again</a>
+          <p>{% if lang == 'hi' %}पास होने के लिए कम से कम <strong>{{ pass_threshold }}%</strong> आवश्यक है। अभ्यास जारी रखें!{% else %}You need at least <strong>{{ pass_threshold }}%</strong> to pass. Keep practicing!{% endif %}</p>
+          <a href="{% url 'quiz_take' attempt.quiz.id %}" class="sq-btn-outline">{% if lang == 'hi' %}फिर से प्रयास करें{% else %}Try Again{% endif %}</a>
         </div>
         {% endif %}
 
         <div class="sq-share-section">
-          <span class="sq-share-title">Share Quiz</span>
+          <span class="sq-share-title">{% if lang == 'hi' %}क्विज़ साझा करें{% else %}Share Quiz{% endif %}</span>
           <div class="sq-share-grid">
             <a href="https://api.whatsapp.com/send?text={{ whatsapp_text|urlencode }}" target="_blank" class="sq-share-link sq-wa">
               <span>WhatsApp</span>
             </a>
             <button type="button" class="sq-share-link" onclick="ssCopyShareLink(this)" data-url="{{ share_url }}?src=direct">
-              <span>Copy Link</span>
+              <span>{% if lang == 'hi' %}लिंक कॉपी करें{% else %}Copy Link{% endif %}</span>
             </button>
             <button type="button" class="sq-share-link" style="display:none;" onclick="ssNativeShare(this)"
               data-url="{{ share_url }}?src=direct" data-title="{{ quiz_title }}" data-text="{{ whatsapp_text }}">
-              <span>Share</span>
+              <span>{% if lang == 'hi' %}साझा करें{% else %}Share{% endif %}</span>
             </button>
           </div>
         </div>
 
         {% if responses %}
         <div class="sq-review">
-          <div class="sq-rvh">All Questions</div>
+          <div class="sq-rvh">{% if lang == 'hi' %}सभी प्रश्न{% else %}All Questions{% endif %}</div>
           <div class="sq-qnav">
             {% for response in responses %}
             <span class="sq-ncell {% if response.is_correct %}sq-correct{% elif response.selected_option %}sq-wrong{% else %}sq-missed{% endif %}"
@@ -72,9 +72,9 @@
             {% endfor %}
           </div>
           <div class="sq-navlegend">
-            <span><i class="sq-ndot sq-c"></i>Correct</span>
-            <span><i class="sq-ndot sq-w"></i>Wrong</span>
-            <span><i class="sq-ndot sq-m"></i>Missed</span>
+            <span><i class="sq-ndot sq-c"></i>{% if lang == 'hi' %}सही{% else %}Correct{% endif %}</span>
+            <span><i class="sq-ndot sq-w"></i>{% if lang == 'hi' %}गलत{% else %}Wrong{% endif %}</span>
+            <span><i class="sq-ndot sq-m"></i>{% if lang == 'hi' %}छूटे{% else %}Missed{% endif %}</span>
           </div>
 
           <!-- Answer review -- the grid above only ever showed a color per
@@ -82,7 +82,7 @@
                lists every question with its own answer vs the correct one,
                open by default for wrong/missed so the participant sees
                exactly what to revisit, collapsed for ones already correct. -->
-          <div class="sq-rvh sq-rvh-2">Answer Review</div>
+          <div class="sq-rvh sq-rvh-2">{% if lang == 'hi' %}उत्तर समीक्षा{% else %}Answer Review{% endif %}</div>
           <div class="sq-answer-review">
             {% for item in review_items %}
             <div class="sq-rv-item sq-rv-{{ item.status }} {% if item.status != 'correct' %}sq-rv-open{% endif %}" id="sqReviewQ{{ item.num }}">
@@ -90,22 +90,22 @@
                 <span class="sq-rv-num">{{ item.num }}</span>
                 <span class="sq-rv-q">{{ item.question_text }}</span>
                 <span class="sq-rv-tag">
-                  {% if item.status == 'correct' %}Correct
-                  {% elif item.status == 'wrong' %}Wrong
-                  {% else %}Skipped{% endif %}
+                  {% if item.status == 'correct' %}{% if lang == 'hi' %}सही{% else %}Correct{% endif %}
+                  {% elif item.status == 'wrong' %}{% if lang == 'hi' %}गलत{% else %}Wrong{% endif %}
+                  {% else %}{% if lang == 'hi' %}छोड़ दिया{% else %}Skipped{% endif %}{% endif %}
                 </span>
                 <i class="sq-rv-chevron">▾</i>
               </button>
               <div class="sq-rv-body">
                 {% if item.your_answer %}
                 <p class="sq-rv-line {% if item.status == 'wrong' %}sq-rv-bad{% endif %}">
-                  <span>Your answer:</span> {{ item.your_answer }}
+                  <span>{% if lang == 'hi' %}आपका उत्तर:{% else %}Your answer:{% endif %}</span> {{ item.your_answer }}
                 </p>
                 {% else %}
-                <p class="sq-rv-line sq-rv-bad"><span>Your answer:</span> Not answered</p>
+                <p class="sq-rv-line sq-rv-bad"><span>{% if lang == 'hi' %}आपका उत्तर:{% else %}Your answer:{% endif %}</span> {% if lang == 'hi' %}उत्तर नहीं दिया{% else %}Not answered{% endif %}</p>
                 {% endif %}
                 {% if item.status != 'correct' %}
-                <p class="sq-rv-line sq-rv-good"><span>Correct answer:</span> {{ item.correct_answer }}</p>
+                <p class="sq-rv-line sq-rv-good"><span>{% if lang == 'hi' %}सही उत्तर:{% else %}Correct answer:{% endif %}</span> {{ item.correct_answer }}</p>
                 {% endif %}
                 {% if item.explanation %}
                 <p class="sq-rv-explain">{{ item.explanation }}</p>

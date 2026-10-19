@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trainer Login — Sahyog Setu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5ef; --card:#ffffff; --ink:#17281f; --ink-soft:rgba(23,40,31,.65);
+    --gold:#c9a227; --gold-hi:#ffd75e; --line:rgba(20,48,31,.12);
+    --red:#c0392b;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0; min-height:100dvh; display:flex; align-items:center; justify-content:center;
+    background:var(--bg); font-family:'Mukta',system-ui,sans-serif; color:var(--ink);
+    padding:16px;
+  }
+  .tl-card{
+    width:100%; max-width:380px; background:var(--card); border-radius:18px;
+    border:1px solid var(--line); box-shadow:0 20px 50px rgba(20,48,31,.08);
+    padding:32px 28px;
+  }
+  .tl-seal{
+    width:44px; height:44px; border-radius:12px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold)); color:#10231a; font-weight:800;
+    font-family:'Fraunces',serif; font-size:19px; margin:0 auto 14px;
+  }
+  .tl-title{ font-family:'Fraunces',serif; font-weight:700; font-size:20px; text-align:center; margin:0 0 4px; }
+  .tl-sub{ text-align:center; color:var(--ink-soft); font-size:13.5px; margin:0 0 24px; }
+  .tl-label{ font-size:12.5px; font-weight:600; color:var(--ink-soft); display:block; margin-bottom:6px; }
+  .tl-field{ margin-bottom:16px; }
+  .tl-input{
+    width:100%; padding:11px 13px; border-radius:10px; border:1px solid var(--line);
+    font-size:14.5px; font-family:inherit; color:var(--ink);
+  }
+  .tl-input:focus{ outline:2px solid var(--gold-hi); outline-offset:1px; border-color:var(--gold); }
+  .tl-btn{
+    width:100%; padding:12px; border:none; border-radius:12px; cursor:pointer;
+    font-family:'Mukta',sans-serif; font-weight:700; font-size:15px; color:#10231a;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold));
+    border-bottom:3px solid #8a6d16; margin-top:4px;
+  }
+  .tl-btn:active{ transform:translateY(2px); border-bottom-width:1px; }
+  .tl-error{
+    background:rgba(192,57,43,.08); border:1px solid rgba(192,57,43,.3); color:var(--red);
+    padding:10px 13px; border-radius:10px; font-size:13px; margin-bottom:16px;
+  }
+</style>
+</head>
+<body>
+  <div class="tl-card">
+    <div class="tl-seal">स</div>
+    <h1 class="tl-title">Trainer Login</h1>
+    <p class="tl-sub">Sahyog Setu — see your own training's quiz results</p>
+
+    {% if error %}<div class="tl-error">{{ error }}</div>{% endif %}
+
+    <form method="post">
+      {% csrf_token %}
+      <div class="tl-field">
+        <label class="tl-label" for="tl-username">Mobile Number</label>
+        <input class="tl-input" type="text" id="tl-username" name="username" inputmode="numeric" autocomplete="username" required autofocus>
+      </div>
+      <div class="tl-field">
+        <label class="tl-label" for="tl-password">Password</label>
+        <input class="tl-input" type="password" id="tl-password" name="password" autocomplete="current-password" required>
+      </div>
+      <button type="submit" class="tl-btn">Log In</button>
+    </form>
+  </div>
+</body>
+</html>

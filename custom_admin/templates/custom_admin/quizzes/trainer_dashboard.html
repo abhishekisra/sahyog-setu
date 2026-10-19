@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trainer Dashboard — Sahyog Setu</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f7f5ef; --card:#ffffff; --ink:#17281f; --ink-soft:rgba(23,40,31,.65); --ink-faint:rgba(23,40,31,.45);
+    --gold:#c9a227; --gold-hi:#ffd75e; --line:rgba(20,48,31,.12);
+    --green:#1a8a4f; --amber:#a5811c;
+  }
+  *{box-sizing:border-box}
+  body{ margin:0; background:var(--bg); font-family:'Mukta',system-ui,sans-serif; color:var(--ink); }
+  .td-head{
+    display:flex; align-items:center; justify-content:space-between; gap:12px;
+    padding:16px 20px; background:#fff; border-bottom:1px solid var(--line);
+  }
+  .td-brand{ display:flex; align-items:center; gap:10px; }
+  .td-seal{
+    width:36px; height:36px; border-radius:10px; display:flex; align-items:center; justify-content:center;
+    background:linear-gradient(180deg,var(--gold-hi),var(--gold)); color:#10231a; font-weight:800;
+    font-family:'Fraunces',serif; font-size:16px;
+  }
+  .td-brand b{ font-family:'Fraunces',serif; font-size:16px; }
+  .td-who{ font-size:13px; color:var(--ink-soft); }
+  .td-logout{ font-size:13px; color:var(--ink-soft); text-decoration:none; border:1px solid var(--line); padding:7px 14px; border-radius:99px; }
+  .td-logout:hover{ border-color:var(--gold); color:var(--ink); }
+
+  .td-wrap{ max-width:860px; margin:0 auto; padding:24px 16px 60px; }
+  .td-title{ font-family:'Fraunces',serif; font-size:22px; font-weight:700; margin:0 0 4px; }
+  .td-sub{ color:var(--ink-soft); font-size:13.5px; margin:0 0 24px; }
+
+  .td-empty{
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:40px 24px;
+    text-align:center; color:var(--ink-soft);
+  }
+
+  .td-card{
+    background:#fff; border:1px solid var(--line); border-radius:16px; padding:20px 22px; margin-bottom:18px;
+  }
+  .td-card-head{ display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:8px; margin-bottom:14px; }
+  .td-card-title{ font-family:'Fraunces',serif; font-weight:700; font-size:17px; }
+  .td-card-quiz{ font-size:12.5px; color:var(--ink-soft); }
+
+  .td-stats{ display:grid; grid-template-columns:repeat(auto-fit,minmax(100px,1fr)); gap:10px; margin-bottom:10px; }
+  .td-stat{ background:rgba(20,48,31,.04); border-radius:12px; padding:12px 10px; text-align:center; }
+  .td-stat .n{ font-family:'Fraunces',serif; font-size:22px; font-weight:700; }
+  .td-stat .l{ font-size:11.5px; color:var(--ink-soft); margin-top:2px; }
+
+  .td-fuzzy{
+    margin-top:14px; padding-top:14px; border-top:1px dashed var(--line);
+  }
+  .td-fuzzy-title{ font-size:12.5px; font-weight:700; color:var(--amber); margin-bottom:8px; }
+  .td-variant{
+    display:inline-flex; align-items:center; gap:6px; background:rgba(165,129,28,.1);
+    border:1px solid rgba(165,129,28,.25); border-radius:99px; padding:5px 12px; font-size:12.5px;
+    margin:0 6px 6px 0;
+  }
+  .td-variant b{ color:var(--amber); }
+</style>
+</head>
+<body>
+  <header class="td-head">
+    <div class="td-brand">
+      <div class="td-seal">स</div>
+      <b>Sahyog Setu</b>
+    </div>
+    <div style="display:flex;align-items:center;gap:14px;">
+      <span class="td-who">{{ trainer_name }}</span>
+      <a href="{% url 'trainer_logout' %}" class="td-logout">Log Out</a>
+    </div>
+  </header>
+
+  <div class="td-wrap">
+    <h1 class="td-title">Your Training Outcomes</h1>
+    <p class="td-sub">Results for every training session you've conducted, as reported by participants.</p>
+
+    {% if not rows %}
+    <div class="td-empty">No training sessions set up for you yet.</div>
+    {% endif %}
+
+    {% for row in rows %}
+    <div class="td-card">
+      <div class="td-card-head">
+        <div>
+          <div class="td-card-title">{{ row.training.name }}</div>
+          <div class="td-card-quiz">{{ row.training.quiz.title }}</div>
+        </div>
+      </div>
+
+      <div class="td-stats">
+        <div class="td-stat"><div class="n">{{ row.exact.total }}</div><div class="l">Attempts</div></div>
+        <div class="td-stat"><div class="n">{{ row.exact.avg_pct }}%</div><div class="l">Avg Score</div></div>
+        <div class="td-stat"><div class="n">{{ row.exact.pass_rate }}%</div><div class="l">Pass Rate</div></div>
+      </div>
+
+      {% if row.fuzzy %}
+      <div class="td-fuzzy">
+        <div class="td-fuzzy-title">⚠ {{ row.fuzzy.total }} more attempt(s) where the participant typed a similar-looking training name — likely the same training, spelled differently</div>
+        <div style="margin-bottom:10px;">
+          {% for variant, count in row.fuzzy.variants %}
+          <span class="td-variant">"{{ variant }}" <b>×{{ count }}</b></span>
+          {% endfor %}
+        </div>
+        <div class="td-stats">
+          <div class="td-stat"><div class="n">{{ row.fuzzy.avg_pct }}%</div><div class="l">Avg Score (these)</div></div>
+          <div class="td-stat"><div class="n">{{ row.fuzzy.pass_rate }}%</div><div class="l">Pass Rate (these)</div></div>
+        </div>
+      </div>
+      {% endif %}
+    </div>
+    {% endfor %}
+  </div>
+</body>
+</html>

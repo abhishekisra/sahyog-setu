@@ -21,6 +21,9 @@ urlpatterns = [
     # "/", and {% url %}/reverse() interpolate it back out the same way.
     path('certificate/verify/<path:cert_id>/', views.verify_certificate, name='verify_certificate'),
     path('quiz-analytics/', views.QuizAnalyticsView.as_view(), name='quiz_analytics'),
+    path('trainer/login/', views.TrainerLoginView.as_view(), name='trainer_login'),
+    path('trainer/logout/', views.trainer_logout, name='trainer_logout'),
+    path('trainer/', views.trainer_dashboard, name='trainer_dashboard'),
     path('quiz-analytics/export/', views.quiz_analytics_export, name='quiz_analytics_export'),
     path('quiz-analytics/participants/', views.ParticipantsListView.as_view(), name='quiz_participants'),
     path('quiz-analytics/participants/<int:user_id>/', views.ParticipantDetailView.as_view(), name='quiz_participant_detail'),
