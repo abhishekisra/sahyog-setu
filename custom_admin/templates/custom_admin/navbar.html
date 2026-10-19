@@ -35,9 +35,8 @@
                 </div>
                 <div class="collapse" id="nav-user-link">
                     <ul class="list-inline">
-                        <li class="list-inline-item"><a href="user-profile.html" data-toggle="tooltip" title="View Profile"><i class="feather icon-user"></i></a></li>
-                        <li class="list-inline-item"><a href="email_inbox.html"><i class="feather icon-mail" data-toggle="tooltip" title="Messages"></i><small class="badge badge-pill badge-primary">5</small></a></li>
-                        <li class="list-inline-item"><a href="auth-signin.html" data-toggle="tooltip" title="Logout" class="text-danger"><i class="feather icon-power"></i></a></li>
+                        <li class="list-inline-item"><a href="/admin/account/change-password" data-toggle="tooltip" title="Change Password"><i class="feather icon-lock"></i></a></li>
+                        <li class="list-inline-item"><a href="/admin/logout" data-toggle="tooltip" title="Logout" class="text-danger"><i class="feather icon-power"></i></a></li>
                     </ul>
                 </div>
             </div>
@@ -143,6 +142,11 @@
             </li>
         </ul>
         <ul class="navbar-nav ml-auto">
+            <li>
+                <a href="/admin/account/change-password" title="Change Password" style="margin-right: 14px;">
+                    <i class="feather icon-lock"></i>
+                </a>
+            </li>
             <li>
                 <div class="dropdown drp-user">
                     <a href="/admin/logout" class="dud-logout" title="Logout">

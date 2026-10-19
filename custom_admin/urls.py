@@ -30,7 +30,20 @@ urlpatterns = [
 
     path('login', views.LoginView.as_view(), name="adminLogin"),
     path('logout', views.LogoutView.as_view(), name="adminLogout"),
-    path('dashboard', views.dashboard, name="adminDashboard"),   
+    path('dashboard', views.dashboard, name="adminDashboard"),
+
+    # Forgot password (logged-OUT admin, OTP via email) -- views existed
+    # since before but had no urls.py entry at all, so this whole flow
+    # (including login.html's own "Forgot password? Reset" link) 404'd.
+    path('reset-password', views.resetPassword, name="adminResetPassword"),
+    path('request-otp', views.requestOtp, name="adminRequestOtp"),
+    path('verify-otp', views.verifyOtp, name="adminVerifyOtp"),
+    path('change-password', views.changePassword, name="adminForgotChangePassword"),
+
+    # Change password (logged-IN admin, current-password based) -- new,
+    # separate path from the forgot-password flow's own '/change-password'
+    # AJAX step above so neither breaks the other.
+    path('account/change-password', views.ChangePasswordView.as_view(), name="adminChangePassword"),
 
     path('news', News.NewsView.as_view(), name="adminNews"),
     path('news/<int:id>', News.updateNews, name="adminUpdateNews"),
