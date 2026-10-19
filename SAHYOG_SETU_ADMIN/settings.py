@@ -83,6 +83,19 @@ CSRF_COOKIE_SECURE = True
 # secure-cookie flags above and makes build_absolute_uri() emit http:// links.
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
+# 2026-10-19 (security headers audit, "aur kya improve kare" item #5):
+# was completely missing -- nginx already force-redirects http -> https for
+# this domain, so this just tells the BROWSER to skip that redirect round
+# trip on every future visit and go straight to https, closing the one-time
+# SSL-stripping window a plain redirect still leaves open on a user's very
+# first visit (or any visit where a cached http:// link/bookmark is used).
+# Safe to enable now (not something to roll out blindly) because every
+# cookie already requires https (*_COOKIE_SECURE above) and the whole site
+# has been https-only for a while -- there's no remaining legitimate http
+# traffic this would break.
+SECURE_HSTS_SECONDS = 31536000
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+
 
 
 INSTALLED_APPS = [
