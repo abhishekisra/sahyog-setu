@@ -57,7 +57,14 @@ class Schemes(TranslatableMixin, models.Model):
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now_add= True)
 
-
+    class Meta:
+        # 2026-10-19 (VPS indexing audit): the scheme-count queries filter on
+        # status + scheme_type / business_related and were full-scanning the
+        # table (performance_schema: up to ~4.6k rows examined per row sent).
+        indexes = [
+            models.Index(fields=['status', 'scheme_type'], name='scheme_status_type_idx'),
+            models.Index(fields=['status', 'business_related'], name='scheme_status_biz_idx'),
+        ]
 
 
 class SchemeTranslation(models.Model):
