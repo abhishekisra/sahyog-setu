@@ -9,6 +9,9 @@ from accounts.EmailBackEnd import EmailBackEnd
 from django.contrib.auth import login, logout
 from django.contrib import messages
 from django.views.decorators.csrf import csrf_exempt
+from django.core.cache import cache
+import hmac
+import time
 from rest_framework import status
 from accounts.models import User
 from django.template.loader import render_to_string
@@ -32,6 +35,15 @@ from entrepreneurship.marketing.models import Marketing
 from entrepreneurship.organization_registrations.models import Organization_Registration
 from helplines.models import Helplines
 
+# 2026-10-19 (security audit): the admin login and the forgot-password OTP
+# check had no attempt limit at all, so the admin password (or the 6-digit
+# OTP, which also never expired) could be brute-forced. Same cache-counter
+# pattern as accounts.views.LoginView uses for the public login.
+ADMIN_LOGIN_ATTEMPT_LIMIT = 5
+ADMIN_LOGIN_ATTEMPT_WINDOW = 15 * 60  # seconds
+OTP_ATTEMPT_LIMIT = 5
+OTP_TTL = 15 * 60  # seconds
+
 @method_decorator(csrf_exempt, name='post')
 class LoginView(View):
     def get(self, request):
@@ -41,15 +53,17 @@ class LoginView(View):
     def post(self, request):
         emailId = request.POST['emailId']
         password = request.POST['password']
+        cache_key = f"admin_login_attempts_{emailId.strip().lower()}"
+        attempts = cache.get(cache_key, 0)
+        if attempts >= ADMIN_LOGIN_ATTEMPT_LIMIT:
+            return render(request, 'custom_admin/login.html', {'error' : "Too many failed attempts. Please try again after 15 minutes."})
         user = EmailBackEnd().authenticate(request, username = emailId, password =password)
-        if user is not None:
-            if user.user_type == 1:
-                login(request, user)
-                return redirect('adminDashboard')
-            else:
-                return render(request, 'custom_admin/login.html', {'error' : "Invalid email Id or password"})
-        else:
-            return render(request, 'custom_admin/login.html', {'error' : "Invalid email Id or password"})
+        if user is not None and user.user_type == 1:
+            cache.delete(cache_key)
+            login(request, user)
+            return redirect('adminDashboard')
+        cache.set(cache_key, attempts + 1, ADMIN_LOGIN_ATTEMPT_WINDOW)
+        return render(request, 'custom_admin/login.html', {'error' : "Invalid email Id or password"})
 
 
 
@@ -112,6 +126,8 @@ def requestOtp(request):
         otp = ''.join((secrets.choice('1234567890') for i in range(6)))
         request.session['otp'] = otp
         request.session['otp_user_id'] = user.id
+        request.session['otp_created'] = time.time()
+        request.session['otp_fails'] = 0
         # otp_verified intentionally NOT set here -- verifyOtp is the only
         # place that may set it, and changePassword below now requires it.
         request.session.pop('otp_verified', None)
@@ -138,11 +154,23 @@ def verifyOtp(request):
     # ever requested in THIS session used to raise an uncaught KeyError here
     # (500, not the "OTP Not Matched" message this flow is supposed to show).
     session_otp = request.session.get('otp')
-    otp = request.POST.get('otp')
-    if session_otp and otp == session_otp:
+    otp = request.POST.get('otp') or ''
+    if session_otp and time.time() - request.session.get('otp_created', 0) > OTP_TTL:
+        for k in ('otp', 'otp_user_id', 'otp_created', 'otp_fails'):
+            request.session.pop(k, None)
+        session_otp = None
+    if session_otp and hmac.compare_digest(otp, session_otp):
+        request.session.pop('otp_fails', None)
         request.session['otp_verified'] = True
         return JsonResponse({'message': "OTP Matched", 'status': status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
     else:
+        if session_otp:
+            fails = request.session.get('otp_fails', 0) + 1
+            request.session['otp_fails'] = fails
+            if fails >= OTP_ATTEMPT_LIMIT:
+                for k in ('otp', 'otp_user_id', 'otp_created', 'otp_fails'):
+                    request.session.pop(k, None)
+                return JsonResponse({'message': "Too many wrong attempts. Please request a new OTP.", 'status': status.HTTP_400_BAD_REQUEST}, safe=False, status=status.HTTP_400_BAD_REQUEST)
         return JsonResponse({'message': "OTP Not Matched", 'status': status.HTTP_400_BAD_REQUEST}, safe=False, status=status.HTTP_400_BAD_REQUEST)
 
 
