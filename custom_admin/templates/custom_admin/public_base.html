@@ -322,6 +322,15 @@
             #ssq-main-nav a { font-size: 13px; padding: 10px 11px; }
             #ssq-nav-lang select { max-width: 92px; font-size: 12px; }
         }
+        /* 769-1499px (tablet landscape / laptop): the 10 links need ~1360px
+           at 14px, so on a 1366 laptop the last ones ("Announcements",
+           "Helpline") were cut off by the hidden-scrollbar strip. Tighter
+           links fit one row at 1366; narrower screens wrap to a 2nd row
+           instead of hiding items. */
+        @media (min-width: 769px) and (max-width: 1499px) {
+            #ssq-nav-links { flex-wrap: wrap; overflow: visible; gap: 0 2px; }
+            #ssq-main-nav a { font-size: 13.5px; padding: 11px 9px; }
+        }
 
         /* Mobile bottom app-nav (2026-09-20, "bilkul application jaisa
            dikhe") -- same #ssq-bottom-nav as the React homepage's own copy

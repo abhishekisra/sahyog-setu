@@ -1076,6 +1076,9 @@ class QuizLandingView(View):
             "og_image": og_image,
             "question_count": question_count,
             "total_marks": question_count * MARKS_PER_QUESTION,
+            # Same constant the quiz-take timer uses -- the chip was a
+            # hard-coded "20s" left over from before the timer became 35s.
+            "per_question_seconds": PER_QUESTION_SECONDS,
             "take_url": take_url,
             "login_url": login_url,
             "lang": lang,

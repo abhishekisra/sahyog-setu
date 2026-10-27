@@ -52,7 +52,7 @@
 
         <div class="sq-meta">
           <div class="sq-chip"><div class="n">{{ question_count }}</div><div class="l">{% if lang == 'hi' %}प्रश्न{% else %}Questions{% endif %}</div></div>
-          <div class="sq-chip"><div class="n">20s</div><div class="l">{% if lang == 'hi' %}प्रति प्रश्न{% else %}per Question{% endif %}</div></div>
+          <div class="sq-chip"><div class="n">{{ per_question_seconds }}s</div><div class="l">{% if lang == 'hi' %}प्रति प्रश्न{% else %}per Question{% endif %}</div></div>
           <div class="sq-chip"><div class="n">{{ total_marks }}</div><div class="l">{% if lang == 'hi' %}कुल अंक{% else %}Total Marks{% endif %}</div></div>
           <div class="sq-chip"><div class="n">{{ quiz.pass_threshold }}%</div><div class="l">{% if lang == 'hi' %}पास होने के लिए{% else %}to Pass{% endif %}</div></div>
         </div>
