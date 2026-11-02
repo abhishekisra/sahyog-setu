@@ -508,7 +508,11 @@ def scheme_finder(request):
     total_schemes = Schemes.objects.filter(status=1).count()
     total_categories = Categories.objects.filter(status=1).count()
     share_scheme = None
-    scheme_id = request.GET.get('scheme')
+    # Only a plain number is a real scheme id -- crawlers that scrape the
+    # homepage JS request junk like ?scheme=' + s.id + ', which used to 500.
+    scheme_id = (request.GET.get('scheme') or '').strip()
+    if not scheme_id.isdigit():
+        scheme_id = ''
     if scheme_id:
         share_scheme = Schemes.objects.filter(status=1, id=scheme_id).first()
     og_title = f"{share_scheme.field_for('title', lang)} — Sahyog Setu" if share_scheme else "Scheme Viewer — Sahyog Setu"
@@ -631,7 +635,11 @@ def business_related_scheme_finder(request):
     languages, _ = available_languages_for(SchemeTranslation.objects.all(), field="title")
     total = Schemes.objects.filter(status=1, business_related=1).count()
     share_scheme = None
-    scheme_id = request.GET.get('scheme')
+    # Only a plain number is a real scheme id -- crawlers that scrape the
+    # homepage JS request junk like ?scheme=' + s.id + ', which used to 500.
+    scheme_id = (request.GET.get('scheme') or '').strip()
+    if not scheme_id.isdigit():
+        scheme_id = ''
     if scheme_id:
         share_scheme = Schemes.objects.filter(status=1, business_related=1, id=scheme_id).first()
     og_title = f"{share_scheme.field_for('title', lang)} — Sahyog Setu" if share_scheme else "Business Development Schemes — Sahyog Setu"

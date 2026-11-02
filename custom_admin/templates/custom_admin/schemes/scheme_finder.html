@@ -198,6 +198,8 @@
   .yk-faq-item summary::before{content:'+';color:var(--gold-ink);font-weight:800;width:16px;flex-shrink:0;}
   .yk-faq-item[open] summary::before{content:'−';}
   .yk-faq-item .yk-faq-answer{font-size:14px;color:var(--text-muted);line-height:1.65;margin:8px 0 0 24px;text-align:justify;}
+  /* Justified text on a ~340px column stretches word gaps into rivers -- left-align on phones. */
+  @media (max-width:600px){ .yk-card p, .yk-block p, .yk-block div, .yk-faq-item .yk-faq-answer{text-align:left;} }
   .yk-disclaimer{background:rgba(201,162,39,.08);border:1px solid rgba(201,162,39,.28);border-radius:12px;padding:14px 18px;font-size:12.5px;color:var(--text-muted);line-height:1.6;margin-top:15px;}
   .yk-apply-card p{font-size:14px;color:#C4D0BE;margin:0;line-height:1.5;}
   .yk-apply-btn{background:var(--gold);color:var(--brand-deeper);border:none;padding:11px 22px;border-radius:9px;font-weight:700;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:7px;font-family:inherit;text-decoration:none;flex-shrink:0;white-space:nowrap;}
