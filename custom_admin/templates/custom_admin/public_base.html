@@ -396,6 +396,22 @@
         }
         #ssq-bn-more-panel a:last-child { border-bottom: none; }
         #ssq-bn-more-panel svg { width: 18px; height: 18px; flex-shrink: 0; color: #ffd75e; }
+        /* Site-wide body text: justified, but never split a word (no auto-
+           hyphenation, no mid-word breaks -- only a single word longer than
+           the whole line, e.g. a URL inside a link, may wrap). Phones get
+           left-aligned instead: justify on a ~340px column opens big gaps.
+           Element selectors only, so any page's own class rule still wins;
+           containers whose text is meant to be centred keep inheriting it. */
+        p, li, blockquote, .content, .description {
+            text-align: justify; text-justify: inter-word;
+            hyphens: none; -webkit-hyphens: none; -ms-hyphens: none;
+            word-break: normal; overflow-wrap: normal;
+        }
+        p a, li a { overflow-wrap: break-word; }
+        @media (max-width: 600px) {
+            p, li, blockquote, .content, .description { text-align: left; }
+        }
+        .text-center p, .text-center li, .premium-footer p, .premium-footer li, .sqz-hero p { text-align: inherit; }
     </style>
     {% block head %}{% endblock %}
 </head>
