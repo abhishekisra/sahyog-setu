@@ -7,6 +7,6 @@ google-auth==2.56.0
 gunicorn==26.2.0
 mysqlclient==2.2.4
 openpyxl==3.1.5
-pillow==12.3.0
+pillow==13.0.0
 reportlab==4.4.10
 sqlparse==0.6.0
