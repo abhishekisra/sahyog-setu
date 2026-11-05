@@ -562,7 +562,7 @@
                                     <label>Signature</label>
                                     <input type="file" name="authority1_sign_image" class="form-control" onchange="qaPreviewFile(this,'previewSig1')">
                                     <div class="qa-sig-preview" id="previewSig1" style="{% if not quiz.authority1_sign_image %}display:none;{% endif %}">
-                                        <img src="{% if quiz.authority1_sign_image %}{{ quiz.authority1_sign_image.url }}{% endif %}">
+                                        <img src="{% if quiz.authority1_sign_image %}{% url 'quiz_signature' quiz.id 1 %}{% endif %}">
                                     </div>
                                 </div>
                             </div>
@@ -594,7 +594,7 @@
                                     <label>Signature</label>
                                     <input type="file" name="authority2_sign_image" class="form-control" onchange="qaPreviewFile(this,'previewSig2')">
                                     <div class="qa-sig-preview" id="previewSig2" style="{% if not quiz.authority2_sign_image %}display:none;{% endif %}">
-                                        <img src="{% if quiz.authority2_sign_image %}{{ quiz.authority2_sign_image.url }}{% endif %}">
+                                        <img src="{% if quiz.authority2_sign_image %}{% url 'quiz_signature' quiz.id 2 %}{% endif %}">
                                     </div>
                                 </div>
                             </div>

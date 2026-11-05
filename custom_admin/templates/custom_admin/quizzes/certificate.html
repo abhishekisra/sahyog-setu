@@ -118,13 +118,13 @@
 
                         <div class="zone zone-signatures" style="top: 74%;">
                             <div class="zone-auth">
-                                <div class="sigbox">{% if quiz.authority1_sign_image %}<img src="{{ quiz.authority1_sign_image.url }}" alt="">{% endif %}</div>
+                                <div class="sigbox">{% if quiz.authority1_sign_image %}<img src="{% url 'quiz_signature' quiz.id 1 %}" alt="">{% endif %}</div>
                                 <div class="zone-auth-line"></div>
                                 <div class="zone-auth-name">{{ quiz.authority1_name|default:"Authorized Signatory" }}</div>
                                 <div class="zone-auth-desig">{{ quiz.authority1_designation|default:"Director" }}</div>
                             </div>
                             <div class="zone-auth">
-                                <div class="sigbox">{% if quiz.authority2_sign_image %}<img src="{{ quiz.authority2_sign_image.url }}" alt="">{% endif %}</div>
+                                <div class="sigbox">{% if quiz.authority2_sign_image %}<img src="{% url 'quiz_signature' quiz.id 2 %}" alt="">{% endif %}</div>
                                 <div class="zone-auth-line"></div>
                                 <div class="zone-auth-name">{{ quiz.authority2_name|default:"Verified By" }}</div>
                                 <div class="zone-auth-desig">{{ quiz.authority2_designation|default:"Admin" }}</div>

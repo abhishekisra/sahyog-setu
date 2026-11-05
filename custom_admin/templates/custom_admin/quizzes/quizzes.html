@@ -125,7 +125,7 @@
                                         <td>
                                             <div class="qa-auth-cell">
                                                 {% if quiz.authority1_sign_image %}
-                                                    <img src="{{ quiz.authority1_sign_image.url }}" class="qa-auth-sig" alt="">
+                                                    <img src="{% url 'quiz_signature' quiz.id 1 %}" class="qa-auth-sig" alt="">
                                                 {% endif %}
                                                 <div>
                                                     <strong>{{ quiz.authority1_name }}</strong>
@@ -137,7 +137,7 @@
                                         <td>
                                             <div class="qa-auth-cell">
                                                 {% if quiz.authority2_sign_image %}
-                                                    <img src="{{ quiz.authority2_sign_image.url }}" class="qa-auth-sig" alt="">
+                                                    <img src="{% url 'quiz_signature' quiz.id 2 %}" class="qa-auth-sig" alt="">
                                                 {% endif %}
                                                 <div>
                                                     <strong>{{ quiz.authority2_name }}</strong>

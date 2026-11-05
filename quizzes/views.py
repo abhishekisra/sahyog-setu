@@ -2279,3 +2279,29 @@ class MyResultsView(View):
             "certificates_earned": certificates_earned,
             "certificate_min_percentage": CERTIFICATE_MIN_PERCENTAGE,
         })
+
+
+# ---------------------------------------------------------------------------
+# 2026-11-05 security check: authority signature images used to sit in public
+# /media/quiz/authorities/signatures/ under guessable names (e.g. the CEO's
+# own name), i.e. clean transparent PNGs anyone could download and paste onto
+# a forged document. nginx now 404s that folder; the browser gets them only
+# through this view: staff/admin always, a participant only for a quiz they
+# have PASSED (the same people CertificateView already shows them to).
+# Server-side certificate PNG/PDF builders read the file from disk, unaffected.
+@login_required
+def quiz_signature(request, quiz_id, n):
+    from django.http import FileResponse, Http404
+    import os
+    quiz = get_object_or_404(Quizzes, pk=quiz_id)
+    field = {1: quiz.authority1_sign_image, 2: quiz.authority2_sign_image}.get(n)
+    if not field or not os.path.exists(field.path):
+        raise Http404
+    u = request.user
+    if not (u.is_staff or getattr(u, "user_type", None) == 1 or
+            QuizAttempt.objects.filter(user=u, quiz=quiz, passed=True, is_demo=False).exists()):
+        raise Http404
+    resp = FileResponse(open(field.path, "rb"))
+    resp["Cache-Control"] = "private, max-age=3600"
+    resp["X-Content-Type-Options"] = "nosniff"
+    return resp
