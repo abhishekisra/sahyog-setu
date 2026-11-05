@@ -1226,7 +1226,7 @@ class QuizTakeView(View):
                 {
                     "id": q.id,
                     "text": q.text_for(attempt.language),
-                    "options": [text for _, text in q.options_for(attempt.language)],
+                    "options": (lambda o: [o[n] for n in option_order(attempt, q.id)])(dict(q.options_for(attempt.language))),
                 }
                 for q in questions
             ],
@@ -1352,6 +1352,28 @@ class QuizTakeView(View):
         return attempt
 
 
+# 2026-11-05: options are shown in a different order per attempt. Before
+# this every quiz showed option 1..4 as authored, and most answer keys sat on
+# one position (Yuvakendra 71/100 on option 1, Candle/Cyber 16/25 on option
+# 2), so guessing the usual slot passed people. The order is a pure function
+# of (attempt, question) -- nothing stored, the same on every reload/resume.
+# Everything saved stays in the AUTHORED numbering (selected_option /
+# correct_option), so results, analytics and exports are unchanged; only
+# quiz_take's payload and quiz_answer's in/out are mapped. Attempts started
+# before the cut-over keep the authored order so a page already open in
+# someone's browser doesn't get its answers mis-mapped.
+import datetime as _dt
+OPTION_SHUFFLE_FROM = _dt.datetime(2026, 11, 5, 16, 50, tzinfo=_dt.timezone.utc)
+
+
+def option_order(attempt, question_id):
+    """Authored option numbers in the order this attempt shows them."""
+    order = [1, 2, 3, 4]
+    if attempt.started_at and attempt.started_at >= OPTION_SHUFFLE_FROM:
+        random.Random(f"sq-opt:{attempt.id}:{question_id}").shuffle(order)
+    return order
+
+
 @login_required
 def quiz_answer(request, quiz_id):
     """Per-question answer, called via fetch() the instant the participant
@@ -1412,13 +1434,16 @@ def quiz_answer(request, quiz_id):
         return JsonResponse({
             "ok": True,
             "isCorrect": existing.is_correct,
-            "correctOption": int(existing.correct_option),
+            "correctOption": option_order(attempt, question.id).index(int(existing.correct_option)) + 1,
             "explanation": existing.explanation_snapshot,
         })
 
     # selected_option is "" for a skip/timeout -- never equals correct_option
     # ("1".."4"), so it scores as wrong exactly like any other wrong answer.
-    selected_option = request.POST.get("selected_option", "")
+    # The client sends the 1-based position it SHOWED; store the authored number.
+    shown = request.POST.get("selected_option", "")
+    order = option_order(attempt, question.id)
+    selected_option = str(order[int(shown) - 1]) if shown in ("1", "2", "3", "4") else ""
     correct_option = str(question.correct_option)
     is_correct = selected_option == correct_option
 
@@ -1443,7 +1468,7 @@ def quiz_answer(request, quiz_id):
     return JsonResponse({
         "ok": True,
         "isCorrect": response.is_correct,
-        "correctOption": int(response.correct_option),
+        "correctOption": order.index(int(response.correct_option)) + 1,
         "explanation": response.explanation_snapshot,
     })
 
@@ -1543,8 +1568,11 @@ class QuizResultView(View):
             if not option_num:
                 return None
             if question:
+                # option_num is the stored CharField ("1".."4") and
+                # options_for yields ints -- compare as ints (comparing as-is
+                # never matched, so every review row said "Option N").
                 for i, text in question.options_for(attempt.language):
-                    if i == option_num:
+                    if str(i) == str(option_num):
                         return text or f"Option {option_num}"
                 return f"Option {option_num}"
             return f"Option {option_num}"
