@@ -2,6 +2,7 @@ import csv
 from functools import wraps
 
 from django.contrib import messages
+from django.core.cache import cache
 from django.contrib.admin.views.decorators import staff_member_required
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, Q
@@ -78,13 +79,26 @@ class PartnerLoginView(View):
         # partner just habitually typing their username differently).
         # Passwords are still matched exactly via check_password below --
         # only the username lookup is case-insensitive.
+        # 2026-11-05 security check: no attempt limit before (partners see their
+        # quiz participants' names/mobiles). Same cache-counter pattern as
+        # custom_admin LoginView: 5 wrong tries per username, then 15 min.
+        cache_key = f"partner_login_attempts_{username.lower()}"
+        attempts = cache.get(cache_key, 0)
+        if attempts >= 5:
+            return render(request, "partners/login.html", {
+                "error": "Too many failed attempts. Please try again after 15 minutes.",
+                "username": username,
+            })
         partner = Partner.objects.filter(username__iexact=username, is_active=True).first()
         if not partner or not partner.check_password(password):
+            cache.set(cache_key, attempts + 1, 15 * 60)
             return render(request, "partners/login.html", {
                 "error": "Invalid username or password.",
                 "username": username,
             })
 
+        cache.delete(cache_key)
+        request.session.cycle_key()  # new session id on login (no session fixation)
         request.session["partner_id"] = partner.id
         return redirect("partner_quiz_select")
 

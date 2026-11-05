@@ -1846,10 +1846,21 @@ class TrainerLoginView(View):
     def post(self, request):
         username = request.POST.get("username", "").strip()
         password = request.POST.get("password", "")
+        # 2026-11-05 security check: no attempt limit before. 5 wrong tries per
+        # username, then 15 min (same pattern as custom_admin LoginView).
+        from django.core.cache import cache
+        cache_key = f"trainer_login_attempts_{username.lower()}"
+        attempts = cache.get(cache_key, 0)
+        if attempts >= 5:
+            return render(request, "custom_admin/quizzes/trainer_login.html", {
+                "error": "Too many failed attempts. Please try again after 15 minutes.",
+            })
         user = authenticate(request, username=username, password=password)
         if user is not None and user.user_type == 3:
+            cache.delete(cache_key)
             auth_login(request, user)
             return redirect("trainer_dashboard")
+        cache.set(cache_key, attempts + 1, 15 * 60)
         return render(request, "custom_admin/quizzes/trainer_login.html", {
             "error": "Invalid mobile number or password.",
         })
