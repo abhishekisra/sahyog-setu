@@ -7,7 +7,7 @@
 {% block head %}
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Mukta:wght@400;500;600;700&family=Baloo+2:wght@800&display=swap" rel="stylesheet">
 {% endblock %}
 
 {% block body %}
@@ -25,19 +25,40 @@
     </div>
   </div>
 
-  <div class="sqz-hero">
-    <div class="sqz-eyebrow">Sahyog Setu · Quiz Zone</div>
-    <h1>Participate. Learn. <em>Get Recognized.</em></h1>
-    <div class="sqz-flourish"></div>
-    <p>Test your knowledge on welfare schemes, self-help groups, cyber safety and more — and earn a certificate you can share.</p>
-  </div>
+  <!-- 2026-11-05: quiz banner (user's design), replaces the old text hero.
+       No "Know more" page exists, and no quiz-time.png sticker yet, so the
+       built-in "QUIZ TIME!!!" text sticker is used. -->
+  <section class="sqb" aria-labelledby="sqb-title">
+    <div class="sqb-copy">
+      {% if lang == 'hi' %}
+      <h2 id="sqb-title">जो जानते हैं उसे परखें, कुछ नया सीखें</h2>
+      <p>छोटी-छोटी प्रश्नोत्तरी जो सरकारी योजनाओं, स्वयं सहायता समूह और रोज़गार की जानकारी को आसान अभ्यास बना देती हैं। खेलें, अपना स्कोर देखें और हर बार कुछ काम का सीखें।</p>
+      <ul class="sqb-topics" aria-label="प्रश्नोत्तरी के विषय">
+        <li>सरकारी योजनाएँ</li><li>स्वयं सहायता समूह</li><li>उद्यमिता</li><li>साइबर सुरक्षा</li><li class="sqb-more">और भी</li>
+      </ul>
+      <div class="sqb-actions"><a class="sqb-btn" href="#sqzQuizList">प्रश्नोत्तरी शुरू करें</a></div>
+      {% else %}
+      <h2 id="sqb-title">Test what you know, learn something new</h2>
+      <p>Short quizzes that turn government schemes, self-help groups and livelihood skills into easy practice. Play, check your score, and pick up something useful each time.</p>
+      <ul class="sqb-topics" aria-label="Quiz topics">
+        <li>Government schemes</li><li>Self-help groups</li><li>Entrepreneurship</li><li>Cyber safety</li><li class="sqb-more">and more</li>
+      </ul>
+      <div class="sqb-actions"><a class="sqb-btn" href="#sqzQuizList">Start quiz</a></div>
+      {% endif %}
+    </div>
+    <div class="sqb-stage" aria-hidden="true">
+      <div class="sqb-rays"></div><div class="sqb-disc"></div>
+      <span class="sqb-spark sqb-a"></span><span class="sqb-spark sqb-b"></span><span class="sqb-spark sqb-c"></span>
+      <div class="sqb-sticker"><span class="sqb-q">QUIZ</span><span class="sqb-t">TIME!!!</span></div>
+    </div>
+  </section>
 
-  <div class="sqz-grid">
+  <div class="sqz-grid" id="sqzQuizList">
     {% for item in quizzes %}
     <article class="sqz-card{% if item.locked %} sqz-locked{% endif %}" style="--accent:{{ item.accent }}">
       <div class="sqz-media">
         <span class="sqz-tag">{{ item.tag }}</span>
-        <span class="sqz-dur">⏱ 20s / Q</span>
+        <span class="sqz-dur">⏱ {{ per_question_seconds }}s / Q</span>
         <span class="sqz-icon-badge">{{ item.icon_svg|safe }}</span>
         {% if item.quiz.certificate_enabled %}<span class="sqz-cert-badge">🎖️ Certificate</span>{% endif %}
         {% if item.locked %}<span class="sqz-done-badge">🔒 Completed</span>{% endif %}
@@ -213,5 +234,47 @@
   .sqz-footer b{ color:var(--gold-hi); }
 
   #sqzWrap :focus-visible{ outline:3px solid var(--gold-hi); outline-offset:2px; }
+</style>
+<style>
+  /* Quiz banner (2026-11-05), scoped .sqb-* */
+  .sqb{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,400px);align-items:center;gap:36px;
+    margin:8px 0 34px;padding:48px 56px;border-radius:32px;
+    background:linear-gradient(115deg,#0c1f13 0%,#12281a 40%,#24502f 100%);
+    box-shadow:0 24px 50px -12px rgba(12,31,19,.45),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.18)}
+  .sqb::before{content:"";position:absolute;inset:0;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.07) 1.5px,transparent 1.5px);background-size:24px 24px;
+    -webkit-mask-image:linear-gradient(90deg,transparent 10%,#000 70%);mask-image:linear-gradient(90deg,transparent 10%,#000 70%)}
+  .sqb-copy h2{font-family:"Mukta",system-ui,sans-serif;font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:700;line-height:1.15;color:#fff;max-width:15em;margin:0}
+  .sqb-copy p{margin:16px 0 0;font-size:1.06rem;line-height:1.65;color:#bfd2c5;max-width:34em;text-align:left}
+  .sqb-topics{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
+  .sqb-topics li{padding:7px 15px;border-radius:999px;font-size:.9rem;font-weight:500;color:#e6f1e9;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);text-align:left}
+  .sqb-topics li.sqb-more{background:transparent;border-style:dashed;color:#bfd2c5}
+  .sqb-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+  .sqb-btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 32px;border-radius:14px;font-weight:700;font-size:1.02rem;text-decoration:none;
+    background:#ffd60a;color:#1b1b1b;box-shadow:0 5px 0 #b99a00,0 14px 24px rgba(0,0,0,.25);transition:transform .15s,box-shadow .15s}
+  .sqb-btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 #b99a00,0 18px 28px rgba(0,0,0,.3);color:#1b1b1b}
+  .sqb-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #b99a00}
+  .sqb-btn:focus-visible{outline:3px solid #f2a33a;outline-offset:3px}
+  .sqb-stage{position:relative;aspect-ratio:1;display:grid;place-items:center}
+  .sqb-rays{position:absolute;inset:-6%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,214,10,.20) 0 7deg,transparent 7deg 20deg);
+    -webkit-mask-image:radial-gradient(circle,#000 28%,transparent 68%);mask-image:radial-gradient(circle,#000 28%,transparent 68%)}
+  .sqb-disc{position:absolute;width:74%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f2a33a 70%);
+    box-shadow:0 0 0 10px rgba(242,163,58,.18),0 0 0 22px rgba(242,163,58,.09),0 20px 40px rgba(0,0,0,.3)}
+  .sqb-sticker{position:relative;z-index:2;transform:rotate(-5deg);text-align:center;font-family:"Baloo 2","Mukta",sans-serif;font-weight:800;line-height:.9;
+    animation:sqbPop .7s cubic-bezier(.2,1.4,.4,1) .15s both}
+  .sqb-sticker span{display:block;-webkit-text-stroke:4px #17203a;paint-order:stroke fill;text-shadow:5px 5px 0 #17203a}
+  .sqb-q{font-size:clamp(3.2rem,6.5vw,5.2rem);color:#6ff0ff}
+  .sqb-t{font-size:clamp(2.8rem,5.8vw,4.6rem);color:#ffd60a}
+  .sqb-spark{position:absolute;z-index:3;border-radius:50%}
+  .sqb-a{width:14px;height:14px;top:12%;left:14%;background:#ef5350}
+  .sqb-b{width:9px;height:9px;top:22%;right:10%;background:#6ff0ff}
+  .sqb-c{width:11px;height:11px;bottom:14%;right:16%;background:#ffd60a}
+  @keyframes sqbPop{from{opacity:0;transform:rotate(-14deg) scale(.6)}to{opacity:1;transform:rotate(-5deg) scale(1)}}
+  #sqzQuizList{scroll-margin-top:90px}
+  @media (max-width:900px){
+    .sqb{grid-template-columns:1fr;padding:32px 24px 38px;border-radius:26px;gap:8px}
+    .sqb-stage{order:-1;width:min(240px,70%);justify-self:center}
+  }
+  @media (max-width:480px){ .sqb-btn{flex:1 1 100%} }
+  @media (prefers-reduced-motion:reduce){ .sqb-sticker{animation:none} .sqb-btn{transition:none} }
 </style>
 {% endblock %}

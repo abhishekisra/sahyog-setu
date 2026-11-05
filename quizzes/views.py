@@ -1020,6 +1020,9 @@ class QuizListView(View):
         return render(request, "custom_admin/quizzes/quiz_list.html", {
             "quizzes": quizzes,
             "is_authenticated": request.user.is_authenticated,
+            # Only the top banner is bilingual so far (2026-11-05).
+            "lang": clean_language(request.GET.get("lang", "en")),
+            "per_question_seconds": PER_QUESTION_SECONDS,
         })
 
 
