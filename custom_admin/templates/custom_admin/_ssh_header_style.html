@@ -41,7 +41,7 @@
   .ssh-sub{position:absolute;left:0;top:calc(100% + 10px);min-width:230px;padding:8px;margin:0;list-style:none;background:#fff;color:#1c2b21;border-radius:14px;box-shadow:0 18px 40px rgba(10,20,12,.28);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .15s,transform .15s,visibility .15s;z-index:70}
   .ssh-sub::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
   .ssh-has-sub.ssh-open>.ssh-sub{opacity:1;visibility:visible;transform:none}
-  @media (hover:hover) and (min-width:1281px){.ssh-has-sub:hover>.ssh-sub{opacity:1;visibility:visible;transform:none}}
+  @media (hover:hover) and (min-width:1366px){.ssh-has-sub:hover>.ssh-sub{opacity:1;visibility:visible;transform:none}}
   .ssh-sub a{display:block;padding:10px 14px;border-radius:9px;font-size:.9rem;font-weight:500;color:#1c2b21}
   .ssh-sub a:hover{background:#eef4ef;color:#1c2b21}
 
@@ -70,9 +70,9 @@
   .ssh-lang-m select{width:100%;height:46px;margin-top:8px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font:500 .95rem "Poppins","Noto Sans Devanagari",sans-serif}
   .ssh-lang-m select option{color:#111}
 
-  @media (max-width:1440px) and (min-width:1281px){
+  @media (max-width:1780px) and (min-width:1366px){
     .ssh-head-in{gap:12px;padding:12px 18px}
-    .ssh-link,.ssh-nav-btn{padding:10px 9px;font-size:.86rem}
+    .ssh-link,.ssh-nav-btn{padding:10px 8px;font-size:.86rem}
     .ssh-brand img{width:48px;height:48px}
     .ssh-brand-name{font-size:1.25rem}
     .ssh-lang select{max-width:112px}
@@ -85,7 +85,7 @@
     .ssh-user-name{display:none}
     .ssh-user-btn{padding:0 5px}
   }
-  @media (max-width:1280px){
+  @media (max-width:1365px){
     .ssh-head-in{padding:10px 16px;gap:10px}
     .ssh-brand img{width:46px;height:46px}
     .ssh-brand-name{font-size:1.2rem}
@@ -121,6 +121,16 @@
     .ssh-tools{gap:8px}
   }
 
+  @media (max-width:400px){
+    .ssh-head-in{gap:6px;padding:8px 10px}
+    .ssh-brand{gap:8px}
+    .ssh-brand img{width:34px;height:34px}
+    .ssh-brand-name{font-size:.9rem;letter-spacing:.03em}
+    .ssh-tools{gap:6px}
+    .ssh-login{height:36px;padding:0 10px;font-size:.8rem}
+    .ssh-icon-btn{width:38px;height:38px}
+    .ssh-a11y-in{gap:5px;padding:5px 10px}
+  }
   [data-contrast="high"] .ssh-a11y,[data-contrast="high"] .ssh-head,[data-contrast="high"] .ssh-nav{background:#000;color:#fff}
   [data-contrast="high"] .ssh-head{border-bottom:2px solid #fff}
   [data-contrast="high"] .ssh-link,[data-contrast="high"] .ssh-nav-btn,[data-contrast="high"] .ssh-brand-name{color:#fff}
