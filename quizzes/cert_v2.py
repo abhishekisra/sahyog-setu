@@ -11,6 +11,9 @@ renders without any request back to the site (signature files are not public
 -- nginx 404s /media/quiz/authorities/signatures/).
 """
 import base64
+import glob
+import hashlib
+import logging
 import mimetypes
 import os
 from io import BytesIO
@@ -89,25 +92,72 @@ def certificate_context(attempt, display_name):
     }
 
 
-def render_certificate_jpeg(attempt, display_name, scale=2.6, quality=90):
-    """A4-landscape JPEG (~2920x2065 px, ~250 dpi) of the exact sheet. JPEG,
-    not PNG: the design's paper grain/noise layers made the PNG ~5 MB and
-    slow; JPEG keeps every layer at ~1 MB."""
+# ---------------------------------------------------------------------------
+# File cache (2026-11-05). Each render takes ~4 s of a gunicorn worker and the
+# site has only 3 workers, so a training batch downloading at once would stall
+# every page. A finished file is kept, keyed by a hash of exactly what it was
+# drawn from (the full sheet HTML: name, score, date, quiz text, authorities,
+# logo/signature bytes, design). Anything changes -> new key -> fresh render.
+# Kept outside /media so it is never web-served.
+# ---------------------------------------------------------------------------
+CACHE_DIR = "/var/lib/sahyogsetu/cert_cache"
+
+
+def _cached(attempt_id, kind, key_material, ext, build):
+    if isinstance(key_material, str):
+        key_material = key_material.encode("utf-8")
+    key = hashlib.sha256(key_material).hexdigest()[:24]
+    path = os.path.join(CACHE_DIR, f"{attempt_id}-{kind}-{key}.{ext}")
+    try:
+        with open(path, "rb") as fh:
+            return fh.read()
+    except OSError:
+        pass
+    data = build()
+    try:
+        os.makedirs(CACHE_DIR, exist_ok=True)
+        for old in glob.glob(os.path.join(CACHE_DIR, f"{attempt_id}-{kind}-*.{ext}")):
+            try:
+                os.remove(old)  # an older version of this same file
+            except OSError:
+                pass
+        tmp = f"{path}.{os.getpid()}.tmp"
+        with open(tmp, "wb") as fh:
+            fh.write(data)
+        os.replace(tmp, path)
+    except OSError:
+        logging.getLogger(__name__).exception("certificate cache write failed")
+    return data
+
+
+def _shoot(html, selector, viewport, scale, quality, refit_js=None):
     os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", BROWSERS_PATH)
     from playwright.sync_api import sync_playwright
 
-    html = render_to_string("custom_admin/quizzes/_cert_standalone.html",
-                            certificate_context(attempt, display_name))
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--no-sandbox"], env={**os.environ, "HOME": "/tmp"})
         try:
-            page = browser.new_page(viewport={"width": 1200, "height": 850}, device_scale_factor=scale)
+            page = browser.new_page(viewport=viewport, device_scale_factor=scale)
             page.set_content(html, wait_until="networkidle", timeout=30000)
             page.evaluate("document.fonts.ready")
-            img = page.locator(".cert").screenshot(type="jpeg", quality=quality)
+            if refit_js:
+                page.evaluate(refit_js)
+                page.wait_for_timeout(150)
+            return page.locator(selector).screenshot(type="jpeg", quality=quality)
         finally:
             browser.close()
-    return img
+
+
+def render_certificate_jpeg(attempt, display_name, scale=2.6, quality=90):
+    """A4-landscape JPEG (~2920x2065 px, ~250 dpi) of the exact sheet. JPEG,
+    not PNG: the design's paper grain/noise layers made the PNG ~5 MB and
+    slow; JPEG keeps every layer at ~1.5 MB. Cached (see _cached)."""
+    # Template + DB work happens here, before any browser starts (inside
+    # sync_playwright Django raises SynchronousOnlyOperation).
+    html = render_to_string("custom_admin/quizzes/_cert_standalone.html",
+                            certificate_context(attempt, display_name))
+    return _cached(attempt.id, f"cert{scale}q{quality}", html, "jpg",
+                   lambda: _shoot(html, ".cert", {"width": 1200, "height": 850}, scale, quality))
 
 
 def render_certificate_pdf(attempt, display_name):
@@ -118,34 +168,27 @@ def render_certificate_pdf(attempt, display_name):
     rasterises the gradient/blend layers.)"""
     from PIL import Image
 
-    img = Image.open(BytesIO(render_certificate_jpeg(attempt, display_name))).convert("RGB")
-    dpi = img.width / (297 / 25.4)
-    buf = BytesIO()
-    img.save(buf, format="PDF", resolution=dpi, title=f"Certificate {attempt.certificate_id or ''}")
-    return buf.getvalue()
+    jpeg = render_certificate_jpeg(attempt, display_name)
+
+    def build():
+        img = Image.open(BytesIO(jpeg)).convert("RGB")
+        buf = BytesIO()
+        img.save(buf, format="PDF", resolution=img.width / (297 / 25.4),
+                 title=f"Certificate {attempt.certificate_id or ''}")
+        return buf.getvalue()
+
+    return _cached(attempt.id, "pdf", jpeg, "pdf", build)
 
 
 def render_story_jpeg(attempt, display_name, quiz_url, quality=90):
     """1080x1920 WhatsApp/Instagram status card in the v2 design. Embeds the
     real v2 certificate (rendered first) plus a QR to the quiz landing page
     (?src=story), so anyone who sees the status can take the quiz too."""
-    os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", BROWSERS_PATH)
-    from playwright.sync_api import sync_playwright
-
     cert_jpeg = render_certificate_jpeg(attempt, display_name, scale=1.4, quality=88)
     ctx = certificate_context(attempt, display_name)
     ctx["s_cert_img"] = "data:image/jpeg;base64," + base64.b64encode(cert_jpeg).decode()
     ctx["s_qr"] = _qr_data_uri(quiz_url)
-    html = render_to_string("custom_admin/quizzes/_cert_story.html", ctx)  # before the browser starts (Django is sync-only)
-    with sync_playwright() as p:
-        browser = p.chromium.launch(args=["--no-sandbox"], env={**os.environ, "HOME": "/tmp"})
-        try:
-            page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
-            page.set_content(html, wait_until="networkidle", timeout=30000)
-            page.evaluate("document.fonts.ready")
-            page.evaluate("window.sscFitName && window.sscFitName()")  # again, now that the script font is in
-            page.wait_for_timeout(150)
-            img = page.locator(".story").screenshot(type="jpeg", quality=quality)
-        finally:
-            browser.close()
-    return img
+    html = render_to_string("custom_admin/quizzes/_cert_story.html", ctx)
+    return _cached(attempt.id, f"story-q{quality}", html, "jpg",
+                   lambda: _shoot(html, ".story", {"width": 1080, "height": 1920}, 1, quality,
+                                  refit_js="window.sscFitName && window.sscFitName()"))
