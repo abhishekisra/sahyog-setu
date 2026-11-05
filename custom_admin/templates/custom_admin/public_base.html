@@ -431,7 +431,7 @@
             <a href="/helplines-viewer/">Helpline</a>
         </div>
         {% if languages|length > 1 %}
-        <div id="ssq-nav-lang">
+        <div id="ssq-nav-lang" class="notranslate" translate="no">
             <select id="langSelect" onchange="ssChangeLang(this.value)" aria-label="Language">
                 {% for l in languages %}
                 <option value="{{ l.code }}"{% if l.code == lang %} selected{% endif %}>{{ l.native_name }}</option>
@@ -448,7 +448,14 @@
         // don't render the block, no per-page opt-in needed.
         function ssChangeLang(code){
             var url = new URL(window.location.href);
-            if (code === "en") { url.searchParams.delete("lang"); } else { url.searchParams.set("lang", code); }
+            if (code === "en") {
+                url.searchParams.delete("lang");
+                // English chosen on purpose: also drop the Google Translate
+                // choice (the googtrans cookie, shared with the homepage), or
+                // the -viewer/ fallback at the end of this file would send
+                // the person straight back to the old language.
+                if (window.ssqGtCookie) { window.ssqGtCookie(null); }
+            } else { url.searchParams.set("lang", code); }
             window.location.href = url.toString();
         }
         // "/" only matches exactly (otherwise it'd always show active, since
@@ -837,6 +844,58 @@
                 moreBtn.addEventListener('click', function () { sheet.classList.add('ssq-open'); });
                 sheet.addEventListener('click', function (e) { if (e.target === sheet) sheet.classList.remove('ssq-open'); });
             }
+        })();
+    </script>
+    <!-- 2026-11-05 (user: free Hindi for all schemes, "a karo"): Google
+         Translate as a FALLBACK behind the existing #ssq-nav-lang switcher,
+         not a second widget. Our own DB translations (?lang=) still render
+         first; Google only translates whatever is still English (most of the
+         4,653 schemes). Content pages only (-viewer/): quiz/signup/login pages
+         are fully translated already and quiz_take has timer JS we don't want
+         Google rewriting. Shares the googtrans cookie with the homepage's
+         React widget, so a language picked on either side carries over. -->
+    <style>
+        iframe.skiptranslate { display: none !important; }
+        body { top: 0 !important; }
+        #goog-gt-tt, .goog-te-balloon-frame { display: none !important; }
+        .goog-text-highlight { background: none !important; box-shadow: none !important; }
+    </style>
+    <div id="ssq-gt" style="display:none"></div>
+    <script>
+        (function () {
+            // Our language codes -> Google's, where they differ.
+            var TO_G = { kok: 'gom', mni: 'mni-Mtei' };
+            var FROM_G = { gom: 'kok', 'mni-Mtei': 'mni' };
+            window.ssqGtCookie = function (val) {
+                var host = location.hostname.replace(/^www\./, '');
+                var exp = val ? '' : '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+                ['', '; domain=' + location.hostname, '; domain=.' + host].forEach(function (d) {
+                    document.cookie = 'googtrans=' + (val || '') + '; path=/' + d + exp;
+                });
+            };
+            if (!/-viewer\//.test(location.pathname)) return;
+            var params = new URLSearchParams(location.search);
+            var lang = (params.get('lang') || '').trim();
+            if (!lang) {
+                // No ?lang= but a Google choice is stored (made on the
+                // homepage, or on an earlier page here): open this page in
+                // that language so our own DB translations load too.
+                var m = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([A-Za-z-]+)/);
+                if (m && m[1] !== 'en') {
+                    params.set('lang', FROM_G[m[1]] || m[1]);
+                    location.replace(location.pathname + '?' + params.toString() + location.hash);
+                }
+                return;
+            }
+            if (lang === 'en') { window.ssqGtCookie(null); return; }
+            window.ssqGtCookie('/en/' + (TO_G[lang] || lang));
+            window.ssqGtInit = function () {
+                new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'ssq-gt');
+            };
+            var s = document.createElement('script');
+            s.src = 'https://translate.google.com/translate_a/element.js?cb=ssqGtInit';
+            s.async = true;
+            document.body.appendChild(s);
         })();
     </script>
 </body>
