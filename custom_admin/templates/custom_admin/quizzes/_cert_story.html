@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Status {{ c_id }}</title>
+{# 1080x1920 WhatsApp/Instagram status card, design v2 (2026-11-05). Rendered only by quizzes/cert_v2.render_story_jpeg(). #}
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;1,500&family=Pinyon+Script&family=Noto+Serif+Devanagari:wght@500;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  html, body{ margin:0; padding:0; }
+  *{ box-sizing:border-box; }
+  .story{ --green:#1C2B24; --brass:#B08D3E; --gold:#C9A227; --gold-hi:#F0D77A; --cream:#f4efe1;
+    width:1080px; height:1920px; position:relative; overflow:hidden; color:var(--cream); text-align:center;
+    font-family:'Montserrat',sans-serif; -webkit-font-smoothing:antialiased;
+    background:radial-gradient(ellipse at 50% 30%, #24502f 0%, #142a1d 55%, #0c1f13 100%); }
+  .dots{ position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,.06) 1.6px, transparent 1.6px); background-size:26px 26px; }
+  .rays{ position:absolute; left:50%; top:880px; width:1500px; height:1500px; transform:translate(-50%,-50%); border-radius:50%;
+    background:repeating-conic-gradient(from 0deg, rgba(201,162,39,.08) 0 6deg, transparent 6deg 18deg);
+    -webkit-mask-image:radial-gradient(circle,#000 20%,transparent 62%); mask-image:radial-gradient(circle,#000 20%,transparent 62%); }
+  .band{ position:absolute; inset:26px; border:2px solid rgba(201,162,39,.55); }
+  .band svg{ position:absolute; inset:0; width:100%; height:100%; }
+  .line{ position:absolute; inset:58px; border:3px solid transparent; border-image:linear-gradient(135deg,#8f6d1c,#F0D77A 25%,#B08D3E 50%,#F0D77A 75%,#8f6d1c) 1; }
+  .line2{ position:absolute; inset:66px; border:1px solid rgba(240,215,122,.35); }
+
+  .top{ position:absolute; top:120px; left:0; right:0; display:flex; align-items:center; justify-content:center; gap:28px; }
+  .top img{ width:118px; height:118px; object-fit:contain; border-radius:50%; background:#fff; padding:6px; box-shadow:0 8px 24px rgba(0,0,0,.35); }
+  .brand{ font-family:'Cinzel',serif; font-weight:700; letter-spacing:.22em; font-size:34px; color:#fff; line-height:1.15; }
+  .brand small{ display:block; font-family:'Montserrat',sans-serif; font-weight:600; letter-spacing:.38em; font-size:15px; color:var(--gold-hi); margin-top:8px; }
+
+  .kicker{ position:absolute; top:300px; left:0; right:0; font-family:'Cinzel',serif; font-weight:700; letter-spacing:.32em; font-size:30px; color:var(--gold-hi); }
+  .kicker:before, .kicker:after{ content:""; display:inline-block; width:90px; height:2px; vertical-align:middle; margin:0 22px; background:linear-gradient(90deg,transparent,var(--gold)); }
+  .kicker:after{ background:linear-gradient(270deg,transparent,var(--gold)); }
+
+  .thumb{ position:absolute; top:370px; left:50%; width:950px; transform:translateX(-50%); padding:12px; background:linear-gradient(135deg,#8f6d1c,#F0D77A 30%,#B08D3E 55%,#F0D77A 80%,#8f6d1c);
+    box-shadow:0 30px 60px rgba(0,0,0,.55); }
+  .thumb img{ display:block; width:100%; height:auto; }
+
+  .name{ position:absolute; top:1080px; left:60px; right:60px; font-family:'Pinyon Script','Noto Serif Devanagari',cursive; font-size:104px; line-height:1.15; color:#fff; white-space:nowrap; }
+  .quiz{ position:absolute; top:1225px; left:110px; right:110px; font-family:'Cormorant Garamond',serif; font-style:italic; font-weight:500; font-size:40px; line-height:1.3; color:var(--cream); }
+  .quiz b{ font-style:normal; font-weight:600; color:var(--gold-hi); }
+
+  .badges{ position:absolute; top:1370px; left:0; right:0; display:flex; justify-content:center; gap:26px; }
+  .badge{ border:2px solid var(--gold); background:rgba(201,162,39,.10); padding:14px 34px; min-width:250px; font-family:'Cinzel',serif; color:#fff; }
+  .badge small{ display:block; font-family:'Montserrat',sans-serif; font-weight:600; font-size:15px; letter-spacing:.32em; color:var(--gold-hi); }
+  .badge span{ font-size:46px; font-weight:700; letter-spacing:.08em; }
+
+  .cta{ position:absolute; top:1530px; left:0; right:0; display:flex; align-items:center; justify-content:center; gap:34px; }
+  .qr{ width:210px; height:210px; background:#fff; padding:10px; border:3px solid var(--gold); }
+  .qr img{ width:100%; height:100%; display:block; image-rendering:pixelated; }
+  .cta-text{ text-align:left; }
+  .cta-text .a{ font-family:'Cormorant Garamond',serif; font-weight:600; font-size:44px; color:#fff; line-height:1.1; }
+  .cta-text .b{ font-family:'Montserrat',sans-serif; font-weight:700; font-size:30px; letter-spacing:.06em; color:var(--gold-hi); margin-top:12px; }
+
+  .foot{ position:absolute; bottom:86px; left:0; right:0; font-size:17px; letter-spacing:.14em; color:rgba(244,239,225,.7); }
+  .foot b{ color:var(--gold-hi); font-weight:600; }
+</style>
+</head>
+<body>
+<div class="story notranslate" translate="no">
+  <div class="dots"></div><div class="rays"></div>
+  <div class="band"><svg viewBox="0 0 1028 1868" preserveAspectRatio="none"><defs><pattern id="sgp" width="22" height="22" patternUnits="userSpaceOnUse">
+    <circle cx="11" cy="11" r="9.5" fill="none" stroke="#C9A227" stroke-width=".7" opacity=".55"/><circle cx="0" cy="0" r="9.5" fill="none" stroke="#C9A227" stroke-width=".7" opacity=".55"/>
+    <circle cx="22" cy="0" r="9.5" fill="none" stroke="#C9A227" stroke-width=".7" opacity=".55"/><circle cx="0" cy="22" r="9.5" fill="none" stroke="#C9A227" stroke-width=".7" opacity=".55"/><circle cx="22" cy="22" r="9.5" fill="none" stroke="#C9A227" stroke-width=".7" opacity=".55"/></pattern>
+    <mask id="sm"><rect width="1028" height="1868" fill="#fff"/><rect x="28" y="28" width="972" height="1812" fill="#000"/></mask></defs>
+    <rect width="1028" height="1868" fill="url(#sgp)" mask="url(#sm)"/></svg></div>
+  <div class="line"></div><div class="line2"></div>
+
+  <div class="top">
+    {% if c_logo_left %}<img src="{{ c_logo_left }}" alt="">{% endif %}
+    <div class="brand">SAHYOG SETU<small>UPLIFT LIVE FOUNDATION</small></div>
+    {% if c_logo_right %}<img src="{{ c_logo_right }}" alt="">{% endif %}
+  </div>
+
+  <div class="kicker">CERTIFICATE EARNED</div>
+  <div class="thumb"><img src="{{ s_cert_img }}" alt=""></div>
+
+  <div class="name"><span id="sName">{{ c_name }}</span></div>
+  {% with qt=c_quiz|lower %}<div class="quiz">completed the <b>{{ c_quiz }}</b>{% if "quiz" not in qt %} quiz{% endif %} on Sahyog Setu</div>{% endwith %}
+
+  <div class="badges">
+    <div class="badge"><small>SCORE</small><span>{{ c_score }}%</span></div>
+    <div class="badge"><small>GRADE</small><span>{{ c_grade }}</span></div>
+  </div>
+
+  <div class="cta">
+    <div class="qr"><img src="{{ s_qr }}" alt=""></div>
+    <div class="cta-text"><div class="a">Scan to take<br>this quiz</div><div class="b">sahyogsetu.in</div></div>
+  </div>
+
+  <div class="foot">Certificate ID <b>{{ c_id }}</b> · Verify at sahyogsetu.in/certificate/verify</div>
+</div>
+<script>
+  /* keep long names whole: shrink until they fit the line */
+  /* measure the inline span (a centred block's overflow isn't counted on the left) */
+  window.sscFitName = function(){ var el=document.getElementById('sName'), max=940, f=104;
+    el.style.fontSize=f+'px'; while(el.getBoundingClientRect().width>max && f>40){ f-=4; el.style.fontSize=f+'px'; } };
+  sscFitName(); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(sscFitName);
+  /* long quiz titles: shrink the line so it stays above the badges */
+  (function(){ var el=document.querySelector('.quiz'), f=40;
+    while(el.scrollHeight>120 && f>26){ f-=2; el.style.fontSize=f+'px'; } })();
+</script>
+</body>
+</html>

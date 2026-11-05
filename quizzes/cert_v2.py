@@ -123,3 +123,29 @@ def render_certificate_pdf(attempt, display_name):
     buf = BytesIO()
     img.save(buf, format="PDF", resolution=dpi, title=f"Certificate {attempt.certificate_id or ''}")
     return buf.getvalue()
+
+
+def render_story_jpeg(attempt, display_name, quiz_url, quality=90):
+    """1080x1920 WhatsApp/Instagram status card in the v2 design. Embeds the
+    real v2 certificate (rendered first) plus a QR to the quiz landing page
+    (?src=story), so anyone who sees the status can take the quiz too."""
+    os.environ.setdefault("PLAYWRIGHT_BROWSERS_PATH", BROWSERS_PATH)
+    from playwright.sync_api import sync_playwright
+
+    cert_jpeg = render_certificate_jpeg(attempt, display_name, scale=1.4, quality=88)
+    ctx = certificate_context(attempt, display_name)
+    ctx["s_cert_img"] = "data:image/jpeg;base64," + base64.b64encode(cert_jpeg).decode()
+    ctx["s_qr"] = _qr_data_uri(quiz_url)
+    html = render_to_string("custom_admin/quizzes/_cert_story.html", ctx)  # before the browser starts (Django is sync-only)
+    with sync_playwright() as p:
+        browser = p.chromium.launch(args=["--no-sandbox"], env={**os.environ, "HOME": "/tmp"})
+        try:
+            page = browser.new_page(viewport={"width": 1080, "height": 1920}, device_scale_factor=1)
+            page.set_content(html, wait_until="networkidle", timeout=30000)
+            page.evaluate("document.fonts.ready")
+            page.evaluate("window.sscFitName && window.sscFitName()")  # again, now that the script font is in
+            page.wait_for_timeout(150)
+            img = page.locator(".story").screenshot(type="jpeg", quality=quality)
+        finally:
+            browser.close()
+    return img

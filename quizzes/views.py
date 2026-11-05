@@ -21,7 +21,7 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 
 from .prepost import pre_post_summary
-from .cert_v2 import certificate_context, render_certificate_jpeg, render_certificate_pdf
+from .cert_v2 import certificate_context, render_certificate_jpeg, render_certificate_pdf, render_story_jpeg
 from django.utils.text import Truncator
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, F, Max, Q
@@ -1865,11 +1865,17 @@ class CertificateStoryDownloadView(View):
         landing_path = reverse("quiz_landing", kwargs={"slug": attempt.quiz.slug})
         quiz_url = request.build_absolute_uri(landing_path) + "?src=story"
 
-        image_bytes = render_certificate_story_image(attempt, quiz_url)
-        response = HttpResponse(image_bytes, content_type="image/png")
+        # 2026-11-05: v2 design (headless Chromium); old Pillow card as fallback.
+        display_name = (attempt.user.get_full_name() or attempt.user.username or "").strip()
+        try:
+            image_bytes, ctype, ext = render_story_jpeg(attempt, display_name, quiz_url), "image/jpeg", "jpg"
+        except Exception:
+            logging.getLogger(__name__).exception("cert v2 story failed, using Pillow fallback")
+            image_bytes, ctype, ext = render_certificate_story_image(attempt, quiz_url), "image/png", "png"
+        response = HttpResponse(image_bytes, content_type=ctype)
         # Same filename-safe swap as CertificateImageDownloadView above.
         safe_id = attempt.certificate_id.replace("/", "-")
-        response["Content-Disposition"] = f'attachment; filename="sahyogsetu_status_{safe_id}.png"'
+        response["Content-Disposition"] = f'attachment; filename="sahyogsetu_status_{safe_id}.{ext}"'
         response["Cache-Control"] = "no-store"
         return response
 
