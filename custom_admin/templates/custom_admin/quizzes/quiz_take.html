@@ -8,7 +8,7 @@
 {% endblock %}
 
 {% block body %}
-<div class="sq-page" id="sqPage">
+<div class="sq-page{% if is_pretest %} sq-pretest{% endif %}" id="sqPage">
 
   <header class="sq-head">
     <div class="sq-head-inner">
@@ -25,6 +25,9 @@
     <section class="sq-panel" id="sqQuiz">
       <div class="sq-gold-line"></div>
 
+      {% if is_pretest %}
+      <div class="sq-pre-badge">{% if lang == 'hi' %}ट्रेनिंग से पहले का टेस्ट — इसमें सही/गलत नहीं बताया जाएगा, बस अपनी समझ से उत्तर दें।{% else %}Before-training test — right/wrong isn't shown here; just answer as best you can.{% endif %}</div>
+      {% endif %}
       <div class="sq-topbar">
         <div class="sq-qcount"><span>{% if lang == 'hi' %}प्रश्न{% else %}Question{% endif %}</span> <b id="sqQNow">1</b>/<span id="sqQTot">{{ total_questions }}</span></div>
         <div class="sq-pbar"><div class="sq-pfill" id="sqPfill"></div></div>
@@ -230,6 +233,10 @@
   }
   .sq-opt.sq-correct .sq-key{ background:rgba(255,255,255,.18); color:#fff; }
   .sq-opt.sq-correct .sq-ic{ transform:translateY(-50%) scale(1); color:#eafff2; }
+  /* before-training test (2026-11-05): no score/streak, neutral "picked" mark */
+  .sq-pretest .sq-stats{ display:none; }
+  .sq-pre-badge{ margin:0 0 12px; padding:10px 14px; border-radius:12px; background:rgba(201,162,39,.14); border:1px solid rgba(201,162,39,.35); font-size:.95em; line-height:1.5; }
+  .sq-opt.sq-picked{ outline:3px solid #c9a227; outline-offset:2px; }
   .sq-opt.sq-wrong{
     background:linear-gradient(180deg,var(--red-deep),#a72e2e); color:#fff;
     border-color:var(--red); border-bottom-color:#8f2626;
@@ -602,6 +609,13 @@
 
   function reveal(isCorrect, correctIdx, chosenIdx, explanation, manualSkip){
     var btns = document.querySelectorAll('#sqOpts .sq-opt');
+    if(data.isPretest){
+      // Before-training test: never show right/wrong (the server doesn't
+      // send it either) -- just mark what was picked and move on.
+      if(chosenIdx >= 0 && btns[chosenIdx]) btns[chosenIdx].classList.add('sq-picked');
+      showNext();
+      return;
+    }
     btns.forEach(function(b,i){ if(i!==correctIdx) b.classList.add('sq-missed-hint'); });
     btns[correctIdx].classList.remove('sq-missed-hint');
     btns[correctIdx].classList.add('sq-correct');

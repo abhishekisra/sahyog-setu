@@ -19,6 +19,8 @@ from django.contrib.admin.views.decorators import staff_member_required
 from django.utils.decorators import method_decorator
 from django.utils import timezone
 from django.utils.html import strip_tags
+
+from .prepost import pre_post_summary
 from django.utils.text import Truncator
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, F, Max, Q
@@ -305,6 +307,7 @@ class EditQuizView(View):
                 quiz.description = request.POST.get("description")
                 quiz.certificate_text = request.POST.get("certificate_text")
                 quiz.certificate_enabled = request.POST.get("certificate_enabled", "1") == "1"
+                quiz.pretest_enabled = request.POST.get("pretest_enabled", "0") == "1"
                 quiz.status = request.POST.get("status")
                 quiz.quiz_time = request.POST.get("quiz_time")
                 quiz.name_top_pct = request.POST.get("name_top_pct") or quiz.name_top_pct
@@ -1062,6 +1065,11 @@ class QuizLandingView(View):
         # string inside another query string is exactly how that kind of
         # link quietly breaks.
         take_url = reverse("quiz_take", kwargs={"quiz_id": quiz.id}) + f"?lang={lang}"
+        # Pre-training test link (trainer shares <landing>?mode=pre before
+        # the training) -- only when the quiz has it switched on.
+        is_pretest = request.GET.get("mode") == "pre" and quiz.pretest_enabled
+        if is_pretest:
+            take_url += "&mode=pre"
         login_url = f"{reverse('login')}?next={urllib.parse.quote(take_url)}"
 
         # Trainer/Training (user-requested: let a participant say which
@@ -1089,6 +1097,7 @@ class QuizLandingView(View):
             "quiz_title": quiz.title_for(lang),
             "quiz_description": quiz.description_for(lang),
             "trainings": trainings,
+            "is_pretest": is_pretest,
         })
 
 
@@ -1146,7 +1155,22 @@ class QuizTakeView(View):
         # a real participant's one-attempt limit or their displayed average.
         completed_attempts = QuizAttempt.objects.filter(quiz=quiz, completed_at__isnull=False, is_demo=False)
 
-        if quiz.one_attempt_only:
+        # Pre-training test (2026-11-05): same quiz, kind="pre", never
+        # counted as a real attempt (QuizAttempt.objects hides it). Only
+        # once per person, and only BEFORE their real attempt -- after it,
+        # a "before training" score would mean nothing.
+        is_pretest = request.GET.get("mode") == "pre" and quiz.pretest_enabled
+        if is_pretest:
+            done_pre = QuizAttempt.all_objects.filter(
+                kind=QuizAttempt.KIND_PRE, user=request.user, quiz=quiz, completed_at__isnull=False, is_demo=False
+            ).order_by("-completed_at").first()
+            if done_pre:
+                return redirect("quiz_result", pk=done_pre.id)
+            if completed_attempts.filter(user=request.user).exists():
+                messages.info(request, "You have already taken this quiz, so the before-training test is closed for you.")
+                return redirect("quiz_list")
+
+        if quiz.one_attempt_only and not is_pretest:
             existing = completed_attempts.filter(user=request.user).order_by('-completed_at').first()
             # Only a PASSED attempt locks retakes -- one_attempt_only exists
             # to stop someone re-rolling for a better score/another
@@ -1177,7 +1201,10 @@ class QuizTakeView(View):
                 training_obj = None
         training_other = "" if training_obj else request.GET.get("training_other", "").strip()[:255]
 
-        attempt = self._get_or_create_attempt(request, quiz, lang, training_obj, training_other)
+        attempt = self._get_or_create_attempt(
+            request, quiz, lang, training_obj, training_other,
+            kind=QuizAttempt.KIND_PRE if is_pretest else QuizAttempt.KIND_MAIN,
+        )
 
         # Resolve against attempt.question_ids -- NEVER request.session.
         # gunicorn restarts, session expiry, and a second browser tab all
@@ -1221,7 +1248,8 @@ class QuizTakeView(View):
         # question is already locked in, same secure boundary as before.
         quiz_data = {
             "attemptId": attempt.id,
-            "answerUrl": reverse("quiz_answer", kwargs={"quiz_id": quiz.id}),
+            "answerUrl": reverse("quiz_answer", kwargs={"quiz_id": quiz.id}) + ("?mode=pre" if is_pretest else ""),
+            "isPretest": is_pretest,
             "perQuestionSeconds": PER_QUESTION_SECONDS,
             "resumeIndex": resume_index,
             "strings": quiz_ui_strings(attempt.language),
@@ -1249,9 +1277,10 @@ class QuizTakeView(View):
             "quiz_data": quiz_data,
             "lang": attempt.language,
             "languages": available_languages,
+            "is_pretest": is_pretest,
         })
 
-    def _get_or_create_attempt(self, request, quiz, lang="en", training=None, training_other=""):
+    def _get_or_create_attempt(self, request, quiz, lang="en", training=None, training_other="", kind="main"):
         # Reusing an in-progress attempt (rather than always creating a new
         # one) is what makes the timer un-resettable by just reloading the
         # page, AND is what makes a resubmit idempotent later in
@@ -1265,7 +1294,8 @@ class QuizTakeView(View):
         # read for the common case; live_lock's uniqueness is what actually
         # stops two simultaneous taps on "Start Quiz" from both
         # succeeding.
-        attempt = QuizAttempt.objects.filter(user=request.user, quiz=quiz, completed_at__isnull=True).first()
+        live = QuizAttempt.all_objects.filter(kind=kind, user=request.user, quiz=quiz, completed_at__isnull=True)
+        attempt = live.first()
 
         # An incomplete attempt whose own time budget has already run out
         # (abandoned tab, browser crash, or the participant simply never
@@ -1315,8 +1345,9 @@ class QuizTakeView(View):
             try:
                 with transaction.atomic():
                     attempt = QuizAttempt.objects.create(
-                        user=request.user, quiz=quiz,
-                        live_lock=f"{request.user.id}_{quiz.id}",
+                        user=request.user, quiz=quiz, kind=kind,
+                        # pre-tests get their own lock so they never collide with a real attempt
+                        live_lock=("pre_" if kind == QuizAttempt.KIND_PRE else "") + f"{request.user.id}_{quiz.id}",
                         source=clean_source(request.session.get(_source_session_key(quiz.id), "direct")),
                         language=lang,
                         # Set once, at creation, same as source above -- a
@@ -1344,7 +1375,7 @@ class QuizTakeView(View):
                 # Someone else's concurrent request won the race and holds
                 # live_lock for this (user, quiz) pair right now -- re-fetch
                 # their row instead of erroring out.
-                attempt = QuizAttempt.objects.get(user=request.user, quiz=quiz, completed_at__isnull=True)
+                attempt = live.get()
 
         if created or not attempt.question_ids:
             bank_ids = list(quiz.questions.values_list("id", flat=True))
@@ -1401,9 +1432,13 @@ def quiz_answer(request, quiz_id):
         return JsonResponse({"ok": False, "error": "post_required"}, status=405)
 
     quiz = get_object_or_404(Quizzes, id=quiz_id, status=True)
-    attempt = QuizAttempt.objects.filter(user=request.user, quiz=quiz, completed_at__isnull=True).first()
+    kind = QuizAttempt.KIND_PRE if request.GET.get("mode") == "pre" else QuizAttempt.KIND_MAIN
+    attempt = QuizAttempt.all_objects.filter(kind=kind, user=request.user, quiz=quiz, completed_at__isnull=True).first()
     if not attempt:
         return JsonResponse({"ok": False, "error": "no_active_attempt"}, status=409)
+    # A before-training test never reveals right/wrong or the answer --
+    # otherwise people would simply learn the answers for the real quiz.
+    pre_reply = {"ok": True, "recorded": True, "isCorrect": None, "correctOption": None, "explanation": ""}
 
     # Server is the only clock -- reject anything POSTed after time's up.
     # Budget is per-attempt question count * PER_QUESTION_SERVER_BUDGET,
@@ -1433,6 +1468,8 @@ def quiz_answer(request, quiz_id):
         return JsonResponse({"ok": False, "error": "question_deleted"}, status=410)
 
     existing = QuestionResponse.objects.filter(attempt=attempt, question=question).first()
+    if existing and kind == QuizAttempt.KIND_PRE:
+        return JsonResponse(pre_reply)
     if existing:
         return JsonResponse({
             "ok": True,
@@ -1468,6 +1505,8 @@ def quiz_answer(request, quiz_id):
         # 500ing on the loser.
         response = QuestionResponse.objects.get(attempt=attempt, question=question)
 
+    if kind == QuizAttempt.KIND_PRE:
+        return JsonResponse(pre_reply)
     return JsonResponse({
         "ok": True,
         "isCorrect": response.is_correct,
@@ -1487,12 +1526,12 @@ def quiz_submit(request, pk):
     after the attempt already finished all just redirect to the existing
     result instead of re-scoring."""
     if request.method != "POST":
-        attempt = get_object_or_404(QuizAttempt, pk=pk, user=request.user)
+        attempt = get_object_or_404(QuizAttempt.all_objects, pk=pk, user=request.user)
         return redirect("quiz_take", quiz_id=attempt.quiz_id)
 
     with transaction.atomic():
         attempt = get_object_or_404(
-            QuizAttempt.objects.select_for_update(), pk=pk, user=request.user
+            QuizAttempt.all_objects.select_for_update(), pk=pk, user=request.user
         )
 
         if attempt.completed_at:
@@ -1521,7 +1560,8 @@ def quiz_submit(request, pk):
         score = sum(1 for qid in live_question_ids if responses_by_qid.get(qid))
 
         percentage = (score / total_questions * 100) if total_questions else 0
-        passed = percentage >= quiz.pass_threshold
+        # A before-training test is never "passed" (no certificate, no lock).
+        passed = attempt.kind == QuizAttempt.KIND_MAIN and percentage >= quiz.pass_threshold
 
         attempt.score = score
         attempt.total_questions = total_questions
@@ -1542,7 +1582,8 @@ def quiz_submit(request, pk):
 class QuizResultView(View):
 
     def get(self, request, pk):
-        attempt = get_object_or_404(QuizAttempt, pk=pk, user=request.user)
+        attempt = get_object_or_404(QuizAttempt.all_objects, pk=pk, user=request.user)
+        is_pretest = attempt.kind == QuizAttempt.KIND_PRE
         responses = attempt.responses.select_related("question").all()
         correct = responses.filter(is_correct=True).count()
         # "Wrong" (picked an option, got it wrong) vs "missed" (skipped, or
@@ -1635,6 +1676,7 @@ class QuizResultView(View):
             "lang": lang,
             "languages": available_languages,
             "quiz_title": quiz_title,
+            "is_pretest": is_pretest,
         })
 
 
@@ -2022,7 +2064,9 @@ class QuizAnalyticsView(View):
         # Most-failed questions -- grouped by snapshot text, NOT question_id,
         # because EditQuizView deletes+recreates Questions on every edit,
         # which would null out question_id on every past response.
-        response_qs = QuestionResponse.objects.filter(attempt__completed_at__isnull=False)
+        # attempt__kind: QuestionResponse isn't covered by QuizAttempt's
+        # default manager, so before-training test answers must be excluded here.
+        response_qs = QuestionResponse.objects.filter(attempt__completed_at__isnull=False, attempt__kind="main")
         if not include_demo:
             response_qs = response_qs.filter(attempt__is_demo=False)
         if date_from:
@@ -2102,6 +2146,7 @@ class QuizAnalyticsView(View):
             "pass_rate": pass_rate,
             "distribution": distribution,
             "most_failed": most_failed,
+            "pre_post": pre_post_summary(include_demo=include_demo),
             "quiz_breakdown": chart_data["quiz_breakdown"],
             "source_breakdown": source_breakdown,
             "registered_users": User.objects.filter(user_type=2).count(),

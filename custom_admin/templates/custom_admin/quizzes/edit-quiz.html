@@ -373,6 +373,17 @@
                                 </div>
 
                                 <div class="col-12 mt-2">
+                                    <label>Before-training Test</label>
+                                    <select class="form-control" name="pretest_enabled" id="pretest_enabled">
+                                        <option value="0" {% if not quiz.pretest_enabled %}selected{% endif %}>Off</option>
+                                        <option value="1" {% if quiz.pretest_enabled %}selected{% endif %}>On — share the link below BEFORE the training; same questions, no answers shown, no certificate</option>
+                                    </select>
+                                    {% if quiz.pretest_enabled and quiz.slug %}
+                                    <small class="d-block mt-1">Before-training link: <code>https://sahyogsetu.in/quiz/{{ quiz.slug }}/?mode=pre</code> — after the training, share the normal quiz link. Results: Quiz Analytics → "Before vs After Training", and the partner portal Overview.</small>
+                                    {% endif %}
+                                </div>
+
+                                <div class="col-12 mt-2">
                                     <label>Certificate Text</label>
                                     <textarea name="certificate_text" id="certificate_text" class="form-control">{{ quiz.certificate_text }}</textarea>
                                     <small class="text-muted">Shown inside quotes on the certificate. Keep the quiz name here consistent with the Quiz Title above.</small>

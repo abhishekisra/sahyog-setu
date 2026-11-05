@@ -71,8 +71,13 @@
              pattern as every other control on this page (font-size
              buttons etc. in quiz_take.html) -- no framework, this page has
              none. -->
+        {% if is_pretest %}
+        <div class="sq-pre-note" style="margin:0 0 14px;padding:12px 14px;border-radius:12px;background:rgba(201,162,39,.14);border:1px solid rgba(201,162,39,.35);line-height:1.55">
+          {% if lang == 'hi' %}<strong>ट्रेनिंग से पहले का टेस्ट।</strong> ट्रेनिंग शुरू होने से पहले यह टेस्ट दें। इसमें सही/गलत नहीं दिखेगा और प्रमाणपत्र नहीं मिलेगा। ट्रेनिंग के बाद यही क्विज़ दोबारा देंगे, तब दोनों स्कोर की तुलना होगी।{% else %}<strong>Before-training test.</strong> Take this before the training starts. Right/wrong isn't shown and there's no certificate. You'll take the same quiz after the training, and the two scores will be compared.{% endif %}
+        </div>
+        {% endif %}
         <div class="sq-training-ask">
-          <label class="sq-training-label" for="sqTrainingSelect">{% if lang == 'hi' %}Kya aap kisi training ke baad ye quiz de rahe hain?{% else %}Are you taking this quiz after attending a training?{% endif %}</label>
+          <label class="sq-training-label" for="sqTrainingSelect">{% if is_pretest %}{% if lang == 'hi' %}Aap kaun si training lene wale hain?{% else %}Which training are you about to attend?{% endif %}{% else %}{% if lang == 'hi' %}Kya aap kisi training ke baad ye quiz de rahe hain?{% else %}Are you taking this quiz after attending a training?{% endif %}{% endif %}</label>
           <select id="sqTrainingSelect" class="sq-training-select">
             <option value="">{% if lang == 'hi' %}— Nahi, seedhe de raha/rahi hoon —{% else %}— No, taking it directly —{% endif %}</option>
             {% for t in trainings %}
@@ -84,7 +89,7 @@
                  placeholder="{% if lang == 'hi' %}Training ka naam likhein{% else %}Type the training's name{% endif %}">
         </div>
         <div class="sq-land-cta">
-          <a href="{{ take_url }}" id="sqStartBtn" data-base-href="{{ take_url }}" class="sq-btn">{% if lang == 'hi' %}क्विज़ शुरू करें →{% else %}Start Quiz →{% endif %}</a>
+          <a href="{{ take_url }}" id="sqStartBtn" data-base-href="{{ take_url }}" class="sq-btn">{% if is_pretest %}{% if lang == 'hi' %}ट्रेनिंग से पहले का टेस्ट शुरू करें →{% else %}Start before-training test →{% endif %}{% else %}{% if lang == 'hi' %}क्विज़ शुरू करें →{% else %}Start Quiz →{% endif %}{% endif %}</a>
         </div>
         <script>
         (function(){

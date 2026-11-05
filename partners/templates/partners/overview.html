@@ -22,5 +22,22 @@
     <div class="pp-bar-n">{{ failed }}</div>
   </div>
 </div>
+{% if quiz.pretest_enabled or pre_post %}
+<div class="pp-card">
+  <div style="font-weight:700; margin-bottom:10px; font-size:14px; color:var(--ink-soft); text-transform:uppercase; letter-spacing:.03em;">Before vs After Training</div>
+  {% if pre_post and pre_post.pairs %}
+  <div class="pp-grid" style="margin:0">
+    <div class="pp-card pp-stat"><div class="n">{{ pre_post.pair_pre_avg }}%</div><div class="l">Before training (avg)</div></div>
+    <div class="pp-card pp-stat"><div class="n">{{ pre_post.pair_post_avg }}%</div><div class="l">After training (avg)</div></div>
+    <div class="pp-card pp-stat"><div class="n">{% if pre_post.gain >= 0 %}+{% endif %}{{ pre_post.gain }}</div><div class="l">Points gained</div></div>
+    <div class="pp-card pp-stat"><div class="n">{{ pre_post.pairs }}</div><div class="l">People who took both</div></div>
+  </div>
+  {% elif pre_post %}
+  <p style="margin:0">{{ pre_post.pre_count }} people took the before-training test (average {{ pre_post.pre_avg }}%). The comparison appears once they take the quiz after the training.</p>
+  {% else %}
+  <p style="margin:0">The before-training test is on, but nobody has taken it yet. Share the quiz link with <b>?mode=pre</b> at the end before the training starts.</p>
+  {% endif %}
+</div>
+{% endif %}
 
 {% endblock %}

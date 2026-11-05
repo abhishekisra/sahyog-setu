@@ -9,6 +9,8 @@ from django.db.models import Avg, Count, Q
 from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.decorators import method_decorator
+
+from quizzes.prepost import pre_post_summary
 from django.views import View
 
 from quizzes.models import Quizzes, QuizAttempt, QuestionResponse
@@ -168,6 +170,7 @@ def partner_overview(request, quiz_id):
         "passed": passed,
         "failed": failed,
         "pass_rate": round(passed / total_completed * 100, 1) if total_completed else 0,
+        "pre_post": (pre_post_summary([quiz.id]) or [None])[0],
     })
 
 
@@ -292,6 +295,7 @@ def partner_questions(request, quiz_id):
     for question in quiz.questions.all().order_by("id"):
         responses = QuestionResponse.objects.filter(
             question=question, attempt__quiz=quiz, attempt__completed_at__isnull=False, attempt__is_demo=False,
+            attempt__kind="main",  # leave out before-training test answers
         )
         total = responses.count()
         correct = responses.filter(is_correct=True).count()

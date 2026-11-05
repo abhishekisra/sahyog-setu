@@ -23,7 +23,7 @@
         <div class="sq-rseal">
           <div><div class="sq-pct">{{ percentage|floatformat:0 }}%</div><div class="sq-pl">{% if lang == 'hi' %}स्कोर{% else %}Score{% endif %}</div></div>
         </div>
-        <h1 class="sq-rtitle">{% if attempt.passed %}{% if lang == 'hi' %}बधाई हो!{% else %}Congratulations!{% endif %}{% else %}{% if lang == 'hi' %}अभ्यास जारी रखें!{% else %}Keep Practicing!{% endif %}{% endif %}</h1>
+        <h1 class="sq-rtitle">{% if is_pretest %}{% if lang == 'hi' %}ट्रेनिंग से पहले का टेस्ट पूरा हुआ{% else %}Before-training test done{% endif %}{% elif attempt.passed %}{% if lang == 'hi' %}बधाई हो!{% else %}Congratulations!{% endif %}{% else %}{% if lang == 'hi' %}अभ्यास जारी रखें!{% else %}Keep Practicing!{% endif %}{% endif %}</h1>
         <p class="sq-rmsg">{% if lang == 'hi' %}आपने <strong>{{ quiz_title }}</strong> में <strong>{{ marks }}/{{ total_marks }}</strong> अंक प्राप्त किए।{% else %}You scored <strong>{{ marks }}/{{ total_marks }}</strong> marks in <strong>{{ quiz_title }}</strong>.{% endif %}</p>
 
         <div class="sq-breakdown">
@@ -32,7 +32,15 @@
           <div class="sq-bd sq-y"><div class="bn">{{ missed }}</div><div class="bl">{% if lang == 'hi' %}छूटे{% else %}Missed{% endif %}</div></div>
         </div>
 
-        {% if attempt.passed %}
+        {% if is_pretest %}
+        <!-- 2026-11-05: before-training test -- score only. No answers, no
+             certificate, no sharing, so the real quiz after the training
+             still measures what was learnt. -->
+        <div class="sq-notice">
+          <p>{% if lang == 'hi' %}यह ट्रेनिंग से पहले का टेस्ट था, इसलिए इसमें सही उत्तर और प्रमाणपत्र नहीं दिखाए जाते। ट्रेनिंग के बाद यही क्विज़ दोबारा दें — तब पता चलेगा कि आपने कितना सीखा।{% else %}This was the before-training test, so answers and certificates aren't shown. Take this quiz again after the training to see how much you learnt.{% endif %}</p>
+          <a href="/quizzes/" class="sq-btn-outline">{% if lang == 'hi' %}सभी प्रश्नोत्तरी देखें{% else %}See all quizzes{% endif %}</a>
+        </div>
+        {% elif attempt.passed %}
         <div class="sq-notice sq-notice-pass">
           <p>{% if lang == 'hi' %}आप यह क्विज़ <strong>{{ percentage|floatformat:1 }}%</strong> अंकों के साथ उत्तीर्ण हुए (पास होने के लिए {{ pass_threshold }}% आवश्यक था)।{% else %}You passed this quiz with <strong>{{ percentage|floatformat:1 }}%</strong> (pass mark was {{ pass_threshold }}%).{% endif %}</p>
           {% if attempt.quiz.certificate_enabled and percentage >= certificate_min_percentage %}
@@ -46,6 +54,7 @@
         </div>
         {% endif %}
 
+        {% if not is_pretest %}
         <div class="sq-share-section">
           <span class="sq-share-title">{% if lang == 'hi' %}क्विज़ साझा करें{% else %}Share Quiz{% endif %}</span>
           <div class="sq-share-grid">
@@ -62,7 +71,9 @@
           </div>
         </div>
 
-        {% if responses %}
+        {% endif %}{# not is_pretest (share) #}
+
+        {% if responses and not is_pretest %}
         <div class="sq-review">
           <div class="sq-rvh">{% if lang == 'hi' %}सभी प्रश्न{% else %}All Questions{% endif %}</div>
           <div class="sq-qnav">

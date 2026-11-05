@@ -161,6 +161,28 @@
             </div>
         </div>
 
+        {% if pre_post %}
+        <!-- 2026-11-05: before vs after training (pre-test = landing ?mode=pre) -->
+        <div class="row"><div class="col-12">
+            <div class="qa-chart-card">
+                <h6>Before vs After Training</h6>
+                <div style="overflow-x:auto;">
+                <table class="qa-table">
+                    <thead><tr><th>Quiz</th><th>Took before-test</th><th>Avg before (all)</th><th>Took both</th><th>Before (same people)</th><th>After</th><th>Gain</th></tr></thead>
+                    <tbody>
+                    {% for r in pre_post %}
+                    <tr><td>{{ r.quiz }}</td><td>{{ r.pre_count }}</td><td>{{ r.pre_avg }}%</td><td>{{ r.pairs }}</td>
+                        <td>{% if r.pairs %}{{ r.pair_pre_avg }}%{% else %}—{% endif %}</td>
+                        <td>{% if r.pairs %}{{ r.pair_post_avg }}%{% else %}—{% endif %}</td>
+                        <td>{% if r.pairs %}{% if r.gain >= 0 %}+{% endif %}{{ r.gain }}{% else %}—{% endif %}</td></tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                </div>
+            </div>
+        </div></div>
+        {% endif %}
+
         <div class="row">
             <div class="col-md-6">
                 <div class="qa-chart-card">
