@@ -1,0 +1,135 @@
+<!-- New site header (user's design, 2026-11-05). Preview only for now:
+     public_base.html includes this and _ssh_header.html when ?newheader=1.
+     Everything is scoped under .ssh-* so page styles can't collide. -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cinzel:wght@700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html.ts-lg{font-size:112.5%}
+  html.ts-xl{font-size:125%}
+  .ssh{--bar:#101a12;--head:#33422f;--head-deep:#2a3727;--line:rgba(255,255,255,.12);--text:#f3f7f4;--text-soft:#c9d8cd;--yellow:#ffd60a;--yellow-deep:#e8b800;
+    position:sticky;top:0;z-index:60;box-shadow:0 8px 24px rgba(10,20,12,.25);font-family:"Poppins","Noto Sans Devanagari",system-ui,sans-serif;text-align:left}
+  .ssh *{box-sizing:border-box}
+  .ssh a{color:inherit;text-decoration:none}
+  .ssh button{font-family:inherit;cursor:pointer}
+  .ssh :focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:8px}
+  .ssh-skip{position:absolute;left:16px;top:-60px;z-index:100;background:#ffd60a;color:#111;padding:10px 16px;border-radius:8px;font-weight:600;font-size:.9rem;transition:top .15s}
+  .ssh-skip:focus{top:8px}
+
+  .ssh-a11y{background:var(--bar);color:var(--text)}
+  .ssh-a11y-in{max-width:1400px;margin:0 auto;padding:6px 24px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:.8rem}
+  .ssh-a11y-label{color:var(--text-soft);margin-right:2px}
+  .ssh-chip{height:28px;min-width:34px;padding:0 10px;border-radius:7px;border:1px solid rgba(255,255,255,.28);background:transparent;color:var(--text);font-weight:600;font-size:.78rem;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;margin:0}
+  .ssh-chip:hover{background:rgba(255,255,255,.1)}
+  .ssh-chip[aria-pressed="true"]{background:var(--yellow);color:#111;border-color:var(--yellow)}
+  .ssh-flag{height:3px;background:linear-gradient(90deg,#e8751a 0 33.33%,#e9ece9 33.33% 66.66%,#138808 66.66%)}
+
+  .ssh-head{background:var(--head);color:var(--text);border-bottom:1px solid var(--line);position:relative}
+  .ssh-head-in{max-width:1400px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+  .ssh-brand{display:flex;align-items:center;gap:14px;flex-shrink:0}
+  .ssh-brand img{width:56px;height:56px;object-fit:contain;border-radius:50%;background:#fff}
+  .ssh-brand-text{line-height:1}
+  .ssh-brand-name{font-family:"Cinzel",Georgia,serif;font-weight:700;font-size:1.5rem;letter-spacing:.06em;color:#fff}
+  .ssh-brand-sub{display:block;margin-top:7px;font-size:.62rem;font-weight:500;letter-spacing:.42em;color:var(--text-soft)}
+
+  .ssh-nav{margin-left:auto}
+  .ssh-nav-list{list-style:none;display:flex;align-items:center;gap:2px;margin:0;padding:0}
+  .ssh-link,.ssh-nav-btn{display:inline-flex;align-items:center;gap:7px;padding:11px 14px;border-radius:12px;border:0;background:transparent;color:var(--text);font-size:.92rem;font-weight:600;white-space:nowrap;position:relative;transition:background .15s,color .15s;margin:0}
+  .ssh-link:hover,.ssh-nav-btn:hover,.ssh-has-sub.ssh-open>.ssh-nav-btn{background:rgba(255,255,255,.09);color:var(--text)}
+  .ssh-link[aria-current="page"],.ssh-nav-btn.ssh-current{background:rgba(255,255,255,.1);color:var(--yellow);box-shadow:inset 0 -3px 0 var(--yellow)}
+  .ssh-caret{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;transition:transform .15s}
+  .ssh-has-sub.ssh-open .ssh-caret{transform:rotate(180deg)}
+  .ssh-has-sub{position:relative}
+  .ssh-sub{position:absolute;left:0;top:calc(100% + 10px);min-width:230px;padding:8px;margin:0;list-style:none;background:#fff;color:#1c2b21;border-radius:14px;box-shadow:0 18px 40px rgba(10,20,12,.28);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .15s,transform .15s,visibility .15s;z-index:70}
+  .ssh-sub::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+  .ssh-has-sub.ssh-open>.ssh-sub{opacity:1;visibility:visible;transform:none}
+  @media (hover:hover) and (min-width:1281px){.ssh-has-sub:hover>.ssh-sub{opacity:1;visibility:visible;transform:none}}
+  .ssh-sub a{display:block;padding:10px 14px;border-radius:9px;font-size:.9rem;font-weight:500;color:#1c2b21}
+  .ssh-sub a:hover{background:#eef4ef;color:#1c2b21}
+
+  .ssh-tools{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .ssh-icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;transition:background .15s;padding:0}
+  .ssh-icon-btn:hover{background:rgba(255,255,255,.14);color:#fff}
+  .ssh-lang{position:relative;margin:0}
+  .ssh-lang select{appearance:none;-webkit-appearance:none;height:42px;padding:0 34px 0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font:500 .85rem "Poppins","Noto Sans Devanagari",sans-serif;cursor:pointer;max-width:150px}
+  .ssh-lang select option{color:#111}
+  .ssh-lang::after{content:"";position:absolute;right:14px;top:50%;width:6px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+  .ssh-cta{height:46px;padding:0 24px;border-radius:999px;display:inline-flex;align-items:center;font-weight:700;font-size:.95rem;color:#1a1a1a !important;background:linear-gradient(180deg,#ffe24a,var(--yellow-deep));box-shadow:0 6px 16px rgba(255,214,10,.28);transition:transform .15s,box-shadow .15s;white-space:nowrap}
+  .ssh-cta:hover{transform:translateY(-1px);box-shadow:0 9px 20px rgba(255,214,10,.4)}
+  .ssh-login{height:46px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font-weight:600;font-size:.85rem;white-space:nowrap}
+  .ssh-user{position:relative}
+  .ssh-user-btn{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px 0 5px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font-weight:600;font-size:.85rem;margin:0}
+  .ssh-avatar{width:34px;height:34px;border-radius:50%;background:var(--yellow);color:#1a1a1a;display:grid;place-items:center;font-weight:700;font-size:.78rem}
+  .ssh-user-menu{position:absolute;right:0;top:calc(100% + 10px);min-width:200px;padding:6px;background:#fff;color:#1c2b21;border-radius:14px;box-shadow:0 18px 40px rgba(10,20,12,.28);display:none;z-index:70}
+  .ssh-user-menu.ssh-open{display:block}
+  .ssh-who{padding:10px 14px 8px;font-size:.78rem;color:#5d6b62;border-bottom:1px solid #e5ebe6;margin-bottom:4px}
+  .ssh-who b{display:block;color:#1c2b21;font-size:.9rem}
+  .ssh-user-menu a{display:block;padding:10px 14px;border-radius:9px;font-size:.9rem;font-weight:500;color:#1c2b21}
+  .ssh-user-menu a:hover{background:#eef4ef}
+  .ssh-user-menu .ssh-danger{color:#b3261e}
+  .ssh-burger{display:none !important}
+  .ssh-lang-m{display:none}
+  .ssh-lang-m select{width:100%;height:46px;margin-top:8px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font:500 .95rem "Poppins","Noto Sans Devanagari",sans-serif}
+  .ssh-lang-m select option{color:#111}
+
+  @media (max-width:1440px) and (min-width:1281px){
+    .ssh-head-in{gap:12px;padding:12px 18px}
+    .ssh-link,.ssh-nav-btn{padding:10px 9px;font-size:.86rem}
+    .ssh-brand img{width:48px;height:48px}
+    .ssh-brand-name{font-size:1.25rem}
+    .ssh-lang select{max-width:112px}
+    .ssh-cta{padding:0 16px}
+    .ssh-login{padding:0 14px}
+    .ssh-tools{gap:8px}
+    .ssh-brand{gap:10px}
+    .ssh-brand-name{font-size:1.15rem}
+    .ssh-icon-btn.ssh-search{display:none}
+    .ssh-user-name{display:none}
+    .ssh-user-btn{padding:0 5px}
+  }
+  @media (max-width:1280px){
+    .ssh-head-in{padding:10px 16px;gap:10px}
+    .ssh-brand img{width:46px;height:46px}
+    .ssh-brand-name{font-size:1.2rem}
+    .ssh-tools{margin-left:auto}
+    .ssh-user-name{display:none}
+    .ssh-user-btn{padding:0 5px}
+    .ssh-burger{display:grid !important}
+    .ssh-nav{position:absolute;left:0;right:0;top:100%;margin:0;background:var(--head-deep);border-bottom:1px solid var(--line);max-height:0;overflow:hidden;transition:max-height .25s ease}
+    .ssh-nav.ssh-open{max-height:80vh;overflow:auto}
+    .ssh-nav-list{flex-direction:column;align-items:stretch;padding:10px 16px 18px;gap:2px}
+    .ssh-link,.ssh-nav-btn{width:100%;justify-content:space-between;padding:14px}
+    .ssh-sub{position:static;opacity:1;visibility:visible;transform:none;display:none;box-shadow:none;background:rgba(255,255,255,.07);color:var(--text);margin:2px 0 6px 10px}
+    .ssh-sub::before{display:none}
+    .ssh-has-sub.ssh-open>.ssh-sub{display:block}
+    .ssh-sub a{color:var(--text)}
+    .ssh-sub a:hover{background:rgba(255,255,255,.1);color:var(--text)}
+  }
+  @media (max-width:640px){
+    .ssh-a11y-in{padding:6px 12px}
+    .ssh-a11y-label,.ssh-chip .ssh-txt{display:none}
+    .ssh-lang{display:none}
+    .ssh-lang-m{display:block}
+    .ssh-cta{height:40px;padding:0 16px;font-size:.85rem}
+    .ssh-login{height:40px;padding:0 12px}
+    .ssh-brand-sub{letter-spacing:.3em}
+    .ssh-brand-name{font-size:1.05rem}
+    .ssh-brand img{width:40px;height:40px}
+    .ssh-icon-btn.ssh-search{display:none}
+    /* the mobile bottom bar already has Helpline */
+    .ssh-cta{display:none}
+    .ssh-brand-sub{display:none}
+    .ssh-head-in{padding:8px 12px}
+    .ssh-tools{gap:8px}
+  }
+
+  [data-contrast="high"] .ssh-a11y,[data-contrast="high"] .ssh-head,[data-contrast="high"] .ssh-nav{background:#000;color:#fff}
+  [data-contrast="high"] .ssh-head{border-bottom:2px solid #fff}
+  [data-contrast="high"] .ssh-link,[data-contrast="high"] .ssh-nav-btn,[data-contrast="high"] .ssh-brand-name{color:#fff}
+  [data-contrast="high"] .ssh-link[aria-current="page"]{color:var(--yellow);background:#000;box-shadow:inset 0 -3px 0 var(--yellow)}
+  [data-contrast="high"] .ssh-brand-sub,[data-contrast="high"] .ssh-a11y-label{color:#fff}
+  [data-contrast="high"] .ssh-icon-btn,[data-contrast="high"] .ssh-user-btn,[data-contrast="high"] .ssh-lang select,[data-contrast="high"] .ssh-chip,[data-contrast="high"] .ssh-login{border-color:#fff}
+  [data-contrast="high"] .ssh-sub,[data-contrast="high"] .ssh-user-menu{background:#000;color:#fff;border:2px solid #fff}
+  [data-contrast="high"] .ssh-sub a,[data-contrast="high"] .ssh-user-menu a{color:#fff}
+  [data-contrast="high"] .ssh-sub a:hover,[data-contrast="high"] .ssh-user-menu a:hover{background:#222}
+  [data-contrast="high"] .ssh-user-menu .ssh-danger{color:#ff8a80}
+  @media (prefers-reduced-motion:reduce){.ssh *{transition:none!important}}
+</style>

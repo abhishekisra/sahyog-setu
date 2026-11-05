@@ -414,10 +414,12 @@
         .text-center p, .text-center li, .premium-footer p, .premium-footer li, .sqz-hero p { text-align: inherit; }
     </style>
     {% block head %}{% endblock %}
+    {% if request.GET.newheader == '1' %}{% include 'custom_admin/_ssh_header_style.html' %}{% endif %}
 </head>
 
 <body>
-    <nav id="ssq-main-nav">
+    {% if request.GET.newheader == '1' %}{% include 'custom_admin/_ssh_header.html' %}{% endif %}
+    <nav id="ssq-main-nav"{% if request.GET.newheader == '1' %} style="display:none!important"{% endif %}>
         <div id="ssq-nav-links">
             <a href="/">Home</a>
             <a href="/central-schemes-viewer/">Central Govt Scheme</a>
