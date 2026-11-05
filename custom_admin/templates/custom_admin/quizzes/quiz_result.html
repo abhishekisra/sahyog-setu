@@ -42,7 +42,7 @@
         {% else %}
         <div class="sq-notice">
           <p>{% if lang == 'hi' %}पास होने के लिए कम से कम <strong>{{ pass_threshold }}%</strong> आवश्यक है। अभ्यास जारी रखें!{% else %}You need at least <strong>{{ pass_threshold }}%</strong> to pass. Keep practicing!{% endif %}</p>
-          <a href="{% url 'quiz_take' attempt.quiz.id %}" class="sq-btn-outline">{% if lang == 'hi' %}फिर से प्रयास करें{% else %}Try Again{% endif %}</a>
+          <a href="{% url 'quiz_take' attempt.quiz.id %}?lang={{ lang }}" class="sq-btn-outline">{% if lang == 'hi' %}फिर से प्रयास करें{% else %}Try Again{% endif %}</a>
         </div>
         {% endif %}
 
@@ -83,6 +83,11 @@
                open by default for wrong/missed so the participant sees
                exactly what to revisit, collapsed for ones already correct. -->
           <div class="sq-rvh sq-rvh-2">{% if lang == 'hi' %}उत्तर समीक्षा{% else %}Answer Review{% endif %}</div>
+          {% if wrong or missed %}
+          <!-- 2026-11-05: one-tap revision -- hide the ones already right. -->
+          <label class="sq-rv-filter"><input type="checkbox" onchange="document.querySelector('.sq-answer-review').classList.toggle('sq-only-wrong', this.checked)">
+            {% if lang == 'hi' %}सिर्फ़ गलत और छूटे प्रश्न दिखाएँ ({{ wrong|add:missed }}){% else %}Show only wrong and missed ({{ wrong|add:missed }}){% endif %}</label>
+          {% endif %}
           <div class="sq-answer-review">
             {% for item in review_items %}
             <div class="sq-rv-item sq-rv-{{ item.status }} {% if item.status != 'correct' %}sq-rv-open{% endif %}" id="sqReviewQ{{ item.num }}">
@@ -118,7 +123,7 @@
         {% endif %}
 
         <div class="sq-footer-links">
-          <a href="/" class="sq-link">Back to Home</a>
+          <a href="/" class="sq-link">{% if lang == 'hi' %}होम पर वापस जाएं{% else %}Back to Home{% endif %}</a>
         </div>
       </div>
     </section>
@@ -241,6 +246,9 @@
      thing a participant ever sees for a skipped/wrong question. */
   .sq-rvh-2{ margin-top:8px; }
   .sq-answer-review{ display:flex; flex-direction:column; gap:10px; }
+  .sq-answer-review.sq-only-wrong .sq-rv-correct{ display:none; }
+  .sq-rv-filter{ display:inline-flex; align-items:center; gap:8px; margin:0 0 12px; font-size:14px; cursor:pointer; }
+  .sq-rv-filter input{ width:18px; height:18px; accent-color:#f7c948; }
   .sq-rv-item{
     border-radius:12px; background:var(--card); border:1px solid rgba(255,255,255,.08);
     overflow:hidden; scroll-margin-top:90px;
