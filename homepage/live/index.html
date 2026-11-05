@@ -1,0 +1,2526 @@
+<!doctype html>
+<html id="html" dir="ltr" lang="en">
+
+<head>
+
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-KLNWR9ZP');</script>
+    <!-- End Google Tag Manager -->
+
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="theme-color" content="#17281f" />
+    <meta name="description" content="Sahyog Setu by Uplift Live Foundation — a unified digital gateway to Indian government welfare schemes, eligibility checks, helplines, important portals, and document guides, in Hindi and English." />
+    <meta name="keywords" content="Sahyog Setu, Uplift Live Foundation, government schemes, sarkari yojana, central schemes, state schemes, eligibility checker, helplines, important documents, important portals, India welfare schemes" />
+    <link rel="canonical" href="https://sahyogsetu.in/" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Sahyog Setu" />
+    <meta property="og:title" content="Sahyog Setu — Government Schemes, Eligibility Check & Helplines" />
+    <meta property="og:description" content="A unified digital gateway to Indian government welfare schemes, eligibility checks, helplines, important portals, and document guides, by Uplift Live Foundation." />
+    <meta property="og:image" content="https://sahyogsetu.in/assets/img/logo.png" />
+    <meta property="og:url" content="https://sahyogsetu.in/" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Sahyog Setu — Government Schemes, Eligibility Check & Helplines" />
+    <meta name="twitter:description" content="A unified digital gateway to Indian government welfare schemes, eligibility checks, helplines, important portals, and document guides." />
+    <meta name="twitter:image" content="https://sahyogsetu.in/assets/img/logo.png" />
+
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "GovernmentService",
+      "name": "Sahyog Setu",
+      "alternateName": "Sahyog Setu Portal",
+      "url": "https://sahyogsetu.in/",
+      "logo": "https://sahyogsetu.in/assets/img/logo.png",
+      "description": "A unified digital gateway to Indian central and state government welfare schemes, an eligibility checker, helplines, important portals, and important document guides.",
+      "provider": {
+        "@type": "NGO",
+        "name": "Uplift Live Foundation",
+        "url": "https://sahyogsetu.in/"
+      },
+      "areaServed": { "@type": "Country", "name": "India" },
+      "availableLanguage": ["Hindi", "English"]
+    }
+    </script>
+
+    <link rel="apple-touch-icon" href="/logo192.png" />
+    <link rel="manifest" href="/manifest.json" />
+    <!-- PWA install support (2026-09-20) -- manifest.json/icons/theme-color
+         above already existed (CRA default); this service worker was the
+         only missing piece for real installability. Injected directly
+         here rather than via React source, same as the Google Translate
+         fix earlier this session -- no source for this prod-only build is
+         available on this box, only the compiled output. Deliberately no
+         explicit "Install App" button anywhere on the site: that exact
+         pattern was tried on the sister ULF-MIS WorkDesk PWA and proved
+         unreliable across Chrome versions/devices (native install-prompt
+         support varies, can't be forced), and was removed after user
+         feedback. Browsers that support installability will offer their
+         own native affordance (address-bar icon, browser menu) once a
+         valid manifest + active service worker are both present, which
+         is exactly what this achieves without an unreliable in-app UI. -->
+    <script>
+      if('serviceWorker' in navigator){
+        window.addEventListener('load',function(){
+          navigator.serviceWorker.register('/sw.js').catch(function(){});
+        });
+      }
+    </script>
+    <link rel="stylesheet" href="/assets/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="/assets/css/animate.min.css" />
+    <link rel="stylesheet" href="/assets/css/fontawesome.all.min.css" />
+    <link rel="stylesheet" href="/assets/css/owl.carousel.min.css" />
+    <link rel="stylesheet" href="/assets/css/owl.theme.default.min.css" />
+    <link rel="stylesheet" href="/assets/css/magnific-popup.min.css" />
+    <link rel="stylesheet" href="/assets/css/navber.css" />
+    <link rel="stylesheet" href="/assets/css/meanmenu.css" />
+    <link rel="stylesheet" href="/assets/css/style.css" />
+    <link rel="stylesheet" href="/assets/css/responsive.css" />
+    <link rel="icon" type="image/png" href="/assets/img/favicon.png">
+    <title>Sahyog Setu — Government Schemes, Eligibility Check & Helplines | Uplift Live Foundation</title>
+    <style>
+        .nav-tabs .nav-link.active {
+            background-color: #d2e5b8;
+            border-color: #fff;
+            color: #000
+        }
+
+        .nav-tabs .nav-link {
+            border-color: #dedede;
+            color: #000;
+            padding: 20px
+        }
+
+        .extra-nav>button.accordion-button {
+            padding: 0 !important
+        }
+
+        .extra-nav>.accordion-button:not(.collapsed) {
+            color: #0c63e4;
+            background-color: #fff;
+            box-shadow: unset !important
+        }
+
+        #RFS-Connector {
+            display: none
+        }
+
+        @media (max-width :992px) {
+            .footer_area_about {
+                padding-right: 0 !important
+            }
+
+            .contact-info {
+                margin-top: 100px;
+                width: 100%;
+                margin-top: 100px;
+                width: 100%;
+                text-align: justify;
+                align-items: center;
+                justify-content: center;
+                display: flex;
+                flex-direction: column
+            }
+        }
+
+        .subscription-modal-width {
+            min-width: min-content
+        }
+
+        /* The "Log in with Google / Powered by Uplift Live Foundation"
+           modal auto-opens on every page load and has no close button --
+           Escape and backdrop-click don't dismiss it either, so it blocks
+           every click on the page underneath it (including "Start Quiz").
+           No frontend source is deployed on this box (production build
+           only), so this is a CSS-only kill switch scoped to that specific
+           modal via its distinctive popup.png background -- it won't touch
+           any other modal the app might open. */
+        .modal.show:has(div[style*="popup.png"]) {
+            display: none !important;
+        }
+
+        .modal-backdrop {
+            display: none !important;
+        }
+
+        /* Quiz banner images were removed from the quiz section (photos
+           replaced with a 1x1 blank placeholder file so the React <img>
+           tag never breaks), but the SPA's card component still reserves
+           a fixed 220px height for that image slot on /quizzes, leaving a
+           tall blank gap in every card. .case_boxed_img is a shared class
+           reused elsewhere (e.g. the homepage's own card sections still
+           show real images), so this collapses it only on the quiz
+           listing route via the html.sq-quizzes-route class toggled by
+           the script below -- it can't affect any other page. */
+        html.sq-quizzes-route .case_boxed_img {
+            display: none !important;
+        }
+
+        #fill-tab-example-tab-volunteers {
+            width: auto;
+            flex: none !important
+        }
+
+        .nav-fill .nav-item,
+        .nav-fill>.nav-link {
+            flex: none;
+            text-align: center
+        }
+
+        .nav-tabs {
+            width: fit-content
+        }
+    </style>
+    <script>
+    // The React quiz-listing pages (/quizzes, home page quiz cards) link
+    // to "Start Quiz" as /quiz/<slug>/<base64-id>/ using client-side
+    // (history.pushState) routing -- this never generates a real HTTP
+    // request, so it can't be fixed at the nginx layer (see the 301 rule
+    // in the nginx config, which only helps direct/typed navigation).
+    // Instead of landing on Django's route (which 404s on the extra
+    // segment), the SPA falls through to its own separate, legacy,
+    // client-only quiz-taking UI (reads raw questions from /api/quiz/<id>,
+    // no answer persistence, wrong timer) instead of the real
+    // server-backed quiz flow. No frontend source is deployed on this box
+    // (production build only), so this patches the behavior by watching
+    // for pushState/replaceState calls that match the bogus URL shape
+    // (base64-padding-looking segment ending in one-or-more '=') and
+    // forcing a real hard navigation to the correct, single-segment
+    // Django quiz landing route instead. Scoped identically to the nginx
+    // regex, so it can't misfire on any other in-app route.
+    //
+    // Same problem, same fix, for /quizzes itself: the SPA has its own
+    // built-in quiz-listing component (fetches raw /api/quizzes and
+    // renders an older card design -- no certificate badges, wrong
+    // question counts, none of the redesign/translation work that only
+    // exists in Django's quiz_list.html) that client-navigation renders
+    // instead of ever hitting the server. A hard reload of the same URL
+    // does reach Django and shows the current design -- which is exactly
+    // the "old design on click, new design on refresh" symptom. Forcing
+    // a real navigation for /quizzes closes that gap the same way.
+    (function(){
+      var origPush = history.pushState;
+      var origReplace = history.replaceState;
+      function maybeRedirect(url) {
+        if (typeof url !== 'string') return false;
+        var m = url.match(/^(\/quiz\/[^\/]+\/)[A-Za-z0-9+\/]*=+\/?$/);
+        if (m) {
+          window.location.href = m[1];
+          return true;
+        }
+        if (url === '/quizzes' || url === '/quizzes/') {
+          window.location.href = '/quizzes/';
+          return true;
+        }
+        return false;
+      }
+      function syncQuizzesRouteClass() {
+        var isQuizzes = location.pathname === '/quizzes' || location.pathname === '/quizzes/';
+        document.documentElement.classList.toggle('sq-quizzes-route', isQuizzes);
+      }
+      syncQuizzesRouteClass();
+      window.addEventListener('popstate', syncQuizzesRouteClass);
+      history.pushState = function(state, title, url) {
+        if (maybeRedirect(url)) return;
+        var r = origPush.apply(this, arguments);
+        syncQuizzesRouteClass();
+        return r;
+      };
+      history.replaceState = function(state, title, url) {
+        if (maybeRedirect(url)) return;
+        var r = origReplace.apply(this, arguments);
+        syncQuizzesRouteClass();
+        return r;
+      };
+    })();
+    </script>
+    <!-- 2026-09-03 (explicit instruction, "google translater lagao home
+         page mein header par"): a PREVIOUS session had deliberately
+         removed Google Translate from this page -- CSS hid its DOM +
+         a MutationObserver actively stripped #google_translate_element/
+         .goog-te-banner-frame/.skiptranslate the instant they appeared,
+         undoing the "body pushed down" offset Google's banner applies.
+         That whole removal block lived here; found while implementing
+         this and flagged to the user before touching it (no record of
+         *why* it was originally removed, and it directly conflicted with
+         and was silently deleting the new widget added just below).
+         Confirmed explicitly to undo that removal and re-enable Google
+         Translate properly -- removed rather than left disabled. -->
+    <!-- 2026-09-03: found via a real before/after bug sweep -- with the
+         old removal gone, Google's own top banner ("Translated into:
+         Hindi | Options") was showing again, pushing the whole page down.
+         The classic .goog-te-banner-frame selector no longer matches --
+         live DOM showed Google now uses an obfuscated per-build class
+         (VIpgJd-...-OEVmcd) instead. That class isn't safe to hang a
+         selector on (it can change), so this targets `iframe.skiptranslate`
+         instead -- .skiptranslate alone would also hide the real widget
+         (it's a goog-te-gadget DIV, not an iframe), but Google's banner is
+         consistently the only skiptranslate IFRAME on the page. -->
+    <style>
+        iframe.skiptranslate { display: none !important; }
+        body { top: 0 !important; }
+    </style>
+    <script defer="defer" src="/static/js/main.8fca9b23.p1.js"></script>
+    <link href="/static/css/main.f71db398.css" rel="stylesheet">
+    <style id="ssq-banner-arrows">
+      /* 2026-10-27: on phones/tablets the home banner's prev/next arrows sat
+         mid-height, right on top of the baked-in "SAHYOG SETU PORTAL" text
+         and the people's faces. Move them to the bottom corners, smaller. */
+      @media (max-width: 991px) {
+        .owl-carousel.shadow .owl-nav .owl-prev,
+        .owl-carousel.shadow .owl-nav .owl-next { top: auto !important; bottom: 10px !important; width: 32px !important; height: 32px !important; }
+        .owl-carousel.shadow .owl-nav .owl-prev { left: 10px !important; }
+        .owl-carousel.shadow .owl-nav .owl-next { right: 10px !important; left: auto !important; }
+      }
+      /* Banner photos are ~3:1 (1920x640 / 1920x720) but were forced to
+         70vh/50vh/35vh tall at full width with object-fit:fill -- squashed
+         to 39% width on phones, 71% on a 1366 laptop. Keep their own shape. */
+      .owl-carousel.shadow .banner-image { height: auto !important; aspect-ratio: 3 / 1; object-fit: cover; }
+      .owl-carousel.owl-theme.shadow.owl-loaded { height: auto !important; }  /* was 50vh/35vh: white gap under the banner */
+      .owl-carousel.shadow .case_boxed_wrapper { margin-bottom: 0 !important; }  /* 30px margin showed as a white strip inside the shadow */
+      @media (max-width: 767px) {
+        /* scheme/eligibility page banners keep their 125px band; crop, don't squash */
+        .commn_banner_page img, .page-banner-image { object-fit: cover; }
+      }
+    </style>
+<style id="ssq-justify">
+        /* Site-wide body text: justified, but never split a word (no auto-
+           hyphenation, no mid-word breaks -- only a single word longer than
+           the whole line, e.g. a URL inside a link, may wrap). Phones get
+           left-aligned instead: justify on a ~340px column opens big gaps.
+           Element selectors only, so any page's own class rule still wins;
+           containers whose text is meant to be centred keep inheriting it. */
+        p, li, blockquote, .content, .description {
+            text-align: justify; text-justify: inter-word;
+            hyphens: none; -webkit-hyphens: none; -ms-hyphens: none;
+            word-break: normal; overflow-wrap: normal;
+        }
+        p a, li a { overflow-wrap: break-word; }
+        @media (max-width: 600px) {
+            p, li, blockquote, .content, .description { text-align: left; }
+        }
+        .text-center p, .text-center li, .premium-footer p, .premium-footer li, .sqz-hero p { text-align: inherit; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cinzel:wght@700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  html.ts-lg{font-size:112.5%}
+  html.ts-xl{font-size:125%}
+  .ssh{--bar:#101a12;--head:#33422f;--head-deep:#2a3727;--line:rgba(255,255,255,.12);--text:#f3f7f4;--text-soft:#c9d8cd;--yellow:#ffd60a;--yellow-deep:#e8b800;
+    position:sticky;top:0;z-index:60;box-shadow:0 8px 24px rgba(10,20,12,.25);font-family:"Poppins","Noto Sans Devanagari",system-ui,sans-serif;text-align:left}
+  .ssh *{box-sizing:border-box}
+  .ssh a{color:inherit;text-decoration:none}
+  .ssh button{font-family:inherit;cursor:pointer}
+  .ssh :focus-visible{outline:3px solid var(--yellow);outline-offset:2px;border-radius:8px}
+  .ssh-skip{position:absolute;left:16px;top:-60px;z-index:100;background:#ffd60a;color:#111;padding:10px 16px;border-radius:8px;font-weight:600;font-size:.9rem;transition:top .15s}
+  .ssh-skip:focus{top:8px}
+
+  .ssh-a11y{background:var(--bar);color:var(--text)}
+  .ssh-a11y-in{max-width:1400px;margin:0 auto;padding:6px 24px;display:flex;align-items:center;justify-content:flex-end;gap:8px;font-size:.8rem}
+  .ssh-a11y-label{color:var(--text-soft);margin-right:2px}
+  .ssh-chip{height:28px;min-width:34px;padding:0 10px;border-radius:7px;border:1px solid rgba(255,255,255,.28);background:transparent;color:var(--text);font-weight:600;font-size:.78rem;display:inline-flex;align-items:center;justify-content:center;gap:6px;transition:background .15s;margin:0}
+  .ssh-chip:hover{background:rgba(255,255,255,.1)}
+  .ssh-chip[aria-pressed="true"]{background:var(--yellow);color:#111;border-color:var(--yellow)}
+  .ssh-flag{height:3px;background:linear-gradient(90deg,#e8751a 0 33.33%,#e9ece9 33.33% 66.66%,#138808 66.66%)}
+
+  .ssh-head{background:var(--head);color:var(--text);border-bottom:1px solid var(--line);position:relative}
+  .ssh-head-in{max-width:1400px;margin:0 auto;padding:12px 24px;display:flex;align-items:center;gap:20px}
+  .ssh-brand{display:flex;align-items:center;gap:14px;flex-shrink:0}
+  .ssh-brand img{width:56px;height:56px;object-fit:contain;border-radius:50%;background:#fff}
+  .ssh-brand-text{line-height:1}
+  .ssh-brand-name{font-family:"Cinzel",Georgia,serif;font-weight:700;font-size:1.5rem;letter-spacing:.06em;color:#fff}
+  .ssh-brand-sub{display:block;margin-top:7px;font-size:.62rem;font-weight:500;letter-spacing:.42em;color:var(--text-soft)}
+
+  .ssh-nav{margin-left:auto}
+  .ssh-nav-list{list-style:none;display:flex;align-items:center;gap:2px;margin:0;padding:0}
+  .ssh-link,.ssh-nav-btn{display:inline-flex;align-items:center;gap:7px;padding:11px 14px;border-radius:12px;border:0;background:transparent;color:var(--text);font-size:.92rem;font-weight:600;white-space:nowrap;position:relative;transition:background .15s,color .15s;margin:0}
+  .ssh-link:hover,.ssh-nav-btn:hover,.ssh-has-sub.ssh-open>.ssh-nav-btn{background:rgba(255,255,255,.09);color:var(--text)}
+  .ssh-link[aria-current="page"],.ssh-nav-btn.ssh-current{background:rgba(255,255,255,.1);color:var(--yellow);box-shadow:inset 0 -3px 0 var(--yellow)}
+  .ssh-caret{width:0;height:0;border-left:4px solid transparent;border-right:4px solid transparent;border-top:5px solid currentColor;transition:transform .15s}
+  .ssh-has-sub.ssh-open .ssh-caret{transform:rotate(180deg)}
+  .ssh-has-sub{position:relative}
+  .ssh-sub{position:absolute;left:0;top:calc(100% + 10px);min-width:230px;padding:8px;margin:0;list-style:none;background:#fff;color:#1c2b21;border-radius:14px;box-shadow:0 18px 40px rgba(10,20,12,.28);opacity:0;visibility:hidden;transform:translateY(-6px);transition:opacity .15s,transform .15s,visibility .15s;z-index:70}
+  .ssh-sub::before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+  .ssh-has-sub.ssh-open>.ssh-sub{opacity:1;visibility:visible;transform:none}
+  @media (hover:hover) and (min-width:1366px){.ssh-has-sub:hover>.ssh-sub{opacity:1;visibility:visible;transform:none}}
+  .ssh-sub a{display:block;padding:10px 14px;border-radius:9px;font-size:.9rem;font-weight:500;color:#1c2b21}
+  .ssh-sub a:hover{background:#eef4ef;color:#1c2b21}
+
+  .ssh-tools{display:flex;align-items:center;gap:10px;flex-shrink:0}
+  .ssh-icon-btn{width:42px;height:42px;border-radius:50%;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;display:grid;place-items:center;transition:background .15s;padding:0}
+  .ssh-icon-btn:hover{background:rgba(255,255,255,.14);color:#fff}
+  .ssh-lang{position:relative;margin:0}
+  .ssh-lang select{appearance:none;-webkit-appearance:none;height:42px;padding:0 34px 0 14px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font:500 .85rem "Poppins","Noto Sans Devanagari",sans-serif;cursor:pointer;max-width:150px}
+  .ssh-lang select option{color:#111}
+  .ssh-lang::after{content:"";position:absolute;right:14px;top:50%;width:6px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:translateY(-70%) rotate(45deg);pointer-events:none}
+  .ssh-cta{height:46px;padding:0 24px;border-radius:999px;display:inline-flex;align-items:center;font-weight:700;font-size:.95rem;color:#1a1a1a !important;background:linear-gradient(180deg,#ffe24a,var(--yellow-deep));box-shadow:0 6px 16px rgba(255,214,10,.28);transition:transform .15s,box-shadow .15s;white-space:nowrap}
+  .ssh-cta:hover{transform:translateY(-1px);box-shadow:0 9px 20px rgba(255,214,10,.4)}
+  .ssh-login{height:46px;padding:0 18px;border-radius:999px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font-weight:600;font-size:.85rem;white-space:nowrap}
+  .ssh-user{position:relative}
+  .ssh-user-btn{display:flex;align-items:center;gap:8px;height:46px;padding:0 12px 0 5px;border-radius:999px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font-weight:600;font-size:.85rem;margin:0}
+  .ssh-avatar{width:34px;height:34px;border-radius:50%;background:var(--yellow);color:#1a1a1a;display:grid;place-items:center;font-weight:700;font-size:.78rem}
+  .ssh-user-menu{position:absolute;right:0;top:calc(100% + 10px);min-width:200px;padding:6px;background:#fff;color:#1c2b21;border-radius:14px;box-shadow:0 18px 40px rgba(10,20,12,.28);display:none;z-index:70}
+  .ssh-user-menu.ssh-open{display:block}
+  .ssh-who{padding:10px 14px 8px;font-size:.78rem;color:#5d6b62;border-bottom:1px solid #e5ebe6;margin-bottom:4px}
+  .ssh-who b{display:block;color:#1c2b21;font-size:.9rem}
+  .ssh-user-menu a{display:block;padding:10px 14px;border-radius:9px;font-size:.9rem;font-weight:500;color:#1c2b21}
+  .ssh-user-menu a:hover{background:#eef4ef}
+  .ssh-user-menu .ssh-danger{color:#b3261e}
+  .ssh-burger{display:none !important}
+  .ssh-lang-m{display:none}
+  .ssh-lang-m select{width:100%;height:46px;margin-top:8px;padding:0 14px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:rgba(255,255,255,.06);color:#fff;font:500 .95rem "Poppins","Noto Sans Devanagari",sans-serif}
+  .ssh-lang-m select option{color:#111}
+
+  @media (max-width:1780px) and (min-width:1366px){
+    .ssh-head-in{gap:12px;padding:12px 18px}
+    .ssh-link,.ssh-nav-btn{padding:10px 8px;font-size:.86rem}
+    .ssh-brand img{width:48px;height:48px}
+    .ssh-brand-name{font-size:1.25rem}
+    .ssh-lang select{max-width:112px}
+    .ssh-cta{padding:0 16px}
+    .ssh-login{padding:0 14px}
+    .ssh-tools{gap:8px}
+    .ssh-brand{gap:10px}
+    .ssh-brand-name{font-size:1.15rem}
+    .ssh-icon-btn.ssh-search{display:none}
+    .ssh-user-name{display:none}
+    .ssh-user-btn{padding:0 5px}
+  }
+  @media (max-width:1365px){
+    .ssh-head-in{padding:10px 16px;gap:10px}
+    .ssh-brand img{width:46px;height:46px}
+    .ssh-brand-name{font-size:1.2rem}
+    .ssh-tools{margin-left:auto}
+    .ssh-user-name{display:none}
+    .ssh-user-btn{padding:0 5px}
+    .ssh-burger{display:grid !important}
+    .ssh-nav{position:absolute;left:0;right:0;top:100%;margin:0;background:var(--head-deep);border-bottom:1px solid var(--line);max-height:0;overflow:hidden;transition:max-height .25s ease}
+    .ssh-nav.ssh-open{max-height:80vh;overflow:auto}
+    .ssh-nav-list{flex-direction:column;align-items:stretch;padding:10px 16px 18px;gap:2px}
+    .ssh-link,.ssh-nav-btn{width:100%;justify-content:space-between;padding:14px}
+    .ssh-sub{position:static;opacity:1;visibility:visible;transform:none;display:none;box-shadow:none;background:rgba(255,255,255,.07);color:var(--text);margin:2px 0 6px 10px}
+    .ssh-sub::before{display:none}
+    .ssh-has-sub.ssh-open>.ssh-sub{display:block}
+    .ssh-sub a{color:var(--text)}
+    .ssh-sub a:hover{background:rgba(255,255,255,.1);color:var(--text)}
+  }
+  @media (max-width:640px){
+    .ssh-a11y-in{padding:6px 12px}
+    .ssh-a11y-label,.ssh-chip .ssh-txt{display:none}
+    .ssh-lang{display:none}
+    .ssh-lang-m{display:block}
+    .ssh-cta{height:40px;padding:0 16px;font-size:.85rem}
+    .ssh-login{height:40px;padding:0 12px}
+    .ssh-brand-sub{letter-spacing:.3em}
+    .ssh-brand-name{font-size:1.05rem}
+    .ssh-brand img{width:40px;height:40px}
+    .ssh-icon-btn.ssh-search{display:none}
+    /* the mobile bottom bar already has Helpline */
+    .ssh-cta{display:none}
+    .ssh-brand-sub{display:none}
+    .ssh-head-in{padding:8px 12px}
+    .ssh-tools{gap:8px}
+  }
+
+  @media (max-width:400px){
+    .ssh-head-in{gap:6px;padding:8px 10px}
+    .ssh-brand{gap:8px}
+    .ssh-brand img{width:34px;height:34px}
+    .ssh-brand-name{font-size:.9rem;letter-spacing:.03em}
+    .ssh-tools{gap:6px}
+    .ssh-login{height:36px;padding:0 10px;font-size:.8rem}
+    .ssh-icon-btn{width:38px;height:38px}
+    .ssh-a11y-in{gap:5px;padding:5px 10px}
+  }
+  [data-contrast="high"] .ssh-a11y,[data-contrast="high"] .ssh-head,[data-contrast="high"] .ssh-nav{background:#000;color:#fff}
+  [data-contrast="high"] .ssh-head{border-bottom:2px solid #fff}
+  [data-contrast="high"] .ssh-link,[data-contrast="high"] .ssh-nav-btn,[data-contrast="high"] .ssh-brand-name{color:#fff}
+  [data-contrast="high"] .ssh-link[aria-current="page"]{color:var(--yellow);background:#000;box-shadow:inset 0 -3px 0 var(--yellow)}
+  [data-contrast="high"] .ssh-brand-sub,[data-contrast="high"] .ssh-a11y-label{color:#fff}
+  [data-contrast="high"] .ssh-icon-btn,[data-contrast="high"] .ssh-user-btn,[data-contrast="high"] .ssh-lang select,[data-contrast="high"] .ssh-chip,[data-contrast="high"] .ssh-login{border-color:#fff}
+  [data-contrast="high"] .ssh-sub,[data-contrast="high"] .ssh-user-menu{background:#000;color:#fff;border:2px solid #fff}
+  [data-contrast="high"] .ssh-sub a,[data-contrast="high"] .ssh-user-menu a{color:#fff}
+  [data-contrast="high"] .ssh-sub a:hover,[data-contrast="high"] .ssh-user-menu a:hover{background:#222}
+  [data-contrast="high"] .ssh-user-menu .ssh-danger{color:#ff8a80}
+  @media (prefers-reduced-motion:reduce){.ssh *{transition:none!important}}
+
+  /* Pages' own small brand bars ("स Sahyog Setu" + "Back to Home") repeat
+     the new header -- user asked to remove them (2026-11-05). */
+  .yk-head{display:none !important}
+  .sq-head .sq-brand,.sq-head .sq-back-link{display:none !important}
+  .sq-head:not(:has(.sq-head-actions)){display:none !important}
+  .sq-head .sq-head-inner{justify-content:flex-end}
+  .sqz-topbar .sqz-brand{display:none !important}
+  .sqz-topbar{justify-content:flex-end}
+
+  /* Homepage (React build): hide the theme's own header and the older
+     injected link strip -- the new header replaces both (2026-11-05). */
+  #root header.main_header_arae{display:none !important}
+  #ssq-main-nav{display:none !important}
+</style>
+
+</head>
+
+<body oncopy="return!1" oncut="return!1"><noscript>You need to enable JavaScript to run this app.</noscript>
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-KLNWR9ZP" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
+    <!-- 2026-09-03: manual Google Translate widget (div + init script) that
+         was here got removed -- found live that main.8fca9b23.js (the
+         React bundle itself) already has its OWN real Component for this
+         (componentDidMount defines window.googleTranslateElementInit,
+         appends the translate_a/element.js script, and even renames the
+         gadget's first option from "Select Language" to "Language").
+         Adding a second, manual one duplicated that script load and
+         collided over the same global callback name -- console showed
+         "window.google.translate.TranslateElement is not a constructor"
+         on every load. Removing the old block below (which had blocked
+         React's native widget entirely, not just mine) is enough on its
+         own -- React renders its real one, in its real header, with no
+         conflict. Only a global style block remains below to size/place
+         it well, since the bundle doesn't hand it any layout of its own. -->
+
+<!-- 2026-11-05: new site header on the homepage (same design as the Django
+     pages' custom_admin/_ssh_header.html, which is the master copy -- keep the
+     two in sync). The React theme's own header is hidden by CSS above. Login
+     state comes from /accounts/status/, the search button opens the existing
+     #ssq-search-panel, and the language list sets Google Translate's googtrans
+     cookie (shared with the Django pages). -->
+<a class="ssh-skip" href="#root">Skip to main content</a>
+<header class="ssh" id="sshHeader">
+  <div class="ssh-a11y">
+    <div class="ssh-a11y-in notranslate" translate="no" role="group" aria-label="Accessibility options">
+      <span class="ssh-a11y-label">Text size</span>
+      <button type="button" class="ssh-chip" data-ssh-size="" aria-label="Normal text">A<sup>−</sup></button>
+      <button type="button" class="ssh-chip" data-ssh-size="ts-lg" aria-label="Larger text">A</button>
+      <button type="button" class="ssh-chip" data-ssh-size="ts-xl" aria-label="Largest text">A<sup>+</sup></button>
+      <button type="button" class="ssh-chip" id="sshContrast" aria-pressed="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+        <span class="ssh-txt">High contrast</span>
+      </button>
+    </div>
+  </div>
+  <div class="ssh-flag" aria-hidden="true"></div>
+  <div class="ssh-head">
+    <div class="ssh-head-in">
+      <a class="ssh-brand notranslate" translate="no" href="/" aria-label="Sahyog Setu, Uplift Live Foundation – home">
+        <img src="/assets/img/logo.png" alt="">
+        <span class="ssh-brand-text"><span class="ssh-brand-name">SAHYOG SETU</span><span class="ssh-brand-sub">UPLIFT LIVE FOUNDATION</span></span>
+      </a>
+      <nav class="ssh-nav" id="sshNav" aria-label="Main">
+        <ul class="ssh-nav-list">
+          <li><a class="ssh-link" href="/" aria-current="page">Home</a></li>
+          <li class="ssh-has-sub">
+            <button type="button" class="ssh-nav-btn" aria-expanded="false" aria-haspopup="true">Schemes <i class="ssh-caret"></i></button>
+            <ul class="ssh-sub">
+              <li><a href="/central-schemes-viewer/">Central Govt Scheme</a></li>
+              <li><a href="/state-schemes-viewer/">State Govt Scheme</a></li>
+            </ul>
+          </li>
+          <li><a class="ssh-link" href="/?openEligibility=1">Check Eligibility</a></li>
+          <li class="ssh-has-sub">
+            <button type="button" class="ssh-nav-btn" aria-expanded="false" aria-haspopup="true">Resources <i class="ssh-caret"></i></button>
+            <ul class="ssh-sub">
+              <li><a href="/important-portals-viewer/">Important Portals</a></li>
+              <li><a href="/important-documents-viewer/">Important Documents</a></li>
+            </ul>
+          </li>
+          <li><a class="ssh-link" href="/entrepreneurship-viewer/">Entrepreneurship</a></li>
+          <li><a class="ssh-link" href="/quizzes/">Quizzes</a></li>
+          <li><a class="ssh-link" href="/scheme-announcements-viewer/">Announcements</a></li>
+          <li class="ssh-lang-m notranslate" translate="no"><select class="ssh-gt-select" aria-label="Language"></select></li>
+        </ul>
+      </nav>
+      <div class="ssh-tools">
+        <a class="ssh-icon-btn ssh-search" href="/scheme-viewer/" id="sshSearch" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </a>
+        <label class="ssh-lang notranslate" translate="no">
+          <span style="position:absolute;left:-9999px">Language</span>
+          <select class="ssh-gt-select" aria-label="Language"></select>
+        </label>
+        <a class="ssh-cta" href="/helplines-viewer/">Helpline</a>
+        <span id="sshAuth"><a class="ssh-login" href="/accounts/login/">Login</a></span>
+        <button type="button" class="ssh-icon-btn ssh-burger" id="sshBurger" aria-label="Open menu" aria-expanded="false" aria-controls="sshNav">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+<script>
+(function(){
+  var root=document.documentElement;
+  var store={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  var sizeBtns=[].slice.call(document.querySelectorAll('[data-ssh-size]'));
+  function setSize(c){root.classList.remove('ts-lg','ts-xl'); if(c) root.classList.add(c);
+    sizeBtns.forEach(function(b){b.setAttribute('aria-pressed', String(b.getAttribute('data-ssh-size')===c));}); store.set('ss-size',c);}
+  sizeBtns.forEach(function(b){b.addEventListener('click',function(){setSize(b.getAttribute('data-ssh-size'));});});
+  setSize(store.get('ss-size')||'');
+  var cBtn=document.getElementById('sshContrast');
+  function setContrast(on){ if(on) root.setAttribute('data-contrast','high'); else root.removeAttribute('data-contrast');
+    cBtn.setAttribute('aria-pressed',String(on)); store.set('ss-contrast',on?'1':'0');}
+  cBtn.addEventListener('click',function(){setContrast(cBtn.getAttribute('aria-pressed')!=='true');});
+  setContrast(store.get('ss-contrast')==='1');
+
+  var subs=[].slice.call(document.querySelectorAll('#sshHeader .ssh-has-sub'));
+  function closeSubs(except){subs.forEach(function(s){if(s!==except){s.classList.remove('ssh-open');s.querySelector('.ssh-nav-btn').setAttribute('aria-expanded','false');}});}
+  subs.forEach(function(s){var b=s.querySelector('.ssh-nav-btn');
+    b.addEventListener('click',function(e){e.stopPropagation();closeSubs(s);var o=s.classList.toggle('ssh-open');b.setAttribute('aria-expanded',String(o));});});
+  var burger=document.getElementById('sshBurger'),nav=document.getElementById('sshNav');
+  burger.addEventListener('click',function(e){e.stopPropagation();var o=nav.classList.toggle('ssh-open');burger.setAttribute('aria-expanded',String(o));});
+  function closeUser(){var m=document.getElementById('sshUserMenu'),b=document.getElementById('sshUserBtn'); if(m){m.classList.remove('ssh-open');b.setAttribute('aria-expanded','false');}}
+  document.addEventListener('click',function(e){closeSubs(); closeUser();
+    if(!nav.contains(e.target)&&!burger.contains(e.target)){nav.classList.remove('ssh-open');burger.setAttribute('aria-expanded','false');}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeSubs(); closeUser(); nav.classList.remove('ssh-open');}});
+
+  // Search: open the homepage's own search panel (its trigger button lives
+  // in the hidden React header); fall back to the scheme viewer link.
+  document.getElementById('sshSearch').addEventListener('click',function(e){
+    var t=document.querySelector('.ssq-search-trigger'); if(t){e.preventDefault(); t.click();}
+  });
+
+  // Language = Google Translate (the homepage has no ?lang= pages).
+  var LANGS=[['en','English'],['hi','हिन्दी'],['bn','বাংলা'],['gu','ગુજરાતી'],['kn','ಕನ್ನಡ'],['ml','മലയാളം'],['mr','मराठी'],['pa','ਪੰਜਾਬੀ'],['ta','தமிழ்'],['te','తెలుగు'],['ur','اردو'],['as','অসমীয়া'],['or','ଓଡ଼ିଆ'],['mai','मैथिली'],['gom','कोंकणी'],['sa','संस्कृतम्']];
+  var m=document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([A-Za-z-]+)/), cur=m?m[1]:'en';
+  function setCk(val){var host=location.hostname.replace(/^www\./,''), exp=val?'':'; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    ['', '; domain='+location.hostname, '; domain=.'+host].forEach(function(d){document.cookie='googtrans='+(val||'')+'; path=/'+d+exp;});}
+  [].slice.call(document.querySelectorAll('.ssh-gt-select')).forEach(function(sel){
+    LANGS.forEach(function(l){var o=document.createElement('option'); o.value=l[0]; o.textContent=l[1]; if(l[0]===cur) o.selected=true; sel.appendChild(o);});
+    sel.addEventListener('change',function(){ setCk(sel.value==='en'?null:'/en/'+sel.value); location.reload(); });
+  });
+
+  // Login state
+  function esc(s){return String(s||'').replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+  fetch('/accounts/status/',{credentials:'same-origin'}).then(function(r){return r.ok?r.json():{authenticated:false};}).then(function(d){
+    if(!d||!d.authenticated) return;
+    var n=d.name||'Account', short=n.length>14?n.slice(0,13)+'…':n;
+    document.getElementById('sshAuth').innerHTML='<div class="ssh-user"><button type="button" class="ssh-user-btn" id="sshUserBtn" aria-haspopup="true" aria-expanded="false">'+
+      '<span class="ssh-avatar notranslate" translate="no">'+esc(n.charAt(0).toUpperCase())+'</span><span class="ssh-user-name notranslate" translate="no">'+esc(short)+'</span></button>'+
+      '<div class="ssh-user-menu" id="sshUserMenu"><div class="ssh-who">Signed in as<b class="notranslate" translate="no">'+esc(n)+'</b></div>'+
+      '<a href="/my-results/">My quiz results</a><a href="/accounts/logout/" class="ssh-danger">Log out</a></div></div>';
+    var b=document.getElementById('sshUserBtn'), mn=document.getElementById('sshUserMenu');
+    b.addEventListener('click',function(e){e.stopPropagation();closeSubs();var o=mn.classList.toggle('ssh-open');b.setAttribute('aria-expanded',String(o));});
+  }).catch(function(){});
+})();
+</script>
+    <div id="root"></div>
+    <script src="/assets/js/jquery.min.js"></script>
+    <script src="/assets/js/bootstrap.bundle.js"></script>
+    <script src="/assets/js/jquery.meanmenu.js"></script>
+    <script src="/assets/js/jquery.magnific-popup.min.js"></script>
+    <script src="/assets/js/owl.carousel.min.js"></script>
+    <script src="/assets/js/wow.min.js"></script>
+    <script src="/assets/js/waypoints.min.js"></script>
+    <script src="/assets/js/jquery.counterup.min.js"></script>
+    <script src="/assets/js/custom.js"></script>
+    <script src="/assets/js/custom-progress-bar.js"></script>
+    <script src="/assets/js/custom-scroll-count.js"></script>
+    <script src="/assets/js/video.js"></script>
+    <script type="text/javascript"></script>
+
+    <!-- Sahyog Setu FAQ chatbot widget -- pure vanilla HTML/CSS/JS, no external
+         API/dependency. Injected as a self-contained block on every public page
+         (both the React SPA's static index.html and Django's public_base.html)
+         so it survives client-side route changes without touching React source. -->
+    <div id="ssq-chatbot-root">
+        <button id="ssq-chatbot-toggle" aria-label="Chat sahayak kholein" type="button">
+            <svg id="ssq-chatbot-icon-open" viewBox="0 0 24 24" width="26" height="26" fill="none" stroke="#14301f" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+            <svg id="ssq-chatbot-icon-close" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#14301f" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="display:none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+
+        <div id="ssq-chatbot-panel" role="dialog" aria-label="Sahyog Setu Sahayak">
+            <div id="ssq-chatbot-header">
+                <span id="ssq-chatbot-avatar">स</span>
+                <div>
+                    <div id="ssq-chatbot-title">Sahyog Setu Sahayak</div>
+                    <div id="ssq-chatbot-subtitle">आमतौर पर तुरंत जवाब देता है</div>
+                </div>
+            </div>
+            <div id="ssq-chatbot-messages"></div>
+            <div id="ssq-chatbot-quick"></div>
+            <form id="ssq-chatbot-form">
+                <input id="ssq-chatbot-input" type="text" autocomplete="off" placeholder="अपना सवाल लिखें...">
+                <button type="submit" aria-label="भेजें">
+                    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="#14301f" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <style>
+        #ssq-chatbot-root, #ssq-chatbot-root * { box-sizing: border-box; font-family: 'Inter', 'Poppins', system-ui, -apple-system, sans-serif; }
+
+        #ssq-chatbot-toggle {
+            position: fixed; right: 20px; bottom: 20px; z-index: 99998;
+            width: 58px; height: 58px; border-radius: 50%; border: none; cursor: pointer;
+            background: linear-gradient(135deg, #ffe27a 0%, #d9a916 100%);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+            display: flex; align-items: center; justify-content: center;
+            transition: transform 0.2s ease;
+        }
+        #ssq-chatbot-toggle:hover { transform: scale(1.06); }
+
+        #ssq-chatbot-panel {
+            position: fixed; right: 20px; bottom: 90px; z-index: 99999;
+            width: 340px; max-width: calc(100vw - 32px);
+            height: 460px; max-height: calc(100vh - 130px);
+            background: #10241a;
+            border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 18px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        #ssq-chatbot-panel.ssq-open { display: flex; }
+
+        #ssq-chatbot-header {
+            background: linear-gradient(135deg, #1b4332 0%, #10241a 100%);
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 10px;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+            flex-shrink: 0;
+        }
+        #ssq-chatbot-avatar {
+            width: 36px; height: 36px; border-radius: 50%; flex-shrink: 0;
+            background: linear-gradient(135deg, #ffe27a 0%, #d9a916 100%);
+            color: #14301f; font-weight: 800; font-size: 16px;
+            display: flex; align-items: center; justify-content: center;
+        }
+        #ssq-chatbot-title { color: #fff; font-weight: 700; font-size: 14px; }
+        #ssq-chatbot-subtitle { color: rgba(255,255,255,0.55); font-size: 11px; margin-top: 1px; }
+
+        #ssq-chatbot-messages {
+            flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .ssq-msg { max-width: 84%; padding: 9px 13px; border-radius: 12px; font-size: 13px; line-height: 1.45; white-space: pre-line; }
+        .ssq-msg-bot { align-self: flex-start; background: rgba(255,255,255,0.08); color: #f3f3ef; border-bottom-left-radius: 3px; }
+        .ssq-msg-user { align-self: flex-end; background: #d9a916; color: #14301f; font-weight: 600; border-bottom-right-radius: 3px; }
+        .ssq-msg-bot a { color: #ffe27a; font-weight: 700; text-decoration: underline; }
+
+        #ssq-chatbot-quick {
+            display: flex; flex-wrap: wrap; gap: 6px; padding: 0 14px 10px 14px; flex-shrink: 0;
+        }
+        .ssq-chip {
+            background: rgba(255,255,255,0.08); color: #ffe27a; border: 1px solid rgba(255,226,122,0.35);
+            border-radius: 99px; padding: 6px 12px; font-size: 12px; font-weight: 600; cursor: pointer;
+            transition: background 0.15s ease;
+        }
+        .ssq-chip:hover { background: rgba(255,226,122,0.15); }
+
+        #ssq-chatbot-form {
+            display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid rgba(255,255,255,0.08); flex-shrink: 0;
+        }
+        #ssq-chatbot-input {
+            flex: 1; background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.12);
+            border-radius: 10px; padding: 9px 12px; color: #fff; font-size: 13px; outline: none;
+        }
+        #ssq-chatbot-input::placeholder { color: rgba(255,255,255,0.4); }
+        #ssq-chatbot-input:focus { border-color: #d9a916; }
+        #ssq-chatbot-form button[type=submit] {
+            width: 38px; height: 38px; border-radius: 10px; border: none; cursor: pointer; flex-shrink: 0;
+            background: linear-gradient(135deg, #ffe27a 0%, #d9a916 100%);
+            display: flex; align-items: center; justify-content: center;
+        }
+
+        @media (max-width: 420px) {
+            #ssq-chatbot-panel { right: 16px; left: 16px; width: auto; bottom: 84px; }
+            #ssq-chatbot-toggle { right: 16px; bottom: 16px; }
+        }
+    </style>
+
+    <script>
+    (function () {
+        if (window.__ssqChatbotInit) return;
+        window.__ssqChatbotInit = true;
+
+        var TOPICS = [
+            {
+                chip: "योजनाएं",
+                keywords: ["scheme", "yojana", "योजना"],
+                reply: "केंद्र और राज्य सरकार की योजनाओं की जानकारी यहाँ देखें:\n" +
+                    "<a href=\"/schemes-and-services/central\">Central Schemes</a>\n" +
+                    "<a href=\"/schemes/map\">State Schemes</a>\n" +
+                    "<a href=\"/eligibility\">Check Eligibility</a>"
+            },
+            {
+                chip: "क्विज़ / प्रमाण पत्र",
+                keywords: ["quiz", "certificate", "प्रमाण", "क्विज़", "score", "pass"],
+                reply: "Quiz Zone में जाकर कोई भी क्विज़ चुनें और शुरू करें:\n" +
+                    "<a href=\"/quizzes\">सभी क्विज़ देखें</a>\n\n" +
+                    "पास होने पर certificate turant मिल जाता है — apna result " +
+                    "<a href=\"/my-results\">My Results</a> mein dekh sakte hain (login zaroori hai)."
+            },
+            {
+                chip: "लॉगिन / साइनअप",
+                keywords: ["login", "signup", "register", "account", "लॉगिन", "पंजीकरण"],
+                reply: "Quiz lene ya result/certificate dekhne ke liye login/signup zaroori hai:\n" +
+                    "<a href=\"/accounts/login/\">Login करें</a>\n" +
+                    "<a href=\"/accounts/signup/\">Signup करें</a>"
+            },
+            {
+                chip: "हेल्पलाइन / संपर्क",
+                keywords: ["helpline", "contact", "help", "support", "संपर्क", "सहायता", "फोन", "number"],
+                reply: "Kisi bhi sawal ya samasya ke liye:\n<a href=\"/helplines-viewer/\">Helplines देखें</a>"
+            },
+            {
+                chip: "ज़रूरी दस्तावेज़ / पोर्टल",
+                keywords: ["document", "portal", "aadhaar", "pan", "दस्तावेज़", "पोर्टल"],
+                reply: "Zaroori sarkari documents aur portals ki list yahan hai:\n" +
+                    "<a href=\"/important-documents\">Important Documents</a>\n" +
+                    "<a href=\"/important-portals\">Important Portals</a>"
+            },
+            {
+                chip: "उद्यमिता",
+                keywords: ["entrepreneur", "business", "startup", "उद्यम", "व्यवसाय"],
+                reply: "Entrepreneurship Development section mein business plans, " +
+                    "registrations aur marketing support ki jaankari milegi:\n" +
+                    "<a href=\"/entrepreneurship-developement\">यहाँ देखें</a>"
+            }
+        ];
+
+        var GREETING = "नमस्ते! 🙏 Main Sahyog Setu Sahayak hoon. Neeche diye gaye topics mein se koi चुनें, ya apna sawal type karein.";
+        var FALLBACK = "Maaf kijiye, is sawal ka seedha jawab mere paas nahi hai. Kripya humari " +
+            "<a href=\"/helplines-viewer/\">Helpline</a> se sampark karein ya " +
+            "<a href=\"/page/3\">About Us</a> page dekhein.";
+
+        function ready(fn) {
+            if (document.readyState !== "loading") fn();
+            else document.addEventListener("DOMContentLoaded", fn);
+        }
+
+        ready(function () {
+            var toggle = document.getElementById("ssq-chatbot-toggle");
+            var panel = document.getElementById("ssq-chatbot-panel");
+            var iconOpen = document.getElementById("ssq-chatbot-icon-open");
+            var iconClose = document.getElementById("ssq-chatbot-icon-close");
+            var messages = document.getElementById("ssq-chatbot-messages");
+            var quick = document.getElementById("ssq-chatbot-quick");
+            var form = document.getElementById("ssq-chatbot-form");
+            var input = document.getElementById("ssq-chatbot-input");
+            if (!toggle || !panel) return;
+
+            var greeted = false;
+
+            function addMessage(html, who) {
+                var el = document.createElement("div");
+                el.className = "ssq-msg " + (who === "user" ? "ssq-msg-user" : "ssq-msg-bot");
+                el.innerHTML = html;
+                messages.appendChild(el);
+                messages.scrollTop = messages.scrollHeight;
+            }
+
+            function renderQuickReplies() {
+                quick.innerHTML = "";
+                TOPICS.forEach(function (t) {
+                    var chip = document.createElement("button");
+                    chip.type = "button";
+                    chip.className = "ssq-chip";
+                    chip.textContent = t.chip;
+                    chip.addEventListener("click", function () {
+                        addMessage(t.chip, "user");
+                        addMessage(t.reply, "bot");
+                    });
+                    quick.appendChild(chip);
+                });
+            }
+
+            function escapeHtml(s) {
+                var div = document.createElement("div");
+                div.textContent = s;
+                return div.innerHTML;
+            }
+
+            function answerFreeText(text) {
+                var lower = text.toLowerCase();
+                for (var i = 0; i < TOPICS.length; i++) {
+                    var kws = TOPICS[i].keywords;
+                    for (var j = 0; j < kws.length; j++) {
+                        if (lower.indexOf(kws[j].toLowerCase()) !== -1) {
+                            return TOPICS[i].reply;
+                        }
+                    }
+                }
+                return FALLBACK;
+            }
+
+            toggle.addEventListener("click", function () {
+                var isOpen = panel.classList.toggle("ssq-open");
+                iconOpen.style.display = isOpen ? "none" : "";
+                iconClose.style.display = isOpen ? "" : "none";
+                toggle.setAttribute("aria-label", isOpen ? "Chat sahayak band karein" : "Chat sahayak kholein");
+                if (isOpen && !greeted) {
+                    greeted = true;
+                    addMessage(GREETING, "bot");
+                    renderQuickReplies();
+                }
+                if (isOpen) input.focus();
+            });
+
+            form.addEventListener("submit", function (e) {
+                e.preventDefault();
+                var text = input.value.trim();
+                if (!text) return;
+                addMessage(escapeHtml(text), "user");
+                input.value = "";
+                var reply = answerFreeText(text);
+                setTimeout(function () { addMessage(reply, "bot"); }, 250);
+            });
+        });
+    })();
+    </script>
+    <style>
+        /* /eligibility's #counter section is a Bootstrap .row sitting
+           outside any .container, so its built-in negative side margins
+           push a few px past the viewport at every screen size, forcing
+           an unwanted horizontal scrollbar. A blanket overflow-x:hidden on
+           html/body was tried and reverted -- it broke window-level
+           scrolling site-wide (this SPA's own scroll container interacts
+           badly with overflow being set on the root elements). Scoped to
+           just the offending element instead: safe, no observed side
+           effects on scroll. */
+        #counter { overflow-x: hidden; max-width: 100%; }
+    </style>
+    <script>
+    (function () {
+        // Scroll-lock recovery -- some modal on this page occasionally leaves
+        // <body class="modal-open"> (Bootstrap's scroll-lock class, overflow:
+        // hidden) and a stray .modal-backdrop behind after it closes, without
+        // any modal actually visible. That permanently blocks scrolling
+        // (mobile and desktop) until the next hard reload. No source access
+        // to the modal component itself (compiled SPA build), so this is a
+        // narrow, generic safety net: only strips the lock when nothing is
+        // actually visibly open, so a real, currently-open modal is never
+        // touched.
+        function anyModalVisible() {
+            var modals = document.querySelectorAll('.modal');
+            for (var i = 0; i < modals.length; i++) {
+                var m = modals[i], cs = getComputedStyle(m);
+                if (cs.display !== 'none' && cs.visibility !== 'hidden' && m.offsetParent !== null) return true;
+            }
+            return false;
+        }
+        function unstick() {
+            if (document.body.classList.contains('modal-open') && !anyModalVisible()) {
+                document.body.classList.remove('modal-open');
+                document.body.style.removeProperty('overflow');
+                document.body.style.removeProperty('padding-right');
+                document.querySelectorAll('.modal-backdrop').forEach(function (b) { b.remove(); });
+            }
+        }
+        setInterval(unstick, 1000);
+        document.addEventListener('DOMContentLoaded', function () { setTimeout(unstick, 500); });
+    })();
+    </script>
+    <style>
+        /* Premium look for the homepage quick-link cards -- shadow/3D/motion
+           only, background colors (.bg_one/.bg_two/.bg_three/.bg_four) are
+           untouched on purpose. */
+        .about_top_boxed {
+            box-shadow: 0 2px 8px rgba(20, 30, 20, .06), 0 14px 34px rgba(20, 30, 20, .10);
+            transition: transform .35s cubic-bezier(.22, 1, .36, 1), box-shadow .35s cubic-bezier(.22, 1, .36, 1);
+            transform-style: preserve-3d;
+            will-change: transform, box-shadow;
+            /* Cards with an injected count badge, or a 2-line title
+               ("Entrepreneurship Developement"), are taller than a plain
+               single-line card (Check Eligibility) -- a strict height
+               (not min-height) forces every card to the same size
+               regardless of how much content it holds, so the whole grid
+               lines up evenly. */
+            height: 260px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+        .about_top_boxed:hover {
+            transform: translateY(-10px) scale(1.025);
+            box-shadow: 0 10px 18px rgba(20, 30, 20, .10), 0 26px 46px rgba(20, 30, 20, .18);
+        }
+        .about_top_boxed_icon img {
+            transition: transform .35s cubic-bezier(.22, 1, .36, 1);
+        }
+        .about_top_boxed:hover .about_top_boxed_icon img {
+            transform: scale(1.08) rotate(-3deg);
+        }
+        .ssq-count-badge {
+            display: inline-flex; align-items: baseline; gap: 5px;
+            font-family: inherit; font-weight: 800; font-size: 28px; line-height: 1;
+            color: #14301f;
+            margin: 2px 0 4px;
+            opacity: 0; transform: translateY(4px);
+            transition: opacity .4s ease, transform .4s ease;
+        }
+        .ssq-count-badge.ssq-count-in { opacity: 1; transform: translateY(0); }
+    </style>
+    <script>
+    (function () {
+        // Homepage quick-link cards (Central Schemes/State Schemes/Helplines/
+        // Important Portals/Important Documents/Scheme Announcements) show
+        // only an icon + title + "More details..." -- no count. No source
+        // access to this compiled SPA build to wire up real numbers inside
+        // the React components themselves, so this fetches the count once
+        // and injects a small badge into each matching card's DOM directly,
+        // re-scanning periodically since the SPA re-mounts this section on
+        // client-side navigation back to "/" without a full page reload.
+        var TITLE_TO_KEY = {
+            'central schemes': 'central_schemes',
+            'state schemes': 'state_schemes',
+            'helplines': 'helplines',
+            'important portals': 'important_portals',
+            'important documents': 'important_documents',
+            'scheme announcements': 'scheme_announcements',
+        };
+        var counts = null;
+        function fetchCounts(cb) {
+            if (counts) { cb(counts); return; }
+            fetch('/api/schemes/counts').then(function (r) { return r.json(); }).then(function (d) {
+                counts = d; cb(d);
+            }).catch(function () { /* silently skip -- cards still work without the badge */ });
+        }
+        function injectBadges() {
+            // The Check-Eligibility results page (/eligibility/schemes) reuses
+            // these same cards with its own "you qualify for N" number on top;
+            // a second, unlabelled all-schemes total under it read as "583 /
+            // 710" with no explanation -- homepage-style cards only.
+            if (window.location.pathname.indexOf('/eligibility') === 0) return;
+            var headings = document.querySelectorAll('.about_top_boxed_text h4');
+            if (!headings.length) return;
+            fetchCounts(function (data) {
+                headings.forEach(function (h4) {
+                    if (h4.dataset.ssqCounted) return;
+                    var key = TITLE_TO_KEY[(h4.textContent || '').trim().toLowerCase()];
+                    if (!key || typeof data[key] !== 'number') return;
+                    h4.dataset.ssqCounted = '1';
+                    var badge = document.createElement('div');
+                    badge.className = 'ssq-count-badge';
+                    badge.textContent = data[key].toLocaleString('en-IN');
+                    h4.parentNode.insertBefore(badge, h4);
+                    requestAnimationFrame(function () {
+                        setTimeout(function () { badge.classList.add('ssq-count-in'); }, 60);
+                    });
+                });
+            });
+        }
+        setInterval(injectBadges, 800);
+        document.addEventListener('DOMContentLoaded', injectBadges);
+    })();
+    </script>
+    <style>
+        /* Conversational Check-Eligibility overlay -- one question at a
+           time, big tap targets + a mic button per question, for a first-
+           time/rural user who may not read comfortably or navigate a
+           12-field form easily. Covers the SPA's own /eligibility form
+           entirely (no source access to replace it in place), so this is
+           a full-screen takeover shown only on that route. */
+        #ssq-elig-overlay {
+            position: fixed; inset: 0; z-index: 999000;
+            background: #ffffff;
+            display: none; flex-direction: column;
+            font-family: 'Poppins', 'Inter', system-ui, sans-serif;
+            color: #17281f;
+        }
+        #ssq-elig-overlay.ssq-elig-open { display: flex; }
+        #ssq-elig-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 24px; flex-shrink: 0;
+            box-shadow: 0 2px 14px rgba(20,48,31,.06);
+            position: relative; z-index: 1;
+        }
+        #ssq-elig-brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 15px; }
+        #ssq-elig-seal {
+            width: 32px; height: 32px; border-radius: 50%;
+            background: conic-gradient(from 210deg, #ffd75e, #c9a227, #8a6d16, #ffd75e);
+            display: grid; place-items: center; color: #14301f; font-weight: 800; font-size: 15px;
+            box-shadow: 0 4px 10px rgba(201,162,39,.4), inset 0 1px 1px rgba(255,255,255,.5);
+        }
+        #ssq-elig-lang-toggle {
+            display: flex; gap: 4px; background: rgba(20,48,31,.06); border-radius: 20px; padding: 3px;
+        }
+        #ssq-elig-lang-toggle button {
+            border: none; background: transparent; color: rgba(20,48,31,.6); font-weight: 700;
+            font-size: 12.5px; padding: 6px 14px; border-radius: 16px; cursor: pointer; transition: all .15s;
+        }
+        #ssq-elig-lang-toggle button.ssq-active { background: #ffd75e; color: #14301f; }
+        #ssq-elig-close {
+            background: rgba(20,48,31,.07); border: none; color: #17281f; width: 34px; height: 34px;
+            border-radius: 50%; font-size: 18px; cursor: pointer; display: grid; place-items: center;
+        }
+        #ssq-elig-progress-track { height: 4px; background: rgba(20,48,31,.08); flex-shrink: 0; }
+        #ssq-elig-progress-bar { height: 100%; background: linear-gradient(90deg, #ffd75e, #c9a227); transition: width .35s ease; width: 0%; }
+        #ssq-elig-body {
+            flex: 1; overflow-y: auto; display: flex; align-items: flex-start; justify-content: center;
+            padding: clamp(20px, 5vw, 60px) 18px;
+            background: radial-gradient(circle at 50% 0%, rgba(255,215,0,.05), transparent 60%);
+        }
+        #ssq-elig-card {
+            width: 100%; max-width: 820px; background: #fffffe; border-radius: 24px;
+            padding: clamp(24px, 4vw, 48px) clamp(20px, 5vw, 56px);
+            box-shadow: 0 30px 70px -20px rgba(20,48,31,.16), 0 10px 24px -10px rgba(20,48,31,.08), 0 1px 0 rgba(255,255,255,.6) inset;
+            border: 1px solid rgba(20,48,31,.05);
+        }
+        #ssq-elig-step-label {
+            color: #c9a227; font-weight: 700; font-size: 12px; letter-spacing: .1em; text-transform: uppercase;
+            margin-bottom: 10px; text-align: center;
+        }
+        #ssq-elig-question {
+            font-family: 'Fraunces', Georgia, serif; font-size: clamp(21px, 4.2vw, 28px); font-weight: 600;
+            line-height: 1.3; text-align: center; margin-bottom: 26px; color: #14301f;
+        }
+        #ssq-elig-mic-row { display: flex; justify-content: center; margin-bottom: 22px; }
+        .ssq-mic-btn {
+            width: 68px; height: 68px; border-radius: 50%; border: none; cursor: pointer;
+            background: linear-gradient(165deg, #ffe58a, #ffd75e 45%, #c9a227); color: #14301f;
+            display: grid; place-items: center;
+            box-shadow: 0 14px 30px -6px rgba(201,162,39,.5), 0 4px 10px rgba(201,162,39,.3), inset 0 1px 2px rgba(255,255,255,.7), inset 0 -3px 6px rgba(138,109,22,.35);
+            transition: transform .15s ease, box-shadow .15s ease;
+            font-size: 26px;
+        }
+        .ssq-mic-btn:hover { transform: translateY(-2px) scale(1.06); }
+        .ssq-mic-btn:active { transform: translateY(0) scale(.98); }
+        .ssq-mic-btn.ssq-listening {
+            animation: ssqPulse 1.1s ease-in-out infinite;
+            background: linear-gradient(165deg, #ffab8a, #ff8a65 45%, #e64a19);
+        }
+        @keyframes ssqPulse {
+            0%, 100% { box-shadow: 0 10px 26px rgba(230,74,25,.4), 0 0 0 0 rgba(230,74,25,.5); }
+            50% { box-shadow: 0 10px 26px rgba(230,74,25,.5), 0 0 0 14px rgba(230,74,25,0); }
+        }
+        #ssq-elig-heard { text-align: center; font-size: 13px; color: rgba(20,48,31,.55); min-height: 18px; margin-bottom: 6px; }
+        #ssq-elig-options {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;
+        }
+        .ssq-opt-btn {
+            padding: 16px 14px; border-radius: 14px; border: 1px solid rgba(20,48,31,.1);
+            background: #faf9f5; color: #17281f; font-size: 15px; font-weight: 600;
+            cursor: pointer; transition: all .15s ease; text-align: center; line-height: 1.35;
+            box-shadow: 0 2px 6px rgba(20,48,31,.05);
+        }
+        .ssq-opt-btn:hover { border-color: #c9a227; background: rgba(255,215,94,.14); transform: translateY(-2px); box-shadow: 0 8px 16px rgba(201,162,39,.18); }
+        .ssq-opt-btn.ssq-selected { background: linear-gradient(165deg, #ffe58a, #ffd75e 60%, #c9a227); color: #14301f; border-color: #c9a227; box-shadow: 0 8px 18px rgba(201,162,39,.35), inset 0 1px 1px rgba(255,255,255,.6); }
+        #ssq-elig-input {
+            width: 100%; font-size: 20px; text-align: center; padding: 16px; border-radius: 14px;
+            border: 1px solid rgba(20,48,31,.14); background: #faf9f5; color: #17281f;
+            margin-bottom: 20px; font-family: inherit;
+            box-shadow: inset 0 2px 5px rgba(20,48,31,.06);
+        }
+        #ssq-elig-input::placeholder { color: rgba(20,48,31,.35); }
+        #ssq-elig-search-list { max-height: 260px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; margin-bottom: 20px; }
+        .ssq-search-item {
+            padding: 13px 16px; border-radius: 12px; background: #faf9f5; border: 1px solid transparent;
+            cursor: pointer; text-align: left; font-size: 14.5px; color: #17281f;
+            box-shadow: 0 2px 6px rgba(20,48,31,.05); transition: all .15s ease;
+        }
+        .ssq-search-item:hover, .ssq-search-item.ssq-selected { border-color: #c9a227; background: rgba(255,215,94,.14); transform: translateY(-1px); box-shadow: 0 6px 14px rgba(201,162,39,.16); }
+        #ssq-elig-nav { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+        .ssq-nav-btn {
+            padding: 13px 26px; border-radius: 12px; font-weight: 700; font-size: 14.5px; cursor: pointer; border: none;
+        }
+        .ssq-nav-btn { transition: transform .15s ease, box-shadow .15s ease; }
+        .ssq-nav-btn:active:not(:disabled) { transform: translateY(1px); }
+        .ssq-nav-back { background: rgba(20,48,31,.08); color: #17281f; }
+        .ssq-nav-back:hover { background: rgba(20,48,31,.13); }
+        .ssq-nav-skip { background: transparent; color: rgba(20,48,31,.55); text-decoration: underline; }
+        .ssq-nav-next {
+            background: linear-gradient(165deg, #ffe58a, #ffd75e 45%, #c9a227); color: #14301f;
+            box-shadow: 0 12px 26px -6px rgba(201,162,39,.45), 0 4px 8px rgba(201,162,39,.25), inset 0 1px 1px rgba(255,255,255,.6);
+        }
+        .ssq-nav-next:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 16px 32px -6px rgba(201,162,39,.5), 0 4px 8px rgba(201,162,39,.3), inset 0 1px 1px rgba(255,255,255,.6); }
+        .ssq-nav-next:disabled { opacity: .4; cursor: not-allowed; box-shadow: none; }
+        #ssq-elig-loading { text-align: center; padding: 60px 0; }
+        #ssq-elig-loading .ssq-spinner {
+            width: 46px; height: 46px; border-radius: 50%; border: 4px solid rgba(20,48,31,.12);
+            border-top-color: #c9a227; margin: 0 auto 18px; animation: ssqSpin 1s linear infinite;
+        }
+        @keyframes ssqSpin { to { transform: rotate(360deg); } }
+        #ssq-elig-results-summary { text-align: center; margin-bottom: 22px; }
+        #ssq-elig-results-summary .ssq-count { font-family: 'Fraunces', serif; font-size: 42px; font-weight: 700; color: #c9a227; }
+        .ssq-result-card {
+            background: #faf9f5; border: 1px solid rgba(20,48,31,.08); border-radius: 14px;
+            padding: 16px 18px; margin-bottom: 12px;
+            box-shadow: 0 4px 12px rgba(20,48,31,.06); transition: transform .15s ease, box-shadow .15s ease;
+        }
+        .ssq-result-card:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(20,48,31,.1); }
+        .ssq-result-card h5 { margin: 0 0 6px; font-size: 15.5px; font-weight: 700; color: #14301f; }
+        .ssq-result-card p { margin: 0 0 10px; font-size: 13px; color: rgba(20,48,31,.65); line-height: 1.55; }
+        .ssq-result-card a { color: #a3811d; font-weight: 700; font-size: 13px; text-decoration: none; }
+        .ssq-result-tag {
+            display: inline-block; font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .04em;
+            padding: 2px 9px; border-radius: 10px; background: rgba(255,215,0,.16); color: #8a6d16; margin-bottom: 8px;
+        }
+        #ssq-elig-restart {
+            display: block; margin: 24px auto 0; background: rgba(20,48,31,.08); color: #17281f; border: none;
+            padding: 12px 24px; border-radius: 12px; font-weight: 700; cursor: pointer;
+        }
+        #ssq-elig-fab {
+            position: fixed; right: 20px; bottom: 86px; z-index: 99997;
+            background: linear-gradient(165deg, #ffe58a, #ffd75e 45%, #c9a227); color: #14301f; border: none;
+            padding: 12px 20px; border-radius: 30px; font-weight: 800; font-size: 13.5px; cursor: pointer;
+            box-shadow: 0 14px 30px -6px rgba(201,162,39,.5), 0 4px 10px rgba(201,162,39,.3), inset 0 1px 1px rgba(255,255,255,.6);
+            display: none; align-items: center; gap: 8px; transition: transform .15s ease, box-shadow .15s ease;
+        }
+        #ssq-elig-fab:hover { transform: translateY(-2px); }
+        #ssq-elig-fab.ssq-show { display: inline-flex; }
+        @media (max-width: 480px) {
+            #ssq-elig-options { grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); }
+        }
+        /* Matches the chatbot toggle's own <=420px breakpoint (public_base.html)
+           exactly -- keeping both FABs on the same breakpoint avoids a narrow
+           width band where one has shrunk and the other hasn't yet, which
+           was clipping this pill's bottom edge into the chatbot circle. */
+        @media (max-width: 420px) {
+            #ssq-elig-fab { right: 12px; bottom: 66px; padding: 10px 16px; font-size: 12px; }
+        }
+    </style>
+    <div id="ssq-elig-overlay">
+        <div id="ssq-elig-head">
+            <div id="ssq-elig-brand"><span id="ssq-elig-seal">स</span><span>Check Eligibility</span></div>
+            <div id="ssq-elig-lang-toggle">
+                <button type="button" data-lang="hi" class="ssq-active">हिं</button>
+                <button type="button" data-lang="en">EN</button>
+            </div>
+            <button id="ssq-elig-close" type="button" aria-label="Close">&times;</button>
+        </div>
+        <div id="ssq-elig-progress-track"><div id="ssq-elig-progress-bar"></div></div>
+        <div id="ssq-elig-body"><div id="ssq-elig-card"></div></div>
+    </div>
+    <button id="ssq-elig-fab" type="button">🎙️ <span id="ssq-elig-fab-text">Check Eligibility (Voice)</span></button>
+    <script>
+    (function () {
+        // The old SPA's category-card grid (/schemes/central/:category) and
+        // state map (/schemes/map/state/:state/:name) navigate via plain
+        // onClick handlers on an <a href="javascript:;"> / an SVG <path> --
+        // neither has a real href to intercept with the usual
+        // a[href="..."] click-listener technique, so this reacts to the
+        // resulting URL instead (same route-poll approach as the
+        // /eligibility fab's visibility check above), redirecting to the
+        // matching Scheme Viewer filter. The card grid and the map
+        // themselves are untouched -- only the results-list step upgrades.
+        var CATEGORY_ROUTE = /^\/schemes\/central\/([^\/]+)\/?$/;
+        var STATE_ROUTE = /^\/schemes\/map\/state\/([^\/]+)\/[^\/]+\/?$/;
+
+        function checkSchemeResultRoute() {
+            var path = window.location.pathname;
+            var m = path.match(CATEGORY_ROUTE);
+            if (m) { window.location.replace('/scheme-viewer/?category=' + encodeURIComponent(m[1])); return; }
+            m = path.match(STATE_ROUTE);
+            if (m) { window.location.replace('/scheme-viewer/?state=' + encodeURIComponent(m[1])); }
+        }
+        setInterval(checkSchemeResultRoute, 400);
+        checkSchemeResultRoute();
+    })();
+    </script>
+    <script>
+    (function () {
+        // Important Portals/Documents and 5 Entrepreneurship Development
+        // sub-sections were rebuilt as Django-rendered Scheme-Viewer-style
+        // pages. Their homepage/landing-page links are real <Link to="...">
+        // elements, so React Router intercepts the click and navigates
+        // client-side -- nginx never sees an HTTP request for it, only the
+        // nginx `location =` redirects (see the config comment there) catch
+        // a hard refresh/typed URL. This route-poll catches the live click
+        // the same way checkSchemeResultRoute above does.
+        var SSQ_ENTREPRENEURSHIP_REDIRECTS = {
+            '/important-portals': '/important-portals-viewer/',
+            '/important-documents': '/important-documents-viewer/',
+            '/scheme-announcements': '/scheme-announcements-viewer/',
+            '/entrepreneurship-developement': '/entrepreneurship-viewer/',
+            '/entrepreneurship-developement/legal-registrations': '/entrepreneurship/legal-registrations-viewer/',
+            '/entrepreneurship-developement/organization-registrations': '/entrepreneurship/organization-registrations-viewer/',
+            '/entrepreneurship-developement/business-plans': '/entrepreneurship/business-plans-viewer/',
+            '/entrepreneurship-developement/artificial-intelligence': '/entrepreneurship/artificial-intelligence-viewer/',
+            '/entrepreneurship-developement/marketing': '/entrepreneurship/marketing-viewer/',
+            '/entrepreneurship-developement/business-related-schemes': '/entrepreneurship/business-related-schemes-viewer/',
+            '/schemes-and-services/central': '/central-schemes-viewer/',
+            '/helplines': '/helplines-viewer/'
+        };
+        function checkEntrepreneurshipRoute() {
+            var target = SSQ_ENTREPRENEURSHIP_REDIRECTS[window.location.pathname];
+            if (target) { window.location.replace(target); }
+        }
+        setInterval(checkEntrepreneurshipRoute, 400);
+        checkEntrepreneurshipRoute();
+
+        // Homepage's own "State Schemes" card (and the FAQ chatbot's reply
+        // link) still point at /schemes/map -- a real, distinct interactive
+        // map feature that stays reachable directly (typed URL/bookmark),
+        // but every in-app click should now land on the same page the nav's
+        // own "State Govt Scheme" link goes to, not the old map. Click-
+        // intercept only (not a route-poll like the redirects above) so a
+        // direct load of /schemes/map itself is untouched.
+        document.addEventListener('click', function (e) {
+            var a = e.target.closest && e.target.closest('a[href="/schemes/map"]');
+            if (a) { e.preventDefault(); window.location.href = '/state-schemes-viewer/'; }
+        }, true);
+    })();
+    </script>
+    <style>
+        /* Check-Eligibility results (/eligibility/schemes) -- the SPA's own
+           list: description box was a fixed 55px with overflow:hidden over
+           pasted rich-text (justified 18px Arial <h4>s inside <li>s), so
+           every card cut a line in half; 3rem gaps between cards; the
+           counter cards' icons overlapped the banner's bottom edge. Scoped
+           by html.ssq-route-elig (set from the route below) since these
+           are generic Bootstrap/theme classes used elsewhere too. */
+        html.ssq-route-elig #counter { margin-top: 40px; }
+        html.ssq-route-elig a.card.my-5.shadow {
+            display: block; margin: 0 0 16px !important; border-radius: 14px;
+            border: 1px solid rgba(20,48,31,.08); text-decoration: none;
+            box-shadow: 0 4px 12px rgba(20,48,31,.06) !important;
+            transition: transform .15s ease, box-shadow .15s ease, border-color .15s ease;
+        }
+        html.ssq-route-elig a.card.my-5.shadow:hover {
+            transform: translateY(-2px); border-color: #c9a227;
+            box-shadow: 0 10px 22px rgba(20,48,31,.1) !important;
+        }
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text { padding: 16px 20px !important; }
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > h4 { margin: 0 0 8px; font-size: 17px; line-height: 1.35; }
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > h4 a { color: #14301f !important; }
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > label:empty { display: none; }
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > div {
+            height: auto !important; max-height: calc(1.55em * 3);
+            display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 3; line-clamp: 3;
+            overflow: hidden; font-size: 14px; line-height: 1.55; color: rgba(20,48,31,.7) !important;
+        }
+        /* Flatten the pasted rich text into one flowing paragraph so the
+           3-line clamp ends on a whole line with an ellipsis. */
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > div * {
+            display: inline !important; margin: 0 !important; padding: 0 !important;
+            font: inherit !important; color: inherit !important; text-align: left !important;
+            list-style: none !important;
+        }
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > div li::after { content: " "; }
+        html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > div img { display: none !important; }
+        @media (max-width: 767px) {
+            html.ssq-route-elig #counter { margin-top: 56px; }
+            html.ssq-route-elig a.card.my-5.shadow .causes_boxed_text > h4 { font-size: 15.5px; }
+        }
+    </style>
+    <script>
+    (function () {
+        // The old SPA scheme detail page (/scheme/:id) is the last unstyled
+        // page in the eligibility flow (default blue links, misaligned
+        // indents, empty right column). Scheme Viewer's detail overlay shows
+        // the same Schemes row (description/eligibility/documents/links +
+        // share) in the site's real design, so every in-app click goes there.
+        // From the eligibility results list it opens in a NEW TAB: that list
+        // only lives in React memory (POST result) -- navigating away and
+        // pressing Back came back to an empty list, losing the user's result.
+        var SCHEME_DETAIL = /^\/scheme\/(\d+)\/?$/;
+        function viewerUrl(id) { return '/scheme-viewer/?scheme=' + id; }
+
+        document.addEventListener('click', function (e) {
+            if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey) return;
+            var a = e.target.closest && e.target.closest('a[href^="/scheme/"]');
+            var m = a && a.getAttribute('href').match(SCHEME_DETAIL);
+            if (!m) return;
+            e.preventDefault(); e.stopPropagation();
+            if (window.location.pathname.indexOf('/eligibility') === 0) {
+                window.open(viewerUrl(m[1]), '_blank');
+            } else {
+                window.location.href = viewerUrl(m[1]);
+            }
+        }, true);
+
+        function checkRoute() {
+            var path = window.location.pathname;
+            document.documentElement.classList.toggle('ssq-route-elig', path.indexOf('/eligibility/schemes') === 0);
+            var m = path.match(SCHEME_DETAIL);
+            if (m) window.location.replace(viewerUrl(m[1]));
+        }
+        setInterval(checkRoute, 400);
+        checkRoute();
+    })();
+    </script>
+    <script>
+    (function () {
+        if (window.__ssqEligWidget) return;
+        window.__ssqEligWidget = true;
+
+        var QUESTIONS = [
+            { key: 'gender', required: true, apiKey: 'gender',
+              hi: 'आपका लिंग क्या है?', en: 'What is your gender?', type: 'choice',
+              options: [
+                { code: '0', hi: 'पुरुष', en: 'Male', syn: ['male', 'purush', 'mard'] },
+                { code: '1', hi: 'महिला', en: 'Female', syn: ['female', 'mahila', 'aurat', 'stri', 'woman'] },
+                { code: '2', hi: 'अन्य', en: 'Other', syn: ['other', 'transgender', 'kinnar'] }
+              ] },
+            { key: 'age', required: true, apiKey: null,
+              hi: 'आपकी उम्र कितनी है?', en: 'What is your age?', type: 'number',
+              ph_hi: 'उम्र (वर्षों में)', ph_en: 'Age in years' },
+            { key: 'state', required: true, apiKey: 'state',
+              hi: 'आप किस राज्य/केंद्र शासित प्रदेश से हैं?', en: 'Which state/UT are you from?', type: 'search', source: 'states' },
+            { key: 'area', required: false, apiKey: 'area',
+              hi: 'आप शहर में रहते हैं या गाँव में?', en: 'Do you live in an urban or rural area?', type: 'choice',
+              options: [
+                { code: '0', hi: 'शहरी', en: 'Urban', syn: ['urban', 'shahar', 'city'] },
+                { code: '1', hi: 'ग्रामीण', en: 'Rural', syn: ['rural', 'gaon', 'village', 'gramin'] }
+              ] },
+            { key: 'marital_status', required: false, apiKey: 'marital_status',
+              hi: 'आपकी वैवाहिक स्थिति क्या है?', en: 'What is your marital status?', type: 'choice',
+              options: [
+                { code: '0', hi: 'विवाहित', en: 'Married', syn: ['married', 'shadi', 'vivahit'] },
+                { code: '1', hi: 'अविवाहित', en: 'Unmarried', syn: ['unmarried', 'single', 'kunwara', 'kunwari'] },
+                { code: '2', hi: 'विधवा/विधुर', en: 'Widowed', syn: ['widow', 'widower', 'vidhwa'] },
+                { code: '3', hi: 'तलाकशुदा', en: 'Divorced', syn: ['divorced', 'talaq'] },
+                { code: '4', hi: 'अलग रह रहे', en: 'Separated', syn: ['separated', 'alag'] }
+              ] },
+            { key: 'religion', required: false, apiKey: 'religion',
+              hi: 'आपका धर्म क्या है?', en: 'What is your religion?', type: 'choice',
+              options: [
+                { code: '0', hi: 'हिन्दू', en: 'Hindu', syn: ['hindu'] },
+                { code: '1', hi: 'मुस्लिम', en: 'Muslim', syn: ['muslim', 'islam'] },
+                { code: '2', hi: 'ईसाई', en: 'Christian', syn: ['christian', 'isai'] },
+                { code: '3', hi: 'सिख', en: 'Sikh', syn: ['sikh'] },
+                { code: '4', hi: 'पारसी', en: 'Parsi', syn: ['parsi'] },
+                { code: '5', hi: 'बौद्ध', en: 'Buddhist', syn: ['buddhist', 'baudh'] },
+                { code: '6', hi: 'जैन', en: 'Jain', syn: ['jain'] },
+                { code: '7', hi: 'कोई धर्म नहीं', en: 'No Religion', syn: ['no religion', 'none'] }
+              ] },
+            { key: 'caste', required: false, apiKey: 'caste',
+              hi: 'आपकी जाति श्रेणी क्या है?', en: 'What is your caste category?', type: 'choice',
+              options: [
+                { code: '0', hi: 'सामान्य', en: 'General', syn: ['general'] },
+                { code: '1', hi: 'ओबीसी', en: 'OBC', syn: ['obc', 'backward'] },
+                { code: '2', hi: 'अनुसूचित जाति', en: 'SC', syn: ['sc', 'scheduled caste'] },
+                { code: '3', hi: 'अनुसूचित जनजाति', en: 'ST', syn: ['st', 'scheduled tribe'] },
+                { code: '4', hi: 'पीवीटीजी', en: 'PVTG', syn: ['pvtg'] }
+              ] },
+            { key: 'divyang_category', required: false, apiKey: 'divyang_category',
+              hi: 'क्या आप दिव्यांग हैं?', en: 'Are you a person with disability?', type: 'choice',
+              options: [
+                { code: '0', hi: 'हाँ', en: 'Yes', syn: ['yes', 'haan', 'ha'] },
+                { code: '1', hi: 'नहीं', en: 'No', syn: ['no', 'nahi', 'nahin'] }
+              ] },
+            { key: 'beneficiary', required: false, apiKey: 'beneficiary',
+              hi: 'आपके पास किस प्रकार का राशन कार्ड है?', en: 'What type of ration card do you have?', type: 'choice',
+              options: [
+                { code: '0', hi: 'बीपीएल', en: 'BPL', syn: ['bpl'] },
+                { code: '1', hi: 'एपीएल', en: 'APL', syn: ['apl'] },
+                { code: '2', hi: 'अंत्योदय', en: 'Antyodaya', syn: ['antyodaya', 'aay'] },
+                { code: '3', hi: 'पीएचएच', en: 'PHH', syn: ['phh'] },
+                { code: '5', hi: 'राशन कार्ड नहीं है', en: 'No Ration Card', syn: ['no ration card', 'none'] }
+              ] },
+            { key: 'employment', required: false, apiKey: 'employment',
+              hi: 'आपकी रोज़गार स्थिति क्या है?', en: 'What is your employment status?', type: 'choice',
+              options: [
+                { code: '0', hi: 'नौकरीपेशा', en: 'Employed', syn: ['employed', 'naukri'] },
+                { code: '1', hi: 'स्वरोज़गार', en: 'Self-Employed', syn: ['self employed', 'swarozgar'] },
+                { code: '2', hi: 'बेरोज़गार', en: 'Unemployed', syn: ['unemployed', 'berozgar'] }
+              ] },
+            { key: 'occupation', required: false, apiKey: 'occupation',
+              hi: 'आपका पेशा/व्यवसाय क्या है?', en: 'What is your occupation?', type: 'search', source: 'occupations' },
+            { key: 'family_income', required: false, apiKey: 'family_income',
+              hi: 'आपकी मासिक पारिवारिक आय कितनी है? (₹)', en: 'What is your monthly family income? (₹)', type: 'number',
+              ph_hi: 'मासिक आय (₹)', ph_en: 'Monthly income (₹)' }
+        ];
+
+        var state = { lang: 'en', step: 0, answers: {}, listSources: {}, recognizing: false };
+        var overlay, card, fab;
+
+        function t(hi, en) { return state.lang === 'hi' ? hi : en; }
+
+        function normalize(s) { return (s || '').toString().toLowerCase().trim().replace(/[^\w\s]/g, ''); }
+
+        function fetchList(source, cb) {
+            if (state.listSources[source]) { cb(state.listSources[source]); return; }
+            fetch('/api/' + source).then(function (r) { return r.json(); }).then(function (d) {
+                var list = d[source] || [];
+                state.listSources[source] = list;
+                cb(list);
+            }).catch(function () { cb([]); });
+        }
+
+        function currentQuestion() { return QUESTIONS[state.step]; }
+
+        function renderProgress() {
+            var pct = Math.round((state.step / QUESTIONS.length) * 100);
+            document.getElementById('ssq-elig-progress-bar').style.width = pct + '%';
+        }
+
+        // Browsers ship several TTS voices per language -- the one picked
+        // with no explicit `voice` set is often a low-quality local/robotic
+        // one even when a much more natural cloud voice (Chrome's "Google
+        // ..." voices, Edge's "Microsoft ... Natural", Safari's premium
+        // voices) is available in the same list. Score and cache the best
+        // match per language so speak() always prefers it over the default.
+        var _voiceCache = {};
+        function _bestVoice(langPrefix) {
+            if (_voiceCache[langPrefix]) return _voiceCache[langPrefix];
+            var voices = window.speechSynthesis.getVoices() || [];
+            var candidates = voices.filter(function (v) { return v.lang && v.lang.toLowerCase().indexOf(langPrefix) === 0; });
+            if (!candidates.length) return null;
+            function score(v) {
+                var n = v.name.toLowerCase();
+                var s = 0;
+                if (n.indexOf('natural') > -1 || n.indexOf('neural') > -1) s += 3;
+                if (n.indexOf('google') > -1) s += 2;
+                if (!v.localService) s += 1; // network/cloud voices usually sound better than the on-device fallback
+                return s;
+            }
+            candidates.sort(function (a, b) { return score(b) - score(a); });
+            _voiceCache[langPrefix] = candidates[0];
+            return candidates[0];
+        }
+        if (window.speechSynthesis) {
+            window.speechSynthesis.onvoiceschanged = function () { _voiceCache = {}; };
+        }
+
+        function speak(text) {
+            try {
+                if (!window.speechSynthesis) return;
+                var langPrefix = state.lang === 'hi' ? 'hi' : 'en';
+                var u = new SpeechSynthesisUtterance(text);
+                u.lang = state.lang === 'hi' ? 'hi-IN' : 'en-IN';
+                var voice = _bestVoice(langPrefix);
+                if (voice) u.voice = voice;
+                u.rate = 0.95;
+                window.speechSynthesis.cancel();
+                window.speechSynthesis.speak(u);
+            } catch (e) {}
+        }
+
+        function startListening(onResult) {
+            var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+            var micBtn = document.getElementById('ssq-elig-mic');
+            var heard = document.getElementById('ssq-elig-heard');
+            if (!SR) {
+                if (heard) heard.textContent = t('माफ़ करें, इस ब्राउज़र में आवाज़ पहचान उपलब्ध नहीं है — नीचे टैप करें।', 'Sorry, voice isn\'t supported in this browser -- please tap an option below.');
+                return;
+            }
+            if (state.recognizing) return;
+            var rec = new SR();
+            rec.lang = state.lang === 'hi' ? 'hi-IN' : 'en-IN';
+            rec.interimResults = false;
+            rec.maxAlternatives = 3;
+            state.recognizing = true;
+            if (micBtn) micBtn.classList.add('ssq-listening');
+            if (heard) heard.textContent = t('सुन रहा हूँ...', 'Listening...');
+            rec.onresult = function (e) {
+                var transcript = e.results[0][0].transcript;
+                if (heard) heard.textContent = t('सुना: ', 'Heard: ') + '"' + transcript + '"';
+                onResult(transcript);
+            };
+            rec.onerror = function () {
+                if (heard) heard.textContent = t('आवाज़ समझ नहीं आई, दोबारा कोशिश करें या टैप करें।', 'Could not understand -- try again or tap an option.');
+            };
+            rec.onend = function () {
+                state.recognizing = false;
+                if (micBtn) micBtn.classList.remove('ssq-listening');
+            };
+            try { rec.start(); } catch (e) { state.recognizing = false; }
+        }
+
+        function fuzzyMatchOption(transcript, options) {
+            var n = normalize(transcript);
+            for (var i = 0; i < options.length; i++) {
+                var o = options[i];
+                if (n.indexOf(normalize(o.hi)) !== -1 || n.indexOf(normalize(o.en)) !== -1) return o;
+                for (var j = 0; j < (o.syn || []).length; j++) {
+                    if (n.indexOf(o.syn[j]) !== -1) return o;
+                }
+            }
+            return null;
+        }
+
+        function fuzzyMatchList(transcript, list) {
+            var n = normalize(transcript);
+            if (!n) return null;
+            var best = null, bestScore = 0;
+            list.forEach(function (item) {
+                var label = normalize(item.label);
+                if (!label) return;
+                var score = 0;
+                if (label === n) score = 100;
+                else if (label.indexOf(n) !== -1 || n.indexOf(label) !== -1) score = 60;
+                else {
+                    var la = label.split(' '), na = n.split(' ');
+                    la.forEach(function (w) { if (na.indexOf(w) !== -1 && w.length > 2) score += 15; });
+                }
+                if (score > bestScore) { bestScore = score; best = item; }
+            });
+            return bestScore >= 15 ? best : null;
+        }
+
+        function goNext() { state.step++; renderStep(); }
+        function goBack() { if (state.step > 0) { state.step--; renderStep(); } }
+        function skip() { delete state.answers[currentQuestion().key]; goNext(); }
+
+        function selectChoice(code) {
+            state.answers[currentQuestion().key] = code;
+            setTimeout(goNext, 220);
+        }
+
+        function renderNav(canProceed) {
+            var q = currentQuestion();
+            var nav = document.createElement('div');
+            nav.id = 'ssq-elig-nav';
+            if (state.step > 0) {
+                var back = document.createElement('button');
+                back.type = 'button'; back.className = 'ssq-nav-btn ssq-nav-back';
+                back.textContent = t('← पीछे', '← Back');
+                back.onclick = goBack;
+                nav.appendChild(back);
+            }
+            if (!q.required) {
+                var sk = document.createElement('button');
+                sk.type = 'button'; sk.className = 'ssq-nav-btn ssq-nav-skip';
+                sk.textContent = t('छोड़ें / पता नहीं', 'Skip / Not sure');
+                sk.onclick = skip;
+                nav.appendChild(sk);
+            }
+            if (q.type === 'number' || q.type === 'search') {
+                var next = document.createElement('button');
+                next.type = 'button'; next.className = 'ssq-nav-btn ssq-nav-next';
+                next.textContent = state.step === QUESTIONS.length - 1 ? t('परिणाम देखें →', 'See Results →') : t('आगे →', 'Next →');
+                next.disabled = !canProceed;
+                next.onclick = function () { if (!next.disabled) goNext(); };
+                nav.appendChild(next);
+            }
+            return nav;
+        }
+
+        function renderStep() {
+            if (state.step >= QUESTIONS.length) { submitAndShowResults(); return; }
+            renderProgress();
+            var q = currentQuestion();
+            card.innerHTML = '';
+
+            var stepLabel = document.createElement('div');
+            stepLabel.id = 'ssq-elig-step-label';
+            stepLabel.textContent = t('सवाल', 'Question') + ' ' + (state.step + 1) + ' / ' + QUESTIONS.length + (q.required ? '' : (' · ' + t('वैकल्पिक', 'optional')));
+            card.appendChild(stepLabel);
+
+            var question = document.createElement('div');
+            question.id = 'ssq-elig-question';
+            question.textContent = t(q.hi, q.en);
+            card.appendChild(question);
+
+            var micRow = document.createElement('div');
+            micRow.id = 'ssq-elig-mic-row';
+            var mic = document.createElement('button');
+            mic.type = 'button'; mic.id = 'ssq-elig-mic'; mic.className = 'ssq-mic-btn';
+            mic.innerHTML = '🎙️';
+            micRow.appendChild(mic);
+            card.appendChild(micRow);
+
+            var heard = document.createElement('div');
+            heard.id = 'ssq-elig-heard';
+            card.appendChild(heard);
+
+            if (q.type === 'choice') {
+                mic.onclick = function () {
+                    startListening(function (transcript) {
+                        var match = fuzzyMatchOption(transcript, q.options);
+                        if (match) selectChoice(match.code);
+                        else heard.textContent = t('समझ नहीं आया, नीचे टैप करें।', 'Did not understand -- please tap below.');
+                    });
+                };
+                var opts = document.createElement('div');
+                opts.id = 'ssq-elig-options';
+                q.options.forEach(function (o) {
+                    var btn = document.createElement('button');
+                    btn.type = 'button'; btn.className = 'ssq-opt-btn';
+                    btn.textContent = t(o.hi, o.en);
+                    if (state.answers[q.key] === o.code) btn.classList.add('ssq-selected');
+                    btn.onclick = function () { selectChoice(o.code); };
+                    opts.appendChild(btn);
+                });
+                card.appendChild(opts);
+                card.appendChild(renderNav(true));
+            } else if (q.type === 'number') {
+                var input = document.createElement('input');
+                input.type = 'number'; input.id = 'ssq-elig-input'; input.inputMode = 'numeric';
+                input.placeholder = t(q.ph_hi, q.ph_en);
+                input.value = state.answers[q.key] || '';
+                card.appendChild(input);
+                var nav = renderNav(!!input.value);
+                card.appendChild(nav);
+                input.addEventListener('input', function () {
+                    state.answers[q.key] = input.value;
+                    var nextBtn = nav.querySelector('.ssq-nav-next');
+                    if (nextBtn) nextBtn.disabled = !input.value;
+                });
+                mic.onclick = function () {
+                    startListening(function (transcript) {
+                        var digits = transcript.replace(/[^\d]/g, '');
+                        if (digits) { input.value = digits; state.answers[q.key] = digits; var nb = nav.querySelector('.ssq-nav-next'); if (nb) nb.disabled = false; }
+                        else heard.textContent = t('संख्या समझ नहीं आई, टाइप करें।', 'Could not understand the number -- please type it.');
+                    });
+                };
+            } else if (q.type === 'search') {
+                var input2 = document.createElement('input');
+                input2.type = 'text'; input2.id = 'ssq-elig-input';
+                input2.placeholder = t('टाइप करें या खोजें...', 'Type to search...');
+                card.appendChild(input2);
+                var list = document.createElement('div');
+                list.id = 'ssq-elig-search-list';
+                card.appendChild(list);
+                var nav2 = renderNav(!!state.answers[q.key]);
+                card.appendChild(nav2);
+
+                fetchList(q.source, function (items) {
+                    function renderList(filter) {
+                        list.innerHTML = '';
+                        var f = normalize(filter);
+                        var shown = items.filter(function (it) { return !f || normalize(it.label).indexOf(f) !== -1; }).slice(0, 40);
+                        shown.forEach(function (it) {
+                            var row = document.createElement('div');
+                            row.className = 'ssq-search-item';
+                            if (String(state.answers[q.key]) === String(it.value)) row.classList.add('ssq-selected');
+                            row.textContent = it.label;
+                            row.onclick = function () {
+                                state.answers[q.key] = it.value;
+                                input2.value = it.label;
+                                renderList(it.label);
+                                var nb = nav2.querySelector('.ssq-nav-next');
+                                if (nb) nb.disabled = false;
+                            };
+                            list.appendChild(row);
+                        });
+                    }
+                    renderList('');
+                    input2.addEventListener('input', function () { renderList(input2.value); });
+                    mic.onclick = function () {
+                        startListening(function (transcript) {
+                            var match = fuzzyMatchList(transcript, items);
+                            if (match) {
+                                state.answers[q.key] = match.value;
+                                input2.value = match.label;
+                                renderList(match.label);
+                                var nb = nav2.querySelector('.ssq-nav-next');
+                                if (nb) nb.disabled = false;
+                            } else {
+                                heard.textContent = t('मिलान नहीं मिला, सूची में से चुनें।', 'No match found -- please pick from the list.');
+                                renderList(transcript);
+                            }
+                        });
+                    };
+                });
+            }
+
+            speak(t(q.hi, q.en));
+        }
+
+        function submitAndShowResults() {
+            renderProgress();
+            card.innerHTML = '<div id="ssq-elig-loading"><div class="ssq-spinner"></div>' +
+                '<div>' + t('आपके लिए योजनाएँ खोजी जा रही हैं...', 'Finding schemes for you...') + '</div></div>';
+
+            var payload = {
+                age: state.answers.age || '',
+                state: state.answers.state || '', family_income: state.answers.family_income || '',
+                divyang_category: state.answers.divyang_category || '', beneficiary: state.answers.beneficiary || '',
+                caste: state.answers.caste || '', gender: state.answers.gender || '',
+                marital_status: state.answers.marital_status || '', religion: state.answers.religion || '',
+                area: state.answers.area || '', employment: state.answers.employment || '',
+                occupation: state.answers.occupation || ''
+            };
+
+            fetch('/api/check-eligibility', {
+                method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload)
+            }).then(function (r) { return r.json(); }).then(function (d) {
+                renderResults((d.central_schemes || []).concat(d.state_schemes || []));
+            }).catch(function () {
+                card.innerHTML = '<div id="ssq-elig-loading">' + t('कुछ गड़बड़ हो गई, कृपया दोबारा कोशिश करें।', 'Something went wrong, please try again.') + '</div>';
+            });
+        }
+
+        function renderResults(schemes) {
+            card.innerHTML = '';
+            var summary = document.createElement('div');
+            summary.id = 'ssq-elig-results-summary';
+            summary.innerHTML = '<div class="ssq-count">' + schemes.length + '</div><div>' +
+                t('योजनाएँ आपके लिए उपलब्ध हैं', 'schemes may be available for you') + '</div>';
+            card.appendChild(summary);
+
+            schemes.forEach(function (s) {
+                var c = document.createElement('div');
+                c.className = 'ssq-result-card';
+                var tag = s.scheme_type === 0 ? t('केंद्र सरकार', 'Central') : t('राज्य सरकार', 'State');
+                var desc = (s.description || '').replace(/<[^>]*>/g, '').slice(0, 140);
+                c.innerHTML = '<span class="ssq-result-tag">' + tag + '</span><h5>' + (s.title || '') + '</h5>' +
+                    '<p>' + desc + (desc.length >= 140 ? '…' : '') + '</p>' +
+                    '<a href="/scheme-viewer/?scheme=' + s.id + '" target="_blank">' + t('पूरी जानकारी देखें →', 'View full details →') + '</a>';
+                card.appendChild(c);
+            });
+
+            if (!schemes.length) {
+                var none = document.createElement('p');
+                none.style.textAlign = 'center'; none.style.color = 'rgba(244,239,225,.6)';
+                none.textContent = t('कोई योजना नहीं मिली — कम जानकारी देकर दोबारा कोशिश करें।', 'No schemes found -- try again answering fewer questions.');
+                card.appendChild(none);
+            }
+
+            var restart = document.createElement('button');
+            restart.id = 'ssq-elig-restart'; restart.type = 'button';
+            restart.textContent = t('फिर से शुरू करें', 'Start Over');
+            restart.onclick = openWidget;
+            card.appendChild(restart);
+        }
+
+        function openWidget() {
+            state.step = 0; state.answers = {};
+            overlay.classList.add('ssq-elig-open');
+            document.body.style.overflow = 'hidden';
+            renderStep();
+        }
+        function closeWidget() {
+            overlay.classList.remove('ssq-elig-open');
+            document.body.style.removeProperty('overflow');
+            try { window.speechSynthesis && window.speechSynthesis.cancel(); } catch (e) {}
+        }
+
+        function ready(fn) {
+            if (document.readyState !== 'loading') fn();
+            else document.addEventListener('DOMContentLoaded', fn);
+        }
+
+        ready(function () {
+            overlay = document.getElementById('ssq-elig-overlay');
+            card = document.getElementById('ssq-elig-card');
+            fab = document.getElementById('ssq-elig-fab');
+            if (!overlay || !card || !fab) return;
+
+            document.getElementById('ssq-elig-close').addEventListener('click', closeWidget);
+            document.querySelectorAll('#ssq-elig-lang-toggle button').forEach(function (b) {
+                b.addEventListener('click', function () {
+                    state.lang = b.getAttribute('data-lang');
+                    document.querySelectorAll('#ssq-elig-lang-toggle button').forEach(function (x) { x.classList.remove('ssq-active'); });
+                    b.classList.add('ssq-active');
+                    renderStep();
+                });
+            });
+            fab.addEventListener('click', openWidget);
+
+            // Also intercept the SPA's own "Check Eligibility" card link
+            // (href="/eligibility") site-wide, and show/hide the floating
+            // button only while on that route, since this is a client-side
+            // router with no full page reload to hook into otherwise.
+            function checkRoute() {
+                fab.classList.toggle('ssq-show', window.location.pathname.indexOf('/eligibility') === 0 && !overlay.classList.contains('ssq-elig-open'));
+            }
+            document.addEventListener('click', function (e) {
+                var a = e.target.closest && e.target.closest('a[href="/eligibility"]');
+                if (a) { e.preventDefault(); e.stopPropagation(); openWidget(); }
+            }, true);
+            setInterval(checkRoute, 500);
+            checkRoute();
+
+            // Django public pages (scheme-viewer/, quizzes/ etc.) have no
+            // copy of this widget -- their own "Check Eligibility" nav link
+            // points here instead of intercepting client-side, landing on
+            // this SPA's own /eligibility route. Auto-open the widget on
+            // arrival so it's the same experience as clicking the link
+            // in-app, then clean the flag off the URL.
+            if (new URLSearchParams(window.location.search).get('openEligibility')) {
+                openWidget();
+                var cleanUrl = window.location.pathname;
+                window.history.replaceState(null, '', cleanUrl);
+            }
+        });
+    })();
+    </script>
+        <style>
+        /* Global search -- a small trigger icon next to the header's
+           existing Language dropdown (.others-options), opening a
+           dropdown-style results panel. Injected (no source access to add
+           a real search box inside the SPA's own navbar component). */
+        .ssq-search-trigger {
+            width: 38px; height: 38px; border-radius: 50%; border: none; cursor: pointer;
+            background: rgba(20, 48, 31, .08); color: #14301f; font-size: 16px;
+            display: grid; place-items: center; margin: 0 4px;
+            transition: background .15s ease;
+            flex-shrink: 0;
+        }
+        .ssq-search-trigger:hover { background: rgba(20, 48, 31, .16); }
+        @media (max-width: 1199px) {
+            .ssq-search-trigger { width: 32px; height: 32px; font-size: 14px; margin: 0 3px; }
+        }
+        #ssq-search-panel {
+            position: fixed; top: clamp(16px, 8vh, 96px); left: 50%; transform: translateX(-50%);
+            z-index: 999500; width: min(640px, calc(100vw - 32px));
+            background: #fffffe; border-radius: 22px; border: 1px solid rgba(20,48,31,.06);
+            box-shadow: 0 40px 90px -20px rgba(20,48,31,.35), 0 10px 30px -8px rgba(20,48,31,.15);
+            display: none; flex-direction: column;
+            max-height: min(70vh, 560px); overflow: hidden;
+        }
+        #ssq-search-panel.ssq-search-open { display: flex; animation: ssqSearchIn .22s cubic-bezier(.2,.9,.3,1.1) both; }
+        @keyframes ssqSearchIn { from { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(.98); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+        #ssq-search-bar-row {
+            display: flex; align-items: center; gap: 12px; padding: 14px 16px;
+            border-bottom: 1px solid rgba(20,48,31,.08); flex-shrink: 0;
+        }
+        #ssq-search-icon-static {
+            font-size: 16px; flex-shrink: 0; width: 34px; height: 34px; border-radius: 50%;
+            background: conic-gradient(from 210deg, #ffd75e, #c9a227, #8a6d16, #ffd75e);
+            display: grid; place-items: center;
+            box-shadow: 0 4px 10px rgba(201,162,39,.35), inset 0 1px 1px rgba(255,255,255,.5);
+        }
+        #ssq-search-input {
+            flex: 1; border: none; outline: none; font-size: 16.5px; color: #17281f; font-family: inherit;
+            background: transparent;
+        }
+        #ssq-search-input::placeholder { color: rgba(23,40,31,.4); }
+        #ssq-search-close {
+            border: none; background: rgba(20,48,31,.06); color: #17281f; width: 30px; height: 30px; border-radius: 50%;
+            font-size: 15px; cursor: pointer; flex-shrink: 0; transition: background .15s ease;
+        }
+        #ssq-search-close:hover { background: rgba(20,48,31,.12); }
+        #ssq-search-results { overflow-y: auto; padding: 8px; }
+        .ssq-search-hint { padding: 22px 14px; color: rgba(23,40,31,.45); font-size: 13.5px; text-align: center; }
+        .ssq-search-result {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            padding: 13px 14px; text-decoration: none; color: #17281f; border-radius: 13px;
+            transition: background .15s ease, transform .15s ease; margin-bottom: 2px;
+        }
+        .ssq-search-result:hover { background: rgba(255,215,94,.14); transform: translateX(2px); }
+        .ssq-search-result-title { font-size: 14.5px; font-weight: 600; }
+        .ssq-search-result-tag {
+            font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em;
+            color: #a5811c; background: rgba(201,162,39,.13); padding: 3px 9px; border-radius: 10px; flex-shrink: 0;
+        }
+        #ssq-search-backdrop {
+            position: fixed; inset: 0; z-index: 999400; background: rgba(20,48,31,.32);
+            backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); display: none;
+        }
+        #ssq-search-backdrop.ssq-search-open { display: block; }
+        @media (max-width: 480px) {
+            #ssq-search-input { font-size: 15px; }
+            #ssq-search-panel { top: 14px; max-height: min(78vh, 560px); }
+        }
+    </style>
+    <div id="ssq-search-backdrop"></div>
+    <div id="ssq-search-panel">
+        <div id="ssq-search-bar-row">
+            <span id="ssq-search-icon-static">🔍</span>
+            <input id="ssq-search-input" type="text" placeholder="Search schemes, helplines, portals, documents...">
+            <button id="ssq-search-close" type="button" aria-label="Close">&times;</button>
+        </div>
+        <div id="ssq-search-results"></div>
+    </div>
+    <script>
+    (function () {
+        if (window.__ssqSearchWidget) return;
+        window.__ssqSearchWidget = true;
+
+        var panel, backdrop, input, results, debounceTimer;
+
+        function openSearch() {
+            panel.classList.add('ssq-search-open');
+            backdrop.classList.add('ssq-search-open');
+            document.body.style.overflow = 'hidden';
+            setTimeout(function () { input.focus(); }, 50);
+        }
+        function closeSearch() {
+            panel.classList.remove('ssq-search-open');
+            backdrop.classList.remove('ssq-search-open');
+            document.body.style.removeProperty('overflow');
+        }
+
+        function renderResults(items, query) {
+            results.innerHTML = '';
+            if (!query || query.trim().length < 2) {
+                results.innerHTML = '<div class="ssq-search-hint">Type at least 2 letters to search across schemes, helplines, portals, and documents.</div>';
+                return;
+            }
+            if (!items.length) {
+                results.innerHTML = '<div class="ssq-search-hint">No results for "' + query + '". Try a different word.</div>';
+                return;
+            }
+            items.forEach(function (item) {
+                var a = document.createElement('a');
+                a.className = 'ssq-search-result';
+                a.href = item.url;
+                if (item.url && item.url.indexOf('http') === 0) a.target = '_blank';
+                a.innerHTML = '<span class="ssq-search-result-title">' + item.title + '</span><span class="ssq-search-result-tag">' + item.type_label + '</span>';
+                a.addEventListener('click', closeSearch);
+                results.appendChild(a);
+            });
+        }
+
+        function doSearch(query) {
+            fetch('/api/search?q=' + encodeURIComponent(query)).then(function (r) { return r.json(); }).then(function (d) {
+                renderResults(d.results || [], query);
+            }).catch(function () { results.innerHTML = '<div class="ssq-search-hint">Search failed -- please try again.</div>'; });
+        }
+
+        function ready(fn) {
+            if (document.readyState !== 'loading') fn();
+            else document.addEventListener('DOMContentLoaded', fn);
+        }
+
+        function ensureTrigger() {
+            // See the Login/Register injection further down for why this is
+            // querySelectorAll (multiple .others-options copies, only one
+            // visible per viewport/interaction state) instead of a single
+            // querySelector + getElementById check -- the latter only ever
+            // populated whichever copy happened to be first in DOM order,
+            // which silently hid the search icon on tablet/mobile.
+            var optionsBars = document.querySelectorAll('.others-options');
+            optionsBars.forEach(function (optionsBar) {
+                if (optionsBar.querySelector('.ssq-search-trigger')) return;
+                var btn = document.createElement('button');
+                btn.type = 'button'; btn.className = 'ssq-search-trigger'; btn.innerHTML = '🔍';
+                btn.setAttribute('aria-label', 'Search');
+                btn.addEventListener('click', openSearch);
+                optionsBar.insertBefore(btn, optionsBar.firstChild);
+            });
+        }
+
+        ready(function () {
+            panel = document.getElementById('ssq-search-panel');
+            backdrop = document.getElementById('ssq-search-backdrop');
+            input = document.getElementById('ssq-search-input');
+            results = document.getElementById('ssq-search-results');
+            if (!panel || !input) return;
+
+            renderResults([], '');
+            document.getElementById('ssq-search-close').addEventListener('click', closeSearch);
+            backdrop.addEventListener('click', closeSearch);
+            document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeSearch(); });
+            input.addEventListener('input', function () {
+                var q = input.value;
+                clearTimeout(debounceTimer);
+                debounceTimer = setTimeout(function () { doSearch(q); }, 300);
+            });
+
+            setInterval(ensureTrigger, 800);
+            ensureTrigger();
+        });
+    })();
+    </script>
+    <script>
+    (function () {
+        /* Login / Register links -- placed next to the header's existing
+           Language dropdown (.others-options), same reasoning as the search
+           trigger above: no source access to add real nav items inside the
+           SPA's own navbar component, so this locates the rendered DOM
+           after React mounts and injects plain links. Points at the
+           Django accounts app (session-based login) so a visitor can find
+           it straight from the home page instead of only after opening a
+           quiz and getting redirected.
+
+           The theme renders MULTIPLE .others-options containers (desktop
+           .main-navbar copy, a hamburger-drawer copy that's forced
+           display:none!important under 1199px, and a separate tablet/mobile
+           "more options" popover) and swaps which one is visible by
+           viewport/interaction state -- only one is ever visible at a time,
+           but querySelector() (singular) only ever finds the FIRST one in
+           DOM order, which is not reliably the one actually shown on a
+           given screen size. That silently dropped Login/Register (and
+           broke the "next to the language selector" placement) on
+           tablet/mobile even though it worked fine on desktop. Fixed by
+           injecting into EVERY matching container via querySelectorAll --
+           the hidden copies just sit there inert like the rest of that
+           container's own hidden content, and whichever one the current
+           viewport actually renders gets the links for free. IDs can't be
+           duplicated across those copies, so every injected element below
+           is class-based, not id-based. */
+        function ready(fn) {
+            if (document.readyState !== 'loading') fn();
+            else document.addEventListener('DOMContentLoaded', fn);
+        }
+
+        var authState = null; // null = not checked yet, else {authenticated, name}
+
+        function loggedOutHTML() {
+            return '<a href="/accounts/login/" class="ssq-login-link">Login</a>' +
+                '<a href="/accounts/signup/" class="ssq-signup-link">Register</a>';
+        }
+        function loggedInHTML(name) {
+            var safeName = String(name || 'Account').replace(/[<>&]/g, function (c) {
+                return { '<': '&lt;', '>': '&gt;', '&': '&amp;' }[c];
+            });
+            return '<span class="ssq-user-name">' + safeName + '</span>' +
+                '<a href="/accounts/logout/" class="ssq-logout-link">Logout</a>';
+        }
+
+        function ensureAuthLinks() {
+            var optionsBars = document.querySelectorAll('.others-options');
+            if (!optionsBars.length) return;
+            // Signature of what SHOULD currently be rendered -- only touch the
+            // DOM when this actually changes (fresh wrap, or a real
+            // login/logout state transition), not on every 800ms poll tick.
+            // Unconditionally overwriting innerHTML every 800ms regardless of
+            // whether anything changed was destroying and recreating the
+            // Login/Logout <a> elements continuously -- if this poll fired
+            // between a user's mousedown and mouseup on that link (very
+            // plausible over an 800ms window), the click landed on an element
+            // that no longer existed and silently did nothing. That's the
+            // most likely cause of "login/logout sometimes doesn't work".
+            var sig = authState ? (authState.authenticated ? 'in:' + authState.name : 'out') : null;
+            optionsBars.forEach(function (optionsBar) {
+                var wrap = optionsBar.querySelector('.ssq-auth-links');
+                if (!wrap) {
+                    wrap = document.createElement('div');
+                    wrap.className = 'ssq-auth-links';
+                    wrap.innerHTML = loggedOutHTML(); // best guess until the status check resolves
+                    wrap.dataset.ssqSig = 'out';
+                    optionsBar.appendChild(wrap);
+                }
+                if (sig !== null && wrap.dataset.ssqSig !== sig) {
+                    wrap.innerHTML = authState.authenticated ? loggedInHTML(authState.name) : loggedOutHTML();
+                    wrap.dataset.ssqSig = sig;
+                }
+            });
+        }
+
+        function refreshAuthState() {
+            fetch('/accounts/status/', { credentials: 'same-origin' })
+                .then(function (r) { return r.ok ? r.json() : { authenticated: false }; })
+                .then(function (data) { authState = data; ensureAuthLinks(); })
+                .catch(function () { /* leave last-known state as-is on network error */ });
+        }
+
+        ready(function () {
+            refreshAuthState();
+            setInterval(function () { ensureAuthLinks(); }, 800);
+            // Re-check auth state itself far less often -- it can only change via
+            // this page's own Login/Logout actions (both full navigations, so a
+            // fresh page load re-checks anyway) or a same-tab login done in a
+            // different tab, which this slow poll still catches within 30s.
+            setInterval(refreshAuthState, 30000);
+        });
+    })();
+    </script>
+    <style>
+        /* flex-wrap: wrap -- some of the theme's .others-options copies are
+           quite narrow on tablet (e.g. .others-option-for-responsive
+           .container .container caps at 190px between 768-991px), so this
+           wraps onto its own line inside that container rather than
+           overflowing it horizontally. */
+        .ssq-auth-links { display: flex; align-items: center; gap: 8px; margin-left: 6px; flex-wrap: wrap; }
+        .ssq-login-link, .ssq-signup-link {
+            font-family: inherit; font-size: 13.5px; font-weight: 700; text-decoration: none;
+            padding: 7px 16px; border-radius: 20px; white-space: nowrap; transition: filter .15s ease;
+        }
+        .ssq-login-link { color: #14301f; background: rgba(20,48,31,.08); }
+        .ssq-login-link:hover { background: rgba(20,48,31,.16); }
+        .ssq-signup-link { color: #14301f; background: linear-gradient(180deg,#ffd75e,#c9a227); }
+        .ssq-signup-link:hover { filter: brightness(1.06); }
+        .ssq-user-name {
+            font-size: 13.5px; font-weight: 700; color: #14301f;
+            max-width: 140px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+        }
+        .ssq-logout-link { color: #14301f; background: rgba(20,48,31,.08); }
+        .ssq-logout-link:hover { background: rgba(20,48,31,.16); }
+        /* Tablet -- matches the theme's own .main-responsive-nav breakpoint
+           (max-width:1199px), where the compact/popover nav copies take
+           over from the full desktop bar. */
+        @media (max-width: 1199px) {
+            .ssq-auth-links { gap: 6px; margin-left: 4px; }
+            .ssq-login-link, .ssq-signup-link, .ssq-logout-link { padding: 6px 12px; font-size: 12.5px; }
+            .ssq-user-name { max-width: 110px; font-size: 12.5px; }
+        }
+        @media (max-width: 767px) {
+            .ssq-auth-links { margin-left: 2px; }
+            .ssq-login-link, .ssq-signup-link, .ssq-logout-link { padding: 6px 10px; font-size: 12px; }
+            .ssq-user-name { max-width: 80px; font-size: 12px; }
+        }
+    </style>
+    <style>
+        /* Helplines / Important Portals / Important Documents cards --
+           keep each entry's own uploaded thumbnail as-is, just clean up the
+           card frame around it (drop the flat black border, add a soft
+           shadow + rounded corners + hover lift, restyle the button) to
+           match the rest of the site's premium look. Scoped entirely to
+           .case_boxed_wrapper so it can't affect any other card style on
+           the site (e.g. the scheme-category cards, untouched). */
+        .case_boxed_wrapper.bordered { border: none !important; }
+        .case_boxed_wrapper {
+            background: #fffffe !important; border-radius: 18px !important;
+            border: 1px solid rgba(20,48,31,.08) !important;
+            box-shadow: 0 10px 26px -10px rgba(20,48,31,.12), 0 2px 8px rgba(20,48,31,.05);
+            transition: transform .18s ease, box-shadow .18s ease; overflow: hidden;
+        }
+        .case_boxed_wrapper:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 16px 34px -10px rgba(20,48,31,.18), 0 4px 10px rgba(20,48,31,.08);
+        }
+        .case_boxed_img img { border-radius: 18px 18px 0 0; display: block; width: 100%; }
+        .causes_boxed_text { text-align: center; padding: 14px 18px 22px; }
+        .causes_boxed_text h5 { height: auto !important; margin-bottom: 6px !important; }
+        .causes_boxed_text h5 a {
+            color: #17281f !important; font-weight: 700 !important; font-size: 15px !important;
+            font-family: 'Poppins', 'Inter', sans-serif;
+        }
+        .case_boxed_wrapper .btn_theme {
+            background: linear-gradient(165deg, #ffe58a, #ffd75e 45%, #c9a227) !important;
+            color: #14301f !important; border: none !important; border-radius: 10px !important;
+            font-weight: 700 !important;
+            box-shadow: 0 8px 18px -4px rgba(201,162,39,.4), inset 0 1px 1px rgba(255,255,255,.5);
+        }
+    </style>
+    <style>
+        /* Site-wide nav bar -- the theme's own header has no navigation
+           links at all (just logo/title, search, language, login/register),
+           and on narrow screens there isn't even a hamburger menu to reveal
+           one -- the only way to reach most pages was a homepage card or a
+           typed URL. Inserted as its own row directly under <header> rather
+           than crammed into the existing navbar (already tight on mobile,
+           see .ssq-auth-links above) -- horizontally scrollable instead of
+           a hamburger, matching the homepage's own "Latest / PAN Card /
+           ABHA Card" pill-row pattern already on this site, so it needs no
+           JS toggle state at all. */
+        #ssq-main-nav {
+            background: #14301f;
+            display: flex; align-items: center; gap: 4px;
+            overflow-x: auto; -webkit-overflow-scrolling: touch;
+            padding: 0 16px; scrollbar-width: none;
+        }
+        #ssq-main-nav::-webkit-scrollbar { display: none; }
+        #ssq-main-nav a {
+            color: rgba(244,239,225,.82); text-decoration: none; white-space: nowrap;
+            font-size: 14px; font-weight: 600; padding: 12px 14px;
+            border-bottom: 2px solid transparent; transition: color .15s ease, border-color .15s ease;
+            flex-shrink: 0;
+        }
+        #ssq-main-nav a:hover { color: #fff; }
+        #ssq-main-nav a.ssq-nav-active { color: #ffd75e; border-bottom-color: #ffd75e; }
+        @media (max-width: 640px) {
+            #ssq-main-nav { padding: 0 10px; }
+            #ssq-main-nav a { font-size: 13px; padding: 10px 11px; }
+        }
+        /* Footer's own background was a separate dark navy gradient
+           (rgb(17,24,39) -> rgb(7,11,19)) unrelated to the nav's brand
+           green (#14301f) -- overridden here to match, same "!important"
+           override technique as #ssq-chatbot-root above since this class
+           is set by the compiled bundle, not editable at the source. */
+        .copyright_area.premium-footer { background: #14301f !important; background-image: none !important; }
+    </style>
+    <script>
+    (function () {
+        var LINKS = [
+            { href: '/', label: 'Home' },
+            { href: '/central-schemes-viewer/', label: 'Central Govt Scheme' },
+            { href: '/state-schemes-viewer/', label: 'State Govt Scheme' },
+            { href: '/eligibility', label: 'Check Eligibility' },
+            { href: '/important-portals-viewer/', label: 'Important Portals' },
+            { href: '/important-documents-viewer/', label: 'Important Documents' },
+            { href: '/entrepreneurship-viewer/', label: 'Entrepreneurship' },
+            { href: '/quizzes/', label: 'Quizzes' },
+            { href: '/scheme-announcements-viewer/', label: 'Announcements' },
+            { href: '/helplines-viewer/', label: 'Helpline' }
+        ];
+
+        function buildNav() {
+            var nav = document.createElement('nav');
+            nav.id = 'ssq-main-nav';
+            nav.innerHTML = LINKS.map(function (l) {
+                return '<a href="' + l.href + '">' + l.label + '</a>';
+            }).join('');
+            return nav;
+        }
+
+        // Highlights whichever link matches the current path -- "/" only
+        // matches exactly (otherwise it would always show active, since
+        // every path starts with "/"), the rest match on prefix so e.g.
+        // /important-portals-viewer/?x=1 still highlights "Important
+        // Portals". A few links need special-casing beyond plain prefix
+        // match: scheme-viewer/ is the shared filtered-results page for
+        // BOTH "Central Govt Scheme" and "State Govt Scheme" (?state= says
+        // which), the 5 Entrepreneurship sub-pages live under
+        // /entrepreneurship/... while the hub link is
+        // /entrepreneurship-viewer/ (different prefix), and "Check
+        // Eligibility" opens a widget rather than being a real destination
+        // so it should never show as active.
+        function updateActive(nav) {
+            var path = window.location.pathname;
+            var search = window.location.search;
+            nav.querySelectorAll('a').forEach(function (a) {
+                var href = a.getAttribute('href');
+                var isActive;
+                if (href === '/') {
+                    isActive = path === '/';
+                } else if (href.indexOf('openEligibility') !== -1) {
+                    isActive = false;
+                } else if (href === '/central-schemes-viewer/') {
+                    isActive = path.indexOf('/central-schemes-viewer/') === 0 || (path === '/scheme-viewer/' && search.indexOf('state=') === -1);
+                } else if (href === '/state-schemes-viewer/') {
+                    isActive = path.indexOf('/state-schemes-viewer/') === 0 || (path === '/scheme-viewer/' && search.indexOf('state=') !== -1);
+                } else if (href === '/entrepreneurship-viewer/') {
+                    isActive = path.indexOf('/entrepreneurship') === 0;
+                } else {
+                    isActive = path.indexOf(href) === 0;
+                }
+                a.classList.toggle('ssq-nav-active', isActive);
+            });
+        }
+
+        function ensureNav() {
+            var header = document.querySelector('header.main_header_arae, header');
+            if (!header) return;
+            var nav = document.getElementById('ssq-main-nav');
+            if (!nav) {
+                nav = buildNav();
+                header.insertAdjacentElement('afterend', nav);
+            }
+            updateActive(nav);
+        }
+
+        function ready(fn) {
+            if (document.readyState !== 'loading') fn();
+            else document.addEventListener('DOMContentLoaded', fn);
+        }
+
+        ready(function () {
+            ensureNav();
+            // Same resilience pattern as the search-trigger/auth-links
+            // injections above -- the SPA can re-render the header and wipe
+            // a plain one-time injection; polling re-adds it if missing and
+            // keeps the active-link highlight in sync with client-side
+            // route changes (which never fire a real page load).
+            setInterval(ensureNav, 800);
+        });
+    })();
+    </script>
+
+    <!-- Mobile bottom app-nav (2026-09-20, "bilkul application jaisa dikhe"):
+         #ssq-main-nav above is a horizontal-scroll strip lifted straight
+         from a desktop nav pattern -- reads as a website, not an app, on a
+         phone. A fixed bottom tab bar (Home/Schemes/Eligibility/Helpline +
+         More) is the actual native-app convention. Mobile-only
+         (<=768px); desktop keeps the existing top nav untouched.
+         #ssq-main-nav itself is hidden on mobile since this replaces its
+         job there. Same resilience pattern as the nav injection above
+         (poll + re-insert, since the SPA can wipe a one-time injection on
+         re-render) and the same !important-override convention used
+         elsewhere in this file for CSS the compiled bundle itself sets. -->
+    <style>
+        #ssq-bottom-nav { display: none; }
+        @media (max-width: 768px) {
+            #ssq-main-nav { display: none !important; }
+            #ssq-bottom-nav {
+                display: flex; position: fixed; left: 0; right: 0; bottom: 0; z-index: 99990;
+                background: #14301f; border-top: 1px solid rgba(255,255,255,.08);
+                box-shadow: 0 -8px 24px rgba(0,0,0,.28);
+                padding-bottom: env(safe-area-inset-bottom, 0);
+            }
+            #ssq-bottom-nav a, #ssq-bottom-nav button {
+                flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+                gap: 3px; padding: 8px 4px 7px; background: none; border: none; cursor: pointer;
+                color: rgba(244,239,225,.72); text-decoration: none; font-size: 10.5px; font-weight: 600;
+                font-family: inherit;
+            }
+            #ssq-bottom-nav svg { width: 21px; height: 21px; }
+            #ssq-bottom-nav .ssq-bn-active { color: #ffd75e; }
+            /* Push the existing chatbot/eligibility FABs up above the new
+               bar so they don't sit on top of / get hidden behind it --
+               !important since these positions are otherwise set by the
+               compiled bundle's own <style> blocks earlier in this file. */
+            #ssq-chatbot-toggle { bottom: 76px !important; }
+            #ssq-chatbot-panel { bottom: 146px !important; }
+            #ssq-elig-fab { bottom: 142px !important; }
+            body { padding-bottom: 58px; }
+        }
+        @media (max-width: 420px) {
+            #ssq-chatbot-toggle { bottom: 72px !important; }
+            #ssq-elig-fab { bottom: 122px !important; }
+        }
+
+        #ssq-bn-more-sheet {
+            display: none; position: fixed; inset: 0; z-index: 999999;
+            background: rgba(0,0,0,.55);
+        }
+        #ssq-bn-more-sheet.ssq-open { display: block; }
+        #ssq-bn-more-panel {
+            position: absolute; left: 0; right: 0; bottom: 0;
+            background: #14301f; border-radius: 18px 18px 0 0;
+            padding: 10px 8px calc(14px + env(safe-area-inset-bottom, 0));
+            max-height: 70vh; overflow-y: auto;
+        }
+        #ssq-bn-more-handle { width: 36px; height: 4px; border-radius: 99px; background: rgba(255,255,255,.25); margin: 6px auto 14px; }
+        #ssq-bn-more-panel a {
+            display: flex; align-items: center; gap: 12px; padding: 13px 14px;
+            color: rgba(244,239,225,.92); text-decoration: none; font-size: 14.5px; font-weight: 600;
+            border-bottom: 1px solid rgba(255,255,255,.07);
+        }
+        #ssq-bn-more-panel a:last-child { border-bottom: none; }
+        #ssq-bn-more-panel svg { width: 18px; height: 18px; flex-shrink: 0; color: #ffd75e; }
+    </style>
+    <script>
+    (function () {
+        var ICONS = {
+            home: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8"/><path d="M5 10v10a1 1 0 0 0 1 1h4v-6h4v6h4a1 1 0 0 0 1-1V10"/></svg>',
+            schemes: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2h9l3 3v17H6z"/><path d="M15 2v3h3"/><path d="M9 12h6"/><path d="M9 16h6"/></svg>',
+            eligibility: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8 12l3 3 5-6"/></svg>',
+            helpline: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 0 0 5 5L15 13l5 2v4a2 2 0 0 1-2 2A16 16 0 0 1 3 6a2 2 0 0 1 2-2z"/></svg>',
+            more: '<svg viewBox="0 0 24 24" fill="currentColor"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>',
+            state: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 3v18"/><path d="M5 4h11l-2 4 2 4H5"/></svg>',
+            portal: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a13 13 0 0 1 0 18"/><path d="M12 3a13 13 0 0 0 0 18"/></svg>',
+            doc: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8"/><path d="M8 12h8"/><path d="M8 16h5"/></svg>',
+            biz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+            quiz: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 5H4a3 3 0 0 0 3 5"/><path d="M17 5h3a3 3 0 0 1-3 5"/></svg>',
+            announce: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11v2a2 2 0 0 0 2 2h1l4 4V5L6 9H5a2 2 0 0 0-2 2z"/><path d="M16 8a5 5 0 0 1 0 8"/></svg>',
+            login: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>'
+        };
+        var PRIMARY = [
+            { href: '/', label: 'Home', icon: 'home' },
+            { href: '/central-schemes-viewer/', label: 'Schemes', icon: 'schemes' },
+            { href: '/quizzes/', label: 'Quizzes', icon: 'quiz' },
+            { href: '/helplines-viewer/', label: 'Helpline', icon: 'helpline' }
+        ];
+        var MORE = [
+            { href: '/state-schemes-viewer/', label: 'State Govt Scheme', icon: 'state' },
+            { href: '/important-portals-viewer/', label: 'Important Portals', icon: 'portal' },
+            { href: '/important-documents-viewer/', label: 'Important Documents', icon: 'doc' },
+            { href: '/entrepreneurship-viewer/', label: 'Entrepreneurship', icon: 'biz' },
+            { href: '/eligibility', label: 'Eligibility', icon: 'eligibility' },
+            { href: '/scheme-announcements-viewer/', label: 'Announcements', icon: 'announce' },
+            { href: '/accounts/login/', label: 'Login / Register', icon: 'login' }
+        ];
+
+        function buildBottomNav() {
+            var nav = document.createElement('nav');
+            nav.id = 'ssq-bottom-nav';
+            nav.innerHTML = PRIMARY.map(function (l) {
+                return '<a href="' + l.href + '" data-href="' + l.href + '">' + ICONS[l.icon] + '<span>' + l.label + '</span></a>';
+            }).join('') + '<button type="button" id="ssq-bn-more-btn">' + ICONS.more + '<span>More</span></button>';
+            return nav;
+        }
+
+        function buildMoreSheet() {
+            var sheet = document.createElement('div');
+            sheet.id = 'ssq-bn-more-sheet';
+            var panel = document.createElement('div');
+            panel.id = 'ssq-bn-more-panel';
+            panel.innerHTML = '<div id="ssq-bn-more-handle"></div>' + MORE.map(function (l) {
+                return '<a href="' + l.href + '">' + ICONS[l.icon] + '<span>' + l.label + '</span></a>';
+            }).join('');
+            sheet.appendChild(panel);
+            sheet.addEventListener('click', function (e) {
+                if (e.target === sheet) sheet.classList.remove('ssq-open');
+            });
+            return sheet;
+        }
+
+        function updateActiveBottom(nav) {
+            var path = window.location.pathname;
+            var search = window.location.search;
+            nav.querySelectorAll('a').forEach(function (a) {
+                var href = a.getAttribute('data-href');
+                var isActive;
+                if (href === '/') {
+                    isActive = path === '/';
+                } else if (href === '/central-schemes-viewer/') {
+                    isActive = path.indexOf('/central-schemes-viewer/') === 0 || (path === '/scheme-viewer/' && search.indexOf('state=') === -1);
+                } else {
+                    isActive = path.indexOf(href) === 0;
+                }
+                a.classList.toggle('ssq-bn-active', isActive);
+            });
+        }
+
+        function ensureBottomNav() {
+            if (!document.getElementById('ssq-bottom-nav')) {
+                var nav = buildBottomNav();
+                document.body.appendChild(nav);
+                document.getElementById('ssq-bn-more-btn').addEventListener('click', function () {
+                    document.getElementById('ssq-bn-more-sheet').classList.add('ssq-open');
+                });
+            }
+            if (!document.getElementById('ssq-bn-more-sheet')) {
+                document.body.appendChild(buildMoreSheet());
+            }
+            updateActiveBottom(document.getElementById('ssq-bottom-nav'));
+        }
+
+        function ready(fn) {
+            if (document.readyState !== 'loading') fn();
+            else document.addEventListener('DOMContentLoaded', fn);
+        }
+
+        ready(function () {
+            ensureBottomNav();
+            setInterval(ensureBottomNav, 800);
+        });
+    })();
+    </script>
+<!-- 2026-11-05: quiz banner (user's design; same as /quizzes/ page's .sqb)
+     replaces the React theme's quiz section (the #home_one_banner that holds
+     quiz_logo.png). React renders late and can re-render, so this re-checks
+     every 800 ms like the other homepage injections. English text; Google
+     Translate handles other languages. -->
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@500;700&family=Baloo+2:wght@800&display=swap" rel="stylesheet">
+<style>
+  /* Quiz banner (2026-11-05), scoped .sqb-* */
+  .sqb{position:relative;overflow:hidden;isolation:isolate;display:grid;grid-template-columns:minmax(0,1fr) minmax(240px,400px);align-items:center;gap:36px;
+    margin:32px auto;max-width:1320px;width:calc(100% - 32px);padding:48px 56px;border-radius:32px;
+    background:linear-gradient(115deg,#0c1f13 0%,#12281a 40%,#24502f 100%);
+    box-shadow:0 24px 50px -12px rgba(12,31,19,.45),inset 0 1px 0 rgba(255,255,255,.08);border:1px solid rgba(201,162,39,.18)}
+  .sqb::before{content:"";position:absolute;inset:0;z-index:-1;background-image:radial-gradient(rgba(255,255,255,.07) 1.5px,transparent 1.5px);background-size:24px 24px;
+    -webkit-mask-image:linear-gradient(90deg,transparent 10%,#000 70%);mask-image:linear-gradient(90deg,transparent 10%,#000 70%)}
+  .sqb-copy h2{font-family:"Mukta",system-ui,sans-serif;font-size:clamp(1.8rem,3.4vw,2.8rem);font-weight:700;line-height:1.15;color:#fff;max-width:15em;margin:0}
+  .sqb-copy p{margin:16px 0 0;font-size:1.06rem;line-height:1.65;color:#bfd2c5;max-width:34em;text-align:left}
+  .sqb-topics{display:flex;flex-wrap:wrap;gap:10px;margin:22px 0 0;padding:0;list-style:none}
+  .sqb-topics li{padding:7px 15px;border-radius:999px;font-size:.9rem;font-weight:500;color:#e6f1e9;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.16);text-align:left}
+  .sqb-topics li.sqb-more{background:transparent;border-style:dashed;color:#bfd2c5}
+  .sqb-actions{display:flex;flex-wrap:wrap;gap:14px;margin-top:28px}
+  .sqb-btn{display:inline-flex;align-items:center;justify-content:center;height:52px;padding:0 32px;border-radius:14px;font-weight:700;font-size:1.02rem;text-decoration:none;
+    background:#ffd60a;color:#1b1b1b;box-shadow:0 5px 0 #b99a00,0 14px 24px rgba(0,0,0,.25);transition:transform .15s,box-shadow .15s}
+  .sqb-btn:hover{transform:translateY(-2px);box-shadow:0 7px 0 #b99a00,0 18px 28px rgba(0,0,0,.3);color:#1b1b1b}
+  .sqb-btn:active{transform:translateY(3px);box-shadow:0 2px 0 #b99a00}
+  .sqb-btn:focus-visible{outline:3px solid #f2a33a;outline-offset:3px}
+  .sqb-stage{position:relative;aspect-ratio:1;display:grid;place-items:center}
+  .sqb-rays{position:absolute;inset:-6%;border-radius:50%;background:repeating-conic-gradient(from 0deg,rgba(255,214,10,.20) 0 7deg,transparent 7deg 20deg);
+    -webkit-mask-image:radial-gradient(circle,#000 28%,transparent 68%);mask-image:radial-gradient(circle,#000 28%,transparent 68%)}
+  .sqb-disc{position:absolute;width:74%;aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 35% 30%,#ffe27a,#f2a33a 70%);
+    box-shadow:0 0 0 10px rgba(242,163,58,.18),0 0 0 22px rgba(242,163,58,.09),0 20px 40px rgba(0,0,0,.3)}
+  .sqb-sticker{position:relative;z-index:2;transform:rotate(-5deg);text-align:center;font-family:"Baloo 2","Mukta",sans-serif;font-weight:800;line-height:.9;
+    animation:sqbPop .7s cubic-bezier(.2,1.4,.4,1) .15s both}
+  .sqb-sticker span{display:block;-webkit-text-stroke:4px #17203a;paint-order:stroke fill;text-shadow:5px 5px 0 #17203a}
+  .sqb-q{font-size:clamp(3.2rem,6.5vw,5.2rem);color:#6ff0ff}
+  .sqb-t{font-size:clamp(2.8rem,5.8vw,4.6rem);color:#ffd60a}
+  .sqb-spark{position:absolute;z-index:3;border-radius:50%}
+  .sqb-a{width:14px;height:14px;top:12%;left:14%;background:#ef5350}
+  .sqb-b{width:9px;height:9px;top:22%;right:10%;background:#6ff0ff}
+  .sqb-c{width:11px;height:11px;bottom:14%;right:16%;background:#ffd60a}
+  /* homepage theme styles headings/links globally -- pin ours */
+  #ssqHomeQuizBanner, #ssqHomeQuizBanner h2, #ssqHomeQuizBanner p, #ssqHomeQuizBanner li, #ssqHomeQuizBanner .sqb-btn{font-family:"Mukta",system-ui,sans-serif;text-align:left}
+  #ssqHomeQuizBanner .sqb-btn{text-decoration:none}
+  #ssqHomeQuizBanner .sqb-sticker{text-align:center}
+  @keyframes sqbPop{from{opacity:0;transform:rotate(-14deg) scale(.6)}to{opacity:1;transform:rotate(-5deg) scale(1)}}
+  @media (max-width:900px){
+    .sqb{grid-template-columns:1fr;padding:32px 24px 38px;border-radius:26px;gap:8px}
+    .sqb-stage{order:-1;width:min(240px,70%);justify-self:center}
+  }
+  @media (max-width:480px){ .sqb-btn{flex:1 1 100%} }
+  @media (prefers-reduced-motion:reduce){ .sqb-sticker{animation:none} .sqb-btn{transition:none} }
+</style>
+<script>
+(function(){
+  var HTML='<section class="sqb" id="ssqHomeQuizBanner" aria-labelledby="sqb-title">'+
+    '<div class="sqb-copy"><h2 id="sqb-title">Test what you know, learn something new</h2>'+
+    '<p>Short quizzes that turn government schemes, self-help groups and livelihood skills into easy practice. Play, check your score, and pick up something useful each time.</p>'+
+    '<ul class="sqb-topics" aria-label="Quiz topics"><li>Government schemes</li><li>Self-help groups</li><li>Entrepreneurship</li><li>Cyber safety</li><li class="sqb-more">and more</li></ul>'+
+    '<div class="sqb-actions"><a class="sqb-btn" href="/quizzes/">Start quiz</a></div></div>'+
+    '<div class="sqb-stage" aria-hidden="true"><div class="sqb-rays"></div><div class="sqb-disc"></div>'+
+    '<span class="sqb-spark sqb-a"></span><span class="sqb-spark sqb-b"></span><span class="sqb-spark sqb-c"></span>'+
+    '<div class="sqb-sticker notranslate" translate="no"><span class="sqb-q">QUIZ</span><span class="sqb-t">TIME!!!</span></div></div></section>';
+  function ensure(){
+    var img=document.querySelector('#root img[src*="quiz_logo"]'); if(!img) return;
+    var sec=img.closest('section'); if(!sec) return;
+    if(sec.style.display!=='none') sec.style.display='none';
+    var prev=sec.previousElementSibling;
+    if(!(prev && prev.id==='ssqHomeQuizBanner')){
+      var old=document.getElementById('ssqHomeQuizBanner'); if(old) old.remove();
+      sec.insertAdjacentHTML('beforebegin', HTML);
+    }
+  }
+  function ready(fn){ if(document.readyState!=='loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
+  ready(function(){ ensure(); setInterval(ensure, 800); });
+})();
+</script>
+</body>
+
+</html>

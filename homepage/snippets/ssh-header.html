@@ -1,0 +1,124 @@
+<!-- 2026-11-05: new site header on the homepage (same design as the Django
+     pages' custom_admin/_ssh_header.html, which is the master copy -- keep the
+     two in sync). The React theme's own header is hidden by CSS above. Login
+     state comes from /accounts/status/, the search button opens the existing
+     #ssq-search-panel, and the language list sets Google Translate's googtrans
+     cookie (shared with the Django pages). -->
+<a class="ssh-skip" href="#root">Skip to main content</a>
+<header class="ssh" id="sshHeader">
+  <div class="ssh-a11y">
+    <div class="ssh-a11y-in notranslate" translate="no" role="group" aria-label="Accessibility options">
+      <span class="ssh-a11y-label">Text size</span>
+      <button type="button" class="ssh-chip" data-ssh-size="" aria-label="Normal text">A<sup>−</sup></button>
+      <button type="button" class="ssh-chip" data-ssh-size="ts-lg" aria-label="Larger text">A</button>
+      <button type="button" class="ssh-chip" data-ssh-size="ts-xl" aria-label="Largest text">A<sup>+</sup></button>
+      <button type="button" class="ssh-chip" id="sshContrast" aria-pressed="false">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 3v18"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+        <span class="ssh-txt">High contrast</span>
+      </button>
+    </div>
+  </div>
+  <div class="ssh-flag" aria-hidden="true"></div>
+  <div class="ssh-head">
+    <div class="ssh-head-in">
+      <a class="ssh-brand notranslate" translate="no" href="/" aria-label="Sahyog Setu, Uplift Live Foundation – home">
+        <img src="/assets/img/logo.png" alt="">
+        <span class="ssh-brand-text"><span class="ssh-brand-name">SAHYOG SETU</span><span class="ssh-brand-sub">UPLIFT LIVE FOUNDATION</span></span>
+      </a>
+      <nav class="ssh-nav" id="sshNav" aria-label="Main">
+        <ul class="ssh-nav-list">
+          <li><a class="ssh-link" href="/" aria-current="page">Home</a></li>
+          <li class="ssh-has-sub">
+            <button type="button" class="ssh-nav-btn" aria-expanded="false" aria-haspopup="true">Schemes <i class="ssh-caret"></i></button>
+            <ul class="ssh-sub">
+              <li><a href="/central-schemes-viewer/">Central Govt Scheme</a></li>
+              <li><a href="/state-schemes-viewer/">State Govt Scheme</a></li>
+            </ul>
+          </li>
+          <li><a class="ssh-link" href="/?openEligibility=1">Check Eligibility</a></li>
+          <li class="ssh-has-sub">
+            <button type="button" class="ssh-nav-btn" aria-expanded="false" aria-haspopup="true">Resources <i class="ssh-caret"></i></button>
+            <ul class="ssh-sub">
+              <li><a href="/important-portals-viewer/">Important Portals</a></li>
+              <li><a href="/important-documents-viewer/">Important Documents</a></li>
+            </ul>
+          </li>
+          <li><a class="ssh-link" href="/entrepreneurship-viewer/">Entrepreneurship</a></li>
+          <li><a class="ssh-link" href="/quizzes/">Quizzes</a></li>
+          <li><a class="ssh-link" href="/scheme-announcements-viewer/">Announcements</a></li>
+          <li class="ssh-lang-m notranslate" translate="no"><select class="ssh-gt-select" aria-label="Language"></select></li>
+        </ul>
+      </nav>
+      <div class="ssh-tools">
+        <a class="ssh-icon-btn ssh-search" href="/scheme-viewer/" id="sshSearch" aria-label="Search">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        </a>
+        <label class="ssh-lang notranslate" translate="no">
+          <span style="position:absolute;left:-9999px">Language</span>
+          <select class="ssh-gt-select" aria-label="Language"></select>
+        </label>
+        <a class="ssh-cta" href="/helplines-viewer/">Helpline</a>
+        <span id="sshAuth"><a class="ssh-login" href="/accounts/login/">Login</a></span>
+        <button type="button" class="ssh-icon-btn ssh-burger" id="sshBurger" aria-label="Open menu" aria-expanded="false" aria-controls="sshNav">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+        </button>
+      </div>
+    </div>
+  </div>
+</header>
+<script>
+(function(){
+  var root=document.documentElement;
+  var store={get:function(k){try{return localStorage.getItem(k)}catch(e){return null}},set:function(k,v){try{localStorage.setItem(k,v)}catch(e){}}};
+  var sizeBtns=[].slice.call(document.querySelectorAll('[data-ssh-size]'));
+  function setSize(c){root.classList.remove('ts-lg','ts-xl'); if(c) root.classList.add(c);
+    sizeBtns.forEach(function(b){b.setAttribute('aria-pressed', String(b.getAttribute('data-ssh-size')===c));}); store.set('ss-size',c);}
+  sizeBtns.forEach(function(b){b.addEventListener('click',function(){setSize(b.getAttribute('data-ssh-size'));});});
+  setSize(store.get('ss-size')||'');
+  var cBtn=document.getElementById('sshContrast');
+  function setContrast(on){ if(on) root.setAttribute('data-contrast','high'); else root.removeAttribute('data-contrast');
+    cBtn.setAttribute('aria-pressed',String(on)); store.set('ss-contrast',on?'1':'0');}
+  cBtn.addEventListener('click',function(){setContrast(cBtn.getAttribute('aria-pressed')!=='true');});
+  setContrast(store.get('ss-contrast')==='1');
+
+  var subs=[].slice.call(document.querySelectorAll('#sshHeader .ssh-has-sub'));
+  function closeSubs(except){subs.forEach(function(s){if(s!==except){s.classList.remove('ssh-open');s.querySelector('.ssh-nav-btn').setAttribute('aria-expanded','false');}});}
+  subs.forEach(function(s){var b=s.querySelector('.ssh-nav-btn');
+    b.addEventListener('click',function(e){e.stopPropagation();closeSubs(s);var o=s.classList.toggle('ssh-open');b.setAttribute('aria-expanded',String(o));});});
+  var burger=document.getElementById('sshBurger'),nav=document.getElementById('sshNav');
+  burger.addEventListener('click',function(e){e.stopPropagation();var o=nav.classList.toggle('ssh-open');burger.setAttribute('aria-expanded',String(o));});
+  function closeUser(){var m=document.getElementById('sshUserMenu'),b=document.getElementById('sshUserBtn'); if(m){m.classList.remove('ssh-open');b.setAttribute('aria-expanded','false');}}
+  document.addEventListener('click',function(e){closeSubs(); closeUser();
+    if(!nav.contains(e.target)&&!burger.contains(e.target)){nav.classList.remove('ssh-open');burger.setAttribute('aria-expanded','false');}});
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeSubs(); closeUser(); nav.classList.remove('ssh-open');}});
+
+  // Search: open the homepage's own search panel (its trigger button lives
+  // in the hidden React header); fall back to the scheme viewer link.
+  document.getElementById('sshSearch').addEventListener('click',function(e){
+    var t=document.querySelector('.ssq-search-trigger'); if(t){e.preventDefault(); t.click();}
+  });
+
+  // Language = Google Translate (the homepage has no ?lang= pages).
+  var LANGS=[['en','English'],['hi','हिन्दी'],['bn','বাংলা'],['gu','ગુજરાતી'],['kn','ಕನ್ನಡ'],['ml','മലയാളം'],['mr','मराठी'],['pa','ਪੰਜਾਬੀ'],['ta','தமிழ்'],['te','తెలుగు'],['ur','اردو'],['as','অসমীয়া'],['or','ଓଡ଼ିଆ'],['mai','मैथिली'],['gom','कोंकणी'],['sa','संस्कृतम्']];
+  var m=document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([A-Za-z-]+)/), cur=m?m[1]:'en';
+  function setCk(val){var host=location.hostname.replace(/^www\./,''), exp=val?'':'; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    ['', '; domain='+location.hostname, '; domain=.'+host].forEach(function(d){document.cookie='googtrans='+(val||'')+'; path=/'+d+exp;});}
+  [].slice.call(document.querySelectorAll('.ssh-gt-select')).forEach(function(sel){
+    LANGS.forEach(function(l){var o=document.createElement('option'); o.value=l[0]; o.textContent=l[1]; if(l[0]===cur) o.selected=true; sel.appendChild(o);});
+    sel.addEventListener('change',function(){ setCk(sel.value==='en'?null:'/en/'+sel.value); location.reload(); });
+  });
+
+  // Login state
+  function esc(s){return String(s||'').replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}
+  fetch('/accounts/status/',{credentials:'same-origin'}).then(function(r){return r.ok?r.json():{authenticated:false};}).then(function(d){
+    if(!d||!d.authenticated) return;
+    var n=d.name||'Account', short=n.length>14?n.slice(0,13)+'…':n;
+    document.getElementById('sshAuth').innerHTML='<div class="ssh-user"><button type="button" class="ssh-user-btn" id="sshUserBtn" aria-haspopup="true" aria-expanded="false">'+
+      '<span class="ssh-avatar notranslate" translate="no">'+esc(n.charAt(0).toUpperCase())+'</span><span class="ssh-user-name notranslate" translate="no">'+esc(short)+'</span></button>'+
+      '<div class="ssh-user-menu" id="sshUserMenu"><div class="ssh-who">Signed in as<b class="notranslate" translate="no">'+esc(n)+'</b></div>'+
+      '<a href="/my-results/">My quiz results</a><a href="/accounts/logout/" class="ssh-danger">Log out</a></div></div>';
+    var b=document.getElementById('sshUserBtn'), mn=document.getElementById('sshUserMenu');
+    b.addEventListener('click',function(e){e.stopPropagation();closeSubs();var o=mn.classList.toggle('ssh-open');b.setAttribute('aria-expanded',String(o));});
+  }).catch(function(){});
+})();
+</script>
