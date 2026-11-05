@@ -14,11 +14,6 @@
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
       <div class="sq-head-actions">
-        <div class="sq-font-controls" role="group" aria-label="{% if lang == 'hi' %}फ़ॉन्ट आकार{% else %}Font Size{% endif %}">
-          <button type="button" class="sq-font-btn" data-scale="down" aria-label="{% if lang == 'hi' %}फ़ॉन्ट आकार घटाएं{% else %}Decrease font size{% endif %}">A−</button>
-          <button type="button" class="sq-font-btn" data-scale="reset" aria-label="{% if lang == 'hi' %}फ़ॉन्ट आकार रीसेट करें{% else %}Reset font size{% endif %}">A</button>
-          <button type="button" class="sq-font-btn" data-scale="up" aria-label="{% if lang == 'hi' %}फ़ॉन्ट आकार बढ़ाएं{% else %}Increase font size{% endif %}">A+</button>
-        </div>
         <button class="sq-mute-btn" id="sqMuteBtn" title="{% if lang == 'hi' %}ध्वनि चालू/बंद करें{% else %}Toggle sound{% endif %}" aria-label="{% if lang == 'hi' %}ध्वनि म्यूट करें{% else %}Mute sound{% endif %}">🔊</button>
       </div>
     </div>
@@ -406,24 +401,11 @@
   $('sqMuteBtn').setAttribute('aria-label', muted ? data.strings.unmute_sound : data.strings.mute_sound);
   document.addEventListener('click', initAudio, {once:true});
 
-  // ---------- font size controls ----------
-  var FONT_KEY = 'sahyog_quiz_font_scale';
-  function applyFontScale(scale){
-    $('sqPage').style.setProperty('--sq-font-scale', scale);
-    localStorage.setItem(FONT_KEY, scale);
-  }
-  (function initFont(){
-    var saved = parseFloat(localStorage.getItem(FONT_KEY));
-    applyFontScale(saved && saved >= 0.8 && saved <= 1.6 ? saved : 1);
-  })();
-  document.querySelectorAll('.sq-font-btn').forEach(function(btn){
-    btn.addEventListener('click', function(){
-      var current = parseFloat($('sqPage').style.getPropertyValue('--sq-font-scale')) || 1;
-      var mode = btn.getAttribute('data-scale');
-      var next = mode === 'up' ? Math.min(1.6, current+0.1) : mode === 'down' ? Math.max(0.8, current-0.1) : 1;
-      applyFontScale(Math.round(next*100)/100);
-    });
-  });
+  // Font size: the site header's Text size buttons (A- A A+) now do this
+  // for every page, so the quiz's own controls were removed (2026-11-05).
+  // Clear the old per-quiz setting so nobody is stuck at a size they can no
+  // longer change from here.
+  try { localStorage.removeItem('sahyog_quiz_font_scale'); } catch(e) {}
 
   // ---------- server communication ----------
   function getCsrfToken(){
