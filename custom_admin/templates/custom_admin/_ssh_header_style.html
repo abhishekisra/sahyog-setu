@@ -1,5 +1,5 @@
-<!-- New site header (user's design, 2026-11-05). Preview only for now:
-     public_base.html includes this and _ssh_header.html when ?newheader=1.
+<!-- New site header (user's design, 2026-11-05), live on every public
+     Django page via public_base.html (previewed first with ?newheader=1).
      Everything is scoped under .ssh-* so page styles can't collide. -->
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Cinzel:wght@700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -132,4 +132,13 @@
   [data-contrast="high"] .ssh-sub a:hover,[data-contrast="high"] .ssh-user-menu a:hover{background:#222}
   [data-contrast="high"] .ssh-user-menu .ssh-danger{color:#ff8a80}
   @media (prefers-reduced-motion:reduce){.ssh *{transition:none!important}}
+
+  /* Pages' own small brand bars ("स Sahyog Setu" + "Back to Home") repeat
+     the new header -- user asked to remove them (2026-11-05). */
+  .yk-head{display:none !important}
+  .sq-head .sq-brand,.sq-head .sq-back-link{display:none !important}
+  .sq-head:not(:has(.sq-head-actions)){display:none !important}
+  .sq-head .sq-head-inner{justify-content:flex-end}
+  .sqz-topbar .sqz-brand{display:none !important}
+  .sqz-topbar{justify-content:flex-end}
 </style>

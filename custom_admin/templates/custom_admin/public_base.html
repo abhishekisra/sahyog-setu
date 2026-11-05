@@ -414,12 +414,15 @@
         .text-center p, .text-center li, .premium-footer p, .premium-footer li, .sqz-hero p { text-align: inherit; }
     </style>
     {% block head %}{% endblock %}
-    {% if request.GET.newheader == '1' %}{% include 'custom_admin/_ssh_header_style.html' %}{% endif %}
+    {% include 'custom_admin/_ssh_header_style.html' %}
 </head>
 
 <body>
-    {% if request.GET.newheader == '1' %}{% include 'custom_admin/_ssh_header.html' %}{% endif %}
-    <nav id="ssq-main-nav"{% if request.GET.newheader == '1' %} style="display:none!important"{% endif %}>
+    {% include 'custom_admin/_ssh_header.html' %}
+    <!-- Old top nav, replaced by _ssh_header.html on 2026-11-05. Kept hidden
+         (not deleted) for one release in case the new header has to be rolled
+         back: delete the include above and this style attribute. -->
+    <nav id="ssq-main-nav" style="display:none!important">
         <div id="ssq-nav-links">
             <a href="/">Home</a>
             <a href="/central-schemes-viewer/">Central Govt Scheme</a>
