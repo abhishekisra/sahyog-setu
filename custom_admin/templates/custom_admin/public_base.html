@@ -888,6 +888,38 @@
                 return;
             }
             if (lang === 'en') { window.ssqGtCookie(null); return; }
+            if (lang === 'hi') {
+                // Labels Google gets wrong in Hindi (checked 2026-11-05 on all
+                // -viewer/ pages). Put our own wording in first and mark it
+                // notranslate so Google leaves it alone. Keys are lowercase.
+                var HI = {
+                    'explore': 'देखें', 'home': 'होम', 'back to home': 'होम पेज पर वापस',
+                    'uttar pradesh': 'उत्तर प्रदेश', 'haryana': 'हरियाणा', 'chhattisgarh': 'छत्तीसगढ़',
+                    'differently abled': 'दिव्यांग', 'important documents': 'महत्वपूर्ण दस्तावेज़',
+                    'category': 'श्रेणी', 'filters': 'फ़िल्टर', 'stay safe online portal': 'स्टे सेफ़ ऑनलाइन पोर्टल',
+                    'pm krishi dhan dhanya yojana': 'पीएम धन-धान्य कृषि योजना', 'more': 'और', 'call now': 'अभी कॉल करें'
+                };
+                var fix = function (root) {
+                    var w = document.createTreeWalker(root, NodeFilter.SHOW_TEXT), n, hits = [];
+                    while ((n = w.nextNode())) {
+                        var p = n.parentNode;
+                        if (!p || (p.closest && p.closest('.notranslate, script, style, select'))) continue;
+                        if (HI[n.nodeValue.trim().toLowerCase()]) hits.push(n);
+                    }
+                    hits.forEach(function (n) {
+                        var v = n.nodeValue, sp = document.createElement('span');
+                        sp.className = 'notranslate'; sp.setAttribute('translate', 'no');
+                        sp.textContent = v.replace(v.trim(), HI[v.trim().toLowerCase()]);
+                        n.parentNode.replaceChild(sp, n);
+                    });
+                };
+                var run = function () { fix(document.body); };
+                if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', run); else run();
+                // Scheme lists and filters are filled in by JS after load.
+                new MutationObserver(function (ms) {
+                    ms.forEach(function (m) { m.addedNodes.forEach(function (a) { if (a.nodeType === 1 && !a.closest('.notranslate, font')) fix(a); }); });
+                }).observe(document.body, { childList: true, subtree: true });
+            }
             window.ssqGtCookie('/en/' + (TO_G[lang] || lang));
             window.ssqGtInit = function () {
                 new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'ssq-gt');
