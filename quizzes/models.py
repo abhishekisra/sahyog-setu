@@ -32,6 +32,11 @@ class Quizzes(models.Model):
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     questions_per_attempt = models.IntegerField(default=10)
+    # 2026-11-05: pre-training test. When on, the landing page with ?mode=pre
+    # runs the same quiz as a "before training" test: same bank, no reveal
+    # of answers, no pass/certificate -- only the score, so the report can
+    # compare it with the normal (after-training) attempt.
+    pretest_enabled = models.BooleanField(default=False, db_default=False)
     pass_threshold = models.IntegerField(default=60)
     one_attempt_only = models.BooleanField(default=True)
     leaderboard_public = models.BooleanField(default=False)
@@ -282,7 +287,20 @@ class Training(models.Model):
         return f"{self.name} ({self.quiz.title} \u2014 {self.trainer})"
 
 
+class RealAttemptManager(models.Manager):
+    """Default manager: real (after-training) attempts only. Pre-training
+    test attempts (kind="pre") are hidden from every existing query --
+    certificates, one-attempt lock, leaderboards, analytics, partner exports
+    -- so they can never be counted as a real attempt by accident. Code that
+    needs them uses QuizAttempt.all_objects explicitly."""
+    def get_queryset(self):
+        return super().get_queryset().filter(kind=QuizAttempt.KIND_MAIN)
+
+
 class QuizAttempt(models.Model):
+    KIND_MAIN = "main"
+    KIND_PRE = "pre"
+
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="quiz_attempts")
     quiz = models.ForeignKey(Quizzes, on_delete=models.CASCADE, related_name="attempts")
     # Populated at submit time; default 0 because the attempt row is now created
@@ -363,6 +381,13 @@ class QuizAttempt(models.Model):
     # never delete the real attempt history recorded against it.
     training = models.ForeignKey(Training, on_delete=models.SET_NULL, null=True, blank=True, related_name="attempts")
     training_other_text = models.CharField(max_length=255, blank=True, default="", db_default="")
+
+    kind = models.CharField(max_length=8, default="main", db_default="main", db_index=True)
+
+    # First manager = default manager (also used by quiz.attempts,
+    # user.quiz_attempts, training.attempts). Keep this order.
+    objects = RealAttemptManager()
+    all_objects = models.Manager()
 
     def __str__(self):
         return f"{self.user} - {self.quiz} ({self.score}/{self.total_questions})"
