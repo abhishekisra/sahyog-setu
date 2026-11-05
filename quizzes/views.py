@@ -21,6 +21,7 @@ from django.utils import timezone
 from django.utils.html import strip_tags
 
 from .prepost import pre_post_summary
+from .cert_v2 import certificate_context, render_certificate_jpeg, render_certificate_pdf
 from django.utils.text import Truncator
 from django.core.paginator import Paginator
 from django.db.models import Avg, Count, F, Max, Q
@@ -1767,13 +1768,15 @@ class CertificateView(View):
             f"You try it too: {share_url}?src=whatsapp"
         )
 
-        return render(request, "custom_admin/quizzes/certificate.html", {
+        ctx = {
             "attempt": attempt,
             "quiz": attempt.quiz,
             "display_name": display_name,
             "share_url": share_url,
             "share_text": share_text,
-        })
+        }
+        ctx.update(certificate_context(attempt, display_name))  # design v2 sheet
+        return render(request, "custom_admin/quizzes/certificate.html", ctx)
 
 
 @method_decorator(login_required, name='dispatch')
@@ -1792,17 +1795,51 @@ class CertificateImageDownloadView(View):
             messages.error(request, "Certificate has not been issued yet.")
             return redirect("quiz_result", pk=attempt.id)
 
-        image_bytes = render_certificate_image(attempt)
-        response = HttpResponse(image_bytes, content_type="image/png")
+        # 2026-11-05: same sheet as the page, screenshotted by headless
+        # Chromium (cert_v2). Falls back to the older Pillow drawing if the
+        # browser can't start, so a download never just fails.
+        display_name = (attempt.user.get_full_name() or attempt.user.username or "").strip()
+        try:
+            image_bytes, ctype, ext = render_certificate_jpeg(attempt, display_name), "image/jpeg", "jpg"
+        except Exception:
+            logging.getLogger(__name__).exception("cert v2 image failed, using Pillow fallback")
+            image_bytes, ctype, ext = render_certificate_image(attempt), "image/png", "png"
+        response = HttpResponse(image_bytes, content_type=ctype)
         # certificate_id now contains "/" (SAHYOG/MM/YY/NN) -- can't go
         # straight into a filename (nested-path-like, and rejected/mangled
         # by most OSes/browsers), so swap it for "-" here only. The stored
         # ID and every displayed/verify-link use of it keep the real slashes.
         safe_id = attempt.certificate_id.replace("/", "-")
-        response["Content-Disposition"] = f'attachment; filename="certificate_{safe_id}.png"'
+        response["Content-Disposition"] = f'attachment; filename="certificate_{safe_id}.{ext}"'
         # Regenerated fresh every request (background texture has changed
         # more than once already) -- no-store so a browser/proxy never
         # hands back a stale pre-fix copy instead of re-fetching.
+        response["Cache-Control"] = "no-store"
+        return response
+
+
+@method_decorator(login_required, name='dispatch')
+class CertificatePdfDownloadView(View):
+    """One-page A4-landscape PDF (user: "ek hi page par, 2 page nahi, blank
+    bhi nahi"). Same eligibility checks as the PNG download."""
+    def get(self, request, pk):
+        attempt = get_object_or_404(
+            QuizAttempt, pk=pk, user=request.user, passed=True, is_demo=False,
+            percentage__gte=CERTIFICATE_MIN_PERCENTAGE,
+        )
+        if not attempt.quiz.certificate_enabled or not attempt.certificate_id:
+            messages.error(request, "Certificate has not been issued yet.")
+            return redirect("quiz_result", pk=attempt.id)
+        display_name = (attempt.user.get_full_name() or attempt.user.username or "").strip()
+        try:
+            pdf_bytes = render_certificate_pdf(attempt, display_name)
+        except Exception:
+            logging.getLogger(__name__).exception("cert v2 PDF failed")
+            messages.error(request, "PDF could not be created right now. Please use Print or Download as Image.")
+            return redirect("quiz_certificate", pk=attempt.id)
+        response = HttpResponse(pdf_bytes, content_type="application/pdf")
+        safe_id = attempt.certificate_id.replace("/", "-")
+        response["Content-Disposition"] = f'attachment; filename="certificate_{safe_id}.pdf"'
         response["Cache-Control"] = "no-store"
         return response
 

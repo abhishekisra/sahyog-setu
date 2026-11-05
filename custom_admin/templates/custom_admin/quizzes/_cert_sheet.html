@@ -1,0 +1,167 @@
+{% comment %}
+Certificate design v2 (user's design, 2026-11-05). Used by certificate.html
+(screen + print) and _cert_standalone.html (PNG via headless Chromium, see
+quizzes/cert_v2.py). Context comes from cert_v2.certificate_context(). All CSS
+is scoped under .cert so the site header/page styles can't leak in or out.
+{% endcomment %}
+<style>
+  .cert{ --f-display:'Cinzel','Trajan Pro','Times New Roman',serif; --f-serif:'Cormorant Garamond','Garamond','Georgia',serif; --f-script:'Pinyon Script','Noto Serif Devanagari','Snell Roundhand','Brush Script MT',cursive; --f-sans:'Montserrat','Helvetica Neue',Arial,sans-serif; --green:#1C2B24; --brass:#B08D3E; --gold:#C9A227; --ink:#1b1b1b; --paper:#fcfaf3;
+    width:297mm; height:210mm; position:relative; overflow:hidden; box-sizing:border-box;
+    background:radial-gradient(ellipse at 50% 45%, #fffef9 0%, var(--paper) 62%, #f1ead6 100%);
+    box-shadow:0 14px 50px rgba(0,0,0,.3);
+    font-family:var(--f-sans); color:var(--ink); text-align:center; text-rendering:optimizeLegibility; -webkit-font-smoothing:antialiased; font-kerning:normal; font-variant-ligatures:common-ligatures; font-variant-numeric:lining-nums;
+    -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .cert *, .cert *::before, .cert *::after{ box-sizing:border-box; }
+  .cert .tex{ position:absolute; inset:0; opacity:.5;
+    background-image:repeating-linear-gradient(45deg, rgba(176,141,62,.06) 0 .25mm, transparent .25mm 2mm), repeating-linear-gradient(-45deg, rgba(28,43,36,.035) 0 .25mm, transparent .25mm 2mm); }
+  .cert .frame{ position:absolute; inset:6mm; background:var(--green); }
+  .cert .guil{ position:absolute; inset:8.2mm; }
+  .cert .guil svg, .cert .vine svg, .cert .brush svg, .cert .wash svg, .cert .rosette svg, .cert .corner svg{ width:100%; height:100%; display:block; }
+  .cert .line1{ position:absolute; inset:15.5mm; border:.7mm solid transparent; border-image:linear-gradient(135deg,#8f6d1c,#F0D77A 25%,#B08D3E 50%,#F0D77A 75%,#8f6d1c) 1; }
+  .cert .line2{ position:absolute; inset:16.7mm; border:.2mm solid var(--green); }
+  .cert .micro{ position:absolute; left:0; right:0; text-align:center; font-family:var(--f-display); font-size:1.7mm; letter-spacing:.5em; color:var(--paper); white-space:nowrap; overflow:hidden; }
+  .cert .micro.t{ top:6.9mm; } .cert .micro.b{ bottom:6.9mm; }
+  .cert .corner{ position:absolute; width:24mm; height:24mm; }
+  .cert .c-tl{ top:12mm; left:12mm; } .cert .c-tr{ top:12mm; right:12mm; transform:scaleX(-1); }
+  .cert .c-bl{ bottom:12mm; left:12mm; transform:scaleY(-1); } .cert .c-br{ bottom:12mm; right:12mm; transform:scale(-1,-1); }
+  .cert .wm{ position:absolute; left:50%; top:52%; width:125mm; height:125mm; transform:translate(-50%,-50%); opacity:.04; }
+  .cert .wm img{ width:100%; height:100%; object-fit:contain; filter:grayscale(1); }
+  .cert .wave{ position:absolute; inset:17.5mm; opacity:.9;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='60' height='8'><path d='M0 4 Q15 0 30 4 T60 4' fill='none' stroke='%23B08D3E' stroke-opacity='.16' stroke-width='.35'/><path d='M0 6 Q15 2 30 6 T60 6' fill='none' stroke='%231C2B24' stroke-opacity='.07' stroke-width='.3'/></svg>");
+    background-size:16mm 2.2mm; }
+  .cert .rosette{ position:absolute; left:50%; top:50%; width:150mm; height:150mm; transform:translate(-50%,-50%); opacity:.3; }
+  .cert .grain{ position:absolute; inset:0; opacity:.22; pointer-events:none;
+    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 .45  0 0 0 0 .38  0 0 0 0 .2  0 0 0 .9 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>"); }
+  .cert .fibre{ position:absolute; inset:0; opacity:.5; pointer-events:none;
+    background:radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(150,120,50,.14) 100%), radial-gradient(circle at 12% 18%, rgba(176,141,62,.08), transparent 30%), radial-gradient(circle at 88% 84%, rgba(28,43,36,.06), transparent 32%); }
+  .cert .canvas{ position:absolute; inset:0; pointer-events:none; opacity:.55;
+    background-image:repeating-linear-gradient(0deg, rgba(120,95,45,.07) 0 .18mm, transparent .18mm .75mm), repeating-linear-gradient(90deg, rgba(120,95,45,.06) 0 .18mm, transparent .18mm .75mm); }
+  .cert .brush{ position:absolute; inset:0; pointer-events:none; opacity:.20; }
+  .cert .wash{ position:absolute; inset:0; pointer-events:none; }
+  .cert .vine{ position:absolute; left:17.4mm; top:17.4mm; width:262.2mm; height:175.2mm; pointer-events:none; }
+
+  .cert .content{ position:absolute; inset:21mm 27mm 18mm; display:flex; flex-direction:column; align-items:center; text-align:center; }
+  .cert .head{ width:100%; display:flex; align-items:center; justify-content:space-between; }
+  .cert .logo{ width:21mm; height:21mm; object-fit:contain; }
+  .cert .org{ flex:1; padding:0 6mm; }
+  .cert .org .n{ font-family:var(--f-display); font-weight:700; letter-spacing:.28em; font-size:5.4mm; color:var(--green); }
+  .cert .org .s{ font-size:2.3mm; letter-spacing:.26em; color:#555; margin-top:1.4mm; text-transform:uppercase; font-weight:600; }
+  .cert .org .r{ font-family:var(--f-serif); font-style:italic; font-weight:500; font-size:3.6mm; color:#777; margin-top:.8mm; }
+  .cert .divider{ display:flex; align-items:center; gap:3mm; margin-top:3.2mm; }
+  .cert .divider i{ display:block; width:46mm; height:.3mm; background:linear-gradient(90deg,transparent,var(--brass)); }
+  .cert .divider i:last-child{ background:linear-gradient(270deg,transparent,var(--brass)); }
+  .cert .divider b{ width:2.2mm; height:2.2mm; background:var(--brass); transform:rotate(45deg); display:block; }
+  .cert h1.c-title{ font-family:var(--f-display); font-weight:700; font-size:15mm; letter-spacing:.16em; margin:2mm 0 0; line-height:1; text-align:center;
+    background:linear-gradient(180deg,#24392f 0%,#1C2B24 55%,#0f1a15 100%); -webkit-background-clip:text; background-clip:text; color:transparent; padding-left:.16em; }
+  .cert .sub{ font-family:var(--f-display); font-weight:600; letter-spacing:.5em; font-size:3.9mm; color:var(--brass); margin-top:2.2mm; padding-left:.5em; }
+  .cert .pre{ font-family:var(--f-serif); font-style:italic; font-weight:500; font-size:5.6mm; letter-spacing:.02em; color:#444; margin-top:3.5mm; }
+  .cert .name{ font-family:var(--f-script); font-size:18mm; letter-spacing:.01em; color:var(--green); line-height:1.1; margin-top:1mm; padding:0 14mm; min-width:160mm; max-width:230mm; white-space:nowrap; }
+  .cert .name.c-long{ font-size:14mm; } .cert .name.c-xlong{ font-size:11mm; }
+  .cert .name::after{ content:""; display:block; height:.35mm; margin-top:.5mm; background:linear-gradient(90deg,transparent,var(--brass) 20%,var(--brass) 80%,transparent); }
+  .cert .body{ font-family:var(--f-serif); font-size:4.9mm; line-height:1.4; letter-spacing:.005em; text-wrap:balance; color:#333; margin-top:3mm; max-width:205mm; font-weight:500; text-align:center; }
+  .cert .body b{ font-weight:700; color:var(--green); }
+  .cert .badges{ display:flex; gap:5mm; margin-top:3mm; align-items:stretch; }
+  .cert .badge{ border:.3mm solid var(--brass); padding:1.5mm 6mm; background:rgba(201,162,39,.07); font-family:var(--f-display); letter-spacing:.14em; color:var(--green); }
+  .cert .badge small{ display:block; font-size:2mm; letter-spacing:.28em; color:#8a6d2a; font-family:var(--f-sans); font-weight:600; }
+  .cert .badge span{ font-size:4.2mm; font-weight:700; letter-spacing:.14em; }
+  .cert .foot{ position:absolute; left:0; right:0; bottom:8mm; display:flex; align-items:flex-end; justify-content:space-between; }
+  .cert .sig{ width:58mm; text-align:center; }
+  .cert .sig .sigimg{ height:14mm; display:block; margin:0 auto -1.5mm; object-fit:contain; mix-blend-mode:multiply; max-width:52mm; }
+  .cert .sig .sigpad{ height:12.5mm; }
+  .cert .sig .line{ border-top:.3mm solid var(--green); padding-top:1.3mm; }
+  .cert .sig .nm{ font-family:var(--f-serif); font-weight:700; font-size:4.4mm; letter-spacing:.03em; }
+  .cert .sig .rl{ font-size:2.2mm; font-weight:600; letter-spacing:.2em; color:#666; text-transform:uppercase; margin-top:.5mm; }
+  .cert .sig .og{ font-family:var(--f-serif); font-style:italic; font-size:3.3mm; color:#888; }
+  .cert .seal{ position:relative; width:30mm; height:35mm; }
+  .cert .seal svg{ width:100%; height:100%; display:block; filter:drop-shadow(0 .6mm .8mm rgba(0,0,0,.25)); }
+  .cert .seal .partner{ position:absolute; left:50%; top:37%; width:14mm; height:14mm; transform:translate(-50%,-50%); border-radius:50%; object-fit:contain; background:#fff; }
+  .cert .meta{ position:absolute; left:2mm; right:2mm; bottom:3.5mm; display:flex; align-items:center; justify-content:space-between; font-size:2.2mm; color:#6b6b6b; letter-spacing:.08em; font-weight:500; }
+  .cert .meta .m b{ color:var(--green); font-weight:600; }
+  .cert .qr{ position:absolute; right:22mm; bottom:39mm; width:15mm; height:15mm; background:#fff; padding:.8mm; border:.25mm solid var(--brass); }
+  .cert .qr img{ width:100%; height:100%; display:block; image-rendering:pixelated; }
+  .cert .qrcap{ position:absolute; right:18mm; bottom:35.5mm; width:23mm; text-align:center; font-size:1.8mm; letter-spacing:.14em; color:#8a6d2a; text-transform:uppercase; font-weight:600; }
+</style>
+<div class="cert notranslate" translate="no" id="cert">
+  <div class="tex"></div>
+  <div class="wash"><svg viewBox="0 0 297 210" preserveAspectRatio="none"><defs><filter id="wf" x="-20%" y="-20%" width="140%" height="140%"><feTurbulence type="fractalNoise" baseFrequency="0.018" numOctaves="4" seed="3" result="t"/><feDisplacementMap in="SourceGraphic" in2="t" scale="22"/><feGaussianBlur stdDeviation="3.2"/></filter></defs>
+<g filter="url(#wf)"><ellipse cx="38" cy="36" rx="46" ry="30" fill="#C9A227" opacity=".13"/><ellipse cx="262" cy="178" rx="52" ry="30" fill="#2f5a44" opacity=".10"/><ellipse cx="258" cy="34" rx="38" ry="24" fill="#B08D3E" opacity=".10"/><ellipse cx="42" cy="176" rx="44" ry="26" fill="#1C2B24" opacity=".07"/><ellipse cx="148" cy="108" rx="80" ry="46" fill="#E9D79A" opacity=".16"/></g></svg></div>
+  <div class="brush"><svg viewBox="0 0 297 210" preserveAspectRatio="none"><filter id="bf" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency="0.004 0.22" numOctaves="4" seed="7"/><feColorMatrix values="0 0 0 0 .62  0 0 0 0 .5  0 0 0 0 .25  0 0 0 1.6 -.55"/></filter><rect width="297" height="210" filter="url(#bf)"/></svg></div>
+  <div class="canvas"></div>
+  <div class="frame"></div>
+  <div class="guil"><svg viewBox="0 0 281 194" preserveAspectRatio="none"><defs><pattern id="gp" width="6" height="6" patternUnits="userSpaceOnUse">
+<circle cx="3" cy="3" r="2.6" fill="none" stroke="#C9A227" stroke-width=".18" opacity=".85"/><circle cx="0" cy="0" r="2.6" fill="none" stroke="#C9A227" stroke-width=".18" opacity=".85"/><circle cx="6" cy="0" r="2.6" fill="none" stroke="#C9A227" stroke-width=".18" opacity=".85"/><circle cx="0" cy="6" r="2.6" fill="none" stroke="#C9A227" stroke-width=".18" opacity=".85"/><circle cx="6" cy="6" r="2.6" fill="none" stroke="#C9A227" stroke-width=".18" opacity=".85"/></pattern></defs>
+<rect x="0" y="0" width="281" height="194" fill="#1f3329"/><rect x="0" y="0" width="281" height="194" fill="url(#gp)"/><rect x="7.3" y="7.3" width="266.4" height="179.4" fill="#fcfaf3"/></svg></div>
+  <div class="wave"></div>
+  <div class="rosette"><svg viewBox="-100 -100 200 200" fill="none" stroke="#B08D3E" stroke-width=".22">
+<g>{% for a in "012345678901234567890123456789" %}<ellipse rx="92" ry="34" transform="rotate({% widthratio forloop.counter0 1 6 %})"/>{% endfor %}</g>
+<g stroke="#1C2B24" stroke-opacity=".6" stroke-width=".18">{% for a in "01234567890123456789" %}<ellipse rx="70" ry="22" transform="rotate({% widthratio forloop.counter0 1 9 %} ) rotate(3)"/>{% endfor %}</g>
+<circle r="96" stroke-width=".5"/><circle r="38" stroke-width=".3"/><circle r="30" stroke-width=".2"/></svg></div>
+  <div class="line1"></div><div class="line2"></div>
+  <div class="vine"><svg viewBox="0 0 262.2 175.2"><defs>
+<pattern id="vh" width="15" height="3.2" patternUnits="userSpaceOnUse"><g fill="none" stroke="#6f5a22" stroke-width=".16" stroke-linecap="round"><path d="M0 1.6 C2.5 -.2 5 3.4 7.5 1.6 S12.5 -.2 15 1.6"/><path d="M3.2 1.05 C2.4 .1 3.2 -.35 4.2 .1 C4.5 .9 3.9 1.2 3.2 1.05z" fill="#2f5a44" fill-opacity=".55"/><path d="M4.4 2.3 C5.6 3.1 6.5 2.8 6.6 2 C5.8 1.5 4.9 1.6 4.4 2.3z" fill="#2f5a44" fill-opacity=".55"/><path d="M10.7 1.05 C9.9 .1 10.7 -.35 11.7 .1 C12 .9 11.4 1.2 10.7 1.05z" fill="#2f5a44" fill-opacity=".55"/><path d="M11.9 2.3 C13.1 3.1 14 2.8 14.1 2 C13.3 1.5 12.4 1.6 11.9 2.3z" fill="#2f5a44" fill-opacity=".55"/><circle cx="7.5" cy="1.6" r=".35" fill="#B08D3E" stroke="none"/><circle cx="0" cy="1.6" r=".28" fill="#B08D3E" stroke="none"/></g></pattern>
+<pattern id="vv" width="15" height="3.2" patternUnits="userSpaceOnUse" patternTransform="rotate(90)"><g fill="none" stroke="#6f5a22" stroke-width=".16" stroke-linecap="round"><path d="M0 1.6 C2.5 -.2 5 3.4 7.5 1.6 S12.5 -.2 15 1.6"/><path d="M3.2 1.05 C2.4 .1 3.2 -.35 4.2 .1 C4.5 .9 3.9 1.2 3.2 1.05z" fill="#2f5a44" fill-opacity=".55"/><path d="M4.4 2.3 C5.6 3.1 6.5 2.8 6.6 2 C5.8 1.5 4.9 1.6 4.4 2.3z" fill="#2f5a44" fill-opacity=".55"/><path d="M10.7 1.05 C9.9 .1 10.7 -.35 11.7 .1 C12 .9 11.4 1.2 10.7 1.05z" fill="#2f5a44" fill-opacity=".55"/><path d="M11.9 2.3 C13.1 3.1 14 2.8 14.1 2 C13.3 1.5 12.4 1.6 11.9 2.3z" fill="#2f5a44" fill-opacity=".55"/><circle cx="7.5" cy="1.6" r=".35" fill="#B08D3E" stroke="none"/><circle cx="0" cy="1.6" r=".28" fill="#B08D3E" stroke="none"/></g></pattern></defs>
+<rect x="9" y="0" width="244.2" height="3.2" fill="url(#vh)"/><rect x="9" y="172" width="244.2" height="3.2" fill="url(#vh)"/>
+<rect x="0" y="9" width="3.2" height="157" fill="url(#vv)" transform="translate(3.2 0) scale(-1 1)"/><rect x="259" y="9" width="3.2" height="157" fill="url(#vv)"/></svg></div>
+
+  <div class="micro t">UPLIFT LIVE FOUNDATION · SAHYOG SETU · ISO 9001:2015 CERTIFIED · UPLIFT LIVE FOUNDATION · SAHYOG SETU · ISO 9001:2015 CERTIFIED</div>
+  <div class="micro b">AUTHENTIC · VERIFIABLE · UPLIFT LIVE FOUNDATION · AUTHENTIC · VERIFIABLE · UPLIFT LIVE FOUNDATION · AUTHENTIC · VERIFIABLE</div>
+  <div class="corner c-tl">{% include 'custom_admin/quizzes/_cert_corner.html' %}</div>
+  <div class="corner c-tr">{% include 'custom_admin/quizzes/_cert_corner.html' %}</div>
+  <div class="corner c-bl">{% include 'custom_admin/quizzes/_cert_corner.html' %}</div>
+  <div class="corner c-br">{% include 'custom_admin/quizzes/_cert_corner.html' %}</div>
+  <div class="fibre"></div><div class="grain"></div>
+  {% if c_logo_left %}<div class="wm"><img src="{{ c_logo_left }}" alt=""></div>{% endif %}
+
+  <div class="content">
+    <div class="head">
+      {% if c_logo_left %}<img class="logo" src="{{ c_logo_left }}" alt="Uplift Live Foundation">{% else %}<span class="logo"></span>{% endif %}
+      <div class="org">
+        <div class="n">UPLIFT LIVE FOUNDATION</div>
+        <div class="s">ISO 9001:2015 Certified Organisation</div>
+        <div class="r">A Registered Public Charitable Trust · Empowering Communities</div>
+      </div>
+      {% if c_logo_right %}<img class="logo" src="{{ c_logo_right }}" alt="Sahyog Setu">{% else %}<span class="logo"></span>{% endif %}
+    </div>
+    <div class="divider"><i></i><b></b><i></i></div>
+    <h1 class="c-title">CERTIFICATE</h1>
+    <div class="sub">OF ACHIEVEMENT</div>
+    <div class="pre">This certificate is proudly presented to</div>
+    <div class="name{% if c_name|length > 30 %} c-xlong{% elif c_name|length > 22 %} c-long{% endif %}">{{ c_name }}</div>
+    <script>
+      /* never cut a name: shrink the font until it fits the line (long names) */
+      (function(){ var el=document.currentScript.previousElementSibling, max=230*96/25.4, fs=parseFloat(getComputedStyle(el).fontSize);
+        function fit(){ var f=fs; el.style.fontSize=''; while(el.scrollWidth>max && f>30){ f-=2; el.style.fontSize=f+'px'; } }
+        fit(); if(document.fonts&&document.fonts.ready) document.fonts.ready.then(fit); })();
+    </script>
+    <div class="body">
+      {% if c_body %}{{ c_body }}{% else %}for successfully completing the <b>{{ c_quiz }}</b> assessment, demonstrating knowledge, dedication and commitment to community development.{% endif %}
+    </div>
+    <div class="badges">
+      <div class="badge"><small>SCORE</small><span>{{ c_score }}%</span></div>
+      <div class="badge"><small>GRADE</small><span>{{ c_grade }}</span></div>
+      <div class="badge"><small>DATE OF ISSUE</small><span>{{ c_date }}</span></div>
+    </div>
+    <div class="foot">
+      <div class="sig">
+        {% if c_sig1 %}<img class="sigimg" src="{{ c_sig1 }}" alt="">{% else %}<div class="sigpad"></div>{% endif %}
+        <div class="line"><div class="nm">{{ c_auth1_name }}</div><div class="rl">{{ c_auth1_role }}</div><div class="og">Uplift Live Foundation</div></div>
+      </div>
+      <div class="seal">
+        <svg viewBox="0 0 100 118" aria-hidden="true"><defs><radialGradient id="sg" cx="50%" cy="35%"><stop offset="0" stop-color="#F0D77A"/><stop offset=".6" stop-color="#C9A227"/><stop offset="1" stop-color="#8f6d1c"/></radialGradient><linearGradient id="rb" x1="0" x2="1"><stop offset="0" stop-color="#1C2B24"/><stop offset="1" stop-color="#2f4a3d"/></linearGradient></defs>
+          <path d="M28 66L16 116l18-9 10 11 8-44z" fill="url(#rb)"/><path d="M72 66l12 50-18-9-10 11-8-44z" fill="url(#rb)"/>
+          <path fill="url(#sg)" d="M50 2l5 5 7-2 4 6 7 0 1 7 6 3-2 7 5 5-5 5 2 7-6 3-1 7-7 0-4 6-7-2-5 5-5-5-7 2-4-6-7 0-1-7-6-3 2-7-5-5 5-5-2-7 6-3 1-7 7 0 4-6 7 2z" transform="translate(0 4)"/>
+          <circle cx="50" cy="40" r="29" fill="none" stroke="#fff3c4" stroke-width="1"/><circle cx="50" cy="40" r="26" fill="none" stroke="#fff3c4" stroke-width=".4" stroke-dasharray="1 1.6"/></svg>
+        {% if c_logo_left %}<img class="partner" src="{{ c_logo_left }}" alt="">{% endif %}
+      </div>
+      <div class="sig">
+        {% if c_sig2 %}<img class="sigimg" src="{{ c_sig2 }}" alt="">{% else %}<div class="sigpad"></div>{% endif %}
+        <div class="line"><div class="nm">{{ c_auth2_name }}</div><div class="rl">{{ c_auth2_role }}</div><div class="og">Uplift Live Foundation</div></div>
+      </div>
+    </div>
+    {% if c_qr %}<div class="qr"><img src="{{ c_qr }}" alt="QR code to verify this certificate"></div><div class="qrcap">Scan to verify</div>{% endif %}
+    <div class="meta">
+      <span class="m">Certificate ID: <b>{{ c_id }}</b></span>
+      <span class="m">Verify at {{ c_verify_text }}</span>
+    </div>
+  </div>
+</div>

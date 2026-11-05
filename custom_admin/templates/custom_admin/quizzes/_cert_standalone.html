@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Certificate {{ c_id }}</title>
+{# Rendered only by quizzes/cert_v2.py (headless Chromium) for the PNG/PDF downloads. #}
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Pinyon+Script&family=Noto+Serif+Devanagari:wght@500;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  @page { size: 297mm 210mm; margin: 0; }
+  html, body { margin: 0; padding: 0; background: #fff; }
+  .cert { box-shadow: none !important; }
+</style>
+</head>
+<body>
+{% include 'custom_admin/quizzes/_cert_sheet.html' %}
+</body>
+</html>

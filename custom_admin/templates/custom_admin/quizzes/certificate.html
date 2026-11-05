@@ -20,123 +20,10 @@
     <main class="container">
         <div class="ss-cert-container">
             <div class="ss-cert-preview-card">
-                <div class="sheet">
-                    {% if quiz.certificate_background %}
-                    <img src="{{ quiz.certificate_background.url }}" class="sheet-bg" alt="">
-                    {% else %}
-                    <!-- No custom background -> built-in vector guilloche frame. Pure SVG,
-                         no image dependency, scales with the container via viewBox.
-                         Mirrors quizzes/cert_image.py's _default_background() (the
-                         downloadable-PNG certificate's own default background) --
-                         same medallion watermark position/radius, same 3-line
-                         gold/gold/ink border, same quatrefoil corner flourishes --
-                         those two were built independently and had drifted into two
-                         visibly different designs (a plain dot pattern here vs. an
-                         ornate medallion+corners there); this brings them back in
-                         sync. Paper-grain noise and the sine-wave guilloche bands
-                         from the PNG version aren't replicated here (PNG-only
-                         texture, not worth the SVG markup for a subtle effect) --
-                         the dot pattern below stands in for that texture. -->
-                    <svg class="sheet-bg" viewBox="0 0 297 210" preserveAspectRatio="none"
-                         xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-                        <defs>
-                            <pattern id="guilloche" width="5" height="5" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
-                                <rect width="5" height="5" fill="{{ quiz.certificate_paper_color }}"/>
-                                <circle cx="2.5" cy="2.5" r="0.9" fill="{{ quiz.certificate_accent_color }}" fill-opacity="0.30"/>
-                            </pattern>
-                            <g id="quatrefoil">
-                                <circle cx="1.8" cy="0" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
-                                <circle cx="-1.8" cy="0" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
-                                <circle cx="0" cy="1.8" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
-                                <circle cx="0" cy="-1.8" r="1.8" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.3"/>
-                                <circle cx="0" cy="0" r="0.6" fill="{{ quiz.certificate_accent_color }}"/>
-                            </g>
-                        </defs>
-                        <rect x="0" y="0" width="297" height="210" fill="{{ quiz.certificate_paper_color }}"/>
-                        {% if quiz.certificate_pattern == "classic" %}
-                        <rect x="0" y="0" width="297" height="210" fill="url(#guilloche)"/>
-
-                        <!-- Medallion watermark: same cx/cy/radius ratios as
-                             _medallion_watermark() in cert_image.py. -->
-                        <g opacity="0.16" stroke="{{ quiz.certificate_accent_color }}" fill="none">
-                            <circle cx="148.5" cy="100.8" r="71.4" stroke-width="0.5"/>
-                            <circle cx="148.5" cy="100.8" r="58.55" stroke-width="0.35"/>
-                            <circle cx="148.5" cy="100.8" r="45.7" stroke-width="0.35"/>
-                        </g>
-                        {% endif %}
-
-                        <!-- Border: 1/2/3 lines per certificate_border_style, mirrors
-                             the border_style branches in cert_image.py's
-                             _default_background(). -->
-                        {% if quiz.certificate_border_style == "single" %}
-                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="1.6"/>
-                        {% elif quiz.certificate_border_style == "double" %}
-                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="2"/>
-                        <rect x="14.13" y="14.13" width="268.74" height="181.74" fill="none" stroke="#222" stroke-width="0.6"/>
-                        {% else %}
-                        <rect x="6" y="6" width="285" height="198" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="2.5"/>
-                        <rect x="10.06" y="10.06" width="276.88" height="189.88" fill="none" stroke="{{ quiz.certificate_accent_color }}" stroke-width="0.6"/>
-                        <rect x="14.13" y="14.13" width="268.74" height="181.74" fill="none" stroke="#222" stroke-width="0.6"/>
-                        {% endif %}
-
-                        {% if quiz.certificate_corners_enabled %}
-                        <!-- Quatrefoil corners at the inner border's 4 corners --
-                             independent of certificate_pattern (see cert_image.py). -->
-                        <use href="#quatrefoil" x="14.13" y="14.13"/>
-                        <use href="#quatrefoil" x="282.87" y="14.13"/>
-                        <use href="#quatrefoil" x="14.13" y="195.87"/>
-                        <use href="#quatrefoil" x="282.87" y="195.87"/>
-                        {% endif %}
-                    </svg>
-                    {% endif %}
-
-                    <div class="sheet-content">
-                        <div class="zone zone-titles-only" style="top: 6%;">
-                            <div class="zone-title" style="color: {{ quiz.certificate_title_color }};">CERTIFICATE</div>
-                            <div class="zone-subtitle" style="color: {{ quiz.certificate_title_color }}; opacity: 0.75;">OF ACHIEVEMENT</div>
-                        </div>
-                        <!-- Independently positioned (logo{1,2}_x_pct/y_pct, "kahi bhi
-                             laga sake") instead of a shared flex row -- matches
-                             cert_image.py's already-independent per-logo x/y, a flex
-                             row can't place two logos at arbitrary, unrelated spots. -->
-                        <div class="logobox" style="left: {{ quiz.logo1_x_pct }}%; top: {{ quiz.logo1_y_pct }}%;">{% if quiz.logo_1 %}<img src="{{ quiz.logo_1.url }}" alt="">{% endif %}</div>
-                        <div class="logobox" style="left: {{ quiz.logo2_x_pct }}%; top: {{ quiz.logo2_y_pct }}%;">{% if quiz.logo_2 %}<img src="{{ quiz.logo_2.url }}" alt="">{% endif %}</div>
-
-                        <div class="zone zone-presented" style="top: 28%;">This Certificate is Proudly Presented To</div>
-
-                        <div class="zone zone-name" style="top: {{ quiz.name_top_pct }}%; color: {{ quiz.certificate_name_color }}; font-family: {% if quiz.certificate_name_font == 'serif' %}'Cormorant', serif{% elif quiz.certificate_name_font == 'bold' %}'Cinzel', serif{% else %}'Great Vibes', cursive{% endif %};">
-                            {{ display_name }}
-                        </div>
-
-                        <div class="zone zone-desc" style="top: 52%;">
-                            {{ quiz.certificate_text|default:"For successfully completing the assessment with outstanding performance." }}
-                        </div>
-
-                        <div class="zone zone-score" style="top: {{ quiz.score_top_pct }}%; color: {{ quiz.certificate_accent_color }};">
-                            {{ quiz.title }} &middot; Score {{ attempt.percentage|floatformat:0 }}%
-                        </div>
-
-                        <div class="zone zone-signatures" style="top: 74%;">
-                            <div class="zone-auth">
-                                <div class="sigbox">{% if quiz.authority1_sign_image %}<img src="{% url 'quiz_signature' quiz.id 1 %}" alt="">{% endif %}</div>
-                                <div class="zone-auth-line"></div>
-                                <div class="zone-auth-name">{{ quiz.authority1_name|default:"Authorized Signatory" }}</div>
-                                <div class="zone-auth-desig">{{ quiz.authority1_designation|default:"Director" }}</div>
-                            </div>
-                            <div class="zone-auth">
-                                <div class="sigbox">{% if quiz.authority2_sign_image %}<img src="{% url 'quiz_signature' quiz.id 2 %}" alt="">{% endif %}</div>
-                                <div class="zone-auth-line"></div>
-                                <div class="zone-auth-name">{{ quiz.authority2_name|default:"Verified By" }}</div>
-                                <div class="zone-auth-desig">{{ quiz.authority2_designation|default:"Admin" }}</div>
-                            </div>
-                        </div>
-
-                        <div class="zone zone-meta" style="top: 96%;">
-                            Certificate ID: {{ attempt.certificate_id }} &middot;
-                            Verify at sahyogsetu.in{% url 'verify_certificate' attempt.certificate_id %}
-                        </div>
-                    </div>
-                </div>
+                <!-- 2026-11-05: certificate design v2 (user's design). The same
+                     _cert_sheet.html is screenshotted for the PNG/PDF downloads
+                     (quizzes/cert_v2.py), so screen, print and downloads match. -->
+                <div class="ssc-fit" id="sscFit">{% include 'custom_admin/quizzes/_cert_sheet.html' %}</div>
             </div>
 
             <div class="ss-cert-actions-card gold-card no-print">
@@ -152,8 +39,16 @@
                             <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
                             <rect x="6" y="14" width="12" height="8"></rect>
                         </svg>
-                        Print / Save as PDF
+                        Print
                     </button>
+                    <a href="{% url 'quiz_certificate_pdf' attempt.id %}" class="btn-outline-ss no-print">
+                        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                        </svg>
+                        Download PDF
+                    </a>
                     <a href="{% url 'quiz_certificate_download' attempt.id %}" class="btn-outline-ss no-print">
                         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor"
                             stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right: 8px;">
@@ -731,5 +626,38 @@
             span.textContent = original;
         }
     }
+</script>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Cormorant+Garamond:ital,wght@0,500;0,600;0,700;1,500;1,600&family=Pinyon+Script&family=Noto+Serif+Devanagari:wght@500;700&family=Montserrat:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+    /* certificate v2: scale the 297x210 mm sheet down to the card width */
+    .ssc-fit{ width:100%; overflow:hidden; contain:inline-size; }
+    /* the 297 mm sheet must not set the grid column's minimum width */
+    .ss-cert-container > *, .ss-cert-preview-card{ min-width:0; }
+    .ssc-fit .cert{ transform-origin:0 0; }
+    .ss-quiz-header .ss-logo-area{ visibility:hidden; }
+    @media print{
+        @page{ size:297mm 210mm; margin:0; }
+        /* exactly one page: only the certificate, pinned to the page box */
+        html, body{ width:297mm !important; height:210mm !important; margin:0 !important; padding:0 !important; overflow:hidden !important; background:#fff !important; }
+        body *{ visibility:hidden !important; }
+        .ssc-fit, .ssc-fit .cert, .ssc-fit .cert *{ visibility:visible !important; }
+        .ssc-fit{ position:fixed !important; left:0; top:0; width:297mm !important; height:210mm !important; overflow:hidden !important; }
+        .ssc-fit .cert{ transform:none !important; box-shadow:none !important; margin:0 !important; }
+    }
+</style>
+<script>
+(function(){
+    var fit=document.getElementById('sscFit'); if(!fit) return;
+    var cert=fit.querySelector('.cert');
+    function scale(){
+        cert.style.transform=''; var w=cert.offsetWidth, h=cert.offsetHeight;
+        var s=Math.min(1, fit.clientWidth / w);
+        cert.style.transform='scale('+s+')'; fit.style.height=Math.ceil(h*s)+'px';
+    }
+    scale(); window.addEventListener('resize', scale);
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(scale);
+    window.addEventListener('beforeprint', function(){ cert.style.transform=''; fit.style.height=''; });
+    window.addEventListener('afterprint', scale);
+})();
 </script>
 {% endblock %}

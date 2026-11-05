@@ -15,6 +15,7 @@ urlpatterns = [
     path('quiz/certificate/<int:pk>/', views.CertificateView.as_view(), name='quiz_certificate'),
     path('quiz/<int:quiz_id>/signature/<int:n>/', views.quiz_signature, name='quiz_signature'),
     path('quiz/certificate/<int:pk>/download/', views.CertificateImageDownloadView.as_view(), name='quiz_certificate_download'),
+    path('quiz/certificate/<int:pk>/pdf/', views.CertificatePdfDownloadView.as_view(), name='quiz_certificate_pdf'),
     path('quiz/certificate/<int:pk>/story/', views.CertificateStoryDownloadView.as_view(), name='quiz_certificate_story'),
     # <path:...>, not <str:...> -- certificate IDs are now "SAHYOG/MM/YY/NN"
     # and contain literal "/" characters, which <str:> can't match at all
