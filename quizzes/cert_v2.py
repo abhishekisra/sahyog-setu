@@ -66,6 +66,14 @@ def grade_for(percentage):
     return "DISTINCTION" if p >= 90 else "MERIT" if p >= 75 else "PASS"
 
 
+ROLE_FULL = {"CEO": "Chief Executive Officer", "COO": "Chief Operating Officer"}
+
+
+def _role(text):
+    text = (text or "").strip()
+    return ROLE_FULL.get(text.upper(), text)
+
+
 def certificate_context(attempt, display_name):
     quiz = attempt.quiz
     cert_id = attempt.certificate_id or ""
@@ -86,9 +94,9 @@ def certificate_context(attempt, display_name):
         "c_sig1": _file_data_uri(quiz.authority1_sign_image),
         "c_sig2": _file_data_uri(quiz.authority2_sign_image),
         "c_auth1_name": quiz.authority1_name or "Authorized Signatory",
-        "c_auth1_role": quiz.authority1_designation or "",
+        "c_auth1_role": _role(quiz.authority1_designation),
         "c_auth2_name": quiz.authority2_name or "Authorized Signatory",
-        "c_auth2_role": quiz.authority2_designation or "",
+        "c_auth2_role": _role(quiz.authority2_designation),
     }
 
 
