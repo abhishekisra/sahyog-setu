@@ -325,6 +325,19 @@ class EditQuizView(View):
                 quiz.logo1_y_pct = request.POST.get("logo1_y_pct") or quiz.logo1_y_pct
                 quiz.logo2_x_pct = request.POST.get("logo2_x_pct") or quiz.logo2_x_pct
                 quiz.logo2_y_pct = request.POST.get("logo2_y_pct") or quiz.logo2_y_pct
+                # Signatory names/designations (the edit form always showed them
+                # but never saved them before 2026-11-06). Authority 1 is printed
+                # on the certificate, so a blank box keeps the old value;
+                # Authority 2 is optional (not printed) and may be cleared.
+                # A field missing from the POST is left untouched.
+                for field, keep_if_blank in (("authority1_name", True), ("authority1_designation", True),
+                                             ("authority2_name", False), ("authority2_designation", False)):
+                    value = request.POST.get(field)
+                    if value is None:
+                        continue
+                    value = value.strip()
+                    if value or not keep_if_blank:
+                        setattr(quiz, field, value)
                 if request.FILES.get("image"):
                     quiz.image = request.FILES.get("image")
                 if request.FILES.get("logo_1"):
