@@ -1,0 +1,356 @@
+{% extends 'custom_admin/public_base.html' %}
+{% comment %}
+"Mere liye yojanayein" (2026-11-06). Matching/ranking: schemes/my_schemes.py.
+Views: schemes/my_schemes_views.py. Same palette/font as scheme_finder.html.
+{% endcomment %}
+{% block title %}{% if lang == 'hi' %}मेरे लिए योजनाएं{% else %}Schemes for me{% endif %} — Sahyog Setu{% endblock %}
+
+{% block head %}
+<meta name="robots" content="noindex">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Mukta:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+{% endblock %}
+
+{% block body %}
+<style>
+  .ms-page{
+    --brand-deep:#28352A; --brand-deeper:#182019; --gold:#FFD700; --gold-ink:#8A6C09;
+    --paper:#FAF6EC; --card:#FFFFFF; --sunken:#EEF1E5; --terracotta:#B8532F;
+    --text:#26251F; --text-muted:#6B6A5E; --border:#E3DCC7; --good:#2F7A4D;
+    background:var(--paper); color:var(--text); font-size:16px; overflow-x:hidden;
+    font-family:'Mukta',-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  }
+  .ms-page *{box-sizing:border-box;}
+  .ms-page h1,.ms-page h2,.ms-page h3{font-family:inherit;font-weight:800;margin:0;}
+  .ms-wrap{max-width:1080px;margin:0 auto;padding:0 20px 90px;}
+  .ms-hero{background:var(--brand-deep);color:#EDEAE0;border-radius:0 0 22px 22px;padding:34px 28px 28px;margin:0 -20px 22px;}
+  .ms-eyebrow{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--gold);}
+  .ms-hero h1{font-size:clamp(26px,4.4vw,40px);line-height:1.15;margin:8px 0 8px;color:#fff;text-wrap:balance;}
+  .ms-hero p{margin:0;color:#C4D0BE;max-width:62ch;line-height:1.55;}
+  .ms-stats{display:flex;flex-wrap:wrap;gap:12px;margin-top:20px;}
+  .ms-stat{background:rgba(255,255,255,.07);border:1px solid rgba(255,215,0,.22);border-radius:12px;padding:10px 16px;min-width:130px;}
+  .ms-stat .n{font-size:26px;font-weight:800;color:var(--gold);line-height:1.1;font-variant-numeric:tabular-nums;}
+  .ms-stat .l{font-size:13px;color:#C4D0BE;}
+
+  .ms-card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px 20px;margin-bottom:18px;}
+  .ms-card h2{font-size:19px;margin-bottom:6px;}
+  .ms-muted{color:var(--text-muted);font-size:14.5px;line-height:1.5;margin:0;}
+  .ms-facts{display:flex;flex-wrap:wrap;gap:8px;margin:12px 0 4px;}
+  .ms-fact{background:var(--sunken);border-radius:999px;padding:4px 12px;font-size:14px;font-weight:600;}
+  .ms-fact b{font-weight:800;color:var(--brand-deep);}
+  .ms-warn{background:rgba(184,83,47,.08);border:1px solid rgba(184,83,47,.3);color:#7a3418;border-radius:10px;padding:10px 14px;font-size:14px;margin-top:10px;}
+  .ms-warn a{color:#7a3418;font-weight:700;}
+
+  details.ms-more{margin-top:12px;border-top:1px dashed var(--border);padding-top:10px;}
+  details.ms-more summary{cursor:pointer;font-weight:700;color:var(--terracotta);list-style:none;display:flex;align-items:center;gap:6px;}
+  details.ms-more summary::-webkit-details-marker{display:none;}
+  details.ms-more summary::before{content:"+";display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:var(--terracotta);color:#fff;font-size:15px;line-height:1;}
+  details.ms-more[open] summary::before{content:"–";}
+  .ms-form{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px 14px;margin-top:12px;}
+  @media (max-width:820px){.ms-form{grid-template-columns:repeat(2,minmax(0,1fr));}}
+  @media (max-width:520px){.ms-form{grid-template-columns:minmax(0,1fr);}}
+  .ms-form label{display:block;font-size:13.5px;font-weight:700;color:var(--text-muted);margin-bottom:4px;}
+  .ms-form select,.ms-tools select,.ms-tools input{width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:9px;background:#fff;font:inherit;font-size:15px;color:var(--text);}
+  .ms-form select:focus-visible,.ms-tools select:focus-visible,.ms-tools input:focus-visible,.ms-btn:focus-visible,.ms-tab:focus-visible,.ms-star:focus-visible{outline:3px solid var(--gold);outline-offset:2px;}
+  .ms-form-actions{grid-column:1/-1;display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .ms-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:none;border-radius:9px;padding:10px 18px;font:inherit;font-weight:700;font-size:15px;cursor:pointer;text-decoration:none;}
+  .ms-btn.primary{background:var(--brand-deep);color:#fff;}
+  .ms-btn.gold{background:var(--gold);color:var(--brand-deeper);}
+  .ms-btn.ghost{background:transparent;color:var(--brand-deep);border:1px solid var(--brand-deep);}
+
+  .ms-tabs{display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 12px;}
+  .ms-tab{border:1px solid var(--border);background:#fff;border-radius:999px;padding:8px 16px;font:inherit;font-weight:700;font-size:15px;color:var(--text);cursor:pointer;}
+  .ms-tab[aria-selected="true"]{background:var(--brand-deep);border-color:var(--brand-deep);color:#fff;}
+  .ms-tab .c{display:inline-block;min-width:24px;margin-left:6px;padding:0 7px;border-radius:999px;background:var(--sunken);color:var(--brand-deep);font-size:13px;font-variant-numeric:tabular-nums;}
+  .ms-tab[aria-selected="true"] .c{background:var(--gold);color:var(--brand-deeper);}
+  .ms-tools{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:10px;margin-bottom:14px;}
+  @media (max-width:560px){.ms-tools{grid-template-columns:minmax(0,1fr);}}
+  .ms-note{font-size:14px;color:var(--text-muted);margin:-4px 0 12px;}
+
+  .ms-list{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;}
+  @media (max-width:720px){.ms-list{grid-template-columns:minmax(0,1fr);}}
+  .ms-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:16px;display:flex;flex-direction:column;gap:10px;min-width:0;}
+  .ms-item-top{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;}
+  .ms-item h3{font-size:17px;line-height:1.35;font-weight:700;overflow-wrap:anywhere;min-width:0;}
+  .ms-item h3 a{color:var(--text);text-decoration:none;}
+  .ms-item h3 a:hover{color:var(--terracotta);}
+  .ms-meta{font-size:13.5px;color:var(--text-muted);}
+  .ms-why{display:flex;flex-wrap:wrap;gap:6px;}
+  .ms-why span{font-size:12.5px;font-weight:700;padding:2px 9px;border-radius:999px;background:rgba(47,122,77,.1);color:#1f5a37;border:1px solid rgba(47,122,77,.25);}
+  .ms-item-foot{display:flex;gap:8px;align-items:center;justify-content:space-between;margin-top:auto;border-top:1px solid var(--border);padding-top:10px;}
+  .ms-open{color:var(--terracotta);font-weight:800;text-decoration:none;font-size:15px;}
+  .ms-star{flex-shrink:0;width:40px;height:40px;border-radius:50%;border:1px solid var(--border);background:#fff;cursor:pointer;display:grid;place-items:center;color:#9a9583;}
+  .ms-star svg{width:20px;height:20px;}
+  .ms-star[aria-pressed="true"]{background:#fff8d6;border-color:#e6c200;color:#c79a00;}
+  .ms-star[aria-pressed="true"] svg{fill:currentColor;}
+  .ms-empty{grid-column:1/-1;text-align:center;padding:30px 16px;color:var(--text-muted);background:var(--card);border:1px dashed var(--border);border-radius:14px;}
+  .ms-moreload{display:flex;justify-content:center;margin-top:16px;}
+  .ms-login{max-width:620px;margin:10px auto 0;text-align:center;}
+  .ms-login .ms-btns{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:16px;}
+  .ms-toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--brand-deeper);color:#fff;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14.5px;z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s;}
+  .ms-toast.show{opacity:1;}
+  @media (prefers-reduced-motion:reduce){.ms-toast{transition:none;}}
+</style>
+
+<div class="ms-page">
+  <div class="ms-wrap">
+    <section class="ms-hero">
+      <div class="ms-eyebrow">★ {% if lang == 'hi' %}आपके लिए चुनी गई{% else %}Picked for you{% endif %}</div>
+      <h1>{% if lang == 'hi' %}मेरे लिए योजनाएं{% else %}Schemes for me{% endif %}</h1>
+      {% if logged_out %}
+      <p>{% if lang == 'hi' %}आपकी उम्र, राज्य, व्यवसाय और परिवार की जानकारी से हम वे सरकारी योजनाएं ढूंढते हैं जो खास आपके लिए हैं, और जिन्हें आप सेव करके बाद में देख सकते हैं।{% else %}We use your age, state, occupation and family details to find the government schemes meant for you, and you can save them to look at later.{% endif %}</p>
+      {% else %}
+      <p>{% if lang == 'hi' %}आपके खाते की जानकारी के आधार पर। जितनी ज़्यादा जानकारी देंगे, सूची उतनी सटीक होगी।{% else %}Based on the details in your account. The more you tell us, the sharper this list gets.{% endif %}</p>
+      <div class="ms-stats">
+        <div class="ms-stat"><div class="n">{{ targeted_count }}</div><div class="l">{% if lang == 'hi' %}खास आपके लिए{% else %}Just for you{% endif %}</div></div>
+        <div class="ms-stat"><div class="n">{{ total_count }}</div><div class="l">{% if lang == 'hi' %}जिनके आप पात्र हो सकते हैं{% else %}You may qualify for{% endif %}</div></div>
+        <div class="ms-stat"><div class="n" id="msSavedStat">{{ saved|length }}</div><div class="l">{% if lang == 'hi' %}सेव की गई{% else %}Saved{% endif %}</div></div>
+      </div>
+      {% endif %}
+    </section>
+
+    {% if logged_out %}
+    <div class="ms-card ms-login">
+      <h2>{% if lang == 'hi' %}अपनी योजनाएं देखने के लिए लॉगिन करें{% else %}Log in to see your schemes{% endif %}</h2>
+      <p class="ms-muted">{% if lang == 'hi' %}रजिस्ट्रेशन में दी गई जानकारी से आपकी सूची अपने आप बन जाएगी। नया खाता बनाने में एक मिनट लगता है।{% else %}Your list is built automatically from the details you gave when you signed up. A new account takes a minute.{% endif %}</p>
+      <div class="ms-btns">
+        <a class="ms-btn primary" href="/accounts/login/?next=/my-schemes/{% if lang != 'en' %}%3Flang%3D{{ lang }}{% endif %}">{% if lang == 'hi' %}लॉगिन करें{% else %}Log in{% endif %}</a>
+        <a class="ms-btn ghost" href="/accounts/signup/?next=/my-schemes/">{% if lang == 'hi' %}नया खाता बनाएं{% else %}Create an account{% endif %}</a>
+      </div>
+      <p class="ms-muted" style="margin-top:16px;">{% if lang == 'hi' %}या बिना लॉगिन:{% else %}Or without logging in:{% endif %} <a href="/scheme-viewer/{% if lang != 'en' %}?lang={{ lang }}{% endif %}" style="color:var(--terracotta);font-weight:700;">{% if lang == 'hi' %}सभी योजनाएं खोजें{% else %}search all schemes{% endif %}</a></p>
+    </div>
+    {% else %}
+
+    <section class="ms-card" aria-labelledby="msAboutH">
+      <h2 id="msAboutH">{% if lang == 'hi' %}आपकी जानकारी{% else %}Your details{% endif %}</h2>
+      <div class="ms-facts">
+        {% if account.age %}<span class="ms-fact">{% if lang == 'hi' %}उम्र{% else %}Age{% endif %} <b>{{ account.age }}</b></span>{% endif %}
+        {% if account.gender %}<span class="ms-fact"><b>{% if lang == 'hi' %}{% if account.gender == 'female' %}महिला{% elif account.gender == 'male' %}पुरुष{% else %}अन्य{% endif %}{% else %}{{ account.get_gender_display }}{% endif %}</b></span>{% endif %}
+        {% if account.state %}<span class="ms-fact"><b>{{ account.state.state }}</b></span>{% endif %}
+        {% if account.occupation %}<span class="ms-fact">{% if lang == 'hi' %}व्यवसाय{% else %}Occupation{% endif %} <b>{{ account.occupation.title }}</b></span>{% endif %}
+      </div>
+      {% if missing_account %}
+      <div class="ms-warn">{% if lang == 'hi' %}आपके खाते में उम्र/लिंग/राज्य नहीं है, इसलिए सूची कम सटीक है।{% else %}Your account is missing age, gender or state, so this list is less precise.{% endif %} <a href="/accounts/complete-profile/">{% if lang == 'hi' %}प्रोफ़ाइल पूरी करें{% else %}Complete your profile{% endif %}</a></div>
+      {% endif %}
+
+      <details class="ms-more" {% if extras_given == 0 %}open{% endif %}>
+        <summary>{% if lang == 'hi' %}और जानकारी दें, सूची और सटीक बनाएं{% else %}Add more details for a sharper list{% endif %} ({{ extras_given }}/6)</summary>
+        <p class="ms-muted" style="margin-top:8px;">{% if lang == 'hi' %}सब वैकल्पिक है। "पता नहीं / नहीं बताना" चुनने पर कोई योजना नहीं छूटेगी। यह जानकारी सिर्फ आपकी सूची बनाने में इस्तेमाल होती है।{% else %}All optional. "Not sure / prefer not to say" never hides a scheme. This is only used to build your list.{% endif %}</p>
+        <form class="ms-form" method="post" action="/my-schemes/profile/">
+          {% csrf_token %}
+          <input type="hidden" name="lang" value="{{ lang }}">
+          {% with ns_en="Not sure / prefer not to say" ns_hi="पता नहीं / नहीं बताना" %}
+          <div>
+            <label for="msIncome">{% if lang == 'hi' %}परिवार की सालाना आय{% else %}Family income per year{% endif %}</label>
+            <select id="msIncome" name="family_income">
+              <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
+              <option value="50000" {% if person.family_income == 50000 %}selected{% endif %}>{% if lang == 'hi' %}₹50,000 तक{% else %}Up to ₹50,000{% endif %}</option>
+              <option value="100000" {% if person.family_income == 100000 %}selected{% endif %}>{% if lang == 'hi' %}₹1,00,000 तक{% else %}Up to ₹1,00,000{% endif %}</option>
+              <option value="250000" {% if person.family_income == 250000 %}selected{% endif %}>{% if lang == 'hi' %}₹2,50,000 तक{% else %}Up to ₹2,50,000{% endif %}</option>
+              <option value="500000" {% if person.family_income == 500000 %}selected{% endif %}>{% if lang == 'hi' %}₹5,00,000 तक{% else %}Up to ₹5,00,000{% endif %}</option>
+              <option value="800000" {% if person.family_income == 800000 %}selected{% endif %}>{% if lang == 'hi' %}₹8,00,000 तक{% else %}Up to ₹8,00,000{% endif %}</option>
+              <option value="1500000" {% if person.family_income == 1500000 %}selected{% endif %}>{% if lang == 'hi' %}₹8,00,000 से ज़्यादा{% else %}More than ₹8,00,000{% endif %}</option>
+            </select>
+          </div>
+          <div>
+            <label for="msCaste">{% if lang == 'hi' %}सामाजिक श्रेणी{% else %}Social category{% endif %}</label>
+            <select id="msCaste" name="caste">
+              <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
+              <option value="0" {% if person.caste == 0 %}selected{% endif %}>{% if lang == 'hi' %}सामान्य{% else %}General{% endif %}</option>
+              <option value="1" {% if person.caste == 1 %}selected{% endif %}>OBC</option>
+              <option value="2" {% if person.caste == 2 %}selected{% endif %}>SC</option>
+              <option value="3" {% if person.caste == 3 %}selected{% endif %}>ST</option>
+              <option value="4" {% if person.caste == 4 %}selected{% endif %}>PVTG</option>
+            </select>
+          </div>
+          <div>
+            <label for="msMarital">{% if lang == 'hi' %}वैवाहिक स्थिति{% else %}Marital status{% endif %}</label>
+            <select id="msMarital" name="marital_status">
+              <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
+              <option value="0" {% if person.marital_status == 0 %}selected{% endif %}>{% if lang == 'hi' %}विवाहित{% else %}Married{% endif %}</option>
+              <option value="1" {% if person.marital_status == 1 %}selected{% endif %}>{% if lang == 'hi' %}अविवाहित{% else %}Unmarried{% endif %}</option>
+              <option value="2" {% if person.marital_status == 2 %}selected{% endif %}>{% if lang == 'hi' %}विधवा / विधुर{% else %}Widowed{% endif %}</option>
+              <option value="3" {% if person.marital_status == 3 %}selected{% endif %}>{% if lang == 'hi' %}तलाकशुदा{% else %}Divorced{% endif %}</option>
+              <option value="4" {% if person.marital_status == 4 %}selected{% endif %}>{% if lang == 'hi' %}अलग रह रहे{% else %}Separated{% endif %}</option>
+            </select>
+          </div>
+          <div>
+            <label for="msReligion">{% if lang == 'hi' %}धर्म{% else %}Religion{% endif %}</label>
+            <select id="msReligion" name="religion">
+              <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
+              <option value="0" {% if person.religion == 0 %}selected{% endif %}>{% if lang == 'hi' %}हिंदू{% else %}Hindu{% endif %}</option>
+              <option value="1" {% if person.religion == 1 %}selected{% endif %}>{% if lang == 'hi' %}मुस्लिम{% else %}Muslim{% endif %}</option>
+              <option value="2" {% if person.religion == 2 %}selected{% endif %}>{% if lang == 'hi' %}ईसाई{% else %}Christian{% endif %}</option>
+              <option value="3" {% if person.religion == 3 %}selected{% endif %}>{% if lang == 'hi' %}सिख{% else %}Sikh{% endif %}</option>
+              <option value="4" {% if person.religion == 4 %}selected{% endif %}>{% if lang == 'hi' %}पारसी{% else %}Parsi{% endif %}</option>
+              <option value="5" {% if person.religion == 5 %}selected{% endif %}>{% if lang == 'hi' %}बौद्ध{% else %}Buddhist{% endif %}</option>
+              <option value="6" {% if person.religion == 6 %}selected{% endif %}>{% if lang == 'hi' %}जैन{% else %}Jain{% endif %}</option>
+              <option value="7" {% if person.religion == 7 %}selected{% endif %}>{% if lang == 'hi' %}कोई धर्म नहीं{% else %}No religion{% endif %}</option>
+            </select>
+          </div>
+          <div>
+            <label for="msDivyang">{% if lang == 'hi' %}क्या आप दिव्यांग हैं?{% else %}Do you have a disability?{% endif %}</label>
+            <select id="msDivyang" name="divyang">
+              <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
+              <option value="0" {% if person.divyang == 0 %}selected{% endif %}>{% if lang == 'hi' %}हाँ{% else %}Yes{% endif %}</option>
+              <option value="1" {% if person.divyang == 1 %}selected{% endif %}>{% if lang == 'hi' %}नहीं{% else %}No{% endif %}</option>
+            </select>
+          </div>
+          <div>
+            <label for="msArea">{% if lang == 'hi' %}आप कहाँ रहते हैं?{% else %}Where do you live?{% endif %}</label>
+            <select id="msArea" name="area">
+              <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
+              <option value="1" {% if person.area == 1 %}selected{% endif %}>{% if lang == 'hi' %}गाँव (ग्रामीण){% else %}Village (rural){% endif %}</option>
+              <option value="0" {% if person.area == 0 %}selected{% endif %}>{% if lang == 'hi' %}शहर (शहरी){% else %}Town / city (urban){% endif %}</option>
+            </select>
+          </div>
+          {% endwith %}
+          <div class="ms-form-actions">
+            <button type="submit" class="ms-btn primary">{% if lang == 'hi' %}सेव करें और सूची अपडेट करें{% else %}Save and update my list{% endif %}</button>
+          </div>
+        </form>
+      </details>
+    </section>
+
+    <section id="ms-results" aria-label="{% if lang == 'hi' %}योजनाएं{% else %}Schemes{% endif %}">
+      <div class="ms-tabs" role="tablist">
+        <button class="ms-tab" role="tab" type="button" data-tab="for" aria-selected="true">{% if lang == 'hi' %}खास आपके लिए{% else %}Just for you{% endif %}<span class="c">{{ targeted_count }}</span></button>
+        <button class="ms-tab" role="tab" type="button" data-tab="all" aria-selected="false">{% if lang == 'hi' %}सभी योग्य{% else %}All you may qualify for{% endif %}<span class="c">{{ total_count }}</span></button>
+        <button class="ms-tab" role="tab" type="button" data-tab="saved" aria-selected="false">★ {% if lang == 'hi' %}सेव की गई{% else %}Saved{% endif %}<span class="c" id="msSavedCount">{{ saved|length }}</span></button>
+      </div>
+      <div class="ms-tools">
+        <input type="search" id="msSearch" placeholder="{% if lang == 'hi' %}योजना का नाम खोजें…{% else %}Search by scheme name…{% endif %}" aria-label="{% if lang == 'hi' %}खोजें{% else %}Search{% endif %}">
+        <select id="msCat" aria-label="{% if lang == 'hi' %}श्रेणी{% else %}Category{% endif %}"><option value="">{% if lang == 'hi' %}सभी श्रेणियां{% else %}All categories{% endif %}</option></select>
+      </div>
+      <p class="ms-note" id="msNote"></p>
+      <div class="ms-list" id="msList"></div>
+      <div class="ms-moreload"><button type="button" class="ms-btn ghost" id="msMore" hidden>{% if lang == 'hi' %}और दिखाएं{% else %}Show more{% endif %}</button></div>
+    </section>
+    {% endif %}
+  </div>
+</div>
+<div class="ms-toast" id="msToast" role="status" aria-live="polite"></div>
+
+{% if not logged_out %}
+{{ results|json_script:"msResults" }}
+{{ saved|json_script:"msSavedData" }}
+{{ saved_ids|json_script:"msSavedIds" }}
+<script>
+(function(){
+  var LANG = '{{ lang|escapejs }}', HI = LANG === 'hi';
+  var T = HI ? {
+    central:'केंद्र सरकार', open:'पूरी जानकारी देखें →', save:'सेव करें', unsave:'सेव हटाएं',
+    saved:'सेव हो गई ★', removed:'सेव से हटाई गई', err:'कुछ गड़बड़ हुई, फिर से कोशिश करें',
+    none_for:'आपकी जानकारी से खास कोई योजना नहीं मिली। "सभी योग्य" देखें, या ऊपर और जानकारी दें।',
+    none_saved:'अभी कोई योजना सेव नहीं की। किसी योजना पर ☆ दबाएं, वह यहाँ दिखेगी।',
+    none_filter:'इस खोज/श्रेणी में कुछ नहीं मिला।',
+    note_for:'ये योजनाएं खास तौर पर आपके जैसे लोगों के लिए हैं; हरे टैग बताते हैं क्यों।',
+    note_all:'वे सभी योजनाएं जिनकी शर्तें आपकी जानकारी से मेल खाती हैं (सबके लिए वाली भी)।',
+    note_saved:'आपकी सेव की गई योजनाएं, किसी भी फोन या कंप्यूटर पर लॉगिन करके देखें।',
+    showing:function(a,b){ return a+' / '+b+' दिखाई जा रही हैं'; }
+  } : {
+    central:'Central Government', open:'See full details →', save:'Save', unsave:'Remove from saved',
+    saved:'Saved ★', removed:'Removed from saved', err:'Something went wrong, please try again',
+    none_for:'No scheme is aimed specifically at your details yet. See "All you may qualify for", or add more details above.',
+    none_saved:'Nothing saved yet. Tap ☆ on any scheme and it will appear here.',
+    none_filter:'Nothing matches this search or category.',
+    note_for:'These schemes are aimed at people like you; the green tags say why.',
+    note_all:'Every scheme whose rules match your details, including ones open to everyone.',
+    note_saved:'Your saved schemes, on any phone or computer you log in from.',
+    showing:function(a,b){ return 'Showing '+a+' of '+b; }
+  };
+  var all = JSON.parse(document.getElementById('msResults').textContent);
+  var saved = JSON.parse(document.getElementById('msSavedData').textContent);
+  var savedSet = {};
+  JSON.parse(document.getElementById('msSavedIds').textContent).forEach(function(id){ savedSet[id] = true; });
+  var byId = {}; all.forEach(function(s){ byId[s.id] = s; });
+
+  var list = document.getElementById('msList'), more = document.getElementById('msMore');
+  var search = document.getElementById('msSearch'), cat = document.getElementById('msCat');
+  var note = document.getElementById('msNote');
+  var tab = 'for', shown = 0, PAGE = 30, current = [];
+
+  // category options from everything this person can see
+  var cats = {}; all.concat(saved).forEach(function(s){ if(s.category) cats[s.category] = (cats[s.category]||0) + 1; });
+  Object.keys(cats).sort().forEach(function(c){ var o = document.createElement('option'); o.value = c; o.textContent = c; cat.appendChild(o); });
+
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  function link(id){ return '/scheme-viewer/?scheme=' + id + (LANG !== 'en' ? '&lang=' + LANG : ''); }
+  var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg>';
+
+  function card(s){
+    var on = !!savedSet[s.id];
+    var why = (s.reasons && s.reasons.length) ? '<div class="ms-why">' + s.reasons.map(function(r){ return '<span>' + esc(r) + '</span>'; }).join('') + '</div>' : '';
+    return '<article class="ms-item">' +
+      '<div class="ms-item-top"><h3><a href="' + link(s.id) + '">' + esc(s.title) + '</a></h3>' +
+      '<button type="button" class="ms-star" data-id="' + s.id + '" aria-pressed="' + on + '" aria-label="' + esc(on ? T.unsave : T.save) + '" title="' + esc(on ? T.unsave : T.save) + '">' + STAR + '</button></div>' +
+      '<div class="ms-meta">' + esc(s.category) + (s.category ? ' · ' : '') + esc(s.central ? T.central : s.state) + '</div>' +
+      why +
+      '<div class="ms-item-foot"><a class="ms-open" href="' + link(s.id) + '">' + T.open + '</a></div>' +
+    '</article>';
+  }
+
+  function pool(){
+    if(tab === 'saved') return saved;
+    if(tab === 'for') return all.filter(function(s){ return s.targeted; });
+    return all;
+  }
+  function render(reset){
+    if(reset){
+      var q = search.value.trim().toLowerCase(), c = cat.value;
+      current = pool().filter(function(s){ return (!c || s.category === c) && (!q || s.title.toLowerCase().indexOf(q) !== -1); });
+      shown = 0; list.innerHTML = '';
+      note.textContent = tab === 'for' ? T.note_for : tab === 'all' ? T.note_all : T.note_saved;
+    }
+    if(!current.length){
+      var base = pool().length;
+      list.innerHTML = '<div class="ms-empty">' + esc(!base ? (tab === 'saved' ? T.none_saved : T.none_for) : T.none_filter) + '</div>';
+      more.hidden = true; return;
+    }
+    var next = current.slice(shown, shown + PAGE);
+    list.insertAdjacentHTML('beforeend', next.map(card).join(''));
+    shown += next.length;
+    more.hidden = shown >= current.length;
+    if(!more.hidden) more.setAttribute('aria-label', T.showing(shown, current.length));
+  }
+
+  document.querySelectorAll('.ms-tab').forEach(function(b){
+    b.addEventListener('click', function(){
+      document.querySelectorAll('.ms-tab').forEach(function(x){ x.setAttribute('aria-selected', x === b ? 'true' : 'false'); });
+      tab = b.getAttribute('data-tab'); render(true);
+    });
+  });
+  var t; search.addEventListener('input', function(){ clearTimeout(t); t = setTimeout(function(){ render(true); }, 150); });
+  cat.addEventListener('change', function(){ render(true); });
+  more.addEventListener('click', function(){ render(false); });
+
+  function csrf(){ var m = document.cookie.match(/csrftoken=([^;]+)/); if(m) return m[1]; var i = document.querySelector('input[name=csrfmiddlewaretoken]'); return i ? i.value : ''; }
+  var toastEl = document.getElementById('msToast'), toastT;
+  function toast(msg){ toastEl.textContent = msg; toastEl.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function(){ toastEl.classList.remove('show'); }, 1800); }
+  function setCounts(){ document.getElementById('msSavedCount').textContent = saved.length; document.getElementById('msSavedStat').textContent = saved.length; }
+
+  list.addEventListener('click', function(e){
+    var b = e.target.closest('.ms-star'); if(!b) return;
+    var id = +b.getAttribute('data-id'), want = !savedSet[id];
+    b.disabled = true;
+    var fd = new FormData(); fd.append('saved', want ? '1' : '0');
+    fetch('/my-schemes/save/' + id + '/', {method:'POST', body:fd, headers:{'X-CSRFToken':csrf()}, credentials:'same-origin'})
+      .then(function(r){ if(r.status === 401){ location.href = '/accounts/login/?next=/my-schemes/'; throw 0; } if(!r.ok) throw 1; return r.json(); })
+      .then(function(d){
+        if(d.saved){ savedSet[id] = true; if(!saved.some(function(s){ return s.id === id; })){ var s = byId[id]; if(s) saved.unshift(s); } toast(T.saved); }
+        else { delete savedSet[id]; saved = saved.filter(function(s){ return s.id !== id; }); toast(T.removed); }
+        b.setAttribute('aria-pressed', d.saved ? 'true' : 'false');
+        b.setAttribute('aria-label', d.saved ? T.unsave : T.save); b.title = d.saved ? T.unsave : T.save;
+        setCounts();
+        if(tab === 'saved' && !d.saved){ render(true); }
+      })
+      .catch(function(x){ if(x !== 0) toast(T.err); })
+      .then(function(){ b.disabled = false; });
+  });
+
+  render(true);
+})();
+</script>
+{% endif %}
+{% endblock %}

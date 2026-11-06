@@ -1,0 +1,179 @@
+{% comment %}
+Scheme popup checklists + save star (2026-11-06). Included by
+scheme_finder.html and business_related_scheme_finder.html; each page calls
+window.ssChecklist.enhance(sheetEl, schemeId, lang) right after its
+renderDetail() has filled the sheet. It looks for the two blocks marked
+data-ck="elig" and data-ck="docs" and turns their bullet points into:
+  - eligibility: Haan / Nahi per condition + a running verdict
+  - documents:   a tick box per document + "3/10 ready"
+Answers are kept in this browser only (localStorage "ss_ck_<id>"), so no
+login is needed. Unstructured text (no bullet list) is left as it is.
+The star in the popup header saves the scheme for logged-in users via
+/my-schemes/save/<id>/ (see schemes/my_schemes_views.py).
+{% endcomment %}
+<style>
+  .ck-sum{border-radius:10px;padding:10px 14px;margin:0 0 12px;font-size:14.5px;line-height:1.45;background:var(--sunken,#EEF1E5);color:var(--text,#26251F);}
+  .ck-sum b{font-weight:800;}
+  .ck-sum.ok{background:rgba(47,122,77,.12);color:#1f5a37;}
+  .ck-sum.no{background:rgba(184,83,47,.1);color:#7a3418;}
+  .ck-hint{display:block;font-size:13px;color:var(--text-muted,#6B6A5E);margin-top:2px;}
+  .ck-bar{height:8px;border-radius:999px;background:rgba(0,0,0,.08);overflow:hidden;margin-top:8px;}
+  .ck-bar i{display:block;height:100%;background:var(--good,#2F7A4D);width:0;transition:width .25s;}
+  .ck-list{list-style:none;padding:0 !important;margin:0;}
+  .ck-list > li{display:flex;gap:10px;align-items:flex-start;justify-content:space-between;padding:9px 0;border-top:1px solid var(--border,#E3DCC7);margin:0 !important;}
+  .ck-list > li:first-child{border-top:0;padding-top:2px;}
+  .ck-list .ck-t{flex:1;min-width:0;overflow-wrap:anywhere;}
+  .ck-yn{display:flex;gap:6px;flex-shrink:0;}
+  .ck-yn button{font:inherit;font-size:13.5px;font-weight:700;border:1px solid var(--border,#E3DCC7);background:#fff;color:var(--text,#26251F);border-radius:999px;padding:4px 12px;cursor:pointer;min-height:32px;}
+  .ck-yn button[aria-pressed="true"].y{background:#2F7A4D;border-color:#2F7A4D;color:#fff;}
+  .ck-yn button[aria-pressed="true"].n{background:#B8532F;border-color:#B8532F;color:#fff;}
+  .ck-yn button:focus-visible,.ck-doc input:focus-visible,.ck-reset:focus-visible,.ck-star:focus-visible{outline:3px solid #FFD700;outline-offset:2px;}
+  .ck-doc{display:flex;gap:10px;align-items:flex-start;cursor:pointer;flex:1;min-width:0;}
+  .ck-doc input{width:20px;height:20px;margin-top:3px;flex-shrink:0;accent-color:#2F7A4D;cursor:pointer;}
+  .ck-doc input:checked + .ck-t{text-decoration:line-through;text-decoration-color:rgba(47,122,77,.6);color:var(--text-muted,#6B6A5E);}
+  .ck-reset{background:none;border:0;padding:0;margin-top:10px;font:inherit;font-size:13.5px;font-weight:700;color:var(--terracotta,#B8532F);cursor:pointer;text-decoration:underline;}
+  .ck-star{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:999px;padding:6px 12px;font:inherit;font-size:13.5px;font-weight:700;cursor:pointer;white-space:nowrap;}
+  .ck-star svg{width:16px;height:16px;}
+  .ck-star[aria-pressed="true"]{background:#FFD700;border-color:#FFD700;color:#182019;}
+  .ck-star[aria-pressed="true"] svg{fill:currentColor;}
+  .ck-hero-actions{display:flex;gap:8px;align-items:center;flex-shrink:0;}
+  @media (max-width:480px){ .ck-list > li{flex-direction:column;} .ck-yn{align-self:flex-end;} .ck-star span{display:none;} }
+  @media (prefers-reduced-motion:reduce){ .ck-bar i{transition:none;} }
+</style>
+<script>
+(function(){
+  var TXT = {
+    en: {
+      yes:'Yes', no:'No', reset:'Clear my answers',
+      eHint:'Answer each condition to check quickly. Your answers stay on this phone only.',
+      eStart:function(n){ return '<b>Am I eligible?</b> Tap Yes or No for each of the '+n+' conditions below.'; },
+      eProg:function(a,n){ return '<b>'+a+' of '+n+'</b> answered. Keep going.'; },
+      eOk:'<b>Looks like you are eligible.</b> You meet every condition you answered. Get your documents ready below.',
+      eNo:function(k){ return '<b>'+k+' condition'+(k>1?'s are':' is')+' not met.</b> You may not qualify. Check the official site, or look at other schemes.'; },
+      dStart:function(n){ return '<b>Document checklist:</b> tick each one you already have. 0 of '+n+' ready.'; },
+      dProg:function(a,n){ return '<b>'+a+' of '+n+'</b> documents ready.'; },
+      dOk:function(n){ return '<b>All '+n+' documents ready!</b> You can go ahead and apply on the official portal.'; },
+      save:'Save', saved:'Saved', loginToSave:'Log in to save schemes'
+    },
+    hi: {
+      yes:'हाँ', no:'नहीं', reset:'मेरे जवाब हटाएं',
+      eHint:'हर शर्त का जवाब दें और तुरंत जांचें। आपके जवाब सिर्फ इसी फोन में रहते हैं।',
+      eStart:function(n){ return '<b>क्या मैं पात्र हूँ?</b> नीचे दी गई '+n+' शर्तों में हर एक पर हाँ या नहीं दबाएं।'; },
+      eProg:function(a,n){ return '<b>'+n+' में से '+a+'</b> का जवाब दिया। आगे बढ़ें।'; },
+      eOk:'<b>लगता है आप पात्र हैं।</b> आपने जिन शर्तों का जवाब दिया, वे सब पूरी होती हैं। नीचे दस्तावेज़ तैयार करें।',
+      eNo:function(k){ return '<b>'+k+' शर्त पूरी नहीं होती।</b> शायद आप पात्र नहीं हैं। आधिकारिक साइट पर जांचें, या दूसरी योजनाएं देखें।'; },
+      dStart:function(n){ return '<b>दस्तावेज़ सूची:</b> जो आपके पास है उस पर टिक करें। '+n+' में से 0 तैयार।'; },
+      dProg:function(a,n){ return '<b>'+n+' में से '+a+'</b> दस्तावेज़ तैयार।'; },
+      dOk:function(n){ return '<b>सभी '+n+' दस्तावेज़ तैयार!</b> अब आधिकारिक पोर्टल पर आवेदन कर सकते हैं।'; },
+      save:'सेव करें', saved:'सेव है', loginToSave:'योजनाएं सेव करने के लिए लॉगिन करें'
+    }
+  };
+  var STAR = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round" aria-hidden="true"><path d="M12 2.8l2.8 5.9 6.4.8-4.7 4.4 1.2 6.4L12 17.2l-5.7 3.1 1.2-6.4L2.8 9.5l6.4-.8z"/></svg>';
+
+  function load(id){ try{ return JSON.parse(localStorage.getItem('ss_ck_'+id)) || {e:{}, d:{}}; }catch(e){ return {e:{}, d:{}}; } }
+  function store(id, st){ try{ localStorage.setItem('ss_ck_'+id, JSON.stringify(st)); }catch(e){} }
+
+  var savedIds = null, authed = false;
+  var savedReady = fetch('/my-schemes/saved-ids/', {credentials:'same-origin'})
+    .then(function(r){ return r.ok ? r.json() : {auth:false, ids:[]}; })
+    .then(function(d){ authed = !!d.auth; savedIds = {}; (d.ids||[]).forEach(function(i){ savedIds[i] = true; }); })
+    .catch(function(){ savedIds = {}; });
+
+  function csrf(){ var m = document.cookie.match(/csrftoken=([^;]+)/); return m ? m[1] : ''; }
+
+  function addStar(sheet, id, T){
+    var hero = sheet.querySelector('.yk-detail-hero'), close = sheet.querySelector('#ykCloseDetail');
+    if(!hero || !close || hero.querySelector('.ck-star')) return;
+    var wrap = document.createElement('div'); wrap.className = 'ck-hero-actions';
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'ck-star';
+    close.parentNode.insertBefore(wrap, close); wrap.appendChild(b); wrap.appendChild(close);
+    function paint(){ var on = !!(savedIds && savedIds[id]); b.setAttribute('aria-pressed', on ? 'true' : 'false');
+      b.innerHTML = STAR + '<span>' + (on ? T.saved : T.save) + '</span>'; b.title = authed ? (on ? T.saved : T.save) : T.loginToSave; b.setAttribute('aria-label', b.title); }
+    paint(); savedReady.then(paint);
+    b.addEventListener('click', function(){
+      if(!authed){ location.href = '/accounts/login/?next=' + encodeURIComponent(location.pathname + '?scheme=' + id); return; }
+      var want = !savedIds[id], fd = new FormData(); fd.append('saved', want ? '1' : '0'); b.disabled = true;
+      fetch('/my-schemes/save/' + id + '/', {method:'POST', body:fd, headers:{'X-CSRFToken':csrf()}, credentials:'same-origin'})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){ if(d){ if(d.saved) savedIds[id] = true; else delete savedIds[id]; } paint(); })
+        .catch(function(){}).then(function(){ b.disabled = false; });
+    });
+  }
+
+  function enhance(sheet, id, lang){
+    if(!sheet || !id) return;
+    var T = TXT[lang] || TXT.en, st = load(id), paintE = null, paintD = null;
+    addStar(sheet, id, T);
+
+    var eb = sheet.querySelector('[data-ck="elig"]'), db = sheet.querySelector('[data-ck="docs"]');
+    var eItems = eb ? eb.querySelectorAll('.yk-block-list > li') : [];
+    var dItems = db ? db.querySelectorAll('.yk-block-list > li') : [];
+
+    if(eItems.length){
+      var eSum = document.createElement('div'); eSum.className = 'ck-sum'; eSum.setAttribute('role','status'); eSum.setAttribute('aria-live','polite');
+      eb.querySelector('h3').insertAdjacentElement('afterend', eSum);
+      eItems.forEach(function(li, i){
+        li.parentNode.classList.add('ck-list');
+        var t = document.createElement('span'); t.className = 'ck-t'; while(li.firstChild) t.appendChild(li.firstChild);
+        var yn = document.createElement('div'); yn.className = 'ck-yn'; yn.setAttribute('role','group');
+        yn.innerHTML = '<button type="button" class="y" data-v="1">' + T.yes + '</button><button type="button" class="n" data-v="0">' + T.no + '</button>';
+        li.appendChild(t); li.appendChild(yn);
+        yn.setAttribute('aria-label', t.textContent.slice(0, 80));
+        yn.addEventListener('click', function(ev){
+          var b = ev.target.closest('button'); if(!b) return;
+          var v = +b.getAttribute('data-v');
+          if(st.e[i] === v) delete st.e[i]; else st.e[i] = v;
+          store(id, st); paintE();
+        });
+      });
+      var eHint = document.createElement('span'); eHint.className = 'ck-hint';
+      paintE = function(){
+        var n = eItems.length, a = 0, no = 0;
+        eItems.forEach(function(li, i){
+          var v = st.e[i];
+          li.querySelectorAll('.ck-yn button').forEach(function(b){ b.setAttribute('aria-pressed', (v !== undefined && +b.getAttribute('data-v') === v) ? 'true' : 'false'); });
+          if(v !== undefined){ a++; if(v === 0) no++; }
+        });
+        eSum.className = 'ck-sum' + (no ? ' no' : (a === n ? ' ok' : ''));
+        eSum.innerHTML = no ? T.eNo(no) : (a === n ? T.eOk : (a ? T.eProg(a, n) : T.eStart(n)));
+        if(!a){ eHint.textContent = T.eHint; eSum.appendChild(eHint); }
+      };
+      paintE();
+    }
+
+    if(dItems.length){
+      var dSum = document.createElement('div'); dSum.className = 'ck-sum'; dSum.setAttribute('role','status'); dSum.setAttribute('aria-live','polite');
+      db.querySelector('h3').insertAdjacentElement('afterend', dSum);
+      dItems.forEach(function(li, i){
+        li.parentNode.classList.add('ck-list');
+        var lab = document.createElement('label'); lab.className = 'ck-doc';
+        var cb = document.createElement('input'); cb.type = 'checkbox'; cb.checked = !!st.d[i];
+        var t = document.createElement('span'); t.className = 'ck-t'; while(li.firstChild) t.appendChild(li.firstChild);
+        lab.appendChild(cb); lab.appendChild(t); li.appendChild(lab);
+        cb.addEventListener('change', function(){ if(cb.checked) st.d[i] = 1; else delete st.d[i]; store(id, st); paintD(); });
+      });
+      paintD = function(){
+        var n = dItems.length, a = 0; dItems.forEach(function(li, i){ if(st.d[i]) a++; });
+        dSum.className = 'ck-sum' + (a === n ? ' ok' : '');
+        dSum.innerHTML = (a === n ? T.dOk(n) : (a ? T.dProg(a, n) : T.dStart(n))) + '<div class="ck-bar"><i style="width:' + Math.round(a / n * 100) + '%"></i></div>';
+      };
+      paintD();
+    }
+
+    if(eItems.length || dItems.length){
+      var anchor = db && dItems.length ? db : eb;
+      var r = document.createElement('button'); r.type = 'button'; r.className = 'ck-reset'; r.textContent = T.reset;
+      r.addEventListener('click', function(){
+        try{ localStorage.removeItem('ss_ck_' + id); }catch(e){}
+        // clear in place: the handlers above read st.e / st.d, so mutate, don't replace
+        Object.keys(st.e).forEach(function(k){ delete st.e[k]; });
+        Object.keys(st.d).forEach(function(k){ delete st.d[k]; });
+        dItems.forEach(function(li){ var c = li.querySelector('input'); if(c) c.checked = false; });
+        if(paintE) paintE(); if(paintD) paintD();
+      });
+      anchor.appendChild(r);
+    }
+  }
+  window.ssChecklist = {enhance: enhance};
+})();
+</script>

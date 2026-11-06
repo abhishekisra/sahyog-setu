@@ -28,10 +28,11 @@
         <ul class="ssh-nav-list">
           <li><a class="ssh-link" href="/" data-ssh-match="^/$">Home</a></li>
           <li class="ssh-has-sub">
-            <button type="button" class="ssh-nav-btn" aria-expanded="false" aria-haspopup="true" data-ssh-match="^/(central-schemes-viewer|state-schemes-viewer|scheme-viewer)/">Schemes <i class="ssh-caret"></i></button>
+            <button type="button" class="ssh-nav-btn" aria-expanded="false" aria-haspopup="true" data-ssh-match="^/(central-schemes-viewer|state-schemes-viewer|scheme-viewer|my-schemes)/">Schemes <i class="ssh-caret"></i></button>
             <ul class="ssh-sub">
               <li><a href="/central-schemes-viewer/">Central Govt Scheme</a></li>
               <li><a href="/state-schemes-viewer/">State Govt Scheme</a></li>
+              <li><a href="/my-schemes/">★ Schemes for me</a></li>
             </ul>
           </li>
           <li><a class="ssh-link" href="/?openEligibility=1">Check Eligibility</a></li>
@@ -76,6 +77,7 @@
           </button>
           <div class="ssh-user-menu" id="sshUserMenu">
             <div class="ssh-who">Signed in as<b class="notranslate" translate="no">{{ uname }}</b></div>
+            <a href="/my-schemes/">★ Schemes for me</a>
             <a href="{% url 'my_results' %}">My quiz results</a>
             <a href="{% url 'logout' %}" class="ssh-danger">Log out</a>
           </div>

@@ -117,3 +117,30 @@ class Scheme_Employements(models.Model):
     employment = models.IntegerField(default="", blank=False, null=False)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now_add= True)
+
+# ---------------------------------------------------------------------------
+# "Mere liye yojanayein" (/my-schemes/, 2026-11-06): a participant's saved
+# schemes and the extra eligibility details that are NOT on the signup form
+# (age, gender, state and occupation already live on accounts.User). Codes
+# are the same ones the admin scheme form and /api/check-eligibility use.
+# ---------------------------------------------------------------------------
+class SavedScheme(models.Model):
+    user = models.ForeignKey("accounts.User", on_delete=CASCADE, related_name="saved_schemes")
+    scheme = models.ForeignKey(Schemes, on_delete=CASCADE, related_name="saved_by")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=["user", "scheme"], name="uniq_saved_scheme_per_user")]
+        ordering = ["-created_at"]
+
+
+class SchemeProfile(models.Model):
+    """All optional: None = "not told us", which never excludes a scheme."""
+    user = models.OneToOneField("accounts.User", on_delete=CASCADE, related_name="scheme_profile")
+    family_income = models.PositiveIntegerField(null=True, blank=True)   # annual, rupees
+    caste = models.SmallIntegerField(null=True, blank=True)              # 0 General 1 OBC 2 SC 3 ST 4 PVTG
+    marital_status = models.SmallIntegerField(null=True, blank=True)     # 0 Married 1 Unmarried 2 Widowed 3 Divorced 4 Separated
+    religion = models.SmallIntegerField(null=True, blank=True)           # 0 Hindu .. 7 No religion
+    divyang = models.SmallIntegerField(null=True, blank=True)            # 0 Yes 1 No (scheme.divyang 2 = both)
+    area = models.SmallIntegerField(null=True, blank=True)               # 0 Urban 1 Rural
+    updated_at = models.DateTimeField(auto_now=True)

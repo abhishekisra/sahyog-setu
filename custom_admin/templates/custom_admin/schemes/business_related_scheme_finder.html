@@ -487,8 +487,8 @@
       '</div>' +
       '<div class="yk-detail-body">' +
         '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16v16H4z"/><path d="M8 9h8M8 13h8M8 17h4"/></svg>Overview</h3>'+renderRichText(d.description, 'No overview available yet.')+'</div>' +
-        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3>'+renderRichText(d.eligibility, 'Refer to the official page for eligibility details.')+'</div>' +
-        '<div class="yk-block"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3>'+renderRichText(d.required_documents, 'Refer to the official page for the documents list.')+'</div>' +
+        '<div class="yk-block" data-ck="elig"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>Eligibility</h3>'+renderRichText(d.eligibility, 'Refer to the official page for eligibility details.')+'</div>' +
+        '<div class="yk-block" data-ck="docs"><h3><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg>Required documents</h3>'+renderRichText(d.required_documents, 'Refer to the official page for the documents list.')+'</div>' +
         '<div class="yk-apply-card">' +
           "<p>Applications go through this scheme's own official portal or office.</p>" +
           applyBtn +
@@ -498,6 +498,7 @@
         '<div class="yk-disclaimer">'+escapeHtml(SCHEME_DISCLAIMER)+'</div>' +
       '</div>';
     document.getElementById('ykCloseDetail').addEventListener('click', closeDetail);
+    if(window.ssChecklist) window.ssChecklist.enhance(sheet, d.id, LANG);
   }
   function closeDetail(){
     document.getElementById('ykDetailOverlay').classList.remove('open');
@@ -509,4 +510,5 @@
   runSearch();
 })();
 </script>
+{% include 'custom_admin/schemes/_scheme_checklist.html' %}
 {% endblock %}

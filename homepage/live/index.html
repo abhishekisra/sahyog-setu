@@ -524,6 +524,7 @@
             <ul class="ssh-sub">
               <li><a href="/central-schemes-viewer/">Central Govt Scheme</a></li>
               <li><a href="/state-schemes-viewer/">State Govt Scheme</a></li>
+              <li><a href="/my-schemes/">★ Schemes for me</a></li>
             </ul>
           </li>
           <li><a class="ssh-link" href="/?openEligibility=1">Check Eligibility</a></li>
@@ -607,7 +608,7 @@
     document.getElementById('sshAuth').innerHTML='<div class="ssh-user"><button type="button" class="ssh-user-btn" id="sshUserBtn" aria-haspopup="true" aria-expanded="false">'+
       '<span class="ssh-avatar notranslate" translate="no">'+esc(n.charAt(0).toUpperCase())+'</span><span class="ssh-user-name notranslate" translate="no">'+esc(short)+'</span></button>'+
       '<div class="ssh-user-menu" id="sshUserMenu"><div class="ssh-who">Signed in as<b class="notranslate" translate="no">'+esc(n)+'</b></div>'+
-      '<a href="/my-results/">My quiz results</a><a href="/accounts/logout/" class="ssh-danger">Log out</a></div></div>';
+      '<a href="/my-schemes/">★ Schemes for me</a><a href="/my-results/">My quiz results</a><a href="/accounts/logout/" class="ssh-danger">Log out</a></div></div>';
     var b=document.getElementById('sshUserBtn'), mn=document.getElementById('sshUserMenu');
     b.addEventListener('click',function(e){e.stopPropagation();closeSubs();var o=mn.classList.toggle('ssh-open');b.setAttribute('aria-expanded',String(o));});
   }).catch(function(){});
