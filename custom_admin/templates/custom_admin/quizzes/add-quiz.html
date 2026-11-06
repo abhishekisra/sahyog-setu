@@ -301,24 +301,24 @@
                                         <span class="qa-authority-icon"><i class="feather icon-user-check"></i></span>
                                         <div>
                                             <div class="qa-authority-title">Authority 2</div>
-                                            <div class="qa-authority-sub">Second signing authority on the certificate</div>
+                                            <div class="qa-authority-sub">Optional &mdash; the certificate prints only Authority 1 (CEO)</div>
                                         </div>
                                     </div>
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label>Name *</label>
-                                    <input type="text" name="authority2_name" class="form-control" required>
+                                    <label>Name</label>
+                                    <input type="text" name="authority2_name" class="form-control">
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label>Designation *</label>
-                                    <input type="text" name="authority2_designation" class="form-control" required>
+                                    <label>Designation</label>
+                                    <input type="text" name="authority2_designation" class="form-control">
                                 </div>
 
                                 <div class="col-md-4">
-                                    <label>Signature *</label>
-                                    <input type="file" name="authority2_sign_image" class="form-control" required onchange="qaPreviewFile(this,'previewSig2')">
+                                    <label>Signature</label>
+                                    <input type="file" name="authority2_sign_image" class="form-control" onchange="qaPreviewFile(this,'previewSig2')">
                                     <div class="qa-sig-preview" id="previewSig2" style="display:none;"><img src=""></div>
                                 </div>
                             </div>
