@@ -85,13 +85,12 @@ Previous design: /root/sahyogsetu-backups/cert-v2-before-v3/.
     <div class="fact w"><div class="l">Certificate No.</div><div class="v">{{ c_id }}</div></div>
   </div>
 
-  <div class="abs sig" style="left:36mm; top:143mm">
+  {% comment %}Only ONE signatory: the CEO (authority 1). User 2026-11-06: "Chief Executive
+     Officer ka signature hi kaafi hai". Authority 2 stays in the quiz settings but
+     is not printed.{% endcomment %}
+  <div class="abs sig" style="left:199mm; top:143mm">
     {% if c_sig1 %}<img src="{{ c_sig1 }}" alt="">{% else %}<div class="pad"></div>{% endif %}
     <div class="ln"><div class="nm">{{ c_auth1_name }}</div><div class="rl">{{ c_auth1_role }}</div><div class="og">Uplift Live Foundation</div></div>
-  </div>
-  <div class="abs sig" style="left:199mm; top:143mm">
-    {% if c_sig2 %}<img src="{{ c_sig2 }}" alt="">{% else %}<div class="pad"></div>{% endif %}
-    <div class="ln"><div class="nm">{{ c_auth2_name }}</div><div class="rl">{{ c_auth2_role }}</div><div class="og">Uplift Live Foundation</div></div>
   </div>
 
   {% if c_qr %}<div class="abs qr" style="left:30mm; top:177mm"><img src="{{ c_qr }}" alt="QR code to verify this certificate"></div>{% endif %}
