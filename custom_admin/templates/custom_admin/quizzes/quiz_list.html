@@ -74,7 +74,10 @@
         {% if item.my_attempt %}
         <div class="sqz-my-score">Your score: <b>{{ item.my_attempt.percentage|floatformat:0 }}%</b> {% if item.my_attempt.passed %}✅{% else %}❌{% endif %}</div>
         {% endif %}
-        {% if item.locked %}
+        {% if item.pending and not item.locked %}
+        <div class="sqz-pending">📝 {% if lang == 'hi' %}अधूरा है{% else %}Unfinished{% endif %}{% if item.pending.total %} · {{ item.pending.answered }}/{{ item.pending.total }}{% endif %}</div>
+        <a class="sqz-go sqz-go-pending" href="{% url 'quiz_landing' item.quiz.slug %}">{% if lang == 'hi' %}पूरा करें →{% else %}Complete Quiz →{% endif %}</a>
+        {% elif item.locked %}
         <a class="sqz-go sqz-go-done" href="{% url 'quiz_result' pk=item.my_attempt.id %}">View Result →</a>
         {% elif item.my_attempt %}
         <a class="sqz-go" href="{% url 'quiz_landing' item.quiz.slug %}">Try Again →</a>
@@ -164,6 +167,8 @@
   .sqz-card:hover .sqz-icon-badge{ transform:scale(1.08) rotate(-4deg); }
   .sqz-card:hover .sqz-go{ filter:brightness(1.06); }
   .sqz-card.sqz-locked{ opacity:.88; }
+  .sqz-pending{ margin:6px 0 2px; font-size:13px; font-weight:700; color:var(--gold-hi); }
+  .sqz-go.sqz-go-pending{ box-shadow:0 0 0 2px var(--gold-hi); }
   .sqz-card.sqz-locked .sqz-media{ filter:grayscale(.3); }
 
   .sqz-media{

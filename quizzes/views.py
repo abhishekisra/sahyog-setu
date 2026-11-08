@@ -999,6 +999,10 @@ class QuizListView(View):
             )
             for a in my_attempts:
                 my_attempts_by_quiz.setdefault(a.quiz_id, a)
+        # Unfinished attempts -> card shows "Adhoora" + "Complete" button
+        # (same rule as the site-wide reminder strip, quizzes/reminder.py).
+        from .reminder import pending_quizzes
+        pending_by_quiz = {p["quiz"].id: p for p in pending_quizzes(request.user)}
 
         quizzes = []
         for quiz in Quizzes.objects.filter(status=True).order_by("id"):
@@ -1033,6 +1037,7 @@ class QuizListView(View):
                 # matching passed-only check in QuizTakeView.get).
                 "my_attempt": my_attempt,
                 "locked": bool(my_attempt) and my_attempt.passed and quiz.one_attempt_only,
+                "pending": pending_by_quiz.get(quiz.id),
             })
         return render(request, "custom_admin/quizzes/quiz_list.html", {
             "quizzes": quizzes,

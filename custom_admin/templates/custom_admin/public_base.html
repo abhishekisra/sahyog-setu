@@ -505,6 +505,33 @@
         </div>
         {% endif %}
 
+        {% if quiz_pending %}
+        {# 2026-11-08: unfinished-quiz reminder (quizzes/reminder.py) #}
+        <div id="ssq-qrem" role="status">
+            <span class="ssq-qrem-ic" aria-hidden="true">📝</span>
+            <div class="ssq-qrem-txt">
+                {% with q=quiz_pending.0 %}
+                <b>{% if lang == 'hi' %}आपका क्विज़ अधूरा है — पूरा करें{% else %}Your quiz is unfinished — complete it{% endif %}</b>
+                <span>{{ q.quiz.title }}{% if q.total %} · {{ q.answered }}/{{ q.total }} {% if lang == 'hi' %}सवाल हो चुके{% else %}answered{% endif %}{% endif %}{% if not q.resumable %} · {% if lang == 'hi' %}समय निकल गया, फिर से शुरू करें{% else %}time ran out, start again{% endif %}{% endif %}{% if quiz_pending|length > 1 %} · +{{ quiz_pending|length|add:"-1" }} {% if lang == 'hi' %}और{% else %}more{% endif %}{% endif %}</span>
+                {% endwith %}
+            </div>
+            <a class="ssq-qrem-go" href="{% if quiz_pending|length > 1 %}/quizzes/{% else %}{% url 'quiz_landing' quiz_pending.0.quiz.slug %}{% endif %}">{% if lang == 'hi' %}पूरा करें →{% else %}Complete →{% endif %}</a>
+            <button type="button" class="ssq-qrem-x" aria-label="Close" onclick="document.getElementById('ssq-qrem').remove();try{sessionStorage.setItem('ssqQrem','1')}catch(e){}">×</button>
+        </div>
+        <style>
+            #ssq-qrem{display:flex;align-items:center;gap:12px;max-width:1100px;margin:12px auto 0;padding:10px 14px;background:#213627;color:#f4efe1;border:1px solid rgba(201,162,39,.45);border-radius:12px;font-size:14px;line-height:1.35}
+            #ssq-qrem .ssq-qrem-ic{font-size:22px;flex-shrink:0}
+            #ssq-qrem .ssq-qrem-txt{flex:1;min-width:0;display:flex;flex-direction:column;gap:2px}
+            #ssq-qrem .ssq-qrem-txt b{color:#ffd75e}
+            #ssq-qrem .ssq-qrem-txt span{color:#adc2b1;font-size:13px}
+            #ssq-qrem .ssq-qrem-go{flex-shrink:0;background:#c9a227;color:#122019;font-weight:700;padding:8px 14px;border-radius:999px;text-decoration:none;white-space:nowrap}
+            #ssq-qrem .ssq-qrem-go:hover{background:#ffd75e}
+            #ssq-qrem .ssq-qrem-x{flex-shrink:0;background:none;border:0;color:#adc2b1;font-size:22px;line-height:1;cursor:pointer;padding:0 4px}
+            @media (max-width:560px){#ssq-qrem{margin:10px 12px 0;flex-wrap:wrap}#ssq-qrem .ssq-qrem-txt{flex-basis:calc(100% - 70px)}#ssq-qrem .ssq-qrem-go{margin-left:34px}}
+        </style>
+        <script>try{if(sessionStorage.getItem('ssqQrem')){var e=document.getElementById('ssq-qrem');e&&e.remove();}}catch(e){}</script>
+        {% endif %}
+
         {% block body %}{% endblock %}
     </div>
 
