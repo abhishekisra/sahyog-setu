@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 from . import my_schemes_views
+from . import sitemap_views
 
 urlpatterns = [
     path('central-schemes-viewer/', views.central_category_finder, name='central_category_finder'),
@@ -15,4 +16,5 @@ urlpatterns = [
     path('my-schemes/profile/', my_schemes_views.my_schemes_profile, name='my_schemes_profile'),
     path('my-schemes/save/<int:scheme_id>/', my_schemes_views.toggle_saved, name='my_schemes_toggle_saved'),
     path('my-schemes/saved-ids/', my_schemes_views.saved_ids, name='my_schemes_saved_ids'),
+    path('sitemap-schemes.xml', sitemap_views.sitemap_schemes, name='sitemap_schemes'),   # 2026-11-08 Google visibility
 ]
