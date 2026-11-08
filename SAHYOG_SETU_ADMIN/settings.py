@@ -135,6 +135,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'schemes.hide_source_middleware.HideMySchemeMiddleware',  # 2026-11-08 no 'myScheme' on public pages
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
