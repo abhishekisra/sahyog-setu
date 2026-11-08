@@ -7,6 +7,7 @@ from django.conf import settings
 from occupations import views as Occupations
 from schemes import views as Schemes
 from schemes import age_review_views as SchemeAgeReview
+from schemes import myscheme_update_views as MySchemeUpdates
 from important_portals import views as ImportantPortals
 from testimonials import views as Testimonials
 from news import views as News
@@ -34,6 +35,7 @@ urlpatterns = [
     path('dashboard', views.dashboard, name="adminDashboard"),
     # 2026-11-08: fill missing scheme ages from eligibility text (admin approves each)
     path('manage-schemes/age-suggestions', SchemeAgeReview.age_review, name='scheme_age_review'),
+    path('manage-schemes/myscheme-updates', MySchemeUpdates.myscheme_updates, name='myscheme_updates'),   # 2026-11-08 monthly myScheme check
 
     # Forgot password (logged-OUT admin, OTP via email) -- views existed
     # since before but had no urls.py entry at all, so this whole flow

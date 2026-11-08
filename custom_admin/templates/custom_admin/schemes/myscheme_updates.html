@@ -1,0 +1,32 @@
+{% include 'custom_admin/base.html' %}
+{% include 'custom_admin/navbar.html' %}
+{% block body %}
+<div class="pcoded-main-container"><div class="pcoded-content">
+  <div class="page-header"><div class="page-block"><div class="row align-items-center"><div class="col-md-8">
+    <div class="page-header-title"><h5>myScheme updates</h5></div>
+    <ul class="breadcrumb"><li class="breadcrumb-item"><a href="/admin/dashboard"><i class="feather icon-home"></i></a></li>
+      <li class="breadcrumb-item"><a href="/admin/manage-schemes/schemes">Schemes</a></li><li class="breadcrumb-item"><a href="#!">myScheme updates</a></li></ul>
+  </div></div></div></div>
+  {% for m in messages %}<div class="alert alert-{% if m.tags == 'error' %}danger{% else %}{{ m.tags }}{% endif %}">{{ m }}</div>{% endfor %}
+  <div class="card"><div class="card-body">
+    <p style="margin:0 0 6px">Har mahine myscheme.gov.in se milaan hota hai. Jo badla hai woh yahan dikhta hai — <b>apne aap kuch nahi badalta</b>. Padhkar <b>Approve</b> (naya text lagao) ya <b>Ignore</b> karein.</p>
+    <p style="margin:0">{% if checked_at %}Pichhla check: <span data-ts="{{ checked_at }}"></span> · same: {{ same }} · badle: <b>{{ rows|length }}</b> · myScheme par nahi mile: {{ gone|length }}{% if errors %} · errors: {{ errors }}{% endif %}{% else %}Abhi tak check nahi hua.{% endif %}</p>
+    {% if rows %}<form method="post" style="margin-top:10px" onsubmit="return confirm('Sabhi {{ rows|length }} badlav lagayein?')">{% csrf_token %}<input type="hidden" name="act" value="approve_all"><button class="btn btn-primary btn-sm">Sabhi {{ rows|length }} approve karein</button></form>{% endif %}
+  </div></div>
+  {% for r in rows %}
+  <div class="card"><div class="card-body">
+    <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap"><b>[{{ r.id }}] <a href="/scheme-viewer/?scheme={{ r.id }}" target="_blank" rel="noopener">{{ r.title }}</a></b>{% if r.status != 1 %}<small>(inactive)</small>{% endif %}
+      <form method="post" style="margin-left:auto;display:flex;gap:6px">{% csrf_token %}<input type="hidden" name="id" value="{{ r.id }}">
+        <button class="btn btn-success btn-sm" name="act" value="approve">Approve</button><button class="btn btn-outline-secondary btn-sm" name="act" value="ignore">Ignore</button></form></div>
+    {% for f in r.fields %}
+    <div style="margin-top:8px"><b>{{ f.label }}</b>
+      <div class="row"><div class="col-md-6" style="font-size:12px"><small style="color:#b91c1c">Abhi:</small><div style="background:#fef2f2;padding:6px;border-radius:6px">{{ f.old|default:"—" }}</div></div>
+      <div class="col-md-6" style="font-size:12px"><small style="color:#15803d">myScheme par naya:</small><div style="background:#f0fdf4;padding:6px;border-radius:6px">{{ f.new }}</div></div></div></div>
+    {% endfor %}
+  </div></div>
+  {% endfor %}
+  {% if gone %}<div class="card"><div class="card-body"><b>myScheme par ab nahi mile ({{ gone|length }})</b> — shayad band ho gayi; check karke chahein to inactive karein:<br>
+    {% for g in gone %}<a href="/admin/manage-schemes/schemes" style="font-size:12px">[{{ g.id }}] {{ g.title }}</a>{% if not forloop.last %} · {% endif %}{% endfor %}</div></div>{% endif %}
+</div></div>
+<script>document.querySelectorAll('[data-ts]').forEach(function(e){e.textContent=new Date(+e.dataset.ts*1000).toLocaleString('en-IN');});</script>
+{% endblock %}
