@@ -55,6 +55,14 @@
         {% endif %}
 
         {% if not is_pretest %}
+        {# 2026-11-08 (user: "5 karo"): point quiz-takers to "Schemes for me" #}
+        <div class="sq-notice" style="margin-top:14px">
+          <p>{% if lang == 'hi' %}<strong>★ आपके लिए कौन सी सरकारी योजनाएँ हैं?</strong> अपनी उम्र, राज्य और काम बताइए — हम आपके लिए सही योजनाएँ छाँटकर दिखाएँगे।{% else %}<strong>★ Which government schemes are for you?</strong> Tell us your age, state and work — we'll pick the right schemes for you.{% endif %}</p>
+          <a href="/my-schemes/" class="sq-btn-outline">{% if lang == 'hi' %}मेरे लिए योजनाएँ देखें →{% else %}See schemes for me →{% endif %}</a>
+        </div>
+        {% endif %}
+
+        {% if not is_pretest %}
         <div class="sq-share-section">
           <span class="sq-share-title">{% if lang == 'hi' %}क्विज़ साझा करें{% else %}Share Quiz{% endif %}</span>
           <div class="sq-share-grid">

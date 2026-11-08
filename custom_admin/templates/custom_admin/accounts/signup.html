@@ -31,6 +31,7 @@
 
         <form method="post" novalidate class="sq-form">
           {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">   {# 2026-11-08: back to where the visitor came from (e.g. /my-schemes/) #}
           <input type="hidden" name="lang" value="{{ lang }}">
 
           <div class="sq-field">

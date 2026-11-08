@@ -41,6 +41,17 @@ LOGIN_ATTEMPT_LIMIT = 5
 LOGIN_ATTEMPT_WINDOW = 15 * 60  # seconds
 
 
+def _safe_next(request, url):
+    """2026-11-08: only follow ?next= inside this site. LoginView redirected to
+    any URL it was given (open redirect: /accounts/login/?next=https://evil.example
+    sent people off-site after logging in); SignupView ignored next entirely."""
+    from django.utils.http import url_has_allowed_host_and_scheme
+    url = (url or '').strip()
+    if url and url_has_allowed_host_and_scheme(url, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
+        return url
+    return settings.LOGIN_REDIRECT_URL
+
+
 class SignupView(View):
 
     def _context(self, form, lang='en'):
@@ -73,7 +84,9 @@ class SignupView(View):
 
     def get(self, request):
         lang = clean_language(request.GET.get('lang', 'en'))
-        return render(request, 'custom_admin/accounts/signup.html', self._context(SignupForm(), lang))
+        ctx = self._context(SignupForm(), lang)
+        ctx['next'] = _safe_next(request, request.GET.get('next')) if request.GET.get('next') else ''
+        return render(request, 'custom_admin/accounts/signup.html', ctx)
 
     def post(self, request):
         lang = clean_language(request.POST.get('lang') or request.GET.get('lang', 'en'))
@@ -81,19 +94,21 @@ class SignupView(View):
         if form.is_valid():
             user = form.save()
             login(request, user)
-            return redirect(settings.LOGIN_REDIRECT_URL)
-        return render(request, 'custom_admin/accounts/signup.html', self._context(form, lang))
+            return redirect(_safe_next(request, request.POST.get('next') or request.GET.get('next')))
+        ctx = self._context(form, lang)
+        ctx['next'] = request.POST.get('next', '')
+        return render(request, 'custom_admin/accounts/signup.html', ctx)
 
 
 class LoginView(View):
 
     def get(self, request):
-        return render(request, 'custom_admin/accounts/login.html', {'next': request.GET.get('next', '')})
+        return render(request, 'custom_admin/accounts/login.html', {'next': _safe_next(request, request.GET.get('next')) if request.GET.get('next') else ''})
 
     def post(self, request):
         mobile = request.POST.get('mobile', '').strip()
         password = request.POST.get('password', '')
-        next_url = request.POST.get('next') or settings.LOGIN_REDIRECT_URL
+        next_url = _safe_next(request, request.POST.get('next'))
 
         cache_key = f'login_attempts_{mobile}'
         attempts = cache.get(cache_key, 0)
@@ -172,7 +187,7 @@ class GoogleLoginView(View):
         return JsonResponse({
             'ok': True,
             'needsProfile': not bool(user.mobile),
-            'next': body.get('next') or settings.LOGIN_REDIRECT_URL,
+            'next': _safe_next(request, body.get('next')),
         })
 
 
@@ -187,7 +202,7 @@ class CompleteProfileView(View):
         if not request.user.is_authenticated:
             return redirect('login')
         if request.user.mobile:
-            return redirect(request.GET.get('next') or settings.LOGIN_REDIRECT_URL)
+            return redirect(_safe_next(request, request.GET.get('next')))
         return render(request, 'custom_admin/accounts/complete_profile.html', {
             'next': request.GET.get('next', ''),
         })
@@ -200,7 +215,7 @@ class CompleteProfileView(View):
         dob = request.POST.get('date_of_birth', '').strip()
         lat = request.POST.get('latitude', '').strip()
         lng = request.POST.get('longitude', '').strip()
-        next_url = request.POST.get('next') or settings.LOGIN_REDIRECT_URL
+        next_url = _safe_next(request, request.POST.get('next'))
 
         errors = {}
         if not mobile.isdigit() or len(mobile) != 10:
