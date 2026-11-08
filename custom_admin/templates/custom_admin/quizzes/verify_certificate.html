@@ -10,6 +10,12 @@
 {% endblock %}
 
 {% block body %}
+<style>
+  .sq-verify-form{margin:16px 0 4px;display:flex;flex-direction:column;gap:8px}
+  .sq-verify-row{display:flex;gap:8px;flex-wrap:wrap}
+  .sq-verify-row input{flex:1;min-width:180px;padding:10px 12px;border-radius:10px;border:1px solid rgba(201,162,39,.6);font:inherit;text-transform:uppercase}
+  .sq-verify-btn{padding:10px 18px;border-radius:10px;border:0;cursor:pointer}
+</style>
 <div class="sq-page" id="sqVerifyPage">
   <header class="sq-head">
     <div class="sq-head-inner">
@@ -25,7 +31,14 @@
         <div class="sq-eyebrow">Certificate</div>
         <h1 class="sq-title">Certificate Verification</h1>
 
-        {% if attempt %}
+        {% if lookup %}
+        <p class="sq-sub">Enter the certificate ID to check that a Sahyog Setu certificate is genuine.</p>
+        <form class="sq-verify-form" method="get" action="{% url 'verify_certificate_lookup' %}">
+          <label for="sqCertId" class="sq-sub">Certificate ID (printed on the certificate, e.g. SAHYOG/10/26/12)</label>
+          <div class="sq-verify-row"><input id="sqCertId" name="id" required maxlength="40" placeholder="SAHYOG/MM/YY/NN" autocomplete="off" value="{{ cert_id }}">
+          <button type="submit" class="sq-link sq-verify-btn">Verify</button></div>
+        </form>
+        {% elif attempt %}
         <div class="sq-status sq-status-ok">✅ Valid Certificate</div>
         <div class="sq-details">
           <div class="sq-row"><span class="sq-k">Name</span><span class="sq-v">{{ attempt.name }}</span></div>
@@ -37,6 +50,11 @@
         {% else %}
         <div class="sq-status sq-status-bad">❌ Not Found</div>
         <p class="sq-sub">No valid certificate was found for ID <strong>{{ cert_id }}</strong>. Please check the ID and try again.</p>
+        <form class="sq-verify-form" method="get" action="{% url 'verify_certificate_lookup' %}">
+          <label for="sqCertId" class="sq-sub">Certificate ID (printed on the certificate, e.g. SAHYOG/10/26/12)</label>
+          <div class="sq-verify-row"><input id="sqCertId" name="id" required maxlength="40" placeholder="SAHYOG/MM/YY/NN" autocomplete="off" value="{{ cert_id }}">
+          <button type="submit" class="sq-link sq-verify-btn">Verify</button></div>
+        </form>
         {% endif %}
 
         <p class="sq-footer-link"><a href="/" class="sq-link">Back to Home</a></p>

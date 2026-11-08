@@ -21,6 +21,7 @@ urlpatterns = [
     # and contain literal "/" characters, which <str:> can't match at all
     # (it explicitly excludes "/"). <path:> matches any character including
     # "/", and {% url %}/reverse() interpolate it back out the same way.
+    path('certificate/verify/', views.verify_certificate_lookup, name='verify_certificate_lookup'),
     path('certificate/verify/<path:cert_id>/', views.verify_certificate, name='verify_certificate'),
     path('quiz-analytics/', views.QuizAnalyticsView.as_view(), name='quiz_analytics'),
     path('trainer/login/', views.TrainerLoginView.as_view(), name='trainer_login'),

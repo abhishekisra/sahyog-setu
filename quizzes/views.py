@@ -1898,6 +1898,16 @@ class CertificateStoryDownloadView(View):
         return response
 
 
+def verify_certificate_lookup(request):
+    """2026-11-08: public "type your certificate ID" page (the website links
+    here as "Verify a Certificate"); ?id=... goes to the normal result page."""
+    cid = " ".join((request.GET.get("id") or "").split()).strip("/ ").upper()[:40]
+    if cid:
+        return redirect("verify_certificate", cert_id=cid)
+    return render(request, "custom_admin/quizzes/verify_certificate.html",
+                  {"cert_id": "", "attempt": None, "lookup": True, "lang": "en", "languages": []})
+
+
 def verify_certificate(request, cert_id):
     # Public, no login -- deliberately does not select_related("user") into
     # the template with mobile/email fields; the template only ever
