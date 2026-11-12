@@ -16,5 +16,6 @@ urlpatterns = [
     path('my-schemes/profile/', my_schemes_views.my_schemes_profile, name='my_schemes_profile'),
     path('my-schemes/save/<int:scheme_id>/', my_schemes_views.toggle_saved, name='my_schemes_toggle_saved'),
     path('my-schemes/saved-ids/', my_schemes_views.saved_ids, name='my_schemes_saved_ids'),
+    path('my-schemes/eligible-count/', my_schemes_views.eligible_count, name='my_schemes_eligible_count'),
     path('sitemap-schemes.xml', sitemap_views.sitemap_schemes, name='sitemap_schemes'),   # 2026-11-08 Google visibility
 ]

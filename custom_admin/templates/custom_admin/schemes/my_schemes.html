@@ -91,10 +91,44 @@ Views: schemes/my_schemes_views.py. Same palette/font as scheme_finder.html.
   .ms-toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--brand-deeper);color:#fff;padding:10px 18px;border-radius:999px;font-weight:600;font-size:14.5px;z-index:9999;opacity:0;pointer-events:none;transition:opacity .2s;}
   .ms-toast.show{opacity:1;}
   @media (prefers-reduced-motion:reduce){.ms-toast{transition:none;}}
+.elig-card{display:flex;align-items:center;justify-content:space-between;gap:24px;background:linear-gradient(135deg,#17301f,#1f4a30);color:#fff;border-radius:16px;padding:22px 28px;margin:0 0 24px;box-shadow:0 10px 28px rgba(0,0,0,.18)}
+.elig-left{display:flex;align-items:center;gap:20px}
+.elig-count{min-width:76px;height:76px;padding:0 10px;border-radius:999px;background:#ffd84d;color:#17301f;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:30px;line-height:1}
+.elig-text h3{margin:0 0 6px;font-size:19px;color:#ffd84d;text-align:left}
+.elig-text p{margin:0;font-size:14px;color:#fff;opacity:.9;max-width:560px;text-align:left}
+.elig-btn{white-space:nowrap;background:linear-gradient(135deg,#ffe07a,#e2b532);color:#17301f!important;font-weight:700;padding:12px 22px;border-radius:999px;text-decoration:none!important}
+.elig-btn:hover{filter:brightness(1.05)}
+.elig-card.empty .elig-count{background:#ffffff22;color:#fff}
+@media(max-width:700px){.elig-card{flex-direction:column;text-align:center;padding:20px 18px}.elig-text h3,.elig-text p{text-align:center}.elig-left{flex-direction:column}.elig-btn{width:100%;text-align:center}}
 </style>
 
 <div class="ms-page">
   <div class="ms-wrap">
+    {% if not logged_out %}{# 2026-11-12: eligibility summary card (user's design) #}
+    {% if account.age and account.state_id and account.occupation_id %}
+    <div class="elig-card" id="eligCard">
+      <div class="elig-left">
+        <div class="elig-count">{{ total_count }}</div>
+        <div class="elig-text">
+          <h3>{% if lang == 'hi' %}योजनाएं जिनके आप पात्र हो सकते हैं{% else %}Schemes You May Be Eligible For{% endif %}</h3>
+          <p>{% if total_count %}{% if lang == 'hi' %}आपकी प्रोफ़ाइल के आधार पर आप {{ total_count }} सरकारी योजनाओं के पात्र हो सकते हैं। जो आपके काम की हैं उन्हें देखें और सेव करें।{% else %}You may be eligible for {{ total_count }} government scheme{{ total_count|pluralize }} based on your profile. Review and save the ones relevant to you.{% endif %}{% else %}{% if lang == 'hi' %}आपकी अभी की प्रोफ़ाइल से कोई योजना नहीं मिली। और योजनाएं देखने के लिए नीचे जानकारी अपडेट करें।{% else %}No matching schemes found for your current profile. Update your details below to discover more.{% endif %}{% endif %}</p>
+        </div>
+      </div>
+      <a href="#ms-results" class="elig-btn">{% if lang == 'hi' %}पात्र योजनाएं देखें →{% else %}View Eligible Schemes →{% endif %}</a>
+    </div>
+    {% else %}
+    <div class="elig-card empty" id="eligCard">
+      <div class="elig-left">
+        <div class="elig-count">!</div>
+        <div class="elig-text">
+          <h3>{% if lang == 'hi' %}योजनाएं जिनके आप पात्र हो सकते हैं{% else %}Schemes You May Be Eligible For{% endif %}</h3>
+          <p>{% if lang == 'hi' %}अपनी प्रोफ़ाइल (उम्र, राज्य और व्यवसाय) पूरी करें, ताकि हम आपके लिए सही योजनाएं दिखा सकें।{% else %}Complete your profile (age, state and occupation) to see the schemes you qualify for.{% endif %}</p>
+        </div>
+      </div>
+      <a href="/accounts/complete-profile/" class="elig-btn">{% if lang == 'hi' %}प्रोफ़ाइल पूरी करें →{% else %}Complete Profile →{% endif %}</a>
+    </div>
+    {% endif %}
+    {% endif %}
     <section class="ms-hero">
       <div class="ms-eyebrow">★ {% if lang == 'hi' %}आपके लिए चुनी गई{% else %}Picked for you{% endif %}</div>
       <h1>{% if lang == 'hi' %}मेरे लिए योजनाएं{% else %}Schemes for me{% endif %}</h1>

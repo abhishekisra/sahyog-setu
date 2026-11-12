@@ -105,3 +105,20 @@ def saved_ids(request):
         return JsonResponse({"auth": False, "ids": []})
     ids = list(SavedScheme.objects.filter(user=request.user).values_list("scheme_id", flat=True))
     return JsonResponse({"auth": True, "ids": ids})
+
+
+def eligible_count(request):
+    """GET /my-schemes/eligible-count/ -> the summary card on the homepage (2026-11-12)."""
+    if not request.user.is_authenticated:
+        resp = JsonResponse({"loggedIn": False})
+    else:
+        u = request.user
+        missing = [f for f, v in (("age", u.age), ("state", u.state_id), ("occupation", u.occupation_id)) if not v]
+        if missing:
+            resp = JsonResponse({"loggedIn": True, "profileComplete": False, "missing": missing})
+        else:
+            results = match_schemes(person_from_user(u), "en")
+            resp = JsonResponse({"loggedIn": True, "profileComplete": True, "count": len(results),
+                                 "targeted": sum(1 for r in results if r["targeted"])})
+    resp["Cache-Control"] = "private, no-store"
+    return resp
