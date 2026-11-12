@@ -2524,67 +2524,6 @@
 })();
 </script>
 
-<!-- 2026-11-08 (user: "5 karo"): "Schemes for me" banner on the homepage, right
-     under the top slider (React build has no source; injected like the other ssq- parts). -->
-<style id="ssq-forme-style">
-  #ssq-forme{max-width:1140px;margin:18px auto;padding:0 14px}
-  #ssq-forme .ssq-forme-card{display:flex;align-items:center;gap:16px;flex-wrap:wrap;background:linear-gradient(135deg,#14301f,#1f4d33);color:#fff;border-radius:16px;padding:16px 20px;box-shadow:0 10px 26px -10px rgba(20,48,31,.55)}
-  #ssq-forme .ssq-forme-txt{flex:1 1 260px}
-  #ssq-forme b{display:block;font-size:18px;color:#ffd75e;margin-bottom:2px}
-  #ssq-forme span{font-size:14px;opacity:.95}
-  #ssq-forme a{background:linear-gradient(165deg,#ffe58a,#ffd75e 45%,#c9a227);color:#14301f;font-weight:800;padding:11px 20px;border-radius:30px;text-decoration:none;white-space:nowrap}
-  @media (max-width:600px){#ssq-forme b{font-size:16px}#ssq-forme a{width:100%;text-align:center}}
-</style>
-<script id="ssq-forme-js">
-(function(){
-  if(location.pathname!=='/')return;
-  function add(){
-    // the TOP slider only (React draws it late; other carousels further down must not be used)
-    var car=[].filter.call(document.querySelectorAll('.owl-carousel'),function(c){return c.getBoundingClientRect().top+window.scrollY<700;})[0];
-    if(!car)return false;
-    var host=car.closest('section')||car.parentElement;if(!host||!host.parentNode)return false;
-    var d=document.getElementById('ssq-forme');
-    if(d){if(d.previousSibling===host)return true;host.parentNode.insertBefore(d,host.nextSibling);return true;}
-    d=document.createElement('div');d.id='ssq-forme';
-    d.innerHTML='<div class="ssq-forme-card"><div class="ssq-forme-txt"><b>★ Aapke liye kaunsi yojanayein?</b><span>Apni age, rajya aur kaam batayein — hum aapke liye sahi sarkari yojanayein chhaant kar dikhayenge, aur aap unhe save bhi kar sakte hain.</span></div><a href="/my-schemes/">Mere liye yojanayein dekhein →</a></div>';
-    host.parentNode.insertBefore(d,host.nextSibling);return true;
-  }
-  if(add())return;
-  var mo=new MutationObserver(function(){if(add())mo.disconnect();});
-  mo.observe(document.documentElement,{childList:true,subtree:true});
-  setTimeout(function(){mo.disconnect();},20000);
-})();
-</script>
-<style id="ssq-elig-sum-style">
-#ssq-forme .elig-card{display:flex;align-items:center;justify-content:space-between;gap:24px;background:linear-gradient(135deg,#17301f,#1f4a30);color:#fff;border-radius:16px;padding:22px 28px;box-shadow:0 10px 28px rgba(0,0,0,.18)}
-#ssq-forme .elig-left{display:flex;align-items:center;gap:20px}
-#ssq-forme .elig-count{min-width:76px;height:76px;padding:0 10px;border-radius:999px;background:#ffd84d;color:#17301f;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:30px;line-height:1}
-#ssq-forme .elig-text h3{margin:0 0 6px;font-size:19px;color:#ffd84d;text-align:left}
-#ssq-forme .elig-text p{margin:0;font-size:14px;color:#fff;opacity:.9;max-width:560px;text-align:left}
-#ssq-forme a.elig-btn{white-space:nowrap;background:linear-gradient(135deg,#ffe07a,#e2b532);color:#17301f;font-weight:700;padding:12px 22px;border-radius:999px;text-decoration:none;width:auto}
-#ssq-forme a.elig-btn:hover{filter:brightness(1.05)}
-#ssq-forme .elig-card.empty .elig-count{background:#ffffff22;color:#fff}
-@media(max-width:700px){#ssq-forme .elig-card{flex-direction:column;text-align:center;padding:20px 18px}#ssq-forme .elig-text h3,#ssq-forme .elig-text p{text-align:center}#ssq-forme .elig-left{flex-direction:column}#ssq-forme a.elig-btn{width:100%;text-align:center}}
-</style>
-<script id="ssq-elig-sum-js">
-/* 2026-11-12: logged-in users see their eligible-scheme count in the "Schemes for me" card (#ssq-forme). */
-(function(){
-  if(location.pathname!=='/')return;
-  var data=null,tries=0;
-  function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  function render(){
-    var host=document.getElementById('ssq-forme');
-    if(!host){if(++tries<80)setTimeout(render,250);return;}
-    if(!data||!data.loggedIn||host.getAttribute('data-elig'))return;
-    host.setAttribute('data-elig','1');
-    var h='Schemes You May Be Eligible For',n,sub,btn,href,cls='elig-card';
-    if(data.profileComplete===false){cls+=' empty';n='!';sub='Complete your profile (age, state and occupation) to see the schemes you qualify for.';btn='Complete Profile →';href='/accounts/complete-profile/';}
-    else{var c=Number(data.count)||0;n=c;sub=c?('You may be eligible for '+c+' government scheme'+(c>1?'s':'')+' based on your profile. Review and save the ones relevant to you.'):'No matching schemes found for your current profile. Update your details to discover more.';btn='View Eligible Schemes →';href='/my-schemes/';}
-    host.innerHTML='<div class="'+cls+'"><div class="elig-left"><div class="elig-count">'+esc(n)+'</div><div class="elig-text"><h3>'+esc(h)+'</h3><p>'+esc(sub)+'</p></div></div><a class="elig-btn" href="'+href+'">'+esc(btn)+'</a></div>';
-  }
-  fetch('/my-schemes/eligible-count/',{credentials:'same-origin',cache:'no-store'}).then(function(r){return r.ok?r.json():null;}).then(function(d){data=d;render();}).catch(function(){});
-})();
-</script>
 </body>
 
 </html>
