@@ -1,0 +1,470 @@
+{
+ "35 seconds per question, 10 marks for every correct answer — once you move ahead you cannot go back.": {
+  "hi": "हर प्रश्न के लिए 35 सेकंड, हर सही उत्तर के 10 अंक — एक बार आगे बढ़ने के बाद आप वापस नहीं जा सकते।"
+ },
+ "Add more details for a sharper list": {
+  "hi": "और जानकारी दें, सूची और सटीक बनाएं"
+ },
+ "Age": {
+  "hi": "उम्र"
+ },
+ "All Questions": {
+  "hi": "सभी प्रश्न"
+ },
+ "All categories": {
+  "hi": "सभी श्रेणियां"
+ },
+ "All optional. \"Not sure / prefer not to say\" never hides a scheme. This is only used to build your list.": {
+  "hi": "सब वैकल्पिक है। \"पता नहीं / नहीं बताना\" चुनने पर कोई योजना नहीं छूटेगी। यह जानकारी सिर्फ आपकी सूची बनाने में इस्तेमाल होती है।"
+ },
+ "All you may qualify for": {
+  "hi": "सभी योग्य"
+ },
+ "Answer Review": {
+  "hi": "उत्तर समीक्षा"
+ },
+ "Answer could not be saved — check your network.": {
+  "hi": "उत्तर सेव नहीं हो सका — अपना नेटवर्क जांचें।"
+ },
+ "Applicants must be between {0} and {1} years of age.": {
+  "hi": "आवेदक की आयु {0} से {1} वर्ष के बीच होनी चाहिए।"
+ },
+ "Are you taking this quiz after attending a training?": {
+  "hi": "Kya aap kisi training ke baad ye quiz de rahe hain?"
+ },
+ "Back to Home": {
+  "hi": "होम पर वापस जाएं"
+ },
+ "Based on the details in your account. The more you tell us, the sharper this list gets.": {
+  "hi": "आपके खाते की जानकारी के आधार पर। जितनी ज़्यादा जानकारी देंगे, सूची उतनी सटीक होगी।"
+ },
+ "Before-training test done": {
+  "hi": "ट्रेनिंग से पहले का टेस्ट पूरा हुआ"
+ },
+ "Before-training test — right/wrong isn't shown here; just answer as best you can.": {
+  "hi": "ट्रेनिंग से पहले का टेस्ट — इसमें सही/गलत नहीं बताया जाएगा, बस अपनी समझ से उत्तर दें।"
+ },
+ "Buddhist": {
+  "hi": "बौद्ध"
+ },
+ "Category": {
+  "hi": "श्रेणी"
+ },
+ "Christian": {
+  "hi": "ईसाई"
+ },
+ "Complete Profile →": {
+  "hi": "प्रोफ़ाइल पूरी करें →"
+ },
+ "Complete Quiz →": {
+  "hi": "पूरा करें →"
+ },
+ "Complete your profile": {
+  "hi": "प्रोफ़ाइल पूरी करें"
+ },
+ "Complete your profile (age, state and occupation) to see the schemes you qualify for.": {
+  "hi": "अपनी प्रोफ़ाइल (उम्र, राज्य और व्यवसाय) पूरी करें, ताकि हम आपके लिए सही योजनाएं दिखा सकें।"
+ },
+ "Complete →": {
+  "hi": "पूरा करें →"
+ },
+ "Congratulations!": {
+  "hi": "बधाई हो!"
+ },
+ "Copy Link": {
+  "hi": "लिंक कॉपी करें"
+ },
+ "Correct": {
+  "hi": "सही"
+ },
+ "Correct answer! 🎉": {
+  "hi": "सही उत्तर! 🎉"
+ },
+ "Correct answer:": {
+  "hi": "सही उत्तर:"
+ },
+ "Create an account": {
+  "hi": "नया खाता बनाएं"
+ },
+ "Divorced": {
+  "hi": "तलाकशुदा"
+ },
+ "Do you have a disability?": {
+  "hi": "क्या आप दिव्यांग हैं?"
+ },
+ "Does this scheme offer Direct Benefit Transfer (DBT)?": {
+  "hi": "क्या इस योजना का लाभ DBT (Direct Benefit Transfer) से मिलता है?"
+ },
+ "Family income per year": {
+  "hi": "परिवार की सालाना आय"
+ },
+ "Female": {
+  "hi": "महिला"
+ },
+ "General": {
+  "hi": "सामान्य"
+ },
+ "Government Scheme · Knowledge Test": {
+  "hi": "सरकारी योजना · ज्ञान परीक्षण"
+ },
+ "Hindu": {
+  "hi": "हिंदू"
+ },
+ "How can I apply for this scheme?": {
+  "hi": "इस योजना के लिए आवेदन कैसे करें?"
+ },
+ "Is there a category restriction for this scheme?": {
+  "hi": "क्या इस योजना में श्रेणी (जाति) संबंधी कोई शर्त है?"
+ },
+ "Is there a marital status requirement for this scheme?": {
+  "hi": "क्या वैवाहिक स्थिति की कोई शर्त है?"
+ },
+ "Is there a religion-based restriction for this scheme?": {
+  "hi": "क्या इस योजना में धर्म संबंधी कोई शर्त है?"
+ },
+ "Is there an income limit for this scheme?": {
+  "hi": "क्या इस योजना के लिए आय की कोई सीमा है?"
+ },
+ "Is this scheme applicable across India?": {
+  "hi": "क्या यह योजना पूरे भारत में लागू है?"
+ },
+ "Jain": {
+  "hi": "जैन"
+ },
+ "JavaScript must be enabled to take this quiz.": {
+  "hi": "यह क्विज़ लेने के लिए जावास्क्रिप्ट सक्षम होना आवश्यक है।"
+ },
+ "Just for you": {
+  "hi": "खास आपके लिए"
+ },
+ "Keep Practicing!": {
+  "hi": "अभ्यास जारी रखें!"
+ },
+ "Log in": {
+  "hi": "लॉगिन करें"
+ },
+ "Log in to see your schemes": {
+  "hi": "अपनी योजनाएं देखने के लिए लॉगिन करें"
+ },
+ "Login to Start Quiz →": {
+  "hi": "लॉगिन करके क्विज़ शुरू करें →"
+ },
+ "Male": {
+  "hi": "पुरुष"
+ },
+ "Marital status": {
+  "hi": "वैवाहिक स्थिति"
+ },
+ "Married": {
+  "hi": "विवाहित"
+ },
+ "Missed": {
+  "hi": "छूटे"
+ },
+ "More than ₹8,00,000": {
+  "hi": "₹8,00,000 से ज़्यादा"
+ },
+ "Muslim": {
+  "hi": "मुस्लिम"
+ },
+ "Mute sound": {
+  "hi": "ध्वनि म्यूट करें"
+ },
+ "My training isn't listed": {
+  "hi": "Mere training ka naam list mein nahi hai"
+ },
+ "Next →": {
+  "hi": "अगला →"
+ },
+ "No": {
+  "hi": "नहीं"
+ },
+ "No Religion": {
+  "hi": "कोई धर्म नहीं"
+ },
+ "No matching schemes found for your current profile. Update your details below to discover more.": {
+  "hi": "आपकी अभी की प्रोफ़ाइल से कोई योजना नहीं मिली। और योजनाएं देखने के लिए नीचे जानकारी अपडेट करें।"
+ },
+ "No religion": {
+  "hi": "कोई धर्म नहीं"
+ },
+ "Not answered": {
+  "hi": "उत्तर नहीं दिया"
+ },
+ "OBC": {
+  "hi": "अन्य पिछड़ा वर्ग (OBC)"
+ },
+ "Occupation": {
+  "hi": "व्यवसाय"
+ },
+ "Or without logging in:": {
+  "hi": "या बिना लॉगिन:"
+ },
+ "Parsi": {
+  "hi": "पारसी"
+ },
+ "Particularly Vulnerable Tribal Group (PVTG)": {
+  "hi": "विशेष रूप से कमजोर जनजातीय समूह (PVTG)"
+ },
+ "Picked for you": {
+  "hi": "आपके लिए चुनी गई"
+ },
+ "Question": {
+  "hi": "प्रश्न"
+ },
+ "Questions": {
+  "hi": "प्रश्न"
+ },
+ "Religion": {
+  "hi": "धर्म"
+ },
+ "Retry": {
+  "hi": "फिर से प्रयास करें"
+ },
+ "SC": {
+  "hi": "अनुसूचित जाति (SC)"
+ },
+ "ST": {
+  "hi": "अनुसूचित जनजाति (ST)"
+ },
+ "Save and update my list": {
+  "hi": "सेव करें और सूची अपडेट करें"
+ },
+ "Saved": {
+  "hi": "सेव की गई"
+ },
+ "Schemes": {
+  "hi": "योजनाएं"
+ },
+ "Schemes You May Be Eligible For": {
+  "hi": "योजनाएं जिनके आप पात्र हो सकते हैं"
+ },
+ "Schemes for me": {
+  "hi": "मेरे लिए योजनाएं"
+ },
+ "Score": {
+  "hi": "स्कोर"
+ },
+ "Search": {
+  "hi": "खोजें"
+ },
+ "Search by scheme name…": {
+  "hi": "योजना का नाम खोजें…"
+ },
+ "See all quizzes": {
+  "hi": "सभी प्रश्नोत्तरी देखें"
+ },
+ "See schemes for me →": {
+  "hi": "मेरे लिए योजनाएँ देखें →"
+ },
+ "Separated": {
+  "hi": "अलग रह रहे"
+ },
+ "Share": {
+  "hi": "साझा करें"
+ },
+ "Share Quiz": {
+  "hi": "क्विज़ साझा करें"
+ },
+ "Show more": {
+  "hi": "और दिखाएं"
+ },
+ "Sikh": {
+  "hi": "सिख"
+ },
+ "Skip ⏭": {
+  "hi": "छोड़ें ⏭"
+ },
+ "Skipped": {
+  "hi": "छोड़ दिया"
+ },
+ "Social category": {
+  "hi": "सामाजिक श्रेणी"
+ },
+ "Start Quiz →": {
+  "hi": "क्विज़ शुरू करें →"
+ },
+ "Start before-training test →": {
+  "hi": "ट्रेनिंग से पहले का टेस्ट शुरू करें →"
+ },
+ "Still trying — checking your connection…": {
+  "hi": "फिर से कोशिश कर रहे हैं — आपका कनेक्शन जांच रहे हैं…"
+ },
+ "Streak": {
+  "hi": "स्ट्रीक"
+ },
+ "Submitting your answer…": {
+  "hi": "आपका उत्तर सबमिट हो रहा है…"
+ },
+ "This is a State Government scheme, applicable to residents of {0}.": {
+  "hi": "यह एक राज्य सरकार की योजना है, जो {0} राज्य के निवासियों के लिए है।"
+ },
+ "This quiz is not available right now.": {
+  "hi": "यह क्विज़ अभी उपलब्ध नहीं है।"
+ },
+ "This scheme is available only for: {0}.": {
+  "hi": "यह योजना केवल {0} के लिए उपलब्ध है।"
+ },
+ "This scheme is restricted to individuals of the following religions: {0}.": {
+  "hi": "यह योजना केवल इन धर्मों के लोगों के लिए है: {0}।"
+ },
+ "This scheme is restricted to the following categories: {0}.": {
+  "hi": "यह योजना केवल इन श्रेणियों के लिए है: {0}।"
+ },
+ "This was the before-training test, so answers and certificates aren't shown. Take this quiz again after the training to see how much you learnt.": {
+  "hi": "यह ट्रेनिंग से पहले का टेस्ट था, इसलिए इसमें सही उत्तर और प्रमाणपत्र नहीं दिखाए जाते। ट्रेनिंग के बाद यही क्विज़ दोबारा दें — तब पता चलेगा कि आपने कितना सीखा।"
+ },
+ "Time up ⏳": {
+  "hi": "समय समाप्त ⏳"
+ },
+ "Toggle sound": {
+  "hi": "ध्वनि चालू/बंद करें"
+ },
+ "Total Marks": {
+  "hi": "कुल अंक"
+ },
+ "Town / city (urban)": {
+  "hi": "शहर (शहरी)"
+ },
+ "Transgender": {
+  "hi": "ट्रांसजेंडर"
+ },
+ "Try Again": {
+  "hi": "फिर से प्रयास करें"
+ },
+ "Type the training's name": {
+  "hi": "Training ka naam likhein"
+ },
+ "Unfinished": {
+  "hi": "अधूरा है"
+ },
+ "Unmarried": {
+  "hi": "अविवाहित"
+ },
+ "Unmute sound": {
+  "hi": "ध्वनि चालू करें"
+ },
+ "Up to ₹1,00,000": {
+  "hi": "₹1,00,000 तक"
+ },
+ "Up to ₹2,50,000": {
+  "hi": "₹2,50,000 तक"
+ },
+ "Up to ₹5,00,000": {
+  "hi": "₹5,00,000 तक"
+ },
+ "Up to ₹50,000": {
+  "hi": "₹50,000 तक"
+ },
+ "Up to ₹8,00,000": {
+  "hi": "₹8,00,000 तक"
+ },
+ "View Eligible Schemes →": {
+  "hi": "पात्र योजनाएं देखें →"
+ },
+ "View Leaderboard": {
+  "hi": "लीडरबोर्ड देखें"
+ },
+ "View Results 🏆": {
+  "hi": "परिणाम देखें 🏆"
+ },
+ "Village (rural)": {
+  "hi": "गाँव (ग्रामीण)"
+ },
+ "We use your age, state, occupation and family details to find the government schemes meant for you, and you can save them to look at later.": {
+  "hi": "आपकी उम्र, राज्य, व्यवसाय और परिवार की जानकारी से हम वे सरकारी योजनाएं ढूंढते हैं जो खास आपके लिए हैं, और जिन्हें आप सेव करके बाद में देख सकते हैं।"
+ },
+ "What documents are required for this scheme?": {
+  "hi": "इस योजना के लिए कौन से दस्तावेज़ चाहिए?"
+ },
+ "What is the age limit for this scheme?": {
+  "hi": "इस योजना के लिए आयु सीमा क्या है?"
+ },
+ "Where do you live?": {
+  "hi": "आप कहाँ रहते हैं?"
+ },
+ "Which state is this scheme applicable to?": {
+  "hi": "यह योजना किस राज्य के लिए है?"
+ },
+ "Which training are you about to attend?": {
+  "hi": "Aap kaun si training lene wale hain?"
+ },
+ "Who can apply for this scheme based on gender?": {
+  "hi": "यह योजना किस लिंग के लिए है?"
+ },
+ "Who is eligible for this scheme?": {
+  "hi": "इस योजना के लिए कौन पात्र है?"
+ },
+ "Widowed": {
+  "hi": "विधवा / विधुर"
+ },
+ "Widowed / Widower": {
+  "hi": "विधवा / विधुर"
+ },
+ "Wrong": {
+  "hi": "गलत"
+ },
+ "Wrong answer": {
+  "hi": "गलत उत्तर"
+ },
+ "Yes": {
+  "hi": "हाँ"
+ },
+ "Yes, the annual family income must not exceed Rs. {0:,}.": {
+  "hi": "हाँ, परिवार की वार्षिक आय ₹{0:,} से अधिक नहीं होनी चाहिए।"
+ },
+ "Yes, the benefit of this scheme is transferred directly to the applicant's bank account via Direct Benefit Transfer (DBT).": {
+  "hi": "हाँ, इस योजना का लाभ Direct Benefit Transfer (DBT) के माध्यम से सीधे आवेदक के बैंक खाते में भेजा जाता है।"
+ },
+ "Yes, this is a Central Government scheme applicable across India.": {
+  "hi": "हाँ, यह एक केंद्र सरकार की योजना है जो पूरे भारत में लागू है।"
+ },
+ "You may qualify for": {
+  "hi": "जिनके आप पात्र हो सकते हैं"
+ },
+ "Your account is missing age, gender or state, so this list is less precise.": {
+  "hi": "आपके खाते में उम्र/लिंग/राज्य नहीं है, इसलिए सूची कम सटीक है।"
+ },
+ "Your answer:": {
+  "hi": "आपका उत्तर:"
+ },
+ "Your details": {
+  "hi": "आपकी जानकारी"
+ },
+ "Your list is built automatically from the details you gave when you signed up. A new account takes a minute.": {
+  "hi": "रजिस्ट्रेशन में दी गई जानकारी से आपकी सूची अपने आप बन जाएगी। नया खाता बनाने में एक मिनट लगता है।"
+ },
+ "Your quiz is unfinished — complete it": {
+  "hi": "आपका क्विज़ अधूरा है — पूरा करें"
+ },
+ "answered": {
+  "hi": "सवाल हो चुके"
+ },
+ "more": {
+  "hi": "और"
+ },
+ "per Question": {
+  "hi": "प्रति प्रश्न"
+ },
+ "search all schemes": {
+  "hi": "सभी योजनाएं खोजें"
+ },
+ "seconds left": {
+  "hi": "सेकंड शेष"
+ },
+ "time ran out, start again": {
+  "hi": "समय निकल गया, फिर से शुरू करें"
+ },
+ "to Pass": {
+  "hi": "पास होने के लिए"
+ },
+ "— No, taking it directly —": {
+  "hi": "— Nahi, seedhe de raha/rahi hoon —"
+ },
+ "🏆 View Certificate": {
+  "hi": "🏆 प्रमाणपत्र देखें"
+ },
+ "🔥 Streak ×": {
+  "hi": "🔥 स्ट्रीक ×"
+ }
+}

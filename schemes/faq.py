@@ -127,11 +127,17 @@ def _restriction_labels(raw, label_map, all_set):
 
 
 def build_scheme_faq(data, lang='en'):
-    t = TEXT.get(lang, TEXT['en'])
-    gender_labels_map = GENDER_LABELS.get(lang, GENDER_LABELS['en'])
-    caste_labels_map = CASTE_LABELS.get(lang, CASTE_LABELS['en'])
-    marital_labels_map = MARITAL_LABELS.get(lang, MARITAL_LABELS['en'])
-    religion_labels_map = RELIGION_LABELS.get(lang, RELIGION_LABELS['en'])
+    # 2026-11-23: languages other than en/hi come from languages/ui_strings.json (machine-filled, checked);
+    # a text with no translation yet stays English.
+    from languages.templatetags.ui import ui_text
+
+    def _pick(d):
+        return d.get(lang) or {k: ui_text(v, lang) for k, v in d['en'].items()}
+    t = _pick(TEXT)
+    gender_labels_map = _pick(GENDER_LABELS)
+    caste_labels_map = _pick(CASTE_LABELS)
+    marital_labels_map = _pick(MARITAL_LABELS)
+    religion_labels_map = _pick(RELIGION_LABELS)
 
     faq = []
 

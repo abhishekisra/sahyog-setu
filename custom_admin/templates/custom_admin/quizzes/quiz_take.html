@@ -1,4 +1,5 @@
 {% extends 'custom_admin/public_base.html' %}
+{% load ui %}
 {% load static %}
 
 {% block head %}
@@ -12,7 +13,7 @@
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
       <div class="sq-head-actions">
-        <button class="sq-mute-btn" id="sqMuteBtn" title="{% if lang == 'hi' %}ध्वनि चालू/बंद करें{% else %}Toggle sound{% endif %}" aria-label="{% if lang == 'hi' %}ध्वनि म्यूट करें{% else %}Mute sound{% endif %}">🔊</button>
+        <button class="sq-mute-btn" id="sqMuteBtn" title="{% ui "Toggle sound" %}" aria-label="{% ui "Mute sound" %}">🔊</button>
       </div>
     </div>
   </header>
@@ -24,16 +25,16 @@
       <div class="sq-gold-line"></div>
 
       {% if is_pretest %}
-      <div class="sq-pre-badge">{% if lang == 'hi' %}ट्रेनिंग से पहले का टेस्ट — इसमें सही/गलत नहीं बताया जाएगा, बस अपनी समझ से उत्तर दें।{% else %}Before-training test — right/wrong isn't shown here; just answer as best you can.{% endif %}</div>
+      <div class="sq-pre-badge">{% ui "Before-training test — right/wrong isn't shown here; just answer as best you can." %}</div>
       {% endif %}
       <div class="sq-topbar">
-        <div class="sq-qcount"><span>{% if lang == 'hi' %}प्रश्न{% else %}Question{% endif %}</span> <b id="sqQNow">1</b>/<span id="sqQTot">{{ total_questions }}</span></div>
+        <div class="sq-qcount"><span>{% ui "Question" %}</span> <b id="sqQNow">1</b>/<span id="sqQTot">{{ total_questions }}</span></div>
         <div class="sq-pbar"><div class="sq-pfill" id="sqPfill"></div></div>
       </div>
       <div class="sq-stats">
-        <div class="sq-stat"><div class="v" id="sqSScore">0</div><div class="k">{% if lang == 'hi' %}स्कोर{% else %}Score{% endif %}</div></div>
-        <div class="sq-stat sq-streak"><div class="v" id="sqSStreak">0🔥</div><div class="k">{% if lang == 'hi' %}स्ट्रीक{% else %}Streak{% endif %}</div></div>
-        <div class="sq-stat"><div class="v" id="sqSRight">0</div><div class="k">{% if lang == 'hi' %}सही{% else %}Correct{% endif %}</div></div>
+        <div class="sq-stat"><div class="v" id="sqSScore">0</div><div class="k">{% ui "Score" %}</div></div>
+        <div class="sq-stat sq-streak"><div class="v" id="sqSStreak">0🔥</div><div class="k">{% ui "Streak" %}</div></div>
+        <div class="sq-stat"><div class="v" id="sqSRight">0</div><div class="k">{% ui "Correct" %}</div></div>
       </div>
 
       <div class="sq-qwrap">
@@ -50,20 +51,20 @@
           </div>
           <div class="sq-qhi" id="sqQHi"></div>
           <div class="sq-opts" id="sqOpts"></div>
-          <div class="sq-submitting" id="sqSubmitStatus" hidden><span class="sq-submitting-spinner"></span><span id="sqSubmitStatusText">{% if lang == 'hi' %}आपका उत्तर सबमिट हो रहा है…{% else %}Submitting your answer…{% endif %}</span></div>
+          <div class="sq-submitting" id="sqSubmitStatus" hidden><span class="sq-submitting-spinner"></span><span id="sqSubmitStatusText">{% ui "Submitting your answer…" %}</span></div>
           <div class="sq-explain" id="sqExplain"></div>
           <div class="sq-neterr" id="sqNetErr" hidden>
-            <span>{% if lang == 'hi' %}उत्तर सेव नहीं हो सका — अपना नेटवर्क जांचें।{% else %}Answer could not be saved — check your network.{% endif %}</span>
-            <button type="button" id="sqRetryBtn">{% if lang == 'hi' %}फिर से प्रयास करें{% else %}Retry{% endif %}</button>
+            <span>{% ui "Answer could not be saved — check your network." %}</span>
+            <button type="button" id="sqRetryBtn">{% ui "Retry" %}</button>
           </div>
         </div>
       </div>
 
       <div class="sq-qfoot">
-        <button type="button" class="sq-btn sq-skip" id="sqSkipBtn">{% if lang == 'hi' %}छोड़ें ⏭{% else %}Skip ⏭{% endif %}</button>
-        <button type="button" class="sq-btn" id="sqNextBtn" style="display:none">{% if lang == 'hi' %}अगला →{% else %}Next →{% endif %}</button>
+        <button type="button" class="sq-btn sq-skip" id="sqSkipBtn">{% ui "Skip ⏭" %}</button>
+        <button type="button" class="sq-btn" id="sqNextBtn" style="display:none">{% ui "Next →" %}</button>
       </div>
-      <p class="sq-forward-note">{% if lang == 'hi' %}हर प्रश्न के लिए 35 सेकंड, हर सही उत्तर के 10 अंक — एक बार आगे बढ़ने के बाद आप वापस नहीं जा सकते।{% else %}35 seconds per question, 10 marks for every correct answer — once you move ahead you cannot go back.{% endif %}</p>
+      <p class="sq-forward-note">{% ui "35 seconds per question, 10 marks for every correct answer — once you move ahead you cannot go back." %}</p>
     </section>
 
     <form method="post" action="{% url 'quiz_submit' attempt.id %}" id="sqSubmitForm" style="display:none">
@@ -71,7 +72,7 @@
     </form>
 
     <noscript>
-      <div class="alert alert-warning">{% if lang == 'hi' %}यह क्विज़ लेने के लिए जावास्क्रिप्ट सक्षम होना आवश्यक है।{% else %}JavaScript must be enabled to take this quiz.{% endif %}</div>
+      <div class="alert alert-warning">{% ui "JavaScript must be enabled to take this quiz." %}</div>
     </noscript>
   </main>
 </div>

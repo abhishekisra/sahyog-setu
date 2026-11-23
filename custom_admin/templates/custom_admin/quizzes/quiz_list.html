@@ -1,4 +1,5 @@
 {% extends 'custom_admin/public_base.html' %}
+{% load ui %}
 {% load static %}
 {% load quiz_extras %}
 
@@ -73,8 +74,8 @@
         <div class="sqz-my-score">Your score: <b>{{ item.my_attempt.percentage|floatformat:0 }}%</b> {% if item.my_attempt.passed %}✅{% else %}❌{% endif %}</div>
         {% endif %}
         {% if item.pending and not item.locked %}
-        <div class="sqz-pending">📝 {% if lang == 'hi' %}अधूरा है{% else %}Unfinished{% endif %}{% if item.pending.total %} · {{ item.pending.answered }}/{{ item.pending.total }}{% endif %}</div>
-        <a class="sqz-go sqz-go-pending" href="{% url 'quiz_landing' item.quiz.slug %}">{% if lang == 'hi' %}पूरा करें →{% else %}Complete Quiz →{% endif %}</a>
+        <div class="sqz-pending">📝 {% ui "Unfinished" %}{% if item.pending.total %} · {{ item.pending.answered }}/{{ item.pending.total }}{% endif %}</div>
+        <a class="sqz-go sqz-go-pending" href="{% url 'quiz_landing' item.quiz.slug %}">{% ui "Complete Quiz →" %}</a>
         {% elif item.locked %}
         <a class="sqz-go sqz-go-done" href="{% url 'quiz_result' pk=item.my_attempt.id %}">View Result →</a>
         {% elif item.my_attempt %}

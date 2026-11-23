@@ -1,4 +1,5 @@
 {% extends 'custom_admin/public_base.html' %}
+{% load ui %}
 {% load static %}
 {% load quiz_extras %}
 
@@ -23,7 +24,7 @@
   <header class="sq-head">
     <div class="sq-head-inner">
       <div class="sq-brand"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
-      <a href="/" class="sq-back-link">{% if lang == 'hi' %}होम पर वापस जाएं{% else %}Back to Home{% endif %}</a>
+      <a href="/" class="sq-back-link">{% ui "Back to Home" %}</a>
     </div>
   </header>
 
@@ -33,7 +34,7 @@
       <div class="sq-land-body">
         <div class="sq-brand-inline"><div class="sq-seal">स</div><b>Sahyog <span>Setu</span></b></div>
 
-        <div class="sq-eyebrow">{% if lang == 'hi' %}सरकारी योजना · ज्ञान परीक्षण{% else %}Government Scheme · Knowledge Test{% endif %}</div>
+        <div class="sq-eyebrow">{% ui "Government Scheme · Knowledge Test" %}</div>
 
         {% if languages|length > 1 %}
         <div class="sq-lang-select" role="group" aria-label="Choose quiz language">
@@ -49,14 +50,14 @@
         {% endif %}
 
         <div class="sq-meta">
-          <div class="sq-chip"><div class="n">{{ question_count }}</div><div class="l">{% if lang == 'hi' %}प्रश्न{% else %}Questions{% endif %}</div></div>
-          <div class="sq-chip"><div class="n">{{ per_question_seconds }}s</div><div class="l">{% if lang == 'hi' %}प्रति प्रश्न{% else %}per Question{% endif %}</div></div>
-          <div class="sq-chip"><div class="n">{{ total_marks }}</div><div class="l">{% if lang == 'hi' %}कुल अंक{% else %}Total Marks{% endif %}</div></div>
-          <div class="sq-chip"><div class="n">{{ quiz.pass_threshold }}%</div><div class="l">{% if lang == 'hi' %}पास होने के लिए{% else %}to Pass{% endif %}</div></div>
+          <div class="sq-chip"><div class="n">{{ question_count }}</div><div class="l">{% ui "Questions" %}</div></div>
+          <div class="sq-chip"><div class="n">{{ per_question_seconds }}s</div><div class="l">{% ui "per Question" %}</div></div>
+          <div class="sq-chip"><div class="n">{{ total_marks }}</div><div class="l">{% ui "Total Marks" %}</div></div>
+          <div class="sq-chip"><div class="n">{{ quiz.pass_threshold }}%</div><div class="l">{% ui "to Pass" %}</div></div>
         </div>
 
         {% if not quiz.is_live %}
-        <div class="sq-land-warning">{% if lang == 'hi' %}यह क्विज़ अभी उपलब्ध नहीं है।{% else %}This quiz is not available right now.{% endif %}</div>
+        <div class="sq-land-warning">{% ui "This quiz is not available right now." %}</div>
         {% else %}
         {% if request.user.is_authenticated %}
         <!-- Training question -- user-requested: ask once, right before
@@ -75,19 +76,19 @@
         </div>
         {% endif %}
         <div class="sq-training-ask">
-          <label class="sq-training-label" for="sqTrainingSelect">{% if is_pretest %}{% if lang == 'hi' %}Aap kaun si training lene wale hain?{% else %}Which training are you about to attend?{% endif %}{% else %}{% if lang == 'hi' %}Kya aap kisi training ke baad ye quiz de rahe hain?{% else %}Are you taking this quiz after attending a training?{% endif %}{% endif %}</label>
+          <label class="sq-training-label" for="sqTrainingSelect">{% if is_pretest %}{% ui "Which training are you about to attend?" %}{% else %}{% ui "Are you taking this quiz after attending a training?" %}{% endif %}</label>
           <select id="sqTrainingSelect" class="sq-training-select">
-            <option value="">{% if lang == 'hi' %}— Nahi, seedhe de raha/rahi hoon —{% else %}— No, taking it directly —{% endif %}</option>
+            <option value="">{% ui "— No, taking it directly —" %}</option>
             {% for t in trainings %}
             <option value="{{ t.id }}">{{ t.name }}</option>
             {% endfor %}
-            <option value="__other__">{% if lang == 'hi' %}Mere training ka naam list mein nahi hai{% else %}My training isn't listed{% endif %}</option>
+            <option value="__other__">{% ui "My training isn't listed" %}</option>
           </select>
           <input type="text" id="sqTrainingOther" class="sq-training-other" style="display:none"
-                 placeholder="{% if lang == 'hi' %}Training ka naam likhein{% else %}Type the training's name{% endif %}">
+                 placeholder="{% ui "Type the training's name" %}">
         </div>
         <div class="sq-land-cta">
-          <a href="{{ take_url }}" id="sqStartBtn" data-base-href="{{ take_url }}" class="sq-btn">{% if is_pretest %}{% if lang == 'hi' %}ट्रेनिंग से पहले का टेस्ट शुरू करें →{% else %}Start before-training test →{% endif %}{% else %}{% if lang == 'hi' %}क्विज़ शुरू करें →{% else %}Start Quiz →{% endif %}{% endif %}</a>
+          <a href="{{ take_url }}" id="sqStartBtn" data-base-href="{{ take_url }}" class="sq-btn">{% if is_pretest %}{% ui "Start before-training test →" %}{% else %}{% ui "Start Quiz →" %}{% endif %}</a>
         </div>
         <script>
         (function(){
@@ -112,27 +113,27 @@
         </script>
         {% else %}
         <div class="sq-land-cta">
-          <a href="{{ login_url }}" class="sq-btn">{% if lang == 'hi' %}लॉगिन करके क्विज़ शुरू करें →{% else %}Login to Start Quiz →{% endif %}</a>
+          <a href="{{ login_url }}" class="sq-btn">{% ui "Login to Start Quiz →" %}</a>
         </div>
         {% endif %}
         {% endif %}
 
         {% if quiz.leaderboard_public %}
-        <p class="sq-land-leaderboard"><a href="{% url 'quiz_leaderboard' quiz.id %}">{% if lang == 'hi' %}लीडरबोर्ड देखें{% else %}View Leaderboard{% endif %}</a></p>
+        <p class="sq-land-leaderboard"><a href="{% url 'quiz_leaderboard' quiz.id %}">{% ui "View Leaderboard" %}</a></p>
         {% endif %}
 
         <div class="sq-share-section">
-          <span class="sq-share-title">{% if lang == 'hi' %}क्विज़ साझा करें{% else %}Share Quiz{% endif %}</span>
+          <span class="sq-share-title">{% ui "Share Quiz" %}</span>
           <div class="sq-share-grid">
             <a href="https://api.whatsapp.com/send?text={{ whatsapp_text|urlencode }}" target="_blank" class="sq-share-link sq-wa">
               <span>WhatsApp</span>
             </a>
             <button type="button" class="sq-share-link sq-copy" onclick="ssCopyShareLink(this)" data-url="{{ share_url }}?src=direct">
-              <span>{% if lang == 'hi' %}लिंक कॉपी करें{% else %}Copy Link{% endif %}</span>
+              <span>{% ui "Copy Link" %}</span>
             </button>
             <button type="button" class="sq-share-link sq-native" style="display:none;" onclick="ssNativeShare(this)"
               data-url="{{ share_url }}?src=direct" data-title="{{ quiz.title }}" data-text="{{ quiz.title }} — Sahyog Setu">
-              <span>{% if lang == 'hi' %}साझा करें{% else %}Share{% endif %}</span>
+              <span>{% ui "Share" %}</span>
             </button>
           </div>
         </div>

@@ -1,3 +1,4 @@
+{% load ui %}
 <!DOCTYPE html>
 <html lang="en">
 
@@ -509,11 +510,11 @@
             <span class="ssq-qrem-ic" aria-hidden="true">📝</span>
             <div class="ssq-qrem-txt">
                 {% with q=quiz_pending.0 %}
-                <b>{% if lang == 'hi' %}आपका क्विज़ अधूरा है — पूरा करें{% else %}Your quiz is unfinished — complete it{% endif %}</b>
-                <span>{{ q.quiz.title }}{% if q.total %} · {{ q.answered }}/{{ q.total }} {% if lang == 'hi' %}सवाल हो चुके{% else %}answered{% endif %}{% endif %}{% if not q.resumable %} · {% if lang == 'hi' %}समय निकल गया, फिर से शुरू करें{% else %}time ran out, start again{% endif %}{% endif %}{% if quiz_pending|length > 1 %} · +{{ quiz_pending|length|add:"-1" }} {% if lang == 'hi' %}और{% else %}more{% endif %}{% endif %}</span>
+                <b>{% ui "Your quiz is unfinished — complete it" %}</b>
+                <span>{{ q.quiz.title }}{% if q.total %} · {{ q.answered }}/{{ q.total }} {% ui "answered" %}{% endif %}{% if not q.resumable %} · {% ui "time ran out, start again" %}{% endif %}{% if quiz_pending|length > 1 %} · +{{ quiz_pending|length|add:"-1" }} {% ui "more" %}{% endif %}</span>
                 {% endwith %}
             </div>
-            <a class="ssq-qrem-go" href="{% if quiz_pending|length > 1 %}/quizzes/{% else %}{% url 'quiz_landing' quiz_pending.0.quiz.slug %}{% endif %}">{% if lang == 'hi' %}पूरा करें →{% else %}Complete →{% endif %}</a>
+            <a class="ssq-qrem-go" href="{% if quiz_pending|length > 1 %}/quizzes/{% else %}{% url 'quiz_landing' quiz_pending.0.quiz.slug %}{% endif %}">{% ui "Complete →" %}</a>
             <button type="button" class="ssq-qrem-x" aria-label="Close" onclick="document.getElementById('ssq-qrem').remove();try{sessionStorage.setItem('ssqQrem','1')}catch(e){}">×</button>
         </div>
         <style>

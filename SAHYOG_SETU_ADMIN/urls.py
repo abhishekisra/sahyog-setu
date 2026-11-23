@@ -26,6 +26,7 @@ urlpatterns = [
     path('admin/', include('custom_admin.urls')),
     path('api/', include('apis.urls')),
     path('accounts/', include('accounts.urls')),
+    path('', include('languages.urls')),   # 2026-11-23: Colab translation job exchange (token-protected)
     path('', include('partners.urls')),
     path('', include('quizzes.urls')),
     path('', include('schemes.urls')),

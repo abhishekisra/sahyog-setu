@@ -1,9 +1,10 @@
 {% extends 'custom_admin/public_base.html' %}
+{% load ui %}
 {% comment %}
 "Mere liye yojanayein" (2026-11-06). Matching/ranking: schemes/my_schemes.py.
 Views: schemes/my_schemes_views.py. Same palette/font as scheme_finder.html.
 {% endcomment %}
-{% block title %}{% if lang == 'hi' %}मेरे लिए योजनाएं{% else %}Schemes for me{% endif %} — Sahyog Setu{% endblock %}
+{% block title %}{% ui "Schemes for me" %} — Sahyog Setu{% endblock %}
 
 {% block head %}
 <meta name="robots" content="noindex">
@@ -108,88 +109,88 @@ Views: schemes/my_schemes_views.py. Same palette/font as scheme_finder.html.
       <div class="elig-left">
         <div class="elig-count">{{ total_count }}</div>
         <div class="elig-text">
-          <h3>{% if lang == 'hi' %}योजनाएं जिनके आप पात्र हो सकते हैं{% else %}Schemes You May Be Eligible For{% endif %}</h3>
-          <p>{% if total_count %}{% if lang == 'hi' %}आपकी प्रोफ़ाइल के आधार पर आप {{ total_count }} सरकारी योजनाओं के पात्र हो सकते हैं। जो आपके काम की हैं उन्हें देखें और सेव करें।{% else %}You may be eligible for {{ total_count }} government scheme{{ total_count|pluralize }} based on your profile. Review and save the ones relevant to you.{% endif %}{% else %}{% if lang == 'hi' %}आपकी अभी की प्रोफ़ाइल से कोई योजना नहीं मिली। और योजनाएं देखने के लिए नीचे जानकारी अपडेट करें।{% else %}No matching schemes found for your current profile. Update your details below to discover more.{% endif %}{% endif %}</p>
+          <h3>{% ui "Schemes You May Be Eligible For" %}</h3>
+          <p>{% if total_count %}{% if lang == 'hi' %}आपकी प्रोफ़ाइल के आधार पर आप {{ total_count }} सरकारी योजनाओं के पात्र हो सकते हैं। जो आपके काम की हैं उन्हें देखें और सेव करें।{% else %}You may be eligible for {{ total_count }} government scheme{{ total_count|pluralize }} based on your profile. Review and save the ones relevant to you.{% endif %}{% else %}{% ui "No matching schemes found for your current profile. Update your details below to discover more." %}{% endif %}</p>
         </div>
       </div>
-      <a href="#ms-results" class="elig-btn">{% if lang == 'hi' %}पात्र योजनाएं देखें →{% else %}View Eligible Schemes →{% endif %}</a>
+      <a href="#ms-results" class="elig-btn">{% ui "View Eligible Schemes →" %}</a>
     </div>
     {% else %}
     <div class="elig-card empty" id="eligCard">
       <div class="elig-left">
         <div class="elig-count">!</div>
         <div class="elig-text">
-          <h3>{% if lang == 'hi' %}योजनाएं जिनके आप पात्र हो सकते हैं{% else %}Schemes You May Be Eligible For{% endif %}</h3>
-          <p>{% if lang == 'hi' %}अपनी प्रोफ़ाइल (उम्र, राज्य और व्यवसाय) पूरी करें, ताकि हम आपके लिए सही योजनाएं दिखा सकें।{% else %}Complete your profile (age, state and occupation) to see the schemes you qualify for.{% endif %}</p>
+          <h3>{% ui "Schemes You May Be Eligible For" %}</h3>
+          <p>{% ui "Complete your profile (age, state and occupation) to see the schemes you qualify for." %}</p>
         </div>
       </div>
-      <a href="/accounts/complete-profile/" class="elig-btn">{% if lang == 'hi' %}प्रोफ़ाइल पूरी करें →{% else %}Complete Profile →{% endif %}</a>
+      <a href="/accounts/complete-profile/" class="elig-btn">{% ui "Complete Profile →" %}</a>
     </div>
     {% endif %}
     {% endif %}
     <section class="ms-hero">
-      <div class="ms-eyebrow">★ {% if lang == 'hi' %}आपके लिए चुनी गई{% else %}Picked for you{% endif %}</div>
-      <h1>{% if lang == 'hi' %}मेरे लिए योजनाएं{% else %}Schemes for me{% endif %}</h1>
+      <div class="ms-eyebrow">★ {% ui "Picked for you" %}</div>
+      <h1>{% ui "Schemes for me" %}</h1>
       {% if logged_out %}
-      <p>{% if lang == 'hi' %}आपकी उम्र, राज्य, व्यवसाय और परिवार की जानकारी से हम वे सरकारी योजनाएं ढूंढते हैं जो खास आपके लिए हैं, और जिन्हें आप सेव करके बाद में देख सकते हैं।{% else %}We use your age, state, occupation and family details to find the government schemes meant for you, and you can save them to look at later.{% endif %}</p>
+      <p>{% ui "We use your age, state, occupation and family details to find the government schemes meant for you, and you can save them to look at later." %}</p>
       {% else %}
-      <p>{% if lang == 'hi' %}आपके खाते की जानकारी के आधार पर। जितनी ज़्यादा जानकारी देंगे, सूची उतनी सटीक होगी।{% else %}Based on the details in your account. The more you tell us, the sharper this list gets.{% endif %}</p>
+      <p>{% ui "Based on the details in your account. The more you tell us, the sharper this list gets." %}</p>
       <div class="ms-stats">
-        <div class="ms-stat"><div class="n">{{ targeted_count }}</div><div class="l">{% if lang == 'hi' %}खास आपके लिए{% else %}Just for you{% endif %}</div></div>
-        <div class="ms-stat"><div class="n">{{ total_count }}</div><div class="l">{% if lang == 'hi' %}जिनके आप पात्र हो सकते हैं{% else %}You may qualify for{% endif %}</div></div>
-        <div class="ms-stat"><div class="n" id="msSavedStat">{{ saved|length }}</div><div class="l">{% if lang == 'hi' %}सेव की गई{% else %}Saved{% endif %}</div></div>
+        <div class="ms-stat"><div class="n">{{ targeted_count }}</div><div class="l">{% ui "Just for you" %}</div></div>
+        <div class="ms-stat"><div class="n">{{ total_count }}</div><div class="l">{% ui "You may qualify for" %}</div></div>
+        <div class="ms-stat"><div class="n" id="msSavedStat">{{ saved|length }}</div><div class="l">{% ui "Saved" %}</div></div>
       </div>
       {% endif %}
     </section>
 
     {% if logged_out %}
     <div class="ms-card ms-login">
-      <h2>{% if lang == 'hi' %}अपनी योजनाएं देखने के लिए लॉगिन करें{% else %}Log in to see your schemes{% endif %}</h2>
-      <p class="ms-muted">{% if lang == 'hi' %}रजिस्ट्रेशन में दी गई जानकारी से आपकी सूची अपने आप बन जाएगी। नया खाता बनाने में एक मिनट लगता है।{% else %}Your list is built automatically from the details you gave when you signed up. A new account takes a minute.{% endif %}</p>
+      <h2>{% ui "Log in to see your schemes" %}</h2>
+      <p class="ms-muted">{% ui "Your list is built automatically from the details you gave when you signed up. A new account takes a minute." %}</p>
       <div class="ms-btns">
-        <a class="ms-btn primary" href="/accounts/login/?next=/my-schemes/{% if lang != 'en' %}%3Flang%3D{{ lang }}{% endif %}">{% if lang == 'hi' %}लॉगिन करें{% else %}Log in{% endif %}</a>
-        <a class="ms-btn ghost" href="/accounts/signup/?next=/my-schemes/">{% if lang == 'hi' %}नया खाता बनाएं{% else %}Create an account{% endif %}</a>
+        <a class="ms-btn primary" href="/accounts/login/?next=/my-schemes/{% if lang != 'en' %}%3Flang%3D{{ lang }}{% endif %}">{% ui "Log in" %}</a>
+        <a class="ms-btn ghost" href="/accounts/signup/?next=/my-schemes/">{% ui "Create an account" %}</a>
       </div>
-      <p class="ms-muted" style="margin-top:16px;">{% if lang == 'hi' %}या बिना लॉगिन:{% else %}Or without logging in:{% endif %} <a href="/scheme-viewer/{% if lang != 'en' %}?lang={{ lang }}{% endif %}" style="color:var(--terracotta);font-weight:700;">{% if lang == 'hi' %}सभी योजनाएं खोजें{% else %}search all schemes{% endif %}</a></p>
+      <p class="ms-muted" style="margin-top:16px;">{% ui "Or without logging in:" %} <a href="/scheme-viewer/{% if lang != 'en' %}?lang={{ lang }}{% endif %}" style="color:var(--terracotta);font-weight:700;">{% ui "search all schemes" %}</a></p>
     </div>
     {% else %}
 
     <section class="ms-card" aria-labelledby="msAboutH">
-      <h2 id="msAboutH">{% if lang == 'hi' %}आपकी जानकारी{% else %}Your details{% endif %}</h2>
+      <h2 id="msAboutH">{% ui "Your details" %}</h2>
       <div class="ms-facts">
-        {% if account.age %}<span class="ms-fact">{% if lang == 'hi' %}उम्र{% else %}Age{% endif %} <b>{{ account.age }}</b></span>{% endif %}
+        {% if account.age %}<span class="ms-fact">{% ui "Age" %} <b>{{ account.age }}</b></span>{% endif %}
         {% if account.gender %}<span class="ms-fact"><b>{% if lang == 'hi' %}{% if account.gender == 'female' %}महिला{% elif account.gender == 'male' %}पुरुष{% else %}अन्य{% endif %}{% else %}{{ account.get_gender_display }}{% endif %}</b></span>{% endif %}
         {% if account.state %}<span class="ms-fact"><b>{{ account.state.state }}</b></span>{% endif %}
-        {% if account.occupation %}<span class="ms-fact">{% if lang == 'hi' %}व्यवसाय{% else %}Occupation{% endif %} <b>{{ account.occupation.title }}</b></span>{% endif %}
+        {% if account.occupation %}<span class="ms-fact">{% ui "Occupation" %} <b>{{ account.occupation.title }}</b></span>{% endif %}
       </div>
       {% if missing_account %}
-      <div class="ms-warn">{% if lang == 'hi' %}आपके खाते में उम्र/लिंग/राज्य नहीं है, इसलिए सूची कम सटीक है।{% else %}Your account is missing age, gender or state, so this list is less precise.{% endif %} <a href="/accounts/complete-profile/">{% if lang == 'hi' %}प्रोफ़ाइल पूरी करें{% else %}Complete your profile{% endif %}</a></div>
+      <div class="ms-warn">{% ui "Your account is missing age, gender or state, so this list is less precise." %} <a href="/accounts/complete-profile/">{% ui "Complete your profile" %}</a></div>
       {% endif %}
 
       <details class="ms-more" {% if extras_given == 0 %}open{% endif %}>
-        <summary>{% if lang == 'hi' %}और जानकारी दें, सूची और सटीक बनाएं{% else %}Add more details for a sharper list{% endif %} ({{ extras_given }}/6)</summary>
-        <p class="ms-muted" style="margin-top:8px;">{% if lang == 'hi' %}सब वैकल्पिक है। "पता नहीं / नहीं बताना" चुनने पर कोई योजना नहीं छूटेगी। यह जानकारी सिर्फ आपकी सूची बनाने में इस्तेमाल होती है।{% else %}All optional. "Not sure / prefer not to say" never hides a scheme. This is only used to build your list.{% endif %}</p>
+        <summary>{% ui "Add more details for a sharper list" %} ({{ extras_given }}/6)</summary>
+        <p class="ms-muted" style="margin-top:8px;">{% ui 'All optional. "Not sure / prefer not to say" never hides a scheme. This is only used to build your list.' %}</p>
         <form class="ms-form" method="post" action="/my-schemes/profile/">
           {% csrf_token %}
           <input type="hidden" name="lang" value="{{ lang }}">
           {% with ns_en="Not sure / prefer not to say" ns_hi="पता नहीं / नहीं बताना" %}
           <div>
-            <label for="msIncome">{% if lang == 'hi' %}परिवार की सालाना आय{% else %}Family income per year{% endif %}</label>
+            <label for="msIncome">{% ui "Family income per year" %}</label>
             <select id="msIncome" name="family_income">
               <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
-              <option value="50000" {% if person.family_income == 50000 %}selected{% endif %}>{% if lang == 'hi' %}₹50,000 तक{% else %}Up to ₹50,000{% endif %}</option>
-              <option value="100000" {% if person.family_income == 100000 %}selected{% endif %}>{% if lang == 'hi' %}₹1,00,000 तक{% else %}Up to ₹1,00,000{% endif %}</option>
-              <option value="250000" {% if person.family_income == 250000 %}selected{% endif %}>{% if lang == 'hi' %}₹2,50,000 तक{% else %}Up to ₹2,50,000{% endif %}</option>
-              <option value="500000" {% if person.family_income == 500000 %}selected{% endif %}>{% if lang == 'hi' %}₹5,00,000 तक{% else %}Up to ₹5,00,000{% endif %}</option>
-              <option value="800000" {% if person.family_income == 800000 %}selected{% endif %}>{% if lang == 'hi' %}₹8,00,000 तक{% else %}Up to ₹8,00,000{% endif %}</option>
-              <option value="1500000" {% if person.family_income == 1500000 %}selected{% endif %}>{% if lang == 'hi' %}₹8,00,000 से ज़्यादा{% else %}More than ₹8,00,000{% endif %}</option>
+              <option value="50000" {% if person.family_income == 50000 %}selected{% endif %}>{% ui "Up to ₹50,000" %}</option>
+              <option value="100000" {% if person.family_income == 100000 %}selected{% endif %}>{% ui "Up to ₹1,00,000" %}</option>
+              <option value="250000" {% if person.family_income == 250000 %}selected{% endif %}>{% ui "Up to ₹2,50,000" %}</option>
+              <option value="500000" {% if person.family_income == 500000 %}selected{% endif %}>{% ui "Up to ₹5,00,000" %}</option>
+              <option value="800000" {% if person.family_income == 800000 %}selected{% endif %}>{% ui "Up to ₹8,00,000" %}</option>
+              <option value="1500000" {% if person.family_income == 1500000 %}selected{% endif %}>{% ui "More than ₹8,00,000" %}</option>
             </select>
           </div>
           <div>
-            <label for="msCaste">{% if lang == 'hi' %}सामाजिक श्रेणी{% else %}Social category{% endif %}</label>
+            <label for="msCaste">{% ui "Social category" %}</label>
             <select id="msCaste" name="caste">
               <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
-              <option value="0" {% if person.caste == 0 %}selected{% endif %}>{% if lang == 'hi' %}सामान्य{% else %}General{% endif %}</option>
+              <option value="0" {% if person.caste == 0 %}selected{% endif %}>{% ui "General" %}</option>
               <option value="1" {% if person.caste == 1 %}selected{% endif %}>OBC</option>
               <option value="2" {% if person.caste == 2 %}selected{% endif %}>SC</option>
               <option value="3" {% if person.caste == 3 %}selected{% endif %}>ST</option>
@@ -197,67 +198,67 @@ Views: schemes/my_schemes_views.py. Same palette/font as scheme_finder.html.
             </select>
           </div>
           <div>
-            <label for="msMarital">{% if lang == 'hi' %}वैवाहिक स्थिति{% else %}Marital status{% endif %}</label>
+            <label for="msMarital">{% ui "Marital status" %}</label>
             <select id="msMarital" name="marital_status">
               <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
-              <option value="0" {% if person.marital_status == 0 %}selected{% endif %}>{% if lang == 'hi' %}विवाहित{% else %}Married{% endif %}</option>
-              <option value="1" {% if person.marital_status == 1 %}selected{% endif %}>{% if lang == 'hi' %}अविवाहित{% else %}Unmarried{% endif %}</option>
-              <option value="2" {% if person.marital_status == 2 %}selected{% endif %}>{% if lang == 'hi' %}विधवा / विधुर{% else %}Widowed{% endif %}</option>
-              <option value="3" {% if person.marital_status == 3 %}selected{% endif %}>{% if lang == 'hi' %}तलाकशुदा{% else %}Divorced{% endif %}</option>
-              <option value="4" {% if person.marital_status == 4 %}selected{% endif %}>{% if lang == 'hi' %}अलग रह रहे{% else %}Separated{% endif %}</option>
+              <option value="0" {% if person.marital_status == 0 %}selected{% endif %}>{% ui "Married" %}</option>
+              <option value="1" {% if person.marital_status == 1 %}selected{% endif %}>{% ui "Unmarried" %}</option>
+              <option value="2" {% if person.marital_status == 2 %}selected{% endif %}>{% ui "Widowed" %}</option>
+              <option value="3" {% if person.marital_status == 3 %}selected{% endif %}>{% ui "Divorced" %}</option>
+              <option value="4" {% if person.marital_status == 4 %}selected{% endif %}>{% ui "Separated" %}</option>
             </select>
           </div>
           <div>
-            <label for="msReligion">{% if lang == 'hi' %}धर्म{% else %}Religion{% endif %}</label>
+            <label for="msReligion">{% ui "Religion" %}</label>
             <select id="msReligion" name="religion">
               <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
-              <option value="0" {% if person.religion == 0 %}selected{% endif %}>{% if lang == 'hi' %}हिंदू{% else %}Hindu{% endif %}</option>
-              <option value="1" {% if person.religion == 1 %}selected{% endif %}>{% if lang == 'hi' %}मुस्लिम{% else %}Muslim{% endif %}</option>
-              <option value="2" {% if person.religion == 2 %}selected{% endif %}>{% if lang == 'hi' %}ईसाई{% else %}Christian{% endif %}</option>
-              <option value="3" {% if person.religion == 3 %}selected{% endif %}>{% if lang == 'hi' %}सिख{% else %}Sikh{% endif %}</option>
-              <option value="4" {% if person.religion == 4 %}selected{% endif %}>{% if lang == 'hi' %}पारसी{% else %}Parsi{% endif %}</option>
-              <option value="5" {% if person.religion == 5 %}selected{% endif %}>{% if lang == 'hi' %}बौद्ध{% else %}Buddhist{% endif %}</option>
-              <option value="6" {% if person.religion == 6 %}selected{% endif %}>{% if lang == 'hi' %}जैन{% else %}Jain{% endif %}</option>
-              <option value="7" {% if person.religion == 7 %}selected{% endif %}>{% if lang == 'hi' %}कोई धर्म नहीं{% else %}No religion{% endif %}</option>
+              <option value="0" {% if person.religion == 0 %}selected{% endif %}>{% ui "Hindu" %}</option>
+              <option value="1" {% if person.religion == 1 %}selected{% endif %}>{% ui "Muslim" %}</option>
+              <option value="2" {% if person.religion == 2 %}selected{% endif %}>{% ui "Christian" %}</option>
+              <option value="3" {% if person.religion == 3 %}selected{% endif %}>{% ui "Sikh" %}</option>
+              <option value="4" {% if person.religion == 4 %}selected{% endif %}>{% ui "Parsi" %}</option>
+              <option value="5" {% if person.religion == 5 %}selected{% endif %}>{% ui "Buddhist" %}</option>
+              <option value="6" {% if person.religion == 6 %}selected{% endif %}>{% ui "Jain" %}</option>
+              <option value="7" {% if person.religion == 7 %}selected{% endif %}>{% ui "No religion" %}</option>
             </select>
           </div>
           <div>
-            <label for="msDivyang">{% if lang == 'hi' %}क्या आप दिव्यांग हैं?{% else %}Do you have a disability?{% endif %}</label>
+            <label for="msDivyang">{% ui "Do you have a disability?" %}</label>
             <select id="msDivyang" name="divyang">
               <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
-              <option value="0" {% if person.divyang == 0 %}selected{% endif %}>{% if lang == 'hi' %}हाँ{% else %}Yes{% endif %}</option>
-              <option value="1" {% if person.divyang == 1 %}selected{% endif %}>{% if lang == 'hi' %}नहीं{% else %}No{% endif %}</option>
+              <option value="0" {% if person.divyang == 0 %}selected{% endif %}>{% ui "Yes" %}</option>
+              <option value="1" {% if person.divyang == 1 %}selected{% endif %}>{% ui "No" %}</option>
             </select>
           </div>
           <div>
-            <label for="msArea">{% if lang == 'hi' %}आप कहाँ रहते हैं?{% else %}Where do you live?{% endif %}</label>
+            <label for="msArea">{% ui "Where do you live?" %}</label>
             <select id="msArea" name="area">
               <option value="">{% if lang == 'hi' %}{{ ns_hi }}{% else %}{{ ns_en }}{% endif %}</option>
-              <option value="1" {% if person.area == 1 %}selected{% endif %}>{% if lang == 'hi' %}गाँव (ग्रामीण){% else %}Village (rural){% endif %}</option>
-              <option value="0" {% if person.area == 0 %}selected{% endif %}>{% if lang == 'hi' %}शहर (शहरी){% else %}Town / city (urban){% endif %}</option>
+              <option value="1" {% if person.area == 1 %}selected{% endif %}>{% ui "Village (rural)" %}</option>
+              <option value="0" {% if person.area == 0 %}selected{% endif %}>{% ui "Town / city (urban)" %}</option>
             </select>
           </div>
           {% endwith %}
           <div class="ms-form-actions">
-            <button type="submit" class="ms-btn primary">{% if lang == 'hi' %}सेव करें और सूची अपडेट करें{% else %}Save and update my list{% endif %}</button>
+            <button type="submit" class="ms-btn primary">{% ui "Save and update my list" %}</button>
           </div>
         </form>
       </details>
     </section>
 
-    <section id="ms-results" aria-label="{% if lang == 'hi' %}योजनाएं{% else %}Schemes{% endif %}">
+    <section id="ms-results" aria-label="{% ui "Schemes" %}">
       <div class="ms-tabs" role="tablist">
-        <button class="ms-tab" role="tab" type="button" data-tab="for" aria-selected="true">{% if lang == 'hi' %}खास आपके लिए{% else %}Just for you{% endif %}<span class="c">{{ targeted_count }}</span></button>
-        <button class="ms-tab" role="tab" type="button" data-tab="all" aria-selected="false">{% if lang == 'hi' %}सभी योग्य{% else %}All you may qualify for{% endif %}<span class="c">{{ total_count }}</span></button>
-        <button class="ms-tab" role="tab" type="button" data-tab="saved" aria-selected="false">★ {% if lang == 'hi' %}सेव की गई{% else %}Saved{% endif %}<span class="c" id="msSavedCount">{{ saved|length }}</span></button>
+        <button class="ms-tab" role="tab" type="button" data-tab="for" aria-selected="true">{% ui "Just for you" %}<span class="c">{{ targeted_count }}</span></button>
+        <button class="ms-tab" role="tab" type="button" data-tab="all" aria-selected="false">{% ui "All you may qualify for" %}<span class="c">{{ total_count }}</span></button>
+        <button class="ms-tab" role="tab" type="button" data-tab="saved" aria-selected="false">★ {% ui "Saved" %}<span class="c" id="msSavedCount">{{ saved|length }}</span></button>
       </div>
       <div class="ms-tools">
-        <input type="search" id="msSearch" placeholder="{% if lang == 'hi' %}योजना का नाम खोजें…{% else %}Search by scheme name…{% endif %}" aria-label="{% if lang == 'hi' %}खोजें{% else %}Search{% endif %}">
-        <select id="msCat" aria-label="{% if lang == 'hi' %}श्रेणी{% else %}Category{% endif %}"><option value="">{% if lang == 'hi' %}सभी श्रेणियां{% else %}All categories{% endif %}</option></select>
+        <input type="search" id="msSearch" placeholder="{% ui "Search by scheme name…" %}" aria-label="{% ui "Search" %}">
+        <select id="msCat" aria-label="{% ui "Category" %}"><option value="">{% ui "All categories" %}</option></select>
       </div>
       <p class="ms-note" id="msNote"></p>
       <div class="ms-list" id="msList"></div>
-      <div class="ms-moreload"><button type="button" class="ms-btn ghost" id="msMore" hidden>{% if lang == 'hi' %}और दिखाएं{% else %}Show more{% endif %}</button></div>
+      <div class="ms-moreload"><button type="button" class="ms-btn ghost" id="msMore" hidden>{% ui "Show more" %}</button></div>
     </section>
     {% endif %}
   </div>

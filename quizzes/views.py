@@ -861,7 +861,9 @@ QUIZ_UI_STRINGS = {
 def quiz_ui_strings(lang):
     """Flat {key: text} for this one language, falling back to English for
     any key that (shouldn't, but) lacks an entry for it."""
-    return {k: v.get(lang, v["en"]) for k, v in QUIZ_UI_STRINGS.items()}
+    # 2026-11-23: languages other than en/hi come from languages/ui_strings.json (machine-filled, checked)
+    from languages.templatetags.ui import ui_text
+    return {k: v.get(lang) or ui_text(v["en"], lang) for k, v in QUIZ_UI_STRINGS.items()}
 
 
 def clean_language(raw):
