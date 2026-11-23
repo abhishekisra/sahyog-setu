@@ -268,6 +268,19 @@
         iframe.skiptranslate { display: none !important; }
         body { top: 0 !important; }
     </style>
+    <!-- 2026-11-23 (user: "google translate bekar lag rha hai", "dono jagah se hata do"): Google Translate
+         removed. The React bundle's own widget still tries to load translate_a/element.js -- refuse any
+         script from translate.google.com, and clear an old googtrans choice so it never switches the page. -->
+    <script>
+    (function(){
+      function bad(n){return n&&n.tagName==='SCRIPT'&&/translate\.google(apis)?\.com/.test(n.src||'');}
+      ['appendChild','insertBefore'].forEach(function(f){var o=Node.prototype[f];
+        Node.prototype[f]=function(n){if(bad(n))return n;return o.apply(this,arguments);};});
+      var host=location.hostname.replace(/^www\./,'');
+      ['', '; domain='+location.hostname, '; domain=.'+host].forEach(function(d){
+        document.cookie='googtrans=; path=/'+d+'; expires=Thu, 01 Jan 1970 00:00:00 GMT';});
+    })();
+    </script>
     <script defer="defer" src="/static/js/main.8fca9b23.p1.js"></script>
     <link href="/static/css/main.f71db398.css" rel="stylesheet">
     <style id="ssq-banner-arrows">
@@ -589,15 +602,29 @@
     var t=document.querySelector('.ssq-search-trigger'); if(t){e.preventDefault(); t.click();}
   });
 
-  // Language = Google Translate (the homepage has no ?lang= pages).
-  var LANGS=[['en','English'],['hi','हिन्दी'],['bn','বাংলা'],['gu','ગુજરાતી'],['kn','ಕನ್ನಡ'],['ml','മലയാളം'],['mr','मराठी'],['pa','ਪੰਜਾਬੀ'],['ta','தமிழ்'],['te','తెలుగు'],['ur','اردو'],['as','অসমীয়া'],['or','ଓଡ଼ିଆ'],['mai','मैथिली'],['gom','कोंकणी'],['sa','संस्कृतम्']];
-  var m=document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([A-Za-z-]+)/), cur=m?m[1]:'en';
-  function setCk(val){var host=location.hostname.replace(/^www\./,''), exp=val?'':'; expires=Thu, 01 Jan 1970 00:00:00 GMT';
-    ['', '; domain='+location.hostname, '; domain=.'+host].forEach(function(d){document.cookie='googtrans='+(val||'')+'; path=/'+d+exp;});}
-  [].slice.call(document.querySelectorAll('.ssh-gt-select')).forEach(function(sel){
-    LANGS.forEach(function(l){var o=document.createElement('option'); o.value=l[0]; o.textContent=l[1]; if(l[0]===cur) o.selected=true; sel.appendChild(o);});
-    sel.addEventListener('change',function(){ setCk(sel.value==='en'?null:'/en/'+sel.value); location.reload(); });
-  });
+  // Language (2026-11-23, Google Translate removed): only languages switched on in Sahyog Setu
+  // (/api/site-languages). The choice is kept in the ss_lang cookie and every page opened from the
+  // homepage opens in it (?lang=); the homepage cards themselves stay English.
+  function getLang(){var m=document.cookie.match(/(?:^|;\s*)ss_lang=([a-z]+)/);return m?m[1]:'en';}
+  function setLang(c){document.cookie='ss_lang='+(c==='en'?'':c)+'; path=/; max-age='+(c==='en'?0:31536000)+'; samesite=lax';}
+  var curLang=getLang();
+  fetch('/api/site-languages').then(function(r){return r.json();}).then(function(d){
+    var ls=(d&&d.languages)||[{code:'en',name:'English'}];
+    if(!ls.some(function(l){return l.code===curLang;})){curLang='en';setLang('en');}
+    [].slice.call(document.querySelectorAll('.ssh-gt-select')).forEach(function(sel){
+      sel.innerHTML='';
+      ls.forEach(function(l){var o=document.createElement('option');o.value=l.code;o.textContent=l.name;if(l.code===curLang)o.selected=true;sel.appendChild(o);});
+      sel.addEventListener('change',function(){curLang=sel.value;setLang(curLang);
+        [].slice.call(document.querySelectorAll('.ssh-gt-select')).forEach(function(x){x.value=curLang;});});
+    });
+  }).catch(function(){});
+  document.addEventListener('click',function(e){
+    if(curLang==='en')return;
+    var a=e.target&&e.target.closest&&e.target.closest('a[href]');if(!a)return;
+    var u;try{u=new URL(a.getAttribute('href'),location.href);}catch(x){return;}
+    if(u.origin!==location.origin||u.pathname==='/'||u.searchParams.has('lang'))return;
+    u.searchParams.set('lang',curLang);a.setAttribute('href',u.pathname+u.search+u.hash);
+  },true);
 
   // Login state
   function esc(s){return String(s||'').replace(/[<>&"]/g,function(c){return {'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c];});}

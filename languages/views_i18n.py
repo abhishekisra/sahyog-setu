@@ -97,3 +97,17 @@ def notebook(request, token):
     resp["Content-Disposition"] = 'attachment; filename="sahyog_translate.ipynb"'
     resp["Cache-Control"] = "no-store"
     return resp
+
+
+def site_languages(request):
+    """Public: the languages visitors can pick (English + every language switched on in BOTH lists).
+    Used by the homepage header now that Google Translate is gone (user 2026-11-23)."""
+    from quizzes.models import Language as QuizLanguage
+
+    from .models import Language as ContentLanguage
+    on = set(QuizLanguage.objects.filter(is_active=True).values_list("code", flat=True))
+    rows = [{"code": "en", "name": "English"}] + [
+        {"code": l.code, "name": l.native_name} for l in ContentLanguage.objects.filter(is_active=True) if l.code in on]
+    resp = JsonResponse({"languages": rows})
+    resp["Cache-Control"] = "public, max-age=300"
+    return resp

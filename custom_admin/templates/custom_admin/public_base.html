@@ -451,6 +451,8 @@
         // same dropdown in the same spot; pages that pass neither just
         // don't render the block, no per-page opt-in needed.
         function ssChangeLang(code){
+            // 2026-11-23: remember the choice (ss_lang) so the homepage header shows it and opens pages in it
+            try { document.cookie = 'ss_lang=' + (code === 'en' ? '' : code) + '; path=/; max-age=' + (code === 'en' ? 0 : 31536000) + '; samesite=lax'; } catch (e) {}
             var url = new URL(window.location.href);
             if (code === "en") {
                 url.searchParams.delete("lang");
@@ -878,14 +880,9 @@
             }
         })();
     </script>
-    <!-- 2026-11-05 (user: free Hindi for all schemes, "a karo"): Google
-         Translate as a FALLBACK behind the existing #ssq-nav-lang switcher,
-         not a second widget. Our own DB translations (?lang=) still render
-         first; Google only translates whatever is still English (most of the
-         4,653 schemes). Content pages only (-viewer/): quiz/signup/login pages
-         are fully translated already and quiz_take has timer JS we don't want
-         Google rewriting. Shares the googtrans cookie with the homepage's
-         React widget, so a language picked on either side carries over. -->
+    <!-- 2026-11-05 Google Translate fallback REMOVED 2026-11-23 (user: "google translate bekar lag rha hai",
+         "dono jagah se hata do"). What is left: clearing any old googtrans cookie, and our own Hindi
+         wording for a few fixed labels on the -viewer/ pages. -->
     <style>
         iframe.skiptranslate { display: none !important; }
         body { top: 0 !important; }
@@ -895,9 +892,6 @@
     <div id="ssq-gt" style="display:none"></div>
     <script>
         (function () {
-            // Our language codes -> Google's, where they differ.
-            var TO_G = { kok: 'gom', mni: 'mni-Mtei' };
-            var FROM_G = { gom: 'kok', 'mni-Mtei': 'mni' };
             window.ssqGtCookie = function (val) {
                 var host = location.hostname.replace(/^www\./, '');
                 var exp = val ? '' : '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
@@ -905,21 +899,12 @@
                     document.cookie = 'googtrans=' + (val || '') + '; path=/' + d + exp;
                 });
             };
+            // 2026-11-23 (user: "google translate bekar lag rha hai", "dono jagah se hata do"): Google Translate
+            // removed. Only our own translations show; text not translated yet stays English. Any old Google
+            // language choice is cleared so it can never switch a page again.
+            window.ssqGtCookie(null);
             if (!/-viewer\//.test(location.pathname)) return;
-            var params = new URLSearchParams(location.search);
-            var lang = (params.get('lang') || '').trim();
-            if (!lang) {
-                // No ?lang= but a Google choice is stored (made on the
-                // homepage, or on an earlier page here): open this page in
-                // that language so our own DB translations load too.
-                var m = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/([A-Za-z-]+)/);
-                if (m && m[1] !== 'en') {
-                    params.set('lang', FROM_G[m[1]] || m[1]);
-                    location.replace(location.pathname + '?' + params.toString() + location.hash);
-                }
-                return;
-            }
-            if (lang === 'en') { window.ssqGtCookie(null); return; }
+            var lang = (new URLSearchParams(location.search).get('lang') || '').trim();
             if (lang === 'hi') {
                 // Labels Google gets wrong in Hindi (checked 2026-11-05 on all
                 // -viewer/ pages). Put our own wording in first and mark it
@@ -952,14 +937,6 @@
                     ms.forEach(function (m) { m.addedNodes.forEach(function (a) { if (a.nodeType === 1 && !a.closest('.notranslate, font')) fix(a); }); });
                 }).observe(document.body, { childList: true, subtree: true });
             }
-            window.ssqGtCookie('/en/' + (TO_G[lang] || lang));
-            window.ssqGtInit = function () {
-                new google.translate.TranslateElement({ pageLanguage: 'en', autoDisplay: false }, 'ssq-gt');
-            };
-            var s = document.createElement('script');
-            s.src = 'https://translate.google.com/translate_a/element.js?cb=ssqGtInit';
-            s.async = true;
-            document.body.appendChild(s);
         })();
     </script>
 </body>
