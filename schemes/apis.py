@@ -8,6 +8,7 @@ from .models import Schemes, Categories
 from django.db.models import Q
 from languages.utils import clean_language
 from .faq import build_scheme_faq
+from .popularity import popular_order, record_open
 
 
 def _safe_int(value):
@@ -42,7 +43,7 @@ def globalSearch(request):
 
     results = []
 
-    for s in Schemes.objects.filter(status=1, title__icontains=q)[:8]:
+    for s in popular_order(Schemes.objects.filter(status=1, title__icontains=q))[:8]:
         results.append({
             'type': 'scheme',
             'type_label': 'Central Scheme' if s.scheme_type == 0 else 'State Scheme',
@@ -118,19 +119,19 @@ def category(request, id):
 
 
 def stateSchemes(request, state):
-    schemes = Schemes.objects.filter(status = 1, scheme_type = 1, state_id = state)
+    schemes = popular_order(Schemes.objects.filter(status = 1, scheme_type = 1, state_id = state))
     serializer = SchemeSerializer(schemes, many=True)
     return JsonResponse({'schemes' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
 
 
 def businessRelatedSchemes(request):
-    schemes = Schemes.objects.filter(status = 1, business_related = 1)
+    schemes = popular_order(Schemes.objects.filter(status = 1, business_related = 1))
     serializer = SchemeSerializer(schemes, many=True)
     return JsonResponse({'schemes' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
 
 
 def centralSchemes(request, id):
-    schemes = Schemes.objects.filter(status = 1, scheme_type = 0, category_id = id)
+    schemes = popular_order(Schemes.objects.filter(status = 1, scheme_type = 0, category_id = id))
     serializer = SchemeSerializer(schemes, many=True)
     return JsonResponse({'schemes' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
 
@@ -236,6 +237,7 @@ def scheme(request, id):
     # gives byte-identical output to before.
     try:
         scheme = Schemes.objects.get(status = 1, id = id)
+        record_open(request, 'scheme', Schemes, scheme.id)   # 2026-11-25 popularity
         serializer = SchemeSerializer(scheme, many=False)
         data = dict(serializer.data)
         lang = clean_language(request.GET.get('lang', 'en'))

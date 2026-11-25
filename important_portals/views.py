@@ -181,7 +181,8 @@ def portal_search_light(request):
     portals = Important_Portals.objects.filter(status=1)
     if body.get("searched_text"):
         portals = portals.filter(title__icontains=body["searched_text"])
-    portals = portals.order_by("-id")
+    from schemes.popularity import popular_order
+    portals = popular_order(portals)   # 2026-11-25: most opened first
 
     total = portals.count()
     page = max(1, int(body.get("page") or 1))

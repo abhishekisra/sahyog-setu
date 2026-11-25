@@ -14,6 +14,9 @@ class Important_Portals(TranslatableMixin, models.Model):
     status = models.IntegerField(default = 0, choices=status_type)
     description = models.TextField(null=False, blank=False)
     mode_of_application = models.TextField(max_length=255, null=False, blank=False)
+    # 2026-11-25: most-opened portals first -- same meaning as Schemes.open_count / seed_score.
+    open_count = models.PositiveIntegerField(default=0)
+    seed_score = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now_add= True)
 

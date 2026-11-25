@@ -8,11 +8,12 @@ from rest_framework import status
 from .serializers import ImportantPortalSerializer
 from .models import Important_Portals
 from languages.utils import clean_language
+from schemes.popularity import popular_order, record_open
 
 
 
 def importantPortals(request):
-    important_portals = Important_Portals.objects.filter(status = 1)
+    important_portals = popular_order(Important_Portals.objects.filter(status = 1))
     serializer = ImportantPortalSerializer(important_portals, many=True)
     return JsonResponse({'important_portals' : serializer.data, 'status':status.HTTP_200_OK}, safe=False, status=status.HTTP_200_OK)
 
@@ -24,6 +25,7 @@ def importantPortal(request, id):
     # translatable fields when a real translation exists.
     try:
         important_portal = Important_Portals.objects.get(status = 1, id = id)
+        record_open(request, 'portal', Important_Portals, important_portal.id)   # 2026-11-25 popularity
         serializer = ImportantPortalSerializer(important_portal, many=False)
         data = dict(serializer.data)
         lang = clean_language(request.GET.get('lang', 'en'))

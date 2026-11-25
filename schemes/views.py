@@ -604,7 +604,8 @@ def scheme_search_light(request):
     if body.get('searched_text'):
         schemes = schemes.filter(title__icontains=body['searched_text'])
 
-    schemes = schemes.select_related('state').order_by('-id')
+    from .popularity import popular_order
+    schemes = popular_order(schemes.select_related('state'))   # 2026-11-25: most opened first
     total = schemes.count()
     page = max(1, int(body.get('page') or 1))
     paginator = Paginator(schemes, PAGE_SIZE)
@@ -687,7 +688,8 @@ def business_related_scheme_search_light(request):
     schemes = Schemes.objects.filter(status=1, business_related=1)
     if body.get('searched_text'):
         schemes = schemes.filter(title__icontains=body['searched_text'])
-    schemes = schemes.order_by('-id')
+    from .popularity import popular_order
+    schemes = popular_order(schemes)   # 2026-11-25: most opened first
 
     total = schemes.count()
     page = max(1, int(body.get('page') or 1))

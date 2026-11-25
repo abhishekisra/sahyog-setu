@@ -54,6 +54,12 @@ class Schemes(TranslatableMixin, models.Model):
     benificiaries = models.CharField(max_length=255, blank = False, null=False)
     religions = models.CharField(max_length=255, blank = False, null=False)
     castes = models.CharField(max_length=255, blank = False, null=False)
+    # 2026-11-25 (user: "jo jyada popular wo jayda upar"): lists sort by open_count + seed_score.
+    # open_count = real people opening the scheme (one per visitor per day, bots excluded, see
+    # schemes/popularity.py); seed_score = a starting order for well-known schemes until real
+    # counts build up (editable by admin, never changed by the counter).
+    open_count = models.PositiveIntegerField(default=0)
+    seed_score = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add= True)
     updated_at = models.DateTimeField(auto_now_add= True)
 
@@ -144,3 +150,16 @@ class SchemeProfile(models.Model):
     divyang = models.SmallIntegerField(null=True, blank=True)            # 0 Yes 1 No (scheme.divyang 2 = both)
     area = models.SmallIntegerField(null=True, blank=True)               # 0 Urban 1 Rural
     updated_at = models.DateTimeField(auto_now=True)
+
+
+class ContentOpen(models.Model):
+    """One row per visitor per item per day (2026-11-25) -- keeps open_count honest: refreshing
+    or re-opening the same scheme/portal the same day counts once. visitor is a salted hash of
+    IP + browser, never the raw IP."""
+    kind = models.CharField(max_length=10)          # 'scheme' | 'portal'
+    obj_id = models.PositiveIntegerField()
+    visitor = models.CharField(max_length=32)
+    day = models.DateField()
+
+    class Meta:
+        constraints = [models.UniqueConstraint(fields=['kind', 'obj_id', 'visitor', 'day'], name='content_open_once_per_day')]
