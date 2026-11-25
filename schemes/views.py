@@ -490,6 +490,12 @@ def state_photo_credits(request):
     })
 
 
+# 2026-11-25 (user: duplicate check, "Keep #2632"): the same Uttarakhand "Freeship less than Rs 1,00,000 (UG
+# students only)" scheme was added 3 times on 14-07-2026. #2632 (fullest text) kept; #2059 and #3310 set
+# In Active (not deleted). Old ?scheme= links to them go to the kept copy.
+MERGED_SCHEMES = {2059: 2632, 3310: 2632}
+
+
 def scheme_finder(request):
     """Public, no login -- the "Scheme Viewer" finder. Filtering hits
     scheme_search_light below (NOT the existing /api/schemes -- see there
@@ -513,6 +519,11 @@ def scheme_finder(request):
     scheme_id = (request.GET.get('scheme') or '').strip()
     if not scheme_id.isdigit():
         scheme_id = ''
+    if scheme_id and int(scheme_id) in MERGED_SCHEMES:
+        # an old link to a duplicate copy that was switched off -> the copy that was kept
+        q = request.GET.copy()
+        q['scheme'] = str(MERGED_SCHEMES[int(scheme_id)])
+        return redirect(f"{request.path}?{q.urlencode()}", permanent=True)
     if scheme_id:
         share_scheme = Schemes.objects.filter(status=1, id=scheme_id).first()
     og_title = f"{share_scheme.field_for('title', lang)} — Sahyog Setu" if share_scheme else "Scheme Viewer — Sahyog Setu"
