@@ -143,6 +143,12 @@ def portal_finder(request):
     total_portals = Important_Portals.objects.filter(status=1).count()
     share_portal = None
     portal_id = request.GET.get('portal')
+    # 2026-11-25: National Digital Library of India was listed twice; #18 switched off, old links go to #5
+    MERGED_PORTALS = {'18': '5'}
+    if portal_id in MERGED_PORTALS:
+        q = request.GET.copy()
+        q['portal'] = MERGED_PORTALS[portal_id]
+        return redirect(f"{request.path}?{q.urlencode()}", permanent=True)
     if portal_id:
         share_portal = Important_Portals.objects.filter(status=1, id=portal_id).first()
     og_title = f"{share_portal.title} — Sahyog Setu" if share_portal else "Important Portals — Sahyog Setu"

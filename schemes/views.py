@@ -493,7 +493,10 @@ def state_photo_credits(request):
 # 2026-11-25 (user: duplicate check, "Keep #2632"): the same Uttarakhand "Freeship less than Rs 1,00,000 (UG
 # students only)" scheme was added 3 times on 14-07-2026. #2632 (fullest text) kept; #2059 and #3310 set
 # In Active (not deleted). Old ?scheme= links to them go to the kept copy.
-MERGED_SCHEMES = {2059: 2632, 3310: 2632}
+MERGED_SCHEMES = {2059: 2632, 3310: 2632,
+                  # 2026-11-25 (user "karo"): old hand-entered copies of schemes that were later added again with
+                  # fuller text -- PM-JAY, PM Vishwakarma, NPS Traders, ADIP, National Youth Corps, Mumkin, Ladakh IGSSS x3
+                  25: 3726, 22: 3581, 12: 2264, 54: 4240, 56: 906, 97: 410, 92: 474, 93: 1159, 94: 1872}
 
 
 def scheme_finder(request):
