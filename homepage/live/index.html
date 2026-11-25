@@ -268,16 +268,85 @@
         iframe.skiptranslate { display: none !important; }
         body { top: 0 !important; }
     </style>
+<!-- 2026-11-25 (user: "3 days ke liye google tamil and telugu option ... 3 days baad auto remove"): TEMPORARY
+     Google Translate for Tamil and Telugu only. Works until SS_GT_UNTIL (28 Nov 2026, 15:40 IST); after that
+     this block does nothing and clears the Google choice, so the option disappears by itself. -->
+<style>iframe.skiptranslate{display:none!important}body{top:0!important}#goog-gt-tt,.goog-te-balloon-frame{display:none!important}.goog-text-highlight{background:none!important;box-shadow:none!important}</style>
+<div id="ss-gt-temp" style="display:none"></div>
+<script>
+(function(){
+  var UNTIL = Date.UTC(2026, 10, 28, 10, 10);          // 28 Nov 2026 15:40 IST
+  var LANGS = {ta: 'தமிழ் (Google)', te: 'తెలుగు (Google)'};
+  var live = Date.now() < UNTIL;
+  window.__ssGtLive = live;
+  function setCookie(val){
+    var host = location.hostname.replace(/^www\./, '');
+    var exp = val ? '; max-age=259200' : '; expires=Thu, 01 Jan 1970 00:00:00 GMT';
+    ['', '; domain=' + location.hostname, '; domain=.' + host].forEach(function(d){
+      document.cookie = 'googtrans=' + (val || '') + '; path=/' + d + exp;});
+  }
+  function cur(){var m = document.cookie.match(/(?:^|;\s*)googtrans=\/en\/(ta|te)(?:;|$)/); return m ? m[1] : '';}
+  if (!live) { if (cur()) setCookie(null); return; }
+  window.__ssGtCookie = setCookie;
+  var chosen = cur();
+  window.ssGtInit = function(){
+    try { new google.translate.TranslateElement({pageLanguage: 'en', includedLanguages: 'ta,te', autoDisplay: false}, 'ss-gt-temp'); } catch (e) {}
+  };
+  if (chosen) {
+    window.__ssGtActive = true;
+    var s = document.createElement('script');
+    s.src = 'https://translate.google.com/translate_a/element.js?cb=ssGtInit&ssgt=1';
+    (document.head || document.documentElement).appendChild(s);
+  }
+  function wire(sel){
+    if (!sel) return;
+    var added = false;
+    Object.keys(LANGS).forEach(function(k){
+      if (sel.querySelector('option[value="gt-' + k + '"]')) return;
+      var o = document.createElement('option'); o.value = 'gt-' + k; o.textContent = LANGS[k]; sel.appendChild(o); added = true;
+    });
+    if (added && chosen) sel.value = 'gt-' + chosen;
+    if (sel.__ssGt) return; sel.__ssGt = 1;
+    sel.addEventListener('change', function(e){
+      var v = sel.value;
+      if (v.indexOf('gt-') === 0) {
+        e.stopImmediatePropagation();
+        try { document.cookie = 'ss_lang=; path=/; max-age=0'; } catch (x) {}
+        setCookie('/en/' + v.slice(3));
+        var u = new URL(location.href); u.searchParams.delete('lang'); location.href = u.toString();
+      } else if (chosen) { setCookie(null); if (sel.id !== 'langSelect') location.reload(); }
+    }, true);
+  }
+  function fallback(){
+    if (document.querySelector('.ssh-gt-select, #langSelect, #ss-gt-float')) return;
+    var w = document.createElement('div'); w.id = 'ss-gt-float'; w.className = 'notranslate'; w.setAttribute('translate', 'no');
+    w.style.cssText = 'position:fixed;left:12px;bottom:' + (window.innerWidth < 992 ? 84 : 12) + 'px;z-index:2147483000;background:#0f3d2a;border:1px solid #ffd75e;border-radius:10px;padding:4px 6px;box-shadow:0 6px 18px rgba(0,0,0,.25)';
+    var s = document.createElement('select'); s.setAttribute('aria-label', 'Language'); s.className = 'ssh-gt-select';
+    s.style.cssText = 'background:#0f3d2a;color:#fff;border:0;font:600 13px/1.4 Arial,sans-serif;max-width:170px;cursor:pointer';
+    var o = document.createElement('option'); o.value = 'en'; o.textContent = 'English'; s.appendChild(o);
+    w.appendChild(s); document.body.appendChild(w); wire(s);
+  }
+  function scan(){ [].slice.call(document.querySelectorAll('.ssh-gt-select, #langSelect')).forEach(wire); }
+  function start(){ scan(); setTimeout(fallback, 1500); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start); else start();
+  new MutationObserver(scan).observe(document.documentElement, {childList: true, subtree: true});
+})();
+</script>
     <!-- 2026-11-23 (user: "google translate bekar lag rha hai", "dono jagah se hata do"): Google Translate
          removed. The React bundle's own widget still tries to load translate_a/element.js -- refuse any
          script from translate.google.com, and clear an old googtrans choice so it never switches the page. -->
     <script>
     (function(){
-      function bad(n){return n&&n.tagName==='SCRIPT'&&/translate\.google(apis)?\.com/.test(n.src||'');}
+      // 2026-11-25: while the temporary Tamil/Telugu option is in use (__ssGtActive), our own element.js
+      // (?ssgt=1) and Google's follow-up scripts may load; the React widget's own element.js stays blocked.
+      function bad(n){if(!(n&&n.tagName==='SCRIPT'))return false;var s=n.src||'';
+        if(!/translate\.google(apis)?\.com/.test(s))return false;
+        if(window.__ssGtActive&&(/[?&]ssgt=1/.test(s)||!/translate_a\/element\.js/.test(s)))return false;
+        return true;}
       ['appendChild','insertBefore'].forEach(function(f){var o=Node.prototype[f];
         Node.prototype[f]=function(n){if(bad(n))return n;return o.apply(this,arguments);};});
       var host=location.hostname.replace(/^www\./,'');
-      ['', '; domain='+location.hostname, '; domain=.'+host].forEach(function(d){
+      if(!window.__ssGtActive)['', '; domain='+location.hostname, '; domain=.'+host].forEach(function(d){
         document.cookie='googtrans=; path=/'+d+'; expires=Thu, 01 Jan 1970 00:00:00 GMT';});
     })();
     </script>
