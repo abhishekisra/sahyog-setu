@@ -220,6 +220,37 @@
           window.location.href = '/quizzes/';
           return true;
         }
+        // 2026-11-25 (user: "scheme ya important portal open karte hai to quiz ka page aata hai 2 second ke
+        // liye"): these SPA routes are old React pages that are now real Django pages. The route-polls further
+        // down only redirected AFTER React had already drawn its old page (its top section is the quiz block),
+        // so the quiz showed for 1-2 s. Going straight to the real page here, before React renders anything.
+        var path = url.split('?')[0].split('#')[0];
+        var DJ = {
+          '/important-portals': '/important-portals-viewer/',
+          '/important-documents': '/important-documents-viewer/',
+          '/scheme-announcements': '/scheme-announcements-viewer/',
+          '/entrepreneurship-developement': '/entrepreneurship-viewer/',
+          '/entrepreneurship-developement/legal-registrations': '/entrepreneurship/legal-registrations-viewer/',
+          '/entrepreneurship-developement/organization-registrations': '/entrepreneurship/organization-registrations-viewer/',
+          '/entrepreneurship-developement/business-plans': '/entrepreneurship/business-plans-viewer/',
+          '/entrepreneurship-developement/artificial-intelligence': '/entrepreneurship/artificial-intelligence-viewer/',
+          '/entrepreneurship-developement/marketing': '/entrepreneurship/marketing-viewer/',
+          '/entrepreneurship-developement/business-related-schemes': '/entrepreneurship/business-related-schemes-viewer/',
+          '/schemes-and-services/central': '/central-schemes-viewer/',
+          '/helplines': '/helplines-viewer/'
+        };
+        var target = DJ[path.replace(/\/$/, '')];
+        var c = path.match(/^\/schemes\/central\/([^\/]+)\/?$/);
+        if (c) target = '/scheme-viewer/?category=' + encodeURIComponent(c[1]);
+        var s = path.match(/^\/schemes\/map\/state\/([^\/]+)\/[^\/]+\/?$/);
+        if (s) target = '/scheme-viewer/?state=' + encodeURIComponent(s[1]);
+        var d = path.match(/^\/scheme\/(\d+)\/?$/);
+        if (d && location.pathname.indexOf('/eligibility') !== 0) target = '/scheme-viewer/?scheme=' + d[1];
+        if (target) {
+          document.documentElement.style.visibility = 'hidden';
+          window.location.href = target;
+          return true;
+        }
         return false;
       }
       function syncQuizzesRouteClass() {
