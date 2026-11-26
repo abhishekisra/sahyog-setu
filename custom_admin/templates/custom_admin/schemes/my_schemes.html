@@ -147,6 +147,10 @@ Views: schemes/my_schemes_views.py. Same palette/font as scheme_finder.html.
     <div class="ms-card ms-login">
       <h2>{% ui "Log in to see your schemes" %}</h2>
       <p class="ms-muted">{% ui "Your list is built automatically from the details you gave when you signed up. A new account takes a minute." %}</p>
+      <!-- 2026-11-26 (user: easy to use -> "sab sahi karo"): see your schemes without an account -- the existing
+           eligibility check (a few questions, no login); logging in is only needed to save the list -->
+      <a class="ms-btn primary" href="/eligibility" style="display:block;text-align:center;margin:0 0 12px;padding:14px 16px;font-size:16px">✅ {% ui "Check without login — answer a few questions" %}</a>
+      <p class="ms-muted" style="margin:0 0 10px;text-align:center">{% ui "Log in only if you want to save your list:" %}</p>
       <div class="ms-btns">
         <a class="ms-btn primary" href="/accounts/login/?next=/my-schemes/{% if lang != 'en' %}%3Flang%3D{{ lang }}{% endif %}">{% ui "Log in" %}</a>
         <a class="ms-btn ghost" href="/accounts/signup/?next=/my-schemes/">{% ui "Create an account" %}</a>
