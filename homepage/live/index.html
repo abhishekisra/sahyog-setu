@@ -381,7 +381,7 @@
         document.cookie='googtrans=; path=/'+d+'; expires=Thu, 01 Jan 1970 00:00:00 GMT';});
     })();
     </script>
-    <script defer="defer" src="/static/js/main.8fca9b23.p1.js"></script>
+    <script defer="defer" src="/static/js/main.8fca9b23.p1.js?v=20261126b"></script>
     <link href="/static/css/main.f71db398.css" rel="stylesheet">
     <style id="ssq-banner-arrows">
       /* 2026-10-27: on phones/tablets the home banner's prev/next arrows sat
@@ -579,6 +579,25 @@
   #ssq-main-nav{display:none !important}
 </style>
 
+<style id="ssq-home-compact">
+/* 2026-11-26 (user: "suggest how to improve, easy to use" -> "sab sahi karo"): phone home page shorter -- the 8 big
+   cards 2 per row and compact (were 1 per row, 280px each), activity photos 2 per row */
+@media (max-width:700px){
+  section.section_padding .row > a.col-lg-3{flex:0 0 50% !important;max-width:50% !important;margin:6px 0 !important;padding:0 6px !important}
+  section.section_padding .about_top_boxed{padding:14px 8px !important;min-height:0 !important;height:100% !important}
+  section.section_padding .about_top_boxed_icon img{width:40px !important;height:40px !important}
+  section.section_padding .about_top_boxed_icon{margin:0 auto 6px !important;width:auto !important;height:auto !important;position:static !important;transform:none !important}
+  section.section_padding .about_top_boxed_text{padding:4px 0 0 !important}
+  section.section_padding .about_top_boxed_text h4{height:auto !important;min-height:2.6em;font-size:15px !important;line-height:1.25 !important;margin:0 !important;text-align:center}
+  section.section_padding .about_top_boxed_text > a{display:none !important}
+  section.section_padding .about_top_boxed_vector{display:none !important}
+  section.section_padding{padding-top:16px !important;padding-bottom:16px !important}
+  .popup-gallery > div{flex:0 0 50% !important;max-width:50% !important;padding:0 5px !important;margin-bottom:10px !important}
+  .popup-gallery .gallery_item img{height:120px !important;object-fit:cover;width:100%}
+}
+</style>
+<script id="ssq-link-names">/* links without text get a name for screen readers (2026-11-26) */
+setInterval(function(){[].forEach.call(document.querySelectorAll('a[href]'),function(a){if(!a.textContent.trim()&&!a.getAttribute('aria-label')&&!a.querySelector('img[alt]:not([alt=""]):not([alt="img"])')){var h=a.getAttribute('href')||'';a.setAttribute('aria-label',/scheme-viewer/.test(h)?'All schemes':/portal/.test(h)?'Important portals':'Open');}});},2000);</script>
 </head>
 
 <body oncopy="return!1" oncut="return!1"><noscript>You need to enable JavaScript to run this app.</noscript>
