@@ -134,10 +134,13 @@
     <div class="yk-results-head">
       <h3>Choose a state</h3>
     </div>
-    <div class="yk-grid">
+    <!-- 2026-11-26 (user: "suggest how to improve, easy to use" -> "sab sahi karo"): search + compact list -->
+    <input id="ssStateQ" type="search" autocomplete="off" placeholder="🔍 Type your state — e.g. Uttar Pradesh, Delhi, Bihar" aria-label="Search your state"
+      style="width:100%;box-sizing:border-box;padding:13px 16px;font-size:16px;border:2px solid #d8cdb8;border-radius:12px;margin:0 0 14px;background:#fff">
+    <div class="yk-grid" id="ssStateGrid">
       {% for s in states %}
       {% cycle '#B8532F' '#28352A' '#8A6C09' '#2F7A4D' '#5E7A86' '#7A4F9E' as card_accent silent %}
-      <a class="yk-card" href="/scheme-viewer/?state={{ s.id }}{% if lang != 'en' %}&lang={{ lang }}{% endif %}" style="--card-accent:{{ card_accent }};">
+      <a class="yk-card" data-name="{{ s.display_state|lower }}" data-n="{{ s.scheme_count }}" href="/scheme-viewer/?state={{ s.id }}{% if lang != 'en' %}&lang={{ lang }}{% endif %}" style="--card-accent:{{ card_accent }};">
         <div class="yk-card-texture"><span class="yk-card-texture-name">{{ s.display_state }}</span></div>
         <div class="yk-card-body">
           <div class="yk-card-foot">
@@ -150,4 +153,28 @@
     </div>
   </div>
 </div>
+<style>
+  /* phone: one short row per state instead of a half-screen card */
+  @media (max-width:700px){
+    #ssStateGrid{grid-template-columns:1fr !important;gap:8px !important}
+    #ssStateGrid .yk-card{display:flex !important;align-items:center;min-height:0 !important;height:auto !important;aspect-ratio:auto !important}
+    #ssStateGrid .yk-card *{min-height:0 !important;aspect-ratio:auto !important}
+    #ssStateGrid .yk-card-texture{height:auto !important}
+    #ssStateGrid .yk-card-texture{height:auto !important;min-height:0 !important;padding:14px 14px !important;flex:1;background:none !important}
+    #ssStateGrid .yk-card-texture-name{font-size:16px !important;position:static !important;transform:none !important}
+    #ssStateGrid .yk-card-body{padding:0 14px !important;border:0 !important}
+    #ssStateGrid .yk-card-foot{border:0 !important;padding:0 !important;gap:10px}
+  }
+  #ssStateGrid .yk-card.ss-zero{opacity:.55}
+</style>
+<script>
+(function(){var g=document.getElementById('ssStateGrid');if(!g)return;
+  var FIRST=['uttar pradesh','delhi','haryana'];   // where Uplift Live Foundation works
+  var cards=[].slice.call(g.querySelectorAll('.yk-card'));
+  cards.forEach(function(c){if(+c.getAttribute('data-n')===0)c.classList.add('ss-zero');});
+  cards.sort(function(a,b){var an=a.getAttribute('data-name'),bn=b.getAttribute('data-name'),ai=FIRST.findIndex(function(f){return an.indexOf(f)>=0}),bi=FIRST.findIndex(function(f){return bn.indexOf(f)>=0}),az=+a.getAttribute('data-n')===0,bz=+b.getAttribute('data-n')===0;
+    if(ai>=0||bi>=0)return (ai<0?99:ai)-(bi<0?99:bi);if(az!==bz)return az?1:-1;return an<bn?-1:an>bn?1:0;}).forEach(function(c){g.appendChild(c);});
+  var q=document.getElementById('ssStateQ');if(q)q.addEventListener('input',function(){var v=q.value.trim().toLowerCase();cards.forEach(function(c){c.style.display=!v||c.getAttribute('data-name').indexOf(v)>=0?'':'none';});});
+})();
+</script>
 {% endblock %}
