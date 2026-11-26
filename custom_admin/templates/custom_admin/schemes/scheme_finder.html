@@ -467,6 +467,8 @@
   var initialCategory = qp.get('category') || '';
   var currentStateId = qp.get('state') || null;
   var initialSchemeId = qp.get('scheme') || null;
+  // 2026-11-26 (user: easy to use -> 'sab sahi karo'): ?q=words from the scheme search box on other pages fills this page's search
+  (function(){ var iq = (qp.get('q') || '').trim(); var sb = document.getElementById('ykSearch'); if (iq && sb) sb.value = iq; })();
   // ?scheme=<id> -- e.g. from the Check Eligibility widget's "View full
   // details" link -- opens straight into this scheme's own detail overlay
   // instead of landing on the flat card grid first. Independent of the

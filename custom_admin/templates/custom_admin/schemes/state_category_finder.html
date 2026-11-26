@@ -131,6 +131,13 @@
       <p>Pick your state below to see every State Government scheme for it. Prefer the map view? The interactive state map is still available separately.</p>
     </div>
 
+    <!-- 2026-11-26 (user: "suggest how to improve, easy to use" -> "sab sahi karo"): search a scheme by its name -->
+    <form action="/scheme-viewer/" method="get" style="display:flex;gap:8px;margin:0 0 18px" role="search">
+      <input name="q" type="search" required minlength="2" autocomplete="off" placeholder="🔍 Search a scheme by name — e.g. pension, ration, Ayushman" aria-label="Search a scheme by name"
+        style="flex:1;min-width:0;box-sizing:border-box;padding:13px 16px;font-size:16px;border:2px solid #d8cdb8;border-radius:12px;background:#fff">
+      {% if lang != 'en' %}<input type="hidden" name="lang" value="{{ lang }}">{% endif %}
+      <button type="submit" style="padding:0 18px;border:0;border-radius:12px;background:#28352A;color:#fff;font-weight:700;font-size:15px">Search</button>
+    </form>
     <div class="yk-results-head">
       <h3>Choose a state</h3>
     </div>
